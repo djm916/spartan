@@ -28,7 +28,7 @@ public class Op extends Expr
     
   }
   
-  public Inst compile(Inst next)
+  public Inst compile(Inst next, boolean tailContext)
   {
     return new LoadConst(value, next);
   }

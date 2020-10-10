@@ -31,7 +31,7 @@ public class VarRef extends Expr
       throw new CompileError("variable \"" + id + "\" not bound", position);
   }
   
-  public Inst compile(Inst next)
+  public Inst compile(Inst next, boolean tailContext)
   {
     return index.global ? new LoadGlobal(index.depth, next)
                         : new LoadLocal(index.depth, next);

@@ -25,9 +25,9 @@ public class Fun extends Expr
     body.analyze(globals, locals.bind(param));
   }
   
-  public Inst compile(Inst next)
+  public Inst compile(Inst next, boolean tailContext)
   {
-    return new MakeClosure(body.compile(new PopFrame()), next);
+    return new MakeClosure(body.compile(new PopFrame(), true), next);
   }
   
   private final String param;

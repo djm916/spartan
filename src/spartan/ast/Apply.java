@@ -29,13 +29,11 @@ public class Apply extends Expr
     arg.analyze(globals, locals);
   }
   
-  public Inst compile(Inst next)
+  public Inst compile(Inst next, boolean tailContext)
   {
-    return new PushFrame(next,
-           fun.compile(
-           new PushArg(
-           arg.compile(
-           new PushArg(
-           new spartan.runtime.Apply(position))))));
+    if (tailContext)
+      return fun.compile(new PushArg(arg.compile(new PushArg(new spartan.runtime.Apply(position)), false)), false);
+    else
+      return new PushFrame(next, fun.compile(new PushArg(arg.compile(new PushArg(new spartan.runtime.Apply(position)), false)), false));
   }
 }

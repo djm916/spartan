@@ -42,10 +42,10 @@ public class LetRec extends Expr
     body.analyze(globals, locals);
   }
   
-  public Inst compile(Inst next)
+  public Inst compile(Inst next, boolean tailContext)
   {
     final int n = bindings.size();
-    return new PushLocal(n, compileBindings(n - 1, bindings.iterator(), body.compile(new PopLocal(n, next))));
+    return new PushLocal(n, compileBindings(n - 1, bindings.iterator(), body.compile(new PopLocal(n, next), tailContext)));
   }
 
   private Inst compileBindings(int depth, Iterator<Binding> bindings, Inst next)
@@ -53,7 +53,6 @@ public class LetRec extends Expr
     if (!bindings.hasNext())
       return next;
     else
-      return (bindings.next().init)
-             .compile(new StoreLocal(depth, compileBindings(depth - 1, bindings, next)));
+      return bindings.next().init.compile(new StoreLocal(depth, compileBindings(depth - 1, bindings, next)), false);
   }
 }

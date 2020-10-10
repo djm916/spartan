@@ -30,16 +30,16 @@ public class Seq extends Expr
       e.analyze(globals, locals);
   }
   
-  public Inst compile(Inst next)
+  public Inst compile(Inst next, boolean tailContext)
   {
-    return compile(elems.iterator(), next);
+    return compile(elems.iterator(), next, tailContext);
   }
   
-  private Inst compile(Iterator<Expr> elems, Inst next)
+  private Inst compile(Iterator<Expr> elems, Inst next, boolean tailContext)
   {
     if (!elems.hasNext())
       return next;
     else
-      return elems.next().compile(compile(elems, next));
+      return elems.next().compile(compile(elems, next, tailContext), tailContext && !elems.hasNext());
   }
 }

@@ -31,7 +31,7 @@ public class List extends Expr
       e.analyze(globals, locals);
   }
   
-  public Inst compile(Inst next)
+  public Inst compile(Inst next, boolean tailContext)
   {
     return compile(elems.iterator(), new MakeList(elems.size(), next));
   }
@@ -41,6 +41,6 @@ public class List extends Expr
     if (!elems.hasNext())
       return next;
     else
-      return elems.next().compile(new PushArg(compile(elems, next)));
+      return elems.next().compile(new PushArg(compile(elems, next)), false);
   }
 }

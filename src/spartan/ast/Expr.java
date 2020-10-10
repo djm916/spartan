@@ -12,7 +12,7 @@ public abstract class Expr
   
   public abstract void analyze(GlobalEnv globals, LocalEnv locals) throws CompileError;
   
-  public abstract Inst compile(Inst next);
+  public abstract Inst compile(Inst next, boolean tailContext);
   
   protected Expr(Position position)
   {
