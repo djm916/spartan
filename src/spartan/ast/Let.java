@@ -39,9 +39,11 @@ public class Let extends Expr
     body.analyze(globals, locals);
   }
   
-  public Inst compile(Inst next, boolean tailContext)
+  public Inst compile(boolean tailContext, Inst next)
   {
-    return compileBindings(bindings.iterator(), body.compile(new PopLocal(bindings.size(), next), tailContext));
+    return compileBindings(bindings.iterator(),
+           body.compile(tailContext,
+           new PopLocal(bindings.size(), next)));
   }
 
   private Inst compileBindings(Iterator<Binding> bindings, Inst next)
@@ -49,6 +51,9 @@ public class Let extends Expr
     if (!bindings.hasNext())
       return next;
     else
-      return bindings.next().init.compile(new PushLocal(1, new StoreLocal(0, compileBindings(bindings, next))), false);
+      return bindings.next().init.compile(false,
+             new PushLocal(1,
+             new StoreLocal(0,
+             compileBindings(bindings, next))));
   }
 }

@@ -29,11 +29,20 @@ public class Apply extends Expr
     arg.analyze(globals, locals);
   }
   
-  public Inst compile(Inst next, boolean tailContext)
+  public Inst compile(boolean tailContext, Inst next)
   {
     if (tailContext)
-      return fun.compile(new PushArg(arg.compile(new PushArg(new spartan.runtime.Apply(position)), false)), false);
+      return fun.compile(false,
+             new PushArg(
+             arg.compile(false,
+             new PushArg(
+             new spartan.runtime.Apply(position)))));
     else
-      return new PushFrame(next, fun.compile(new PushArg(arg.compile(new PushArg(new spartan.runtime.Apply(position)), false)), false));
+      return new PushFrame(next,
+             fun.compile(false,
+             new PushArg(
+             arg.compile(false,
+             new PushArg(
+             new spartan.runtime.Apply(position))))));
   }
 }

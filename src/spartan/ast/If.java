@@ -34,19 +34,22 @@ public class If extends Expr
     elseExpr.analyze(globals, locals);
   }
   
-  public Inst compile(Inst next, boolean tailContext)
+  public Inst compile(boolean tailContext, Inst next)
   {
-    return compile(thenExprs.iterator(), next, tailContext);
+    return compile(tailContext, thenExprs.iterator(), next);
   }
   
-  private Inst compile(Iterator<Branch> thenExprs, Inst next, boolean tailContext)
+  private Inst compile(boolean tailContext, Iterator<Branch> thenExprs, Inst next)
   {
     if (!thenExprs.hasNext()) {
-      return elseExpr.compile(next, tailContext);
+      return elseExpr.compile(tailContext, next);
     }
     else {
       Branch b = thenExprs.next();
-      return b.test.compile(new spartan.runtime.Branch(b.body.compile(next, tailContext), compile(thenExprs, next, tailContext), b.position), false);
+      return b.test.compile(false,
+             new spartan.runtime.Branch(b.position,
+               b.body.compile(tailContext, next),
+               compile(tailContext, thenExprs, next)));
     }
   }
   

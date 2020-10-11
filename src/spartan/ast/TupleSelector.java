@@ -25,7 +25,7 @@ public class TupleSelector extends Expr
     
   }
   
-  public Inst compile(Inst next, boolean tailContext)
+  public Inst compile(boolean tailContext, Inst next)
   {
     return new LoadConst(new spartan.data.TupleSelector(index), next);
   }

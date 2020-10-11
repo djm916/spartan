@@ -32,7 +32,7 @@ public class Record extends Expr
       b.init.analyze(globals, locals);
   }
   
-  public Inst compile(Inst next, boolean tailContext)
+  public Inst compile(boolean tailContext, Inst next)
   {
     return compile(members.iterator(), new MakeRecord(labelsArray(), next));
   }
@@ -42,7 +42,8 @@ public class Record extends Expr
     if (!members.hasNext())
       return next;
     else
-      return members.next().init.compile(new PushArg(compile(members, next)), false);
+      return members.next().init.compile(false,
+             new PushArg(compile(members, next)));
   }
   
   private String[] labelsArray()

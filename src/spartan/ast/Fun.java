@@ -3,6 +3,9 @@ package spartan.ast;
 import spartan.Position;
 import spartan.runtime.Inst;
 import spartan.runtime.PopFrame;
+import spartan.runtime.PopArg;
+import spartan.runtime.PushLocal;
+import spartan.runtime.StoreLocal;
 import spartan.runtime.MakeClosure;
 import spartan.errors.CompileError;
 
@@ -25,9 +28,18 @@ public class Fun extends Expr
     body.analyze(globals, locals.bind(param));
   }
   
-  public Inst compile(Inst next, boolean tailContext)
+  public Inst compile(boolean tailContext, Inst next)
   {
-    return new MakeClosure(body.compile(new PopFrame(), true), next);
+/*      return new MakeClosure(
+             new PopArg(
+             new PushLocal(1,
+             new StoreLocal(0,
+             body.compile(true,
+             new PopFrame())))),
+           next);
+     
+ */  
+    return new MakeClosure(body.compile(true, new PopFrame()), next);
   }
   
   private final String param;

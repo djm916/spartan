@@ -32,7 +32,7 @@ public class Tuple extends Expr
       e.analyze(globals, locals);
   }
   
-  public Inst compile(Inst next, boolean tailContext)
+  public Inst compile(boolean tailContext, Inst next)
   {
     return compile(elems.iterator(), new MakeTuple(elems.size(), next));
   }
@@ -42,6 +42,7 @@ public class Tuple extends Expr
     if (!elems.hasNext())
       return next;
     else
-      return elems.next().compile(new PushArg(compile(elems, next)), false);
+      return elems.next().compile(false,
+             new PushArg(compile(elems, next)));
   }
 }

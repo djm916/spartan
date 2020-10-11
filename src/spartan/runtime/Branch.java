@@ -7,14 +7,14 @@ import spartan.errors.RuntimeError;
 
 public class Branch extends Inst
 {
-  private final Inst ifTrue;
   private final Position position;
+  private final Inst ifTrue;
   
-  public Branch(Inst ifTrue, Inst ifFalse, Position position)
+  public Branch(Position position, Inst ifTrue, Inst ifFalse)
   {
     super(ifFalse);
-    this.ifTrue = ifTrue;
     this.position = position;
+    this.ifTrue = ifTrue;
   }
   
   public void exec(VirtualMachine vm) throws RuntimeError

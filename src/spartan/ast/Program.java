@@ -54,6 +54,8 @@ public class Program
     if (!defs.hasNext())
       return next;
     else
-      return defs.next().init.compile(new StoreGlobal(depth, compile(depth + 1, defs, next)), false);
+      return defs.next().init.compile(false,
+             new StoreGlobal(depth,
+             compile(depth + 1, defs, next)));
   }
 }
