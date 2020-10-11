@@ -17,9 +17,14 @@ public class Text extends Value
     return value;
   }
   
-  public static boolean eq(Text x, Text y)
+  public boolean eq(Text that)
   {
-    return x.value.equals(y.value);
+    return this.value.equals(that.value);
+  }
+  
+  public int compare(Text that)
+  {
+    return this.value.compareTo(that.value);
   }
   
   private final String value;

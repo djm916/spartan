@@ -17,29 +17,39 @@ public class Int extends Value
     return Integer.toString(value);
   }
   
-  public static Int add(Int x, Int y)
+  public Int neg()
   {
-    return new Int(x.value + y.value);
+    return new Int(-value);
   }
   
-  public static Int sub(Int x, Int y)
+  public Int add(Int that)
   {
-    return new Int(x.value - y.value);
+    return new Int(this.value + that.value);
   }
   
-  public static Int mul(Int x, Int y)
+  public Int sub(Int that)
   {
-    return new Int(x.value * y.value);
+    return new Int(this.value - that.value);
   }
   
-  public static Int div(Int x, Int y)
+  public Int mul(Int that)
   {
-    return new Int(x.value / y.value);
+    return new Int(this.value * that.value);
   }
   
-  public static boolean eq(Int x, Int y)
+  public Int div(Int that)
   {
-    return x.value == y.value;
+    return new Int(this.value / that.value);
+  }
+  
+  public boolean eq(Int that)
+  {
+    return this.value == that.value;
+  }
+  
+  public int compare(Int that)
+  {
+    return Integer.compare(this.value, that.value);
   }
   
   private final int value;

@@ -16,30 +16,40 @@ public class Real extends Value
   {
     return Double.toString(value);
   }
-    
-  public static Real add(Real x, Real y)
+  
+  public Real neg()
   {
-    return new Real(x.value + y.value);
+    return new Real(-value);
   }
   
-  public static Real sub(Real x, Real y)
+  public Real add(Real that)
   {
-    return new Real(x.value - y.value);
+    return new Real(this.value + that.value);
   }
   
-  public static Real mul(Real x, Real y)
+  public Real sub(Real that)
   {
-    return new Real(x.value * y.value);
+    return new Real(this.value - that.value);
   }
   
-  public static Real div(Real x, Real y)
+  public Real mul(Real that)
   {
-    return new Real(x.value / y.value);
+    return new Real(this.value * that.value);
   }
   
-  public static boolean eq(Real x, Real y)
+  public Real div(Real that)
   {
-    return x.value == y.value;
+    return new Real(this.value / that.value);
+  }
+  
+  public boolean eq(Real that)
+  {
+    return this.value == that.value;
+  }
+  
+  public int compare(Real that)
+  {
+    return Double.compare(this.value, that.value);
   }
   
   private final double value;

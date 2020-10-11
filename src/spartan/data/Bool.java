@@ -16,10 +16,25 @@ public class Bool extends Value
     return value ? "true" : "false";
   }
   
-  private final boolean value;
+  public Bool not()
+  {
+    return value ? False : True;
+  }
+  
+  public Bool or(Bool that)
+  {
+    return this.value || that.value ? True : False;
+  }
+  
+  public Bool and(Bool that)
+  {
+    return this.value && that.value ? True : False;
+  }
   
   private Bool(boolean value)
   {
     this.value = value;
   }
+  
+  private final boolean value;
 }

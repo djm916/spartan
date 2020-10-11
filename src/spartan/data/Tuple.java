@@ -40,13 +40,13 @@ public class Tuple extends Value
     }
   }
   
-  public static boolean eq(Tuple x, Tuple y) throws TypeMismatch
+  public boolean eq(Tuple that) throws TypeMismatch
   {
-    if (x.size() != y.size())
+    if (this.size() != that.size())
       return false;
     
-    for (int i = 0; i < x.size(); ++i)
-      if (!Builtins.eq(x.elems[i], y.elems[i]))
+    for (int i = 0; i < this.size(); ++i)
+      if (!Builtins.eq(this.elems[i], that.elems[i]))
         return false;
     
     return true;

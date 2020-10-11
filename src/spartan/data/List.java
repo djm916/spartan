@@ -26,7 +26,12 @@ public class List extends Value
     this.rest = rest;
   }
   
-  public static boolean eq(List x, List y) throws TypeMismatch
+  public boolean eq(List that) throws TypeMismatch
+  {
+    return eq(this, that);
+  }
+  
+  private static boolean eq(List x, List y) throws TypeMismatch
   {
     for (; x != Empty && y != Empty; x = x.rest, y = y.rest)
       if (!Builtins.eq(x.first, y.first))

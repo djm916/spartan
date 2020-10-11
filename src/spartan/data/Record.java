@@ -43,15 +43,15 @@ public class Record extends Value
     return members.size();
   }
   
-  public static boolean eq(Record x, Record y) throws TypeMismatch
+  public boolean eq(Record that) throws TypeMismatch
   {
-    if (x.size() != y.size())
+    if (this.size() != that.size())
       return false;
         
-    for (String label : x.members.keySet()) {
-      if (!y.members.containsKey(label))
+    for (String label : this.members.keySet()) {
+      if (!that.members.containsKey(label))
         return false;
-      if (!Builtins.eq(x.members.get(label), y.members.get(label)))
+      if (!Builtins.eq(this.members.get(label), that.members.get(label)))
         return false;
     }
     
