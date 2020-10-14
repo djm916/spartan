@@ -1,1 +1,1 @@
-def main : [<= 0 1, <= 0 -1]
+def x : let rec x : x in x end 

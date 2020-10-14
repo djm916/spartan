@@ -21,7 +21,7 @@ public class SourceError extends Exception
   public String toString()
   {
     return String.format(
-        "%s: %s: error: %s",
+        "%s: %s: %s: error: %s",
         position.file,
         position.line,
         position.column,

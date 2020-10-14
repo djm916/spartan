@@ -24,6 +24,7 @@ public class Program
     analyze(new GlobalEnv(), LocalEnv.Empty);
     
     return compile(0, defs.iterator(), new LoadGlobal(main.depth, null));
+    //return compile(0, defs.iterator(), null);
   }
   
   public String sexp()
@@ -41,7 +42,8 @@ public class Program
     }
     
     for (Binding b : defs) {
-      b.init.analyze(globals, locals);
+      b.init.analyze(globals, locals, false);
+      globals.set(b.id);
     }
     
     main = globals.lookup("main");

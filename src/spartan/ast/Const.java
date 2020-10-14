@@ -21,7 +21,7 @@ public class Const extends Expr
     return String.format("(Const %s)", value.repr());
   }
   
-  public void analyze(GlobalEnv globals, LocalEnv locals) throws CompileError
+  public void analyze(GlobalEnv globals, LocalEnv locals, boolean inLambda) throws CompileError
   {
     
   }

@@ -29,14 +29,14 @@ public class Let extends Expr
       body.sexp());
   }
   
-  public void analyze(GlobalEnv globals, LocalEnv locals) throws CompileError
+  public void analyze(GlobalEnv globals, LocalEnv locals, boolean inLambda) throws CompileError
   {
     for (Binding b : bindings) {
-      b.init.analyze(globals, locals);
+      b.init.analyze(globals, locals, inLambda);
       locals = locals.bind(b.id);
     }
     
-    body.analyze(globals, locals);
+    body.analyze(globals, locals, inLambda);
   }
   
   public Inst compile(boolean tailContext, Inst next)

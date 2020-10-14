@@ -97,11 +97,18 @@ public final class Builtins
     }
   };
 
+  public static Value mod(Value x, Value y) throws TypeMismatch
+  {
+    if (x.type() == Type.Int && y.type() == Type.Int)
+      return ((Int)x).mod((Int)y);
+    throw new TypeMismatch();
+  }
+  
   public static final PrimFun Mod = new PrimFun() {
     public Value apply(final Value x) {
       return new PrimFun() {
         public Value apply(final Value y) throws TypeMismatch {
-          return null;
+          return mod(y, x);
         }
       };
     }

@@ -23,10 +23,10 @@ public class Apply extends Expr
     return String.format("(Apply %s %s)", fun.sexp(), arg.sexp());
   }
   
-  public void analyze(GlobalEnv globals, LocalEnv locals) throws CompileError
+  public void analyze(GlobalEnv globals, LocalEnv locals, boolean inLambda) throws CompileError
   {
-    fun.analyze(globals, locals);
-    arg.analyze(globals, locals);
+    fun.analyze(globals, locals, inLambda);
+    arg.analyze(globals, locals, inLambda);
   }
   
   public Inst compile(boolean tailContext, Inst next)

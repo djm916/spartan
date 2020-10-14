@@ -26,10 +26,10 @@ public class Record extends Expr
       .collect(Collectors.joining(" ", "(", ")")));
   }
   
-  public void analyze(GlobalEnv globals, LocalEnv locals) throws CompileError
+  public void analyze(GlobalEnv globals, LocalEnv locals, boolean inLambda) throws CompileError
   {
     for (Binding b : members)
-      b.init.analyze(globals, locals);
+      b.init.analyze(globals, locals, inLambda);
   }
   
   public Inst compile(boolean tailContext, Inst next)

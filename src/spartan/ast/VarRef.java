@@ -22,13 +22,15 @@ public class VarRef extends Expr
     return String.format("(Ref %s)", id);
   }
   
-  public void analyze(GlobalEnv globals, LocalEnv locals) throws CompileError
+  public void analyze(GlobalEnv globals, LocalEnv locals, boolean inLambda) throws CompileError
   {
     index = locals.lookup(id);
     if (index == null)
       index = globals.lookup(id);
     if (index == null)
       throw new CompileError("variable \"" + id + "\" not bound", position);
+    if (index.global && !inLambda && !index.isSet)
+      throw new CompileError("forward reference to variable \"" + id + "\"", position);
   }
   
   public Inst compile(boolean tailContext, Inst next)

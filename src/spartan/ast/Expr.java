@@ -10,7 +10,7 @@ public abstract class Expr
   
   public abstract String sexp();
   
-  public abstract void analyze(GlobalEnv globals, LocalEnv locals) throws CompileError;
+  public abstract void analyze(GlobalEnv globals, LocalEnv locals, boolean inLambda) throws CompileError;
   
   public abstract Inst compile(boolean tailContext, Inst next);
   

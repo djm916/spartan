@@ -25,10 +25,10 @@ public class List extends Expr
                     .collect(Collectors.joining(" ")));
   }
   
-  public void analyze(GlobalEnv globals, LocalEnv locals) throws CompileError
+  public void analyze(GlobalEnv globals, LocalEnv locals, boolean inLambda) throws CompileError
   {
     for (Expr e : elems)
-      e.analyze(globals, locals);
+      e.analyze(globals, locals, inLambda);
   }
   
   public Inst compile(boolean tailContext, Inst next)

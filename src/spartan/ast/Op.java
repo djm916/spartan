@@ -23,7 +23,7 @@ public class Op extends Expr
     return String.format("%s", symbol);
   }
   
-  public void analyze(GlobalEnv globals, LocalEnv locals) throws CompileError
+  public void analyze(GlobalEnv globals, LocalEnv locals, boolean inLambda) throws CompileError
   {
     
   }

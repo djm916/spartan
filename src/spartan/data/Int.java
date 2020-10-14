@@ -42,6 +42,11 @@ public class Int extends Value
     return new Int(this.value / that.value);
   }
   
+  public Int mod(Int that)
+  {
+    return new Int(this.value % that.value);
+  }
+  
   public boolean eq(Int that)
   {
     return this.value == that.value;
