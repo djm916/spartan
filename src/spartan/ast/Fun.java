@@ -25,7 +25,9 @@ public class Fun extends Expr
   
   public void analyze(GlobalEnv globals, LocalEnv locals, boolean inLambda) throws CompileError
   {
-    body.analyze(globals, locals.bind(param), true);
+    locals.bind(param, true);
+    body.analyze(globals, locals, true);
+    locals.remove(1);
   }
   
   public Inst compile(boolean tailContext, Inst next)

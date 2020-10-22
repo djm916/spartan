@@ -9,7 +9,7 @@ import spartan.errors.CompileError;
 public class VarRef extends Expr
 {
   private final String id;
-  private Index index;
+  private Variable var;
   
   public VarRef(String id, Position position)
   {
@@ -24,18 +24,18 @@ public class VarRef extends Expr
   
   public void analyze(GlobalEnv globals, LocalEnv locals, boolean inLambda) throws CompileError
   {
-    index = locals.lookup(id);
-    if (index == null)
-      index = globals.lookup(id);
-    if (index == null)
+    var = locals.lookup(id).orElseGet(() -> globals.lookup(id).orElse(null));
+    
+    if (var == null)
       throw new CompileError("variable \"" + id + "\" not bound", position);
-    if (index.global && !inLambda && !index.isSet)
+      
+    if (!inLambda && !var.hasValue())
       throw new CompileError("forward reference to variable \"" + id + "\"", position);
   }
   
   public Inst compile(boolean tailContext, Inst next)
   {
-    return index.global ? new LoadGlobal(index.depth, next)
-                        : new LoadLocal(index.depth, next);
+    return var.global() ? new LoadGlobal(var.depth(), next)
+                        : new LoadLocal(var.depth(), next);
   }
 }

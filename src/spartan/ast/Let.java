@@ -33,10 +33,11 @@ public class Let extends Expr
   {
     for (Binding b : bindings) {
       b.init.analyze(globals, locals, inLambda);
-      locals = locals.bind(b.id);
+      locals.bind(b.id, true);
     }
     
     body.analyze(globals, locals, inLambda);
+    locals.remove(bindings.size());
   }
   
   public Inst compile(boolean tailContext, Inst next)

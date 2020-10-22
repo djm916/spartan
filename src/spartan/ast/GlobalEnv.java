@@ -1,29 +1,65 @@
 package spartan.ast;
 
+import spartan.errors.MultipleDefinition;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Optional;
 
 class GlobalEnv
 {
-  private final Map<String, Index> env = new HashMap<>();
-  
-  Index lookup(String id)
+  private static class Slot implements Variable
   {
-    return env.get(id);
+    final String id;
+    final int depth;
+    boolean hasValue;
+    
+    Slot(String id, int depth, boolean hasValue)
+    {
+      this.id = id;
+      this.depth = depth;
+      this.hasValue = hasValue;
+    }
+        
+    public String id()
+    {
+      return id;
+    }
+
+    public boolean global()
+    {
+      return true;
+    }
+
+    public int depth()
+    {
+      return depth;
+    }
+
+    public boolean hasValue()
+    {
+      return hasValue;
+    }
+
+    public void setValue()
+    {
+      hasValue = true;
+    }
   }
   
-  void bind(String id)
+  private final Map<String, Slot> slots = new HashMap<>();
+  
+  Optional<Variable> lookup(String id)
   {
-    env.put(id, new Index(env.size(), true));
+    if (!slots.containsKey(id))
+      return Optional.empty();
+    else
+      return Optional.of(slots.get(id));
   }
   
-  void set(String id)
+  void bind(String id) throws MultipleDefinition
   {
-    env.get(id).set();
-  }
-  
-  boolean isSet(String id)
-  {
-    return env.get(id).isSet();
+    if (slots.containsKey(id))
+      throw new MultipleDefinition(id);
+    slots.put(id, new Slot(id, slots.size(), false));
   }
 }

@@ -32,14 +32,16 @@ public class LetRec extends Expr
   public void analyze(GlobalEnv globals, LocalEnv locals, boolean inLambda) throws CompileError
   {
     for (Binding b : bindings) {
-      locals = locals.bind(b.id);
+      locals.bind(b.id, false);
     }
 
     for (Binding b : bindings) {
       b.init.analyze(globals, locals, inLambda);
+      locals.lookup(b.id).get().setValue();
     }
     
     body.analyze(globals, locals, inLambda);
+    locals.remove(bindings.size());
   }
   
   public Inst compile(boolean tailContext, Inst next)

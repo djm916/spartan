@@ -1,41 +1,87 @@
 package spartan.ast;
 
+import java.util.Deque;
+import java.util.ArrayDeque;
+import java.util.Optional;
+
 class LocalEnv
 {
-  static final LocalEnv Empty = new LocalEnv(null, null) {
-    public Index lookup(String id)
+  private static class Slot
+  {
+    final String id;
+    boolean hasValue;
+    
+    Slot(String id, boolean hasValue)
     {
-      return null;
+      this.id = id;
+      this.hasValue = hasValue;
     }
-  };
-  
-  private final LocalEnv parent;
-  private final String id;
-  
-  private LocalEnv(String id, LocalEnv parent)
-  {
-    this.id = id;
-    this.parent = parent;
   }
   
-  LocalEnv bind(String id)
+  private static class LocalVariable implements Variable
   {
-    return new LocalEnv(id, this);
-  }
-  
-  Index lookup(String id)
-  {
-    int depth = lookup(id, 0);
-    return depth < 0 ? null : new Index(depth, false);
-  }
-  
-  private int lookup(String id, int depth)
-  {
-    if (id.equals(this.id))
+    private final Slot slot;
+    private final int depth;
+    
+    LocalVariable(Slot slot, int depth)
+    {
+      this.slot = slot;
+      this.depth = depth;
+    }
+    
+    public String id()
+    {
+      return slot.id;
+    }
+
+    public boolean global()
+    {
+      return false;
+    }
+
+    public int depth()
+    {
       return depth;
-    else if (parent != null)
-      return parent.lookup(id, depth + 1);
-    else
-      return -1;
+    }
+
+    public boolean hasValue()
+    {
+      return slot.hasValue;
+    }
+
+    public void setValue()
+    {
+      slot.hasValue = true;
+    }
+  }
+  
+  private final Deque<Slot> slots;
+  
+  LocalEnv()
+  {
+    this.slots = new ArrayDeque<>();
+  }
+  
+  void bind(String id, boolean hasValue)
+  {
+    slots.push(new Slot(id, hasValue));
+  }
+  
+  Optional<Variable> lookup(String id)
+  {
+    int depth = 0;
+    for (Slot slot : slots) {
+      if (id.equals(slot.id)) {
+        return Optional.of(new LocalVariable(slot, depth));
+      }
+      ++depth;
+    }
+    return Optional.empty();
+  }
+  
+  void remove(int n)
+  {
+    for (int i = 0; i < n; ++i)
+      slots.pop();
   }
 }
