@@ -93,7 +93,7 @@ public class Parser
   {
     List<Binding> defs = new ArrayList<>();
     lastToken = tokens.next();
-    while (lastToken != null) {
+    while (lastToken.type != TokenType.Eof) {
       require(TokenType.Def, "\"def\" expected");
       lastToken = tokens.next();
       defs.add(parseBinding());
@@ -119,14 +119,14 @@ public class Parser
   {
     Expr result = parseExp1();
     Position position = result.position;
-    if (lastToken != null && lastToken.type == TokenType.SemiColon) {
+    if (lastToken.type == TokenType.SemiColon) {
       List<Expr> elems = new ArrayList<>();
       elems.add(result);
       do {
         lastToken = tokens.next();
         elems.add(parseExp1());
       }
-      while (lastToken != null && lastToken.type == TokenType.SemiColon);
+      while (lastToken.type == TokenType.SemiColon);
       return new Seq(elems, position);
     }
     return result;
@@ -138,7 +138,7 @@ public class Parser
   {
     Expr result = parseAtom();
     Position position = result.position;
-    while (lastToken != null && atoms.contains(lastToken.type)) {
+    while (atoms.contains(lastToken.type)) {
       result = new Apply(result, parseAtom(), position);
     }
     return result;
@@ -146,12 +146,11 @@ public class Parser
   
   private Expr parseAtom() throws IOException, SyntaxError
   {
-    if (lastToken == null)
-      throw new SyntaxError("unexpected end of input", tokens.position());
-
     Expr result = null;
     
-    if (lastToken.type == TokenType.Int)
+    if (lastToken.type == TokenType.Eof)
+      throw new SyntaxError("unexpected end of input", tokens.position());
+    else if (lastToken.type == TokenType.Int)
       result = new Const(new Int(Integer.parseInt(lastToken.text)), lastToken.position);
     else if (lastToken.type == TokenType.Real)
       result = new Const(new spartan.data.Real(Double.parseDouble(lastToken.text)), lastToken.position);
@@ -189,20 +188,20 @@ public class Parser
     Position position = lastToken.position;
     lastToken = tokens.next();
     
-    if (lastToken != null && lastToken.type == TokenType.RgtParen) {
+    if (lastToken.type == TokenType.RgtParen) {
       return new Const(Unit.Instance, position);
     }
 
     Expr result = parseExp0();
     
-    if (lastToken != null && lastToken.type == TokenType.Comma) {
+    if (lastToken.type == TokenType.Comma) {
       List<Expr> elems = new ArrayList<>();
       elems.add(result);
       do {
         lastToken = tokens.next();
         elems.add(parseExp0());
       }
-      while (lastToken != null && lastToken.type == TokenType.Comma);
+      while (lastToken.type == TokenType.Comma);
       require(TokenType.RgtParen, "\")\" expected");
       return new spartan.ast.Tuple(elems, position);
     }
@@ -216,14 +215,14 @@ public class Parser
     Position position = lastToken.position;
     lastToken = tokens.next();
     
-    if (lastToken != null && lastToken.type == TokenType.RgtBrack) {
+    if (lastToken.type == TokenType.RgtBrack) {
       return new Const(spartan.data.List.Empty, position);
     }
     
     List<Expr> elems = new ArrayList<>();
     elems.add(parseExp0());
     
-    while (lastToken != null && lastToken.type == TokenType.Comma) {
+    while (lastToken.type == TokenType.Comma) {
       lastToken = tokens.next();
       elems.add(parseExp0());
     }
@@ -241,7 +240,7 @@ public class Parser
       lastToken = tokens.next();
       members.add(parseBinding());
     }
-    while (lastToken != null && lastToken.type == TokenType.Comma);
+    while (lastToken.type == TokenType.Comma);
     
     require(TokenType.RgtBrace, "\"}\" expected");
     return new spartan.ast.Record(members, position);
@@ -257,7 +256,7 @@ public class Parser
     lastToken = tokens.next();
     Expr body = parseExp0();
     thenExprs.add(new Branch(test, body, test.position));
-    while (lastToken != null && lastToken.type == TokenType.Elif) {
+    while (lastToken.type == TokenType.Elif) {
       lastToken = tokens.next();
       test = parseExp0();
       require(TokenType.Then, "\"then\" required");
@@ -265,7 +264,7 @@ public class Parser
       body = parseExp0();
       thenExprs.add(new Branch(test, body, test.position));
     }
-    if (lastToken != null && lastToken.type == TokenType.Else) {
+    if (lastToken.type == TokenType.Else) {
       lastToken = tokens.next();
       body = parseExp0();
     }
@@ -281,13 +280,13 @@ public class Parser
     Position position = lastToken.position;
     lastToken = tokens.next();
     boolean isRec = false;
-    if (lastToken != null && lastToken.type == TokenType.Rec) {
+    if (lastToken.type == TokenType.Rec) {
       isRec = true;
       lastToken = tokens.next();
     }
     List<Binding> bindings = new ArrayList<>();
     bindings.add(parseBinding());
-    while (lastToken != null && lastToken.type == TokenType.Comma) {
+    while (lastToken.type == TokenType.Comma) {
       lastToken = tokens.next();
       bindings.add(parseBinding());
     }
@@ -307,7 +306,7 @@ public class Parser
     List<String> params = new ArrayList<>();
     params.add(lastToken.text);
     lastToken = tokens.next();
-    while (lastToken != null && lastToken.type == TokenType.Ident) {
+    while (lastToken.type == TokenType.Ident) {
       params.add(lastToken.text);
       lastToken = tokens.next();
     }
@@ -342,7 +341,7 @@ public class Parser
   private void require(TokenType expectedType, String errorMessage)
   throws SyntaxError, IOException
   {
-    if (lastToken == null)
+    if (lastToken.type == TokenType.Eof)
       throw new SyntaxError(errorMessage, tokens.position());
     
     if (lastToken.type != expectedType)

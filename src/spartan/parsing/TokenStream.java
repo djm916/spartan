@@ -22,7 +22,7 @@ enum TokenType
   Neg, Add, Sub, Mul, Div, Mod,
   Eq, Ne, Lt, Gt, Le, Ge,
   And, Or, Not,
-  
+  Eof
 }
 
 class Token
@@ -280,7 +280,7 @@ class TokenStream
     skipSpace();
     
     if (lastChar == -1)
-      return null;
+      return makeToken(TokenType.Eof, "");
     
     markTokenStart();
     
