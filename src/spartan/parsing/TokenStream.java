@@ -13,7 +13,7 @@ enum TokenType
   LftParen, RgtParen,
   LftBrack, RgtBrack,
   LftBrace, RgtBrace,
-  Colon, SemiColon, Comma, Period, Exclam, At,
+  Colon, SemiColon, Comma, Period, Exclam, At, Pipe,
   If, Then, Else, Elif, 
   Let, Rec, In,
   Fun, RgtArrow,
@@ -322,6 +322,9 @@ class TokenStream
     
     if (lastChar == '!')
       return makeToken(TokenType.Exclam, "!");
+    
+    if (lastChar == '|')
+      return makeToken(TokenType.Pipe, "|");
     
     if (lastChar == '+') {
       if (isDigit(peekChar()))

@@ -131,10 +131,23 @@ public class Parser
     }
     return result;
   }
-  
-  // Exp1 ::= Exp2 {Exp2}
+ 
+  // Exp1 ::= Exp2 {'|' Exp2}
   
   private Expr parseExp1() throws IOException, SyntaxError
+  {
+    Expr result = parseExp2();
+    while (lastToken.type == TokenType.Pipe) {
+      Position position = lastToken.position;
+      lastToken = tokens.next();
+      result = new Apply(parseExp2(), result, position);
+    }
+    return result;
+  }
+  
+  // Exp2 ::= Atom {Atom}
+  
+  private Expr parseExp2() throws IOException, SyntaxError
   {
     Expr result = parseAtom();
     Position position = result.position;
@@ -143,7 +156,7 @@ public class Parser
     }
     return result;
   }
-  
+
   private Expr parseAtom() throws IOException, SyntaxError
   {
     Expr result = null;
