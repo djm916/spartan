@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.Optional;
 import java.util.List;
 import java.util.ArrayList;
@@ -22,13 +23,18 @@ import java.util.Iterator;
 
 public class Parser
 {
-  
-  public static Program parseFile(String fileName)
-  throws FileNotFoundException, IOException, SyntaxError
+  public static Parser parseFile(String fileName)
+  throws FileNotFoundException, IOException
   {
     Reader r = new BufferedReader(new InputStreamReader(new FileInputStream(fileName), DefaultEncoding));
-    Parser p = new Parser(r, fileName);
-    return p.parseProgram();
+    return new Parser(r, fileName);
+  }
+  
+  public static Parser parseStdin()
+  throws IOException
+  {
+    Reader r = new BufferedReader(new InputStreamReader(System.in, DefaultEncoding));
+    return new Parser(r, "stdin");
   }
   
   private static final String DefaultEncoding = "UTF-8";
@@ -84,21 +90,29 @@ public class Parser
     ops.put(TokenType.Ge, Builtins.Ge);
   }
   
-  private Parser(Reader inputStream, String fileName)
+  private Parser(Reader inputStream, String source)
   {
-    this.tokens = new TokenStream(inputStream, fileName);
+    this.tokens = new TokenStream(inputStream, source);
   }
   
-  private Program parseProgram() throws IOException, SyntaxError
+  public Expr next() throws IOException, SyntaxError
   {
-    List<Binding> defs = new ArrayList<>();
     lastToken = tokens.next();
-    while (lastToken.type != TokenType.Eof) {
-      require(TokenType.Def, "\"def\" expected");
-      lastToken = tokens.next();
-      defs.add(parseBinding());
-    }
-    return new Program(defs);
+    if (lastToken.type == TokenType.Eof)
+      return null;
+    Expr result = null;
+    if (lastToken.type == TokenType.Def)
+      result = parseDef();
+    else
+      result = parseExp0();
+    //require(TokenType.SemiColon, "\";\" expected");
+    return result;
+  }
+  
+  private Expr parseDef() throws IOException, SyntaxError
+  {
+    lastToken = tokens.next();
+    return new Def(parseBinding());
   }
   
   private Binding parseBinding() throws IOException, SyntaxError

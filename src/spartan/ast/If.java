@@ -24,14 +24,14 @@ public class If extends Expr
       elseExpr.sexp());
   }
   
-  public void analyze(GlobalEnv globals, LocalEnv locals, boolean inLambda) throws CompileError
+  public void analyze(Scope locals) throws CompileError
   {
     for (Branch b : thenExprs) {
-      b.test.analyze(globals, locals, inLambda);
-      b.body.analyze(globals, locals, inLambda);
+      b.test.analyze(locals);
+      b.body.analyze(locals);
     }
     
-    elseExpr.analyze(globals, locals, inLambda);
+    elseExpr.analyze(locals);
   }
   
   public Inst compile(boolean tailContext, Inst next)

@@ -4,17 +4,17 @@ import spartan.data.Value;
 
 public class StoreGlobal extends Inst
 {
-  private final int depth;
+  private final String id;
   
-  public StoreGlobal(int depth, Inst next)
+  public StoreGlobal(String id, Inst next)
   {
     super(next);
-    this.depth = depth;
+    this.id = id;
   }
   
   public void exec(VirtualMachine vm)
   {
-    vm.globals.store(vm.result, depth);
+    vm.globals.bind(id, vm.result);
     vm.control = next;
   }
 }

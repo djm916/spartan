@@ -9,7 +9,7 @@ public class Error extends Exception
   
   public Throwable fillInStackTrace()
   {
-    // Do not have Java generate a stack trace
+    // Do not generate a stack trace
     return this;
   }
   

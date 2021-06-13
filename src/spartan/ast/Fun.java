@@ -23,11 +23,9 @@ public class Fun extends Expr
     return String.format("(Fun %s %s)", param, body.sexp());
   }
   
-  public void analyze(GlobalEnv globals, LocalEnv locals, boolean inLambda) throws CompileError
+  public void analyze(Scope locals) throws CompileError
   {
-    locals.bind(param, true);
-    body.analyze(globals, locals, true);
-    locals.remove(1);
+    body.analyze(new Scope(param, locals));
   }
   
   public Inst compile(boolean tailContext, Inst next)

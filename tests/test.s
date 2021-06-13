@@ -1,1 +1,3 @@
-def main: 1 | + 1 | true
+def x : 1
+x
+

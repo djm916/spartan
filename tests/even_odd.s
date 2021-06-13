@@ -8,4 +8,4 @@ def  odd : fun n => if = 0 n then false
                     end
            end
 
-def main : even 1000
+even 1000

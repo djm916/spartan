@@ -5,11 +5,12 @@ import spartan.runtime.Inst;
 import spartan.runtime.LoadLocal;
 import spartan.runtime.LoadGlobal;
 import spartan.errors.CompileError;
+import java.util.Optional;
 
 public class VarRef extends Expr
 {
   private final String id;
-  private Variable var;
+  private Integer depth;
   
   public VarRef(String id, Position position)
   {
@@ -22,20 +23,15 @@ public class VarRef extends Expr
     return String.format("(Ref %s)", id);
   }
   
-  public void analyze(GlobalEnv globals, LocalEnv locals, boolean inLambda) throws CompileError
+  public void analyze(Scope locals) throws CompileError
   {
-    var = locals.lookup(id).orElseGet(() -> globals.lookup(id).orElse(null));
-    
-    if (var == null)
-      throw new CompileError("variable \"" + id + "\" not bound", position);
-      
-    if (!inLambda && !var.hasValue())
-      throw new CompileError("forward reference to variable \"" + id + "\"", position);
+    if (locals != null)
+      depth = locals.lookup(id);
   }
   
   public Inst compile(boolean tailContext, Inst next)
   {
-    return var.global() ? new LoadGlobal(var.depth(), next)
-                        : new LoadLocal(var.depth(), next);
+    return depth != null ? new LoadLocal(depth, next)
+                         : new LoadGlobal(position, id.intern(), next);
   }
 }

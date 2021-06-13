@@ -5,8 +5,8 @@ import spartan.errors.SyntaxError;
 import spartan.errors.CompileError;
 import spartan.errors.RuntimeError;
 import spartan.errors.Error;
+import spartan.ast.*;
 import spartan.parsing.Parser;
-import spartan.ast.Program;
 import spartan.runtime.Inst;
 import spartan.runtime.VirtualMachine;
 import spartan.data.Value;
@@ -16,58 +16,38 @@ import java.io.FileNotFoundException;
 public class Main
 {
   private static final String USAGE = 
-    "Usage: java -jar Spartan.jar <file> <arg> ...";
+    "Usage: java -jar Spartan.jar";
   
-  public static void main(String[] args)
+  public static void main(String[] args) throws IOException
   {
-    if (args.length < 1) {
-      System.out.println(USAGE);
-      return;
-    }
+    Parser parser = Parser.parseStdin();
+    VirtualMachine vm = new VirtualMachine();
     
-    String scriptName = args[0];
-    
-    
-    Program prog = null;;
-    
-    try {
-      prog = Parser.parseFile(scriptName);
+    do {
+      System.out.print(">");
+      try {
+        Expr exp = parser.next();
+        if (exp == null)
+          break;
+        System.out.println(exp.sexp());
+        exp.analyze(null);
+        Inst code = exp.compile(false, null);
+        Value result = vm.exec(code);
+        System.out.println(result.repr());
+      }
+      catch (IOException ex) {
+        System.out.println("error: " + ex.getMessage());
+      }
+      catch (SyntaxError ex) {
+        System.out.println(ex);
+      }
+      catch (CompileError ex) {
+        System.out.println(ex);
+      }
+      catch (RuntimeError ex) {
+        System.out.println(ex);
+      }
     }
-    catch (SyntaxError ex) {
-      System.out.println(ex);
-      return;
-    }
-    catch (IOException ex) {
-      System.out.println("error: " + ex.getMessage());
-      return;
-    }
-    
-    Inst code = null;
-    
-    try {
-      code = prog.compile();
-    }
-    catch (Error ex) {
-      System.out.println(ex);
-      return;
-    }
-    catch (CompileError ex) {
-      System.out.println(ex);
-      return;
-    }
-
-    System.out.println(prog.sexp());
-    
-    Value result = null;
-    
-    try {
-      result = new VirtualMachine().exec(code);
-    }
-    catch (RuntimeError ex) {
-      System.out.println(ex);
-      return;
-    }
-    
-    System.out.println(result.repr());
+    while (true);
   }
 }

@@ -20,7 +20,7 @@ public class TupleSelector extends Expr
     return String.format("(Select %d)", index);
   }
   
-  public void analyze(GlobalEnv globals, LocalEnv locals, boolean inLambda) throws CompileError
+  public void analyze(Scope locals) throws CompileError
   {
     
   }

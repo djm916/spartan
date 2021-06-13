@@ -24,10 +24,10 @@ public class Seq extends Expr
                     .collect(Collectors.joining(" ")));
   }
   
-  public void analyze(GlobalEnv globals, LocalEnv locals, boolean inLambda) throws CompileError
+  public void analyze(Scope locals) throws CompileError
   {
     for (Expr e : elems)
-      e.analyze(globals, locals, inLambda);
+      e.analyze(locals);
   }
   
   public Inst compile(boolean tailContext, Inst next)

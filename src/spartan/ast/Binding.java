@@ -6,13 +6,13 @@ public class Binding
 {
   public final String id;
   public final Expr init;
-  public final Position pos;
+  public final Position position;
   
-  public Binding(String id, Expr init, Position pos)
+  public Binding(String id, Expr init, Position position)
   {
     this.id = id;
     this.init = init;
-    this.pos = pos;
+    this.position = position;
   }
   
   public String sexp()

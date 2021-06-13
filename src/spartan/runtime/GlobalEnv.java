@@ -1,28 +1,20 @@
 package spartan.runtime;
 
 import spartan.data.Value;
-import java.util.List;
-import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
 
 class GlobalEnv
 {
-  private final List<Value> values;
-  
-  GlobalEnv(int initialCapacity)
+  private final Map<String, Value> values = new HashMap<>();
+
+  void bind(String id, Value value)
   {
-    values = new ArrayList<>(initialCapacity);
+    values.put(id, value);
   }
   
-  Value load(int depth)
+  Value lookup(String id)
   {
-    return values.get(depth);
-  }
-  
-  void store(Value value, int depth)
-  {
-    if (depth >= values.size())
-      values.add(value);
-    else
-      values.set(depth, value);
+    return values.get(id);
   }
 }

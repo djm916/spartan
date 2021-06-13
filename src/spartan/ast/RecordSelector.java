@@ -20,7 +20,7 @@ public class RecordSelector extends Expr
     return String.format("(Select %s)", label);
   }
   
-  public void analyze(GlobalEnv globals, LocalEnv locals, boolean inLambda) throws CompileError
+  public void analyze(Scope locals) throws CompileError
   {
     
   }

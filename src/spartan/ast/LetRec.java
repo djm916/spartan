@@ -29,19 +29,17 @@ public class LetRec extends Expr
       body.sexp());
   }
   
-  public void analyze(GlobalEnv globals, LocalEnv locals, boolean inLambda) throws CompileError
+  public void analyze(Scope locals) throws CompileError
   {
     for (Binding b : bindings) {
-      locals.bind(b.id, false);
+      locals = new Scope(b.id, locals);
     }
 
     for (Binding b : bindings) {
-      b.init.analyze(globals, locals, inLambda);
-      locals.lookup(b.id).get().setValue();
+      b.init.analyze(locals);
     }
     
-    body.analyze(globals, locals, inLambda);
-    locals.remove(bindings.size());
+    body.analyze(locals);
   }
   
   public Inst compile(boolean tailContext, Inst next)

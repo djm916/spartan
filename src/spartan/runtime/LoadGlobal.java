@@ -1,20 +1,26 @@
 package spartan.runtime;
 
 import spartan.data.Value;
+import spartan.Position;
+import spartan.errors.UnboundVariable;
 
 public class LoadGlobal extends Inst
 {
-  private final int depth;
+  private final Position position;
+  private final String id;
   
-  public LoadGlobal(int depth, Inst next)
+  public LoadGlobal(Position position, String id, Inst next)
   {
     super(next);
-    this.depth = depth;
+    this.position = position;
+    this.id = id;
   }
   
-  public void exec(VirtualMachine vm)
-  {
-    vm.result = vm.globals.load(depth);
+  public void exec(VirtualMachine vm) throws UnboundVariable
+  {    
+    vm.result = vm.globals.lookup(id);
+    if (vm.result == null)
+      throw new UnboundVariable(id, position);
     vm.control = next;
   }
 }
