@@ -5,6 +5,30 @@ import spartan.errors.TypeMismatch;
 
 public class List extends Value
 {
+  /*
+  public static class Builder
+  {
+    private List head;
+    private List tail;
+    
+    public void append(Value v)
+    {
+      if (head == null) {
+        head = tail = new List(v, List.Empty);
+      }
+      else {
+        tail.rest = new List(v, List.Empty);
+        tail = tail.rest;
+      }
+    }
+    
+    public List build()
+    {
+      return head;
+    }
+  }
+  */
+  
   public static final List Empty = new List(null, null);
   
   public Type type()
@@ -14,16 +38,26 @@ public class List extends Value
   
   public String repr()
   {
-    return String.format("[%s]", repr(this));
+    return String.format("(%s)", repr(this));
   }
   
   public final Value first;
-  public final List  rest;
+  public final List rest;
   
   public List(Value first, List rest)
   {
     this.first = first;
     this.rest = rest;
+  }
+  
+  public Value first()
+  {
+    return first;
+  }
+  
+  public Value rest()
+  {
+    return rest;
   }
   
   public boolean eq(List that) throws TypeMismatch
@@ -48,6 +82,6 @@ public class List extends Value
     if (self.rest == Empty)
       return self.first.repr();
     
-    return String.format("%s, %s", self.first.repr(), repr(self.rest));
+    return String.format("%s %s", self.first.repr(), repr(self.rest));
   }
 }

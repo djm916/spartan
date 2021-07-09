@@ -22,7 +22,7 @@ public class SourceError extends Exception
   {
     return String.format(
         "%s: %s: %s: error: %s",
-        position.file,
+        position.source,
         position.line,
         position.column,
         getMessage());

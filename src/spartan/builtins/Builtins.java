@@ -183,11 +183,11 @@ public final class Builtins
         case Int: return ((Int)x).eq((Int)y);
         case Real: return ((Real)x).eq((Real)y);
         case Text: return ((Text)x).eq((Text)y);
-        case Tuple: return ((Tuple)x).eq((Tuple)y);
+        case Vector: return ((Vector)x).eq((Vector)y);
         case List: return ((List)x).eq((List)y);
         case Record: return ((Record)x).eq((Record)y);
-        case Bool:
-        case Unit: return x == y;
+        case Bool: 
+        case Symbol: return x == y;
       }
     }
     throw new TypeMismatch();

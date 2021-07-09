@@ -2,13 +2,13 @@ package spartan.data;
 
 public enum Type
 {
-  Unit("unit"),
   Bool("bool"),
   Int("int"),
   Real("real"),
   List("list"),
-  Tuple("tuple"),
+  Vector("vector"),
   Record("record"),
+  Symbol("symbol"),
   PrimFun("function"),
   Closure("function"),
   Text("text");
