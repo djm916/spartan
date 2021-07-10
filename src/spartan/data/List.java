@@ -60,6 +60,19 @@ public class List extends Value
     return rest;
   }
   
+  public int length()
+  {
+    return length(this);
+  }
+  
+  private static int length(List list)
+  {
+    if (list == List.Empty)
+      return 0;
+    else
+      return 1 + length(list.rest);
+  }
+  
   public boolean eq(List that) throws TypeMismatch
   {
     return eq(this, that);

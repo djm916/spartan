@@ -7,6 +7,7 @@ import spartan.errors.RuntimeError;
 import spartan.errors.Error;
 import spartan.parsing.Reader;
 import spartan.parsing.SourceValue;
+import spartan.compiling.Compiler;
 import spartan.runtime.Inst;
 import spartan.runtime.VirtualMachine;
 import spartan.data.Value;
@@ -21,7 +22,8 @@ public class Main
   public static void main(String[] args) throws IOException
   {
     Reader reader = Reader.readStdin();
-    //VirtualMachine vm = new VirtualMachine();
+    Compiler compiler = new Compiler();
+    VirtualMachine vm = new VirtualMachine();
     
     do {
       System.out.print(">");
@@ -29,15 +31,14 @@ public class Main
         SourceValue sourceValue = reader.read();
         if (sourceValue == null)
           break;
-        Value value = sourceValue.value;
-        System.out.println(value.repr());
-        Position position = sourceValue.positionMap.get(value);
-        if (position != null)
-          System.out.println(String.format("(%d %d)", position.line, position.column));
-        //exp.analyze(null);
-        //Inst code = exp.compile(false, null);
-        //Value result = vm.exec(code);
-        //System.out.println(result.repr());
+        System.out.println("reader: " + sourceValue.value.repr());
+        //Position position = sourceValue.positionMap.get(value);
+        //if (position != null)
+          //System.out.println(String.format("(%d %d)", position.line, position.column));
+        Inst code = compiler.compile(sourceValue);
+        System.out.println("code: " + code);
+        Value result = vm.exec(code);
+        System.out.println("result: " + result.repr());
       }
       catch (IOException ex) {
         System.out.println("error: " + ex.getMessage());
@@ -45,14 +46,12 @@ public class Main
       catch (SyntaxError ex) {
         System.out.println(ex);
       }
-/*
       catch (CompileError ex) {
         System.out.println(ex);
       }
       catch (RuntimeError ex) {
         System.out.println(ex);
       }
-*/
     }
     while (true);
   }

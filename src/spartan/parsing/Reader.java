@@ -7,8 +7,6 @@ import java.io.InputStreamReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.FileNotFoundException;
-import java.util.Map;
-import java.util.IdentityHashMap;
 import java.util.Deque;
 import java.util.ArrayDeque;
 import spartan.data.*;
@@ -34,7 +32,7 @@ public class Reader
   private final MutablePosition tokenStart = new MutablePosition(0, 0);
   private final MutablePosition currentPos = new MutablePosition(1, 0);
   private final String source;
-  private Map<Value, Position> positionMap;
+  private PositionMap positionMap;
 
   private static boolean isDigit(int ch)
   {
@@ -276,7 +274,7 @@ public class Reader
   
   public SourceValue read() throws SyntaxError, IOException
   {
-    positionMap = new IdentityHashMap<>();
+    positionMap = new PositionMap();
     skipSpace();
     Value result = readValue();
     if (result == null)

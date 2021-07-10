@@ -1,7 +1,7 @@
 package spartan.data;
 
 import java.util.Map;
-import java.util.IdentityHashMap;
+import java.util.HashMap;
 
 public class Symbol extends Value
 {
@@ -20,7 +20,7 @@ public class Symbol extends Value
   
   public Type type()
   {
-    return Type.Text;
+    return Type.Symbol;
   }
   
   public String repr()
@@ -33,6 +33,6 @@ public class Symbol extends Value
     return this.value.equals(that.value);
   }
     
-  private static Map<String, Symbol> interned = new IdentityHashMap<>();
+  private static Map<String, Symbol> interned = new HashMap<>();
   private final String value;
 }

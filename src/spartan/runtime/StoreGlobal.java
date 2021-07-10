@@ -1,20 +1,20 @@
 package spartan.runtime;
 
-import spartan.data.Value;
+import spartan.data.Symbol;
 
 public class StoreGlobal extends Inst
 {
-  private final String id;
+  private final Symbol symb;
   
-  public StoreGlobal(String id, Inst next)
+  public StoreGlobal(Symbol symb, Inst next)
   {
     super(next);
-    this.id = id;
+    this.symb = symb;
   }
   
   public void exec(VirtualMachine vm)
   {
-    vm.globals.bind(id, vm.result);
+    vm.globals.bind(symb, vm.result);
     vm.control = next;
   }
 }
