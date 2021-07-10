@@ -10,8 +10,6 @@ public class Compiler
 {
   private PositionMap positionMap;
   
-  private static Symbol Define = Symbol.get("define");
-  
   private static boolean isAtom(Value sexp)
   {
     return sexp.type() == Type.Bool
@@ -28,7 +26,16 @@ public class Compiler
     return new LoadConst(atom, next);
   }
   
-  // (define symb sexp)
+  private Inst compileSymbol(Symbol symb, Scope scope, Inst next) throws CompileError
+  {
+    DeBruijnIndex index = null;
+    if (scope != null)
+      index = scope.lookup(symb);
+    if (index == null)
+      return new LoadGlobal(positionMap.get(symb), symb, next);
+    else
+      return new LoadLocal(index.depth, index.offset, next);
+  }
   
   private void checkDefine(List list) throws CompileError
   {
@@ -46,12 +53,7 @@ public class Compiler
     return compile(init, scope,
                    new StoreGlobal(symb, next));
   }
-  
-  private Inst compileSymbol(Symbol symb, Scope scope, Inst next) throws CompileError
-  {
-    return null;
-  }
-  
+    
   private Inst compileIf(List list, Scope scope, Inst next) throws CompileError
   {
     return null;

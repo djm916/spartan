@@ -4,28 +4,28 @@ import spartan.data.Value;
 
 public class LocalEnv
 {
-  Value value;
+  Value[] bindings;
   LocalEnv parent;
   
-  public LocalEnv(Value value, LocalEnv parent)
+  public LocalEnv(int numBindings, LocalEnv parent)
   {
-    this.value = value;
+    this.bindings = new Value[numBindings];
     this.parent = parent;
   }
   
-  public Value load(int depth)
+  public Value load(int depth, int offset)
   {
     LocalEnv self = this;
     for (; depth > 0; --depth)
       self = self.parent;
-    return self.value;
+    return self.bindings[offset];
   }
   
-  public void store(Value value, int depth)
+  public void store(Value value, int depth, int offset)
   {
     LocalEnv self = this;
     for (; depth > 0; --depth)
       self = self.parent;
-    self.value = value;
+    self.bindings[offset] = value;
   }
 }
