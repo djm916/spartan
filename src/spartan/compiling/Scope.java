@@ -3,8 +3,6 @@ package spartan.compiling;
 import java.util.Map;
 import java.util.IdentityHashMap;
 import spartan.data.Symbol;
-import spartan.errors.UnboundVariable;
-import spartan.errors.MultipleDefinition;
 
 public class Scope
 {
@@ -22,11 +20,12 @@ public class Scope
     return lookup(s, 0);
   }
   
-  public void bind(Symbol s) throws MultipleDefinition
+  public boolean bind(Symbol s)
   {
     if (bindings.containsKey(s))
-      throw new MultipleDefinition(s);
+      return false;
     bindings.put(s, bindings.size());
+    return true;
   }
   
   private DeBruijnIndex lookup(Symbol s, int depth)

@@ -32,13 +32,9 @@ public class Main
         if (sourceValue == null)
           break;
         System.out.println("reader: " + sourceValue.value.repr());
-        //Position position = sourceValue.positionMap.get(value);
-        //if (position != null)
-          //System.out.println(String.format("(%d %d)", position.line, position.column));
         Inst code = compiler.compile(sourceValue);
-        System.out.println("code: " + code);
         Value result = vm.exec(code);
-        System.out.println("result: " + result.repr());
+        System.out.println("eval: " + result.repr());
       }
       catch (IOException ex) {
         System.out.println("error: " + ex.getMessage());

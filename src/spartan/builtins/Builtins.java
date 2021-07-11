@@ -2,6 +2,7 @@ package spartan.builtins;
 
 import spartan.data.*;
 import spartan.errors.Error;
+import spartan.runtime.VirtualMachine;
 import spartan.errors.TypeMismatch;
 import spartan.errors.NoSuchElement;
 
@@ -25,12 +26,10 @@ public final class Builtins
   }
   
   public static final PrimFun Add = new PrimFun() {
-    public Value apply(final Value x) {
-      return new PrimFun() {
-        public Value apply(final Value y) throws TypeMismatch {
-          return add(x, y);
-        }
-      };
+    public Value apply(VirtualMachine vm) throws TypeMismatch {
+      Value x = vm.args.pop();
+      Value y = vm.args.pop();
+      return add(x, y);
     }
   };
 
@@ -46,12 +45,10 @@ public final class Builtins
   }
   
   public static final PrimFun Sub = new PrimFun() {
-    public Value apply(final Value x) {
-      return new PrimFun() {
-        public Value apply(final Value y) throws TypeMismatch {
-          return sub(y, x);
-        }
-      };
+    public Value apply(VirtualMachine vm) throws TypeMismatch {
+      Value x = vm.args.pop();
+      Value y = vm.args.pop();
+      return sub(x, y);
     }
   };
 
@@ -67,12 +64,10 @@ public final class Builtins
   }
     
   public static final PrimFun Mul = new PrimFun() {
-    public Value apply(final Value x) {
-      return new PrimFun() {
-        public Value apply(final Value y) throws TypeMismatch {
-          return mul(x, y);
-        }
-      };
+    public Value apply(VirtualMachine vm) throws TypeMismatch {
+      Value x = vm.args.pop();
+      Value y = vm.args.pop();
+      return mul(x, y);
     }
   };
 
@@ -88,12 +83,10 @@ public final class Builtins
   }
   
   public static final PrimFun Div = new PrimFun() {
-    public Value apply(final Value x) {
-      return new PrimFun() {
-        public Value apply(final Value y) throws TypeMismatch {
-          return div(y, x);
-        }
-      };
+    public Value apply(VirtualMachine vm) throws TypeMismatch {
+      Value x = vm.args.pop();
+      Value y = vm.args.pop();
+      return div(x, y);
     }
   };
 
@@ -105,12 +98,10 @@ public final class Builtins
   }
   
   public static final PrimFun Mod = new PrimFun() {
-    public Value apply(final Value x) {
-      return new PrimFun() {
-        public Value apply(final Value y) throws TypeMismatch {
-          return mod(y, x);
-        }
-      };
+    public Value apply(VirtualMachine vm) throws TypeMismatch {
+      Value x = vm.args.pop();
+      Value y = vm.args.pop();
+      return mod(x, y);
     }
   };
 
@@ -124,7 +115,8 @@ public final class Builtins
   }
   
   public static final PrimFun Neg = new PrimFun() {
-    public Value apply(final Value x) throws TypeMismatch {
+    public Value apply(VirtualMachine vm) throws TypeMismatch {
+      Value x = vm.args.pop();
       return neg(x);
     }
   };
@@ -137,42 +129,9 @@ public final class Builtins
   }
   
   public static final PrimFun Not = new PrimFun() {
-    public Value apply(final Value x) throws TypeMismatch {
+    public Value apply(VirtualMachine vm) throws TypeMismatch {
+      Value x = vm.args.pop();
       return not(x);
-    }
-  };
-
-  public static Bool and(Value x, Value y) throws TypeMismatch
-  {
-    if (x.type() == Type.Bool && y.type() == Type.Bool)
-      return ((Bool)x).and((Bool)y);
-    throw new TypeMismatch();
-  }
-
-  public static final PrimFun And = new PrimFun() {
-    public Value apply(final Value x) {
-      return new PrimFun() {
-        public Value apply(final Value y) throws TypeMismatch {
-          return and(x, y);
-        }
-      };
-    }
-  };
-
-  public static Bool or(Value x, Value y) throws TypeMismatch
-  {
-    if (x.type() == Type.Bool && y.type() == Type.Bool)
-      return ((Bool)x).or((Bool)y);
-    throw new TypeMismatch();
-  }
-  
-  public static final PrimFun Or = new PrimFun() {
-    public Value apply(final Value x) {
-      return new PrimFun() {
-        public Value apply(final Value y) throws TypeMismatch {
-          return or(x, y);
-        }
-      };
     }
   };
 
@@ -194,12 +153,10 @@ public final class Builtins
   }
   
   public static final PrimFun Eq = new PrimFun() {
-    public Value apply(final Value x) {
-      return new PrimFun() {
-        public Value apply(final Value y) throws TypeMismatch {
-          return truth(eq(x, y));
-        }
-      };
+    public Value apply(VirtualMachine vm) throws TypeMismatch {
+      Value x = vm.args.pop();
+      Value y = vm.args.pop();
+      return truth(eq(x, y));
     }
   };
 
@@ -209,12 +166,10 @@ public final class Builtins
   }
   
   public static final PrimFun Ne = new PrimFun() {
-    public Value apply(final Value x) {
-      return new PrimFun() {
-        public Value apply(final Value y) throws TypeMismatch {
-          return truth(ne(x, y));
-        }
-      };
+    public Value apply(VirtualMachine vm) throws TypeMismatch {
+      Value x = vm.args.pop();
+      Value y = vm.args.pop();
+      return truth(ne(x, y));
     }
   };
 
@@ -231,12 +186,10 @@ public final class Builtins
   }
   
   public static final PrimFun Lt = new PrimFun() {
-    public Value apply(final Value x) {
-      return new PrimFun() {
-        public Value apply(final Value y) throws TypeMismatch {
-          return truth(lt(y, x));
-        }
-      };
+    public Value apply(VirtualMachine vm) throws TypeMismatch {
+      Value x = vm.args.pop();
+      Value y = vm.args.pop();
+      return truth(lt(x, y));
     }
   };
 
@@ -253,12 +206,10 @@ public final class Builtins
   }
   
   public static final PrimFun Le = new PrimFun() {
-    public Value apply(final Value x) {
-      return new PrimFun() {
-        public Value apply(final Value y) throws TypeMismatch {
-          return truth(le(y, x));
-        }
-      };
+    public Value apply(VirtualMachine vm) throws TypeMismatch {
+      Value x = vm.args.pop();
+      Value y = vm.args.pop();
+      return truth(le(x, y));
     }
   };
 
@@ -275,12 +226,10 @@ public final class Builtins
   }
   
   public static final PrimFun Gt = new PrimFun() {
-    public Value apply(final Value x) {
-      return new PrimFun() {
-        public Value apply(final Value y) throws TypeMismatch {
-          return truth(gt(y, x));
-        }
-      };
+    public Value apply(VirtualMachine vm) throws TypeMismatch {
+      Value x = vm.args.pop();
+      Value y = vm.args.pop();
+      return truth(gt(x, y));
     }
   };
 
@@ -297,12 +246,10 @@ public final class Builtins
   }
   
   public static final PrimFun Ge = new PrimFun() {
-    public Value apply(final Value x) {
-      return new PrimFun() {
-        public Value apply(final Value y) throws TypeMismatch {
-          return truth(ge(y, x));
-        }
-      };
+    public Value apply(VirtualMachine vm) throws TypeMismatch {
+      Value x = vm.args.pop();
+      Value y = vm.args.pop();
+      return truth(ge(x, y));
     }
   };
 }

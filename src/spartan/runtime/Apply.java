@@ -19,13 +19,12 @@ public class Apply extends Inst
   
   public void exec(VirtualMachine vm) throws RuntimeError
   {
-    final Value arg = vm.args.pop();
     final Value fun = vm.args.pop();
     
     switch (fun.type()) {
       case PrimFun: {
         try {
-          vm.result = ((PrimFun)fun).apply(arg);
+          vm.result = ((PrimFun)fun).apply(vm);
         }
         catch (Error err) {
           throw new RuntimeError(err.getMessage(), position);
@@ -39,7 +38,7 @@ public class Apply extends Inst
       }
       case Closure: {
         final Closure clo = (Closure)fun;
-        vm.locals = new LocalEnv(arg, clo.locals);
+        vm.locals = clo.locals;
         vm.control = clo.code;
         break;
       }

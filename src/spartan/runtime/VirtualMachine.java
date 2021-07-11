@@ -9,12 +9,12 @@ import spartan.errors.RuntimeError;
 
 public class VirtualMachine
 {
-  Value result;
-  Deque<Value> args = new ArrayDeque<Value>();
-  Inst control;
-  LocalEnv locals;
-  GlobalEnv globals = new GlobalEnv();
-  Frame frame;
+  public Value result;
+  public Deque<Value> args = new ArrayDeque<Value>();
+  public Inst control;
+  public LocalEnv locals;
+  public GlobalEnv globals = new GlobalEnv();
+  public Frame frame;
   
   public Value exec(Inst code) throws RuntimeError
   {

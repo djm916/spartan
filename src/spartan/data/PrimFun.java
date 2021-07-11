@@ -1,6 +1,7 @@
 package spartan.data;
 
 import spartan.errors.Error;
+import spartan.runtime.VirtualMachine;
 
 public abstract class PrimFun extends Value
 {
@@ -14,5 +15,5 @@ public abstract class PrimFun extends Value
     return Type.PrimFun.name;
   }
   
-  public abstract Value apply(Value arg) throws Error;
+  public abstract Value apply(VirtualMachine vm) throws Error;
 }

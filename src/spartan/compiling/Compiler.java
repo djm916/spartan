@@ -4,6 +4,7 @@ import spartan.runtime.*;
 import spartan.data.*;
 import spartan.parsing.SourceValue;
 import spartan.parsing.PositionMap;
+import spartan.Position;
 import spartan.errors.CompileError;
 
 public class Compiler
@@ -37,31 +38,91 @@ public class Compiler
       return new LoadLocal(index.depth, index.offset, next);
   }
   
-  private void checkDefine(List list) throws CompileError
-  {
-    if (list.length() != 3)
-      throw new CompileError("define form requires 2 arguments", positionMap.get(list));
-    if (list.rest.first.type() != Type.Symbol)
-      throw new CompileError("symbol expected", positionMap.get(list.rest.first));
-  }
-  
   private Inst compileDefine(List list, Scope scope, Inst next) throws CompileError
   {
-    checkDefine(list);
+    if (list.length() != 3 || list.rest.first.type() != Type.Symbol)
+      throw new CompileError("malformed expression", positionMap.get(list));
+    
     Symbol symb = (Symbol)list.rest.first;
     Value init = list.rest.rest.first;
+    
     return compile(init, scope,
                    new StoreGlobal(symb, next));
   }
-    
+  
   private Inst compileIf(List list, Scope scope, Inst next) throws CompileError
   {
-    return null;
+    if (list.length() != 4)
+      throw new CompileError("malformed expression", positionMap.get(list));
+    
+    Value cond = list.rest.first;
+    Value trueBranch = list.rest.rest.first;
+    Value falseBranch = list.rest.rest.rest.first;
+    
+    return compile(cond, scope,
+                   new Branch(positionMap.get(list),
+                              compile(trueBranch, scope, next),
+                              compile(falseBranch, scope, next)));
   }
+  
+  // (let ((symb init) ...) body)
   
   private Inst compileLet(List list, Scope scope, Inst next) throws CompileError
   {
-    return null;
+    if (list.length() < 3 || list.rest.first.type() != Type.List)
+      throw new CompileError("malformed expression", positionMap.get(list));
+    
+    List bindings = (List)list.rest.first;
+    List body = list.rest.rest;
+
+    checkBindings(bindings, positionMap.get(list));
+    
+    return new PushLocal(bindings.length(),
+                         compileLetBindings(bindings, 0, scope,
+                         compileSequence(body, extendScope(bindings, scope),
+                         new PopLocal(next))));
+  }
+  
+  private void checkBindings(List bindings, Position position) throws CompileError
+  {
+    for (; bindings != List.Empty; bindings = bindings.rest) {
+      if (bindings.first.type() != Type.List)
+        throw new CompileError("malformed expression", position);
+      List binding = (List)bindings.first;
+      if (binding.length() != 2 || binding.first.type() != Type.Symbol)
+        throw new CompileError("malformed expression", position);
+    }
+  }
+  
+  private Scope extendScope(List bindings, Scope parent) throws CompileError
+  {
+    Scope scope = new Scope(parent);
+    for (; bindings != List.Empty; bindings = bindings.rest) {
+      List binding = (List)bindings.first;
+      Symbol symb = (Symbol)binding.first;
+      if (!scope.bind(symb))
+        throw new CompileError("multiple definition of " + symb.repr(), positionMap.get(symb));
+    }
+    return scope;
+  }
+  
+  private Inst compileLetBindings(List bindings, int offset, Scope scope, Inst next) throws CompileError
+  {
+    if (bindings == List.Empty)
+      return next;
+    else
+      return compile(((List)bindings.first).rest.first, scope,
+             new StoreLocal(0, offset,
+             compileLetBindings(bindings.rest, offset + 1, scope, next)));
+  }
+  
+  private Inst compileSequence(List list, Scope scope, Inst next) throws CompileError
+  {
+    if (list == List.Empty)
+      return next;
+    else
+      return compile(list.first, scope,
+             compileSequence(list.rest, scope, next));
   }
   
   private Inst compileLetStar(List list, Scope scope, Inst next) throws CompileError

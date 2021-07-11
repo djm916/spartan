@@ -5,16 +5,18 @@ import spartan.data.Value;
 public class StoreLocal extends Inst
 {
   private final int depth;
+  private final int offset;
   
-  public StoreLocal(int depth, Inst next)
+  public StoreLocal(int depth, int offset, Inst next)
   {
     super(next);
     this.depth = depth;
+    this.offset = offset;
   }
   
   public void exec(VirtualMachine vm)
   {
-    vm.locals.store(vm.result, depth);
+    vm.locals.store(vm.result, depth, offset);
     vm.control = next;
   }
 }

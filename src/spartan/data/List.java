@@ -5,30 +5,6 @@ import spartan.errors.TypeMismatch;
 
 public class List extends Value
 {
-  /*
-  public static class Builder
-  {
-    private List head;
-    private List tail;
-    
-    public void append(Value v)
-    {
-      if (head == null) {
-        head = tail = new List(v, List.Empty);
-      }
-      else {
-        tail.rest = new List(v, List.Empty);
-        tail = tail.rest;
-      }
-    }
-    
-    public List build()
-    {
-      return head;
-    }
-  }
-  */
-  
   public static final List Empty = new List(null, null);
   
   public Type type()
@@ -48,16 +24,6 @@ public class List extends Value
   {
     this.first = first;
     this.rest = rest;
-  }
-  
-  public Value first()
-  {
-    return first;
-  }
-  
-  public Value rest()
-  {
-    return rest;
   }
   
   public int length()

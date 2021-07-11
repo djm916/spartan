@@ -190,6 +190,12 @@ public class Reader
     }
     
     Symbol symbol = Symbol.get(text.toString());
+    
+    if (Symbol.get("true") == symbol)
+      return Bool.True;
+    if (Symbol.get("false") == symbol)
+      return Bool.False;
+    
     positionMap.put(symbol, savePosition);
     return symbol;
   }
