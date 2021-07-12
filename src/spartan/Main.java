@@ -18,14 +18,19 @@ import java.io.FileNotFoundException;
 
 public class Main
 {
-  private static final String USAGE = 
-    "Usage: java -jar Spartan.jar";
-  
-  private static final GlobalEnv globals = new GlobalEnv();
-  
+  private static final GlobalEnv globals = new GlobalEnv();  
+  private static final String IntroMessage =
+    "Welcome to the Spartan interpreter!\n" +
+    "Enter expressions to be evaluated.\n" +
+    "Enter Control-D (on Linux) or Control-Z (on Windows) to exit.";
+
   static
   {
     globals.bind(Symbol.get("+"), Builtins.Add);
+    globals.bind(Symbol.get("-"), Builtins.Sub);
+    globals.bind(Symbol.get("*"), Builtins.Mul);
+    globals.bind(Symbol.get("/"), Builtins.Div);
+    globals.bind(Symbol.get("="), Builtins.Eq);
   }
   
   public static void main(String[] args) throws IOException
@@ -34,6 +39,7 @@ public class Main
     Compiler compiler = new Compiler();
     VirtualMachine vm = new VirtualMachine(globals);
     
+    System.out.println(IntroMessage);
     do {
       System.out.print(">");
       try {

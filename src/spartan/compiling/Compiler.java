@@ -27,6 +27,13 @@ public class Compiler
     return new LoadConst(atom, next);
   }
   
+  private Inst compileQuote(List list, Inst next) throws CompileError
+  {
+    if (list.length() != 2)
+      throw new CompileError("malformed expression", positionMap.get(list));
+    return new LoadConst(list.rest.first, next);
+  }
+  
   private Inst compileSymbol(Symbol symb, Scope scope, Inst next) throws CompileError
   {
     DeBruijnIndex index = null;
@@ -236,6 +243,8 @@ public class Compiler
       return compileDefine(list, scope, next);
     else if (list.first == Symbol.get("fun"))
       return compileFun(list, scope, next);
+    else if (list.first == Symbol.get("quote"))
+      return compileQuote(list, next);
     else
       return compileApply(list, scope, next);
   }
