@@ -139,9 +139,23 @@ public class Compiler
 
   private Inst compileLetRec(List list, Scope scope, Inst next) throws CompileError
   {
-    return null;
-  }
+    if (list.length() < 3 || list.rest.first.type() != Type.List)
+      throw new CompileError("malformed expression", positionMap.get(list));
     
+    List bindings = (List)list.rest.first;
+    List body = list.rest.rest;
+
+    if (!checkBindings(bindings))
+      throw new CompileError("malformed expression", positionMap.get(list));
+    
+    Scope extendedScope = extendLetScope(bindings, scope);
+    
+    return new PushLocal(bindings.length(),
+           compileLetBindings(bindings, 0, extendedScope,
+           compileSequence(body, extendedScope,
+           new PopLocal(next))));
+  }
+  
   // (f a1 a2 ... aN)
   // push-frame
   // <<aN>>

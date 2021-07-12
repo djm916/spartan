@@ -3,7 +3,6 @@ package spartan;
 import spartan.errors.SyntaxError;
 import spartan.errors.CompileError;
 import spartan.errors.RuntimeError;
-import spartan.errors.Error;
 import spartan.parsing.Reader;
 import spartan.parsing.SourceValue;
 import spartan.compiling.Compiler;
@@ -14,7 +13,6 @@ import spartan.data.Value;
 import spartan.data.Symbol;
 import spartan.builtins.Builtins;
 import java.io.IOException;
-import java.io.FileNotFoundException;
 
 public class Main
 {

@@ -1,8 +1,6 @@
 
-let rec fact: fun n p => 
-                if = 0 n then p
-                else fact (- 1 n) (* n p)
-                end
-              end
-in fact 6 1
-end
+(letrec ((fact (fun (n)
+                 (if (= 0 n)
+                   1
+                   (* n (fact (- n 1)))))))
+  (fact 6))
