@@ -43,7 +43,7 @@ public class Apply extends Inst
         break;
       }
       default:
-        throw new RuntimeError("attempted application of non-function type", position);
+        throw new RuntimeError("function required", position);
     }
   }
 }
