@@ -1,6 +1,5 @@
 package spartan;
 
-
 import spartan.errors.SyntaxError;
 import spartan.errors.CompileError;
 import spartan.errors.RuntimeError;
@@ -10,7 +9,10 @@ import spartan.parsing.SourceValue;
 import spartan.compiling.Compiler;
 import spartan.runtime.Inst;
 import spartan.runtime.VirtualMachine;
+import spartan.runtime.GlobalEnv;
 import spartan.data.Value;
+import spartan.data.Symbol;
+import spartan.builtins.Builtins;
 import java.io.IOException;
 import java.io.FileNotFoundException;
 
@@ -19,11 +21,18 @@ public class Main
   private static final String USAGE = 
     "Usage: java -jar Spartan.jar";
   
+  private static final GlobalEnv globals = new GlobalEnv();
+  
+  static
+  {
+    globals.bind(Symbol.get("+"), Builtins.Add);
+  }
+  
   public static void main(String[] args) throws IOException
   {
     Reader reader = Reader.readStdin();
     Compiler compiler = new Compiler();
-    VirtualMachine vm = new VirtualMachine();
+    VirtualMachine vm = new VirtualMachine(globals);
     
     do {
       System.out.print(">");

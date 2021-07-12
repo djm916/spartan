@@ -13,8 +13,13 @@ public class VirtualMachine
   public Deque<Value> args = new ArrayDeque<Value>();
   public Inst control;
   public LocalEnv locals;
-  public GlobalEnv globals = new GlobalEnv();
+  public GlobalEnv globals;
   public Frame frame;
+  
+  public VirtualMachine(GlobalEnv globals)
+  {
+    this.globals = globals;
+  }
   
   public Value exec(Inst code) throws RuntimeError
   {

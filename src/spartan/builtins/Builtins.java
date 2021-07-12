@@ -25,7 +25,7 @@ public final class Builtins
     throw new TypeMismatch();
   }
   
-  public static final PrimFun Add = new PrimFun() {
+  public static final PrimFun Add = new PrimFun(2) {
     public Value apply(VirtualMachine vm) throws TypeMismatch {
       Value x = vm.args.pop();
       Value y = vm.args.pop();
@@ -44,7 +44,7 @@ public final class Builtins
     throw new TypeMismatch();
   }
   
-  public static final PrimFun Sub = new PrimFun() {
+  public static final PrimFun Sub = new PrimFun(2) {
     public Value apply(VirtualMachine vm) throws TypeMismatch {
       Value x = vm.args.pop();
       Value y = vm.args.pop();
@@ -63,7 +63,7 @@ public final class Builtins
     throw new TypeMismatch();
   }
     
-  public static final PrimFun Mul = new PrimFun() {
+  public static final PrimFun Mul = new PrimFun(2) {
     public Value apply(VirtualMachine vm) throws TypeMismatch {
       Value x = vm.args.pop();
       Value y = vm.args.pop();
@@ -82,7 +82,7 @@ public final class Builtins
     throw new TypeMismatch();
   }
   
-  public static final PrimFun Div = new PrimFun() {
+  public static final PrimFun Div = new PrimFun(2) {
     public Value apply(VirtualMachine vm) throws TypeMismatch {
       Value x = vm.args.pop();
       Value y = vm.args.pop();
@@ -97,7 +97,7 @@ public final class Builtins
     throw new TypeMismatch();
   }
   
-  public static final PrimFun Mod = new PrimFun() {
+  public static final PrimFun Mod = new PrimFun(2) {
     public Value apply(VirtualMachine vm) throws TypeMismatch {
       Value x = vm.args.pop();
       Value y = vm.args.pop();
@@ -114,7 +114,7 @@ public final class Builtins
     throw new TypeMismatch();
   }
   
-  public static final PrimFun Neg = new PrimFun() {
+  public static final PrimFun Neg = new PrimFun(1) {
     public Value apply(VirtualMachine vm) throws TypeMismatch {
       Value x = vm.args.pop();
       return neg(x);
@@ -128,7 +128,7 @@ public final class Builtins
     throw new TypeMismatch();
   }
   
-  public static final PrimFun Not = new PrimFun() {
+  public static final PrimFun Not = new PrimFun(1) {
     public Value apply(VirtualMachine vm) throws TypeMismatch {
       Value x = vm.args.pop();
       return not(x);
@@ -152,7 +152,7 @@ public final class Builtins
     throw new TypeMismatch();
   }
   
-  public static final PrimFun Eq = new PrimFun() {
+  public static final PrimFun Eq = new PrimFun(2) {
     public Value apply(VirtualMachine vm) throws TypeMismatch {
       Value x = vm.args.pop();
       Value y = vm.args.pop();
@@ -165,7 +165,7 @@ public final class Builtins
     return !eq(x, y);
   }
   
-  public static final PrimFun Ne = new PrimFun() {
+  public static final PrimFun Ne = new PrimFun(2) {
     public Value apply(VirtualMachine vm) throws TypeMismatch {
       Value x = vm.args.pop();
       Value y = vm.args.pop();
@@ -185,7 +185,7 @@ public final class Builtins
     throw new TypeMismatch();
   }
   
-  public static final PrimFun Lt = new PrimFun() {
+  public static final PrimFun Lt = new PrimFun(2) {
     public Value apply(VirtualMachine vm) throws TypeMismatch {
       Value x = vm.args.pop();
       Value y = vm.args.pop();
@@ -205,7 +205,7 @@ public final class Builtins
     throw new TypeMismatch();
   }
   
-  public static final PrimFun Le = new PrimFun() {
+  public static final PrimFun Le = new PrimFun(2) {
     public Value apply(VirtualMachine vm) throws TypeMismatch {
       Value x = vm.args.pop();
       Value y = vm.args.pop();
@@ -225,7 +225,7 @@ public final class Builtins
     throw new TypeMismatch();
   }
   
-  public static final PrimFun Gt = new PrimFun() {
+  public static final PrimFun Gt = new PrimFun(2) {
     public Value apply(VirtualMachine vm) throws TypeMismatch {
       Value x = vm.args.pop();
       Value y = vm.args.pop();
@@ -245,7 +245,7 @@ public final class Builtins
     throw new TypeMismatch();
   }
   
-  public static final PrimFun Ge = new PrimFun() {
+  public static final PrimFun Ge = new PrimFun(2) {
     public Value apply(VirtualMachine vm) throws TypeMismatch {
       Value x = vm.args.pop();
       Value y = vm.args.pop();

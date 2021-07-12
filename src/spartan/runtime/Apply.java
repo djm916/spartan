@@ -9,11 +9,13 @@ import spartan.errors.Error;
 
 public class Apply extends Inst
 {
+  private final int numArgs;
   private final Position position;
   
-  public Apply(Position position)
+  public Apply(int numArgs, Position position)
   {
     super(null);
+    this.numArgs = numArgs;
     this.position = position;
   }
   
@@ -23,8 +25,11 @@ public class Apply extends Inst
     
     switch (fun.type()) {
       case PrimFun: {
+        final PrimFun primFun = (PrimFun)fun;
+        if (numArgs != primFun.numArgs)
+          throw new RuntimeError("incorrect number of arguments in call", position);
         try {
-          vm.result = ((PrimFun)fun).apply(vm);
+          vm.result = primFun.apply(vm);
         }
         catch (Error err) {
           throw new RuntimeError(err.getMessage(), position);
@@ -37,13 +42,15 @@ public class Apply extends Inst
         break;
       }
       case Closure: {
-        final Closure clo = (Closure)fun;
-        vm.locals = clo.locals;
-        vm.control = clo.code;
+        final Closure closure = (Closure)fun;
+        if (numArgs != closure.numArgs)
+          throw new RuntimeError("incorrect number of arguments in call", position);
+        vm.locals = closure.locals;
+        vm.control = closure.code;
         break;
       }
       default:
-        throw new RuntimeError("function required", position);
+        throw new RuntimeError("attempt to call non-function", position);
     }
   }
 }

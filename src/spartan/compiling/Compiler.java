@@ -150,7 +150,7 @@ public class Compiler
   {
     return new PushFrame(next,
            compilePushArgs(list, scope,
-           new Apply(positionMap.get(list))));
+           new Apply(list.length() - 1, positionMap.get(list))));
   }
   
   private Inst compilePushArgs(List args, Scope scope, Inst next) throws CompileError
@@ -184,20 +184,19 @@ public class Compiler
     if (!checkParams(params))
       throw new CompileError("malformed expression", positionMap.get(params));
     
-    return new MakeClosure(
-             new PushLocal(params.length(),
-             compilePopArgs(params, 0,
-             compileSequence(body, extendFunScope(params, scope),
-             new PopFrame()))),
-           next);
+    Inst code = new PushLocal(params.length(),
+                compilePopArgs(params, 0,
+                compileSequence(body, extendFunScope(params, scope),
+                new PopFrame())));
+    
+    return new MakeClosure(code, params.length(), next);
   }
   
   private boolean checkParams(List params)
   {
-    for (; params != List.Empty; params = params.rest) {
+    for (; params != List.Empty; params = params.rest)
       if (params.first.type() != Type.Symbol)
         return false;
-    }
     return true;
   }
   
@@ -223,51 +222,37 @@ public class Compiler
              next)));
   }
   
-  private Inst compileList(List list, Scope scope, Inst next)
-  throws CompileError
+  private Inst compileList(List list, Scope scope, Inst next) throws CompileError
   {
-    if (list.first.type() == Type.Symbol) {
-      if (list.first == Symbol.get("if")) {
-        return compileIf(list, scope, next);
-      }
-      else if (list.first == Symbol.get("let")) {
-        return compileLet(list, scope, next);
-      }
-      else if (list.first == Symbol.get("let*")) {
-        return compileLetStar(list, scope, next);
-      }
-      else if (list.first == Symbol.get("letrec")) {
-        return compileLetRec(list, scope, next);
-      }
-      else if (list.first == Symbol.get("define")) {
-        return compileDefine(list, scope, next);
-      }
-      else if (list.first == Symbol.get("fun")) {
-        return compileFun(list, scope, next);
-      }
-    }
-    return compileApply(list, scope, next);
+    if (list.first == Symbol.get("if"))
+      return compileIf(list, scope, next);
+    else if (list.first == Symbol.get("let"))
+      return compileLet(list, scope, next);
+    else if (list.first == Symbol.get("let*"))
+      return compileLetStar(list, scope, next);
+    else if (list.first == Symbol.get("letrec"))
+      return compileLetRec(list, scope, next);
+    else if (list.first == Symbol.get("define"))
+      return compileDefine(list, scope, next);
+    else if (list.first == Symbol.get("fun"))
+      return compileFun(list, scope, next);
+    else
+      return compileApply(list, scope, next);
   }
   
-  public Inst compile(Value sexp, Scope scope, Inst next) throws CompileError
+  private Inst compile(Value sexp, Scope scope, Inst next) throws CompileError
   {
-    if (isAtom(sexp)) {
+    if (isAtom(sexp))
       return compileAtom(sexp, next);
-    }
-    else if (sexp.type() == Type.Symbol) {
+    else if (sexp.type() == Type.Symbol)
       return compileSymbol((Symbol)sexp, scope, next);
-    }
-    else if (sexp.type() == Type.List) {
+    else // sexp.type() == Type.List
       return compileList((List)sexp, scope, next);
-    }
-    else {
-      throw new CompileError("unrecognized expression " + sexp.repr(), positionMap.get(sexp));
-    }
   }
   
   public Inst compile(SourceValue sourceValue) throws CompileError
   {
-    this.positionMap = sourceValue.positionMap;
+    positionMap = sourceValue.positionMap;
     return compile(sourceValue.value, null, null);
   }
 }

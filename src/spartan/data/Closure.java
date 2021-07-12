@@ -6,11 +6,13 @@ import spartan.runtime.LocalEnv;
 public class Closure extends Value
 {
   public final Inst code;
+  public final int numArgs;
   public final LocalEnv locals;
   
-  public Closure(Inst code, LocalEnv locals)
+  public Closure(Inst code, int numArgs, LocalEnv locals)
   {
     this.code = code;
+    this.numArgs = numArgs;
     this.locals = locals;
   }
   

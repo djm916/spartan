@@ -5,6 +5,13 @@ import spartan.runtime.VirtualMachine;
 
 public abstract class PrimFun extends Value
 {
+  public final int numArgs;
+  
+  protected PrimFun(int numArgs)
+  {
+    this.numArgs = numArgs;
+  }
+  
   public Type type()
   {
     return Type.PrimFun;
