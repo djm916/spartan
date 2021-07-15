@@ -11,7 +11,7 @@ public class Compiler
 {
   private PositionMap positionMap;
   
-  private static boolean isAtom(Value sexp)
+  private static boolean isSelfEval(Value sexp)
   {
     return sexp.type() == Type.Bool
         || sexp.type() == Type.Int
@@ -22,9 +22,9 @@ public class Compiler
         || sexp == List.Empty;
   }
 
-  private Inst compileAtom(Value atom, Inst next)
+  private Inst compileSelfEval(Value sexp, Inst next)
   {
-    return new LoadConst(atom, next);
+    return new LoadConst(sexp, next);
   }
   
   private Inst compileQuote(List list, Inst next) throws CompileError
@@ -41,8 +41,10 @@ public class Compiler
       index = scope.lookup(symb);
     if (index == null)
       return new LoadGlobal(positionMap.get(symb), symb, next);
-    else
+    else {
+      System.out.println("Lookup to " + symb.repr() + " at (" + index.depth + " " + index.offset + ")");
       return new LoadLocal(index.depth, index.offset, next);
+    }
   }
   
   private Inst compileDefine(List list, Scope scope, Inst next) throws CompileError
@@ -53,8 +55,16 @@ public class Compiler
     Symbol symb = (Symbol)list.rest.first;
     Value init = list.rest.rest.first;
     
-    return compile(init, scope,
-           new StoreGlobal(symb, next));
+    return compile(init, scope, new StoreGlobal(symb, next));
+  }
+  
+  private Inst compileSequence(List list, Scope scope, Inst next) throws CompileError
+  {
+    if (list == List.Empty)
+      return next;
+    else
+      return compile(list.first, scope,
+             compileSequence(list.rest, scope, next));
   }
   
   private Inst compileIf(List list, Scope scope, Inst next) throws CompileError
@@ -123,20 +133,46 @@ public class Compiler
              compileLetBindings(bindings.rest, offset + 1, scope, next)));
   }
   
-  private Inst compileSequence(List list, Scope scope, Inst next) throws CompileError
-  {
-    if (list == List.Empty)
-      return next;
-    else
-      return compile(list.first, scope,
-             compileSequence(list.rest, scope, next));
-  }
-  
   private Inst compileLetStar(List list, Scope scope, Inst next) throws CompileError
   {
-    return null;
+    if (list.length() < 3 || list.rest.first.type() != Type.List)
+      throw new CompileError("malformed expression", positionMap.get(list));
+    
+    List bindings = (List)list.rest.first;
+    List body = list.rest.rest;
+
+    if (!checkBindings(bindings))
+      throw new CompileError("malformed expression", positionMap.get(list));
+    
+    Scope extendedScope = new Scope(scope);
+    
+    return new PushLocal(bindings.length(),
+           compileLetStarBindings(bindings, 0, extendedScope,
+           compileSequence(body, extendedScope,
+           new PopLocal(next))));
   }
 
+  private Inst compileLetStarBindings(List bindings, int offset, Scope scope, Inst next) throws CompileError
+  {
+    if (bindings == List.Empty)
+      return next;
+    else {
+      List binding = (List)bindings.first;
+      Symbol symb = (Symbol)binding.first;
+      Value init = binding.rest.first;
+      return compile(init, scope,
+             new StoreLocal(0, offset,
+             compileLetStarBindings(bindings.rest, offset + 1, bindSymbol(symb, scope), next)));
+    }
+  }
+  
+  private Scope bindSymbol(Symbol symb, Scope scope) throws CompileError
+  {
+    if (!scope.bind(symb))
+        throw new CompileError("multiple definition of " + symb.repr(), positionMap.get(symb));
+    return scope;
+  }
+  
   private Inst compileLetRec(List list, Scope scope, Inst next) throws CompileError
   {
     if (list.length() < 3 || list.rest.first.type() != Type.List)
@@ -265,8 +301,8 @@ public class Compiler
   
   private Inst compile(Value sexp, Scope scope, Inst next) throws CompileError
   {
-    if (isAtom(sexp))
-      return compileAtom(sexp, next);
+    if (isSelfEval(sexp))
+      return compileSelfEval(sexp, next);
     else if (sexp.type() == Type.Symbol)
       return compileSymbol((Symbol)sexp, scope, next);
     else // sexp.type() == Type.List
