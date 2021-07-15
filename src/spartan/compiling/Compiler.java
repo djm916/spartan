@@ -37,23 +37,23 @@ public class Compiler
   private Inst compileSymbol(Symbol symb, Scope scope, Inst next) throws CompileError
   {
     DeBruijnIndex index = null;
+    
     if (scope != null)
       index = scope.lookup(symb);
+    
     if (index == null)
       return new LoadGlobal(positionMap.get(symb), symb, next);
-    else {
-      System.out.println("Lookup to " + symb.repr() + " at (" + index.depth + " " + index.offset + ")");
+    else
       return new LoadLocal(index.depth, index.offset, next);
-    }
   }
   
   private Inst compileDefine(List list, Scope scope, Inst next) throws CompileError
   {
     if (list.length() != 3 || list.rest.first.type() != Type.Symbol)
-      throw new CompileError("malformed expression", positionMap.get(list));
+      throw new CompileError("malformed expression", positionMap.get(list));    
     
     Symbol symb = (Symbol)list.rest.first;
-    Value init = list.rest.rest.first;
+    Value init = list.rest.rest.first;    
     
     return compile(init, scope, new StoreGlobal(symb, next));
   }
@@ -63,8 +63,7 @@ public class Compiler
     if (list == List.Empty)
       return next;
     else
-      return compile(list.first, scope,
-             compileSequence(list.rest, scope, next));
+      return compile(list.first, scope, compileSequence(list.rest, scope, next));
   }
   
   private Inst compileIf(List list, Scope scope, Inst next) throws CompileError
@@ -101,6 +100,42 @@ public class Compiler
            new PopLocal(next)))));
   }
   
+  private Inst compileLetRec(List list, Scope scope, Inst next) throws CompileError
+  {
+    if (list.length() < 3 || list.rest.first.type() != Type.List)
+      throw new CompileError("malformed expression", positionMap.get(list));
+    
+    List bindings = (List)list.rest.first;
+    int numBindings = bindings.length();
+    List body = list.rest.rest;
+
+    if (!checkBindings(bindings))
+      throw new CompileError("malformed expression", positionMap.get(list));
+    
+    Scope extendedScope = extendLetScope(bindings, scope);
+    
+    return new PushLocal(numBindings,
+           evalInitializers(bindings, extendedScope,
+           performBindings(0, numBindings,
+           compileSequence(body, extendedScope,
+           new PopLocal(next)))));
+  }
+  
+  private Inst compileLetStar(List list, Scope scope, Inst next) throws CompileError
+  {
+    if (list.length() < 3 || list.rest.first.type() != Type.List)
+      throw new CompileError("malformed expression", positionMap.get(list));
+    
+    List bindings = (List)list.rest.first;
+    List body = list.rest.rest;
+
+    List xform = transformLetStar(bindings, body);
+    
+    System.out.println("let* transform = " + xform.repr());
+    
+    return compile(xform, scope, next);
+  }
+  
   private boolean checkBindings(List bindings)
   {
     for (; bindings != List.Empty; bindings = bindings.rest) {
@@ -125,16 +160,6 @@ public class Compiler
     return scope;
   }
   
-  private Inst performBindings(int offset, int numBindings, Inst next) throws CompileError
-  {
-    if (offset >= numBindings)
-      return next;
-    else
-      return new PopArg(
-             new StoreLocal(0, offset,
-             performBindings(offset + 1, numBindings, next)));
-  }
-  
   private Inst evalInitializers(List bindings, Scope scope, Inst next) throws CompileError
   {
     if (bindings == List.Empty)
@@ -147,58 +172,26 @@ public class Compiler
     }
   }
   
-  private Inst compileLetStar(List list, Scope scope, Inst next) throws CompileError
+  private Inst performBindings(int offset, int numBindings, Inst next) throws CompileError
   {
-    if (list.length() < 3 || list.rest.first.type() != Type.List)
-      throw new CompileError("malformed expression", positionMap.get(list));
-    
-    List bindings = (List)list.rest.first;
-    List body = list.rest.rest;
-
-    if (!checkBindings(bindings))
-      throw new CompileError("malformed expression", positionMap.get(list));
-    
-    Scope extendedScope = new Scope(scope);
-    
-    return new PushLocal(bindings.length(),
-           compileLetStarBindings(bindings, 0, extendedScope,
-           compileSequence(body, extendedScope,
-           new PopLocal(next))));
+    if (offset >= numBindings)
+      return next;
+    else
+      return new PopArg(
+             new StoreLocal(0, offset,
+             performBindings(offset + 1, numBindings, next)));
   }
-
-  private Inst compileLetStarBindings(List bindings, int offset, Scope scope, Inst next) throws CompileError
+  
+  private List transformLetStar(List bindings, List body)
   {
     if (bindings == List.Empty)
-      return next;
-    else {
-      List binding = (List)bindings.first;
-      Symbol symb = (Symbol)binding.first;
-      Value init = binding.rest.first;
-      return compile(init, scope,
-             new StoreLocal(0, offset,
-             compileLetStarBindings(bindings.rest, offset + 1, bindSymbol(symb, scope), next)));
-    }
-  }
-    
-  private Inst compileLetRec(List list, Scope scope, Inst next) throws CompileError
-  {
-    if (list.length() < 3 || list.rest.first.type() != Type.List)
-      throw new CompileError("malformed expression", positionMap.get(list));
-    
-    List bindings = (List)list.rest.first;
-    int numBindings = bindings.length();
-    List body = list.rest.rest;
-
-    if (!checkBindings(bindings))
-      throw new CompileError("malformed expression", positionMap.get(list));
-    
-    Scope extendedScope = extendLetScope(bindings, scope);
-    
-    return new PushLocal(numBindings,
-           evalInitializers(bindings, extendedScope,
-           performBindings(0, numBindings,
-           compileSequence(body, extendedScope,
-           new PopLocal(next)))));
+      return body;
+    else
+      return new List(Symbol.get("let"),
+             new List(new List(bindings.first, List.Empty),
+               bindings.rest == List.Empty
+                 ? body
+                 : new List(transformLetStar(bindings.rest, body), List.Empty)));
   }
   
   // (f a1 a2 ... aN)
@@ -245,17 +238,18 @@ public class Compiler
       throw new CompileError("malformed expression", positionMap.get(list));
     
     List params = (List)list.rest.first;
+    int numParams = params.length();
     List body = list.rest.rest;
     
     if (!checkParams(params))
       throw new CompileError("malformed expression", positionMap.get(params));
     
-    Inst code = new PushLocal(params.length(),
+    Inst code = new PushLocal(numParams,
                 compilePopArgs(params, 0,
                 compileSequence(body, extendFunScope(params, scope),
                 new PopFrame())));
     
-    return new MakeClosure(code, params.length(), next);
+    return new MakeClosure(code, numParams, next);
   }
   
   private boolean checkParams(List params)
