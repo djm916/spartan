@@ -185,13 +185,13 @@ public class Compiler
   private List transformLetStar(List bindings, List body)
   {
     if (bindings == List.Empty)
-      return body;
+      return new List(Symbol.get("let"), new List(List.Empty, body));
     else
       return new List(Symbol.get("let"),
              new List(new List(bindings.first, List.Empty),
-               bindings.rest == List.Empty
-                 ? body
-                 : new List(transformLetStar(bindings.rest, body), List.Empty)));
+             bindings.rest == List.Empty
+               ? body
+               : new List(transformLetStar(bindings.rest, body), List.Empty)));
   }
   
   // (f a1 a2 ... aN)
