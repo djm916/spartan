@@ -66,19 +66,35 @@ public class Compiler
       return compile(list.first, scope, compileSequence(list.rest, scope, next));
   }
   
+  // (if e1 e2)
+  //
+  // (if e1 e2 e3)
+  
   private Inst compileIf(List list, Scope scope, Inst next) throws CompileError
   {
-    if (list.length() != 4)
+    int length = list.length();
+    
+    if (length == 3) {
+      Value cond = list.rest.first;
+      Value trueBranch = list.rest.rest.first;
+      
+      return compile(cond, scope,
+             new Branch(positionMap.get(list),
+             compile(trueBranch, scope, next),
+             new LoadConst(Nil.Instance, next)));
+    }
+    else if (length == 4) {
+      Value cond = list.rest.first;
+      Value trueBranch = list.rest.rest.first;
+      Value falseBranch = list.rest.rest.rest.first;
+      
+      return compile(cond, scope,
+             new Branch(positionMap.get(list),
+             compile(trueBranch, scope, next),
+             compile(falseBranch, scope, next)));
+    }
+    else
       throw new CompileError("malformed expression", positionMap.get(list));
-    
-    Value cond = list.rest.first;
-    Value trueBranch = list.rest.rest.first;
-    Value falseBranch = list.rest.rest.rest.first;
-    
-    return compile(cond, scope,
-           new Branch(positionMap.get(list),
-           compile(trueBranch, scope, next),
-           compile(falseBranch, scope, next)));
   }
   
   private Inst compileLet(List list, Scope scope, Inst next) throws CompileError

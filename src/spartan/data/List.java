@@ -33,10 +33,10 @@ public class List extends Value
   
   private static int length(List list)
   {
-    if (list == List.Empty)
-      return 0;
-    else
-      return 1 + length(list.rest);
+    int length = 0;
+    for (; list != Empty; list = list.rest)
+      length += 1;
+    return length;
   }
   
   public boolean eq(List that) throws TypeMismatch
