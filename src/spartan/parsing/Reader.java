@@ -238,7 +238,13 @@ public class Reader
     positionMap.put(result, savePosition);
     return result;
   }
-  
+    
+  private Value readQuote() throws SyntaxError, IOException
+  {
+    skipSpace();
+    return new List(Symbol.get("quote"), new List(readValue(), List.Empty));
+  }
+    
   private Value readValue() throws SyntaxError, IOException
   {
     markTokenStart();
@@ -255,6 +261,8 @@ public class Reader
       return readSymbol();
     if (lastChar == '\"')
       return readText();
+    if (lastChar == '\'')
+      return readQuote();
 
     throw new SyntaxError("unrecognized character",
                           new Position(source, currentPos.line, currentPos.column));
