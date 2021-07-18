@@ -57,32 +57,32 @@ public class Compiler
     Symbol symb = (Symbol)list.rest.first;
     Value init = list.rest.rest.first;    
     
-    return compile(init, scope, new StoreGlobal(symb, next));
+    return compile(init, scope, false, new StoreGlobal(symb, next));
   }
   
-  private Inst compileSequence(List list, Scope scope, Inst next) throws CompileError
+  private Inst compileSequence(List list, Scope scope, boolean tc, Inst next) throws CompileError
   {
     if (list == List.Empty)
       return next;
     else
-      return compile(list.first, scope, compileSequence(list.rest, scope, next));
+      return compile(list.first, scope, (tc && list.rest == List.Empty), compileSequence(list.rest, scope, tc, next));
   }
   
   // (if e1 e2)
   //
   // (if e1 e2 e3)
   
-  private Inst compileIf(List list, Scope scope, Inst next) throws CompileError
+  private Inst compileIf(List list, Scope scope, boolean tc, Inst next) throws CompileError
   {
     int length = list.length();
     
     if (length == 3) {
       Value cond = list.rest.first;
       Value trueBranch = list.rest.rest.first;
-      
-      return compile(cond, scope,
+
+      return compile(cond, scope, false,
              new Branch(
-               compile(trueBranch, scope, next),
+               compile(trueBranch, scope, tc, next),
                new LoadConst(Nil.Instance, next)));
     }
     else if (length == 4) {
@@ -90,16 +90,16 @@ public class Compiler
       Value trueBranch = list.rest.rest.first;
       Value falseBranch = list.rest.rest.rest.first;
       
-      return compile(cond, scope,
+      return compile(cond, scope, false,
              new Branch(
-               compile(trueBranch, scope, next),
-               compile(falseBranch, scope, next)));
+               compile(trueBranch, scope, tc, next),
+               compile(falseBranch, scope, tc, next)));
     }
     else
       throw new CompileError("malformed expression", positionMap.get(list));
   }
   
-  private Inst compileLet(List list, Scope scope, Inst next) throws CompileError
+  private Inst compileLet(List list, Scope scope, boolean tc, Inst next) throws CompileError
   {
     if (list.length() < 3 || list.rest.first.type() != Type.List)
       throw new CompileError("malformed expression", positionMap.get(list));
@@ -114,11 +114,11 @@ public class Compiler
     return evalInitializers(bindings, scope,
            new PushLocal(numBindings,
            performBindings(0, numBindings,
-           compileSequence(body, extendLetScope(bindings, scope),
+           compileSequence(body, extendLetScope(bindings, scope), tc,
            new PopLocal(next)))));
   }
   
-  private Inst compileLetRec(List list, Scope scope, Inst next) throws CompileError
+  private Inst compileLetRec(List list, Scope scope, boolean tc, Inst next) throws CompileError
   {
     if (list.length() < 3 || list.rest.first.type() != Type.List)
       throw new CompileError("malformed expression", positionMap.get(list));
@@ -135,11 +135,11 @@ public class Compiler
     return new PushLocal(numBindings,
            evalInitializers(bindings, extendedScope,
            performBindings(0, numBindings,
-           compileSequence(body, extendedScope,
+           compileSequence(body, extendedScope, tc,
            new PopLocal(next)))));
   }
   
-  private Inst compileLetStar(List list, Scope scope, Inst next) throws CompileError
+  private Inst compileLetStar(List list, Scope scope, boolean tc, Inst next) throws CompileError
   {
     if (list.length() < 3 || list.rest.first.type() != Type.List)
       throw new CompileError("malformed expression", positionMap.get(list));
@@ -150,7 +150,7 @@ public class Compiler
 
     //System.out.println("let* transform = " + xform.repr());
     
-    return compile(xform, scope, next);
+    return compile(xform, scope, tc, next);
   }
   
   private boolean checkBindings(List bindings)
@@ -184,7 +184,7 @@ public class Compiler
     else {
       List binding = (List)bindings.first;
       return evalInitializers(bindings.rest, scope,
-             compile(binding.rest.first, scope,
+             compile(binding.rest.first, scope, false,
              new PushArg(next)));
     }
   }
@@ -222,37 +222,28 @@ public class Compiler
   // push-arg
   // apply
   
-  /*
-  private Inst compileApply(List list, Scope scope, Inst next) throws CompileError
+  private Inst compileApply(List list, Scope scope, boolean tc, Inst next) throws CompileError
   {
-    if (next instanceof PopFrame) {
-      System.out.println("detected tail call at " + positionMap.get(list));
+    int numArgs = list.length() - 1;
+    
+    if (tc) {
+      System.out.println("tail call at " + positionMap.get(list));
       return compilePushArgs(list, scope,
-             new Apply(list.length() - 1, positionMap.get(list)));
+             new Apply(numArgs, positionMap.get(list)));
     }
     else
       return new PushFrame(next,
              compilePushArgs(list, scope,
-             new Apply(list.length() - 1, positionMap.get(list))));
+             new Apply(numArgs, positionMap.get(list))));
   }
-  */
-  
-  
-  private Inst compileApply(List list, Scope scope, Inst next) throws CompileError
-  {
-    return new PushFrame(next,
-           compilePushArgs(list, scope,
-           new Apply(list.length() - 1, positionMap.get(list))));
-  }
-  
-  
+    
   private Inst compilePushArgs(List args, Scope scope, Inst next) throws CompileError
   {
     if (args == List.Empty)
       return next;
     else
       return compilePushArgs(args.rest, scope,
-             compile(args.first, scope,
+             compile(args.first, scope, false,
              new PushArg(next)));
   }
   
@@ -280,7 +271,7 @@ public class Compiler
     
     Inst code = new PushLocal(numParams,
                 compilePopArgs(params, 0,
-                compileSequence(body, extendFunScope(params, scope),
+                compileSequence(body, extendFunScope(params, scope), true,
                 new PopFrame())));
     
     return new MakeClosure(code, numParams, next);
@@ -331,7 +322,7 @@ public class Compiler
     if (list == List.Empty)
       return next;
     else
-      return compile(list.first, scope,
+      return compile(list.first, scope, false,
              new Branch(
                next,
                compileOrArgs(list.rest, scope, next)));
@@ -352,22 +343,22 @@ public class Compiler
     if (list == List.Empty)
       return next;
     else
-      return compile(list.first, scope,
+      return compile(list.first, scope, false,
              new Branch(
                compileAndArgs(list.rest, scope, next),
                next));
   }
   
-  private Inst compileList(List list, Scope scope, Inst next) throws CompileError
+  private Inst compileList(List list, Scope scope, boolean tc, Inst next) throws CompileError
   {
     if (list.first == Symbol.get("if"))
-      return compileIf(list, scope, next);
+      return compileIf(list, scope, tc, next);
     else if (list.first == Symbol.get("let"))
-      return compileLet(list, scope, next);
+      return compileLet(list, scope, tc, next);
     else if (list.first == Symbol.get("let*"))
-      return compileLetStar(list, scope, next);
+      return compileLetStar(list, scope, tc, next);
     else if (list.first == Symbol.get("letrec"))
-      return compileLetRec(list, scope, next);
+      return compileLetRec(list, scope, tc, next);
     else if (list.first == Symbol.get("define"))
       return compileDefine(list, scope, next);
     else if (list.first == Symbol.get("fun"))
@@ -379,22 +370,22 @@ public class Compiler
     else if (list.first == Symbol.get("and"))
       return compileAnd(list, scope, next);
     else
-      return compileApply(list, scope, next);
+      return compileApply(list, scope, tc, next);
   }
   
-  private Inst compile(Value sexp, Scope scope, Inst next) throws CompileError
+  private Inst compile(Value sexp, Scope scope, boolean tc, Inst next) throws CompileError
   {
     if (isSelfEval(sexp))
       return compileSelfEval(sexp, next);
     else if (sexp.type() == Type.Symbol)
       return compileSymbol((Symbol)sexp, scope, next);
     else // sexp.type() == Type.List
-      return compileList((List)sexp, scope, next);
+      return compileList((List)sexp, scope, tc, next);
   }
   
   public Inst compile(SourceValue sourceValue) throws CompileError
   {
     positionMap = sourceValue.positionMap;
-    return compile(sourceValue.value, null, null);
+    return compile(sourceValue.value, null, false, null);
   }
 }
