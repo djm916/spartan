@@ -222,12 +222,29 @@ public class Compiler
   // push-arg
   // apply
   
+  /*
+  private Inst compileApply(List list, Scope scope, Inst next) throws CompileError
+  {
+    if (next instanceof PopFrame) {
+      System.out.println("detected tail call at " + positionMap.get(list));
+      return compilePushArgs(list, scope,
+             new Apply(list.length() - 1, positionMap.get(list)));
+    }
+    else
+      return new PushFrame(next,
+             compilePushArgs(list, scope,
+             new Apply(list.length() - 1, positionMap.get(list))));
+  }
+  */
+  
+  
   private Inst compileApply(List list, Scope scope, Inst next) throws CompileError
   {
     return new PushFrame(next,
            compilePushArgs(list, scope,
            new Apply(list.length() - 1, positionMap.get(list))));
   }
+  
   
   private Inst compilePushArgs(List args, Scope scope, Inst next) throws CompileError
   {

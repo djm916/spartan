@@ -13,6 +13,7 @@ public class PushFrame extends Inst
   public void exec(VirtualMachine vm)
   {
     vm.frame = new Frame(vm.frame, vm.locals, returnTo);
+    ++vm.frameCount;
     vm.control = next;
   }
 }
