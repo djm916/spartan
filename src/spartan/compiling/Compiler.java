@@ -19,7 +19,8 @@ public class Compiler
         || sexp.type() == Type.Vector
         || sexp.type() == Type.Record
         || sexp.type() == Type.Text
-        || sexp == List.Empty;
+        || sexp == List.Empty
+        || sexp == Nil.Instance;
   }
 
   private Inst compileSelfEval(Value sexp, Inst next)
@@ -79,9 +80,9 @@ public class Compiler
       Value trueBranch = list.rest.rest.first;
       
       return compile(cond, scope,
-             new Branch(positionMap.get(list),
-             compile(trueBranch, scope, next),
-             new LoadConst(Nil.Instance, next)));
+             new Branch(
+               compile(trueBranch, scope, next),
+               new LoadConst(Nil.Instance, next)));
     }
     else if (length == 4) {
       Value cond = list.rest.first;
@@ -89,9 +90,9 @@ public class Compiler
       Value falseBranch = list.rest.rest.rest.first;
       
       return compile(cond, scope,
-             new Branch(positionMap.get(list),
-             compile(trueBranch, scope, next),
-             compile(falseBranch, scope, next)));
+             new Branch(
+               compile(trueBranch, scope, next),
+               compile(falseBranch, scope, next)));
     }
     else
       throw new CompileError("malformed expression", positionMap.get(list));
@@ -147,7 +148,7 @@ public class Compiler
 
     List xform = transformLetStar(bindings, body);
     
-    System.out.println("let* transform = " + xform.repr());
+    //System.out.println("let* transform = " + xform.repr());
     
     return compile(xform, scope, next);
   }
@@ -298,6 +299,27 @@ public class Compiler
              next)));
   }
   
+  // (or a b ...)
+  
+  private Inst compileOr(List list, Scope scope, Inst next) throws CompileError
+  {
+    if (list.length() < 2)
+      throw new CompileError("malformed expression", positionMap.get(list));
+    
+    return compileOrArgs(list.rest, scope, next);
+  }
+  
+  private Inst compileOrArgs(List list, Scope scope, Inst next) throws CompileError
+  {
+    if (list == List.Empty)
+      return next;
+    else
+      return compile(list.first, scope,
+             new Branch(
+               next,
+               compileOrArgs(list.rest, scope, next)));
+  }
+  
   private Inst compileList(List list, Scope scope, Inst next) throws CompileError
   {
     if (list.first == Symbol.get("if"))
@@ -314,6 +336,8 @@ public class Compiler
       return compileFun(list, scope, next);
     else if (list.first == Symbol.get("quote"))
       return compileQuote(list, next);
+    else if (list.first == Symbol.get("or"))
+      return compileOr(list, scope, next);
     else
       return compileApply(list, scope, next);
   }
