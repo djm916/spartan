@@ -32,6 +32,7 @@ public class Compiler
   {
     if (list.length() != 2)
       throw new CompileError("malformed expression", positionMap.get(list));
+    
     return new LoadConst(list.rest.first, next);
   }
   
@@ -145,9 +146,8 @@ public class Compiler
     
     List bindings = (List)list.rest.first;
     List body = list.rest.rest;
-
     List xform = transformLetStar(bindings, body);
-    
+
     //System.out.println("let* transform = " + xform.repr());
     
     return compile(xform, scope, next);
@@ -320,6 +320,27 @@ public class Compiler
                compileOrArgs(list.rest, scope, next)));
   }
   
+  // (and a b ...)
+  
+  private Inst compileAnd(List list, Scope scope, Inst next) throws CompileError
+  {
+    if (list.length() < 2)
+      throw new CompileError("malformed expression", positionMap.get(list));
+    
+    return compileAndArgs(list.rest, scope, next);
+  }
+  
+  private Inst compileAndArgs(List list, Scope scope, Inst next) throws CompileError
+  {
+    if (list == List.Empty)
+      return next;
+    else
+      return compile(list.first, scope,
+             new Branch(
+               compileAndArgs(list.rest, scope, next),
+               next));
+  }
+  
   private Inst compileList(List list, Scope scope, Inst next) throws CompileError
   {
     if (list.first == Symbol.get("if"))
@@ -338,6 +359,8 @@ public class Compiler
       return compileQuote(list, next);
     else if (list.first == Symbol.get("or"))
       return compileOr(list, scope, next);
+    else if (list.first == Symbol.get("and"))
+      return compileAnd(list, scope, next);
     else
       return compileApply(list, scope, next);
   }
