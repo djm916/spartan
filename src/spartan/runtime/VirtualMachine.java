@@ -16,6 +16,9 @@ public class VirtualMachine
   public GlobalEnv globals;
   public Frame frame;
   
+  // Metrics
+  public int frameCount = 0;
+  
   public VirtualMachine(GlobalEnv globals)
   {
     this.globals = globals;
@@ -23,6 +26,8 @@ public class VirtualMachine
   
   public Value exec(Inst code) throws RuntimeError
   {
+    frameCount = 0;
+    
     control = code;
     
     while (control != null)

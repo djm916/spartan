@@ -48,6 +48,7 @@ public class Main
         Inst code = compiler.compile(sourceValue);
         Value result = vm.exec(code);
         System.out.println("eval: " + result.repr());
+        System.out.println("frames: " + vm.frameCount);
       }
       catch (IOException ex) {
         System.out.println("error: " + ex.getMessage());
