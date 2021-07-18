@@ -8,11 +8,16 @@ import spartan.errors.NoSuchElement;
 
 public final class Builtins
 {
-  static Bool truth(boolean x)
+  public static Bool truth(boolean x)
   {
     return x ? Bool.True : Bool.False;
   }
   
+  public static boolean truth(Value x)
+  {
+    return !(x == Bool.False ||
+             x == Nil.Instance);
+  }
   
   public static Value add(Value x, Value y) throws TypeMismatch
   {

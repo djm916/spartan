@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.io.FileNotFoundException;
 import java.util.Deque;
 import java.util.ArrayDeque;
+import java.util.Map;
+import java.util.IdentityHashMap;
 import spartan.data.*;
 import spartan.Position;
 import spartan.errors.SyntaxError;
@@ -33,7 +35,15 @@ public class Reader
   private final MutablePosition currentPos = new MutablePosition(1, 0);
   private final String source;
   private PositionMap positionMap;
-
+  private static Map<Symbol, Value> keywordMap = new IdentityHashMap<>();
+  
+  static
+  {
+    keywordMap.put(Symbol.get("true"), Bool.True);
+    keywordMap.put(Symbol.get("false"), Bool.False);
+    keywordMap.put(Symbol.get("nil"), Nil.Instance);
+  }
+  
   private static boolean isDigit(int ch)
   {
     return ch >= '0' && ch <= '9';
@@ -191,10 +201,8 @@ public class Reader
     
     Symbol symbol = Symbol.get(text.toString());
     
-    if (Symbol.get("true") == symbol)
-      return Bool.True;
-    if (Symbol.get("false") == symbol)
-      return Bool.False;
+    if (keywordMap.containsKey(symbol))
+      return keywordMap.get(symbol);
     
     positionMap.put(symbol, savePosition);
     return symbol;
@@ -238,7 +246,13 @@ public class Reader
     positionMap.put(result, savePosition);
     return result;
   }
-  
+    
+  private Value readQuote() throws SyntaxError, IOException
+  {
+    skipSpace();
+    return new List(Symbol.get("quote"), new List(readValue(), List.Empty));
+  }
+    
   private Value readValue() throws SyntaxError, IOException
   {
     markTokenStart();
@@ -255,6 +269,8 @@ public class Reader
       return readSymbol();
     if (lastChar == '\"')
       return readText();
+    if (lastChar == '\'')
+      return readQuote();
 
     throw new SyntaxError("unrecognized character",
                           new Position(source, currentPos.line, currentPos.column));
