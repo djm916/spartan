@@ -49,7 +49,7 @@ public class Compiler
       return new LoadLocal(index.depth, index.offset, next);
   }
   
-  private Inst compileDefine(List list, Scope scope, Inst next) throws CompileError
+  private Inst compileDef(List list, Scope scope, Inst next) throws CompileError
   {
     if (list.length() != 3 || list.rest.first.type() != Type.Symbol)
       throw new CompileError("malformed expression", positionMap.get(list));    
@@ -59,6 +59,30 @@ public class Compiler
     
     return compile(init, scope, false,
            new StoreGlobal(symb, next));
+  }
+  
+  // (defun f (a b c ...) body...)
+  
+  private Inst compileDefun(List list, Scope scope, Inst next) throws CompileError
+  {
+    if (list.length() < 4 || list.rest.first.type() != Type.Symbol)
+      throw new CompileError("malformed expression", positionMap.get(list));
+    
+    return compile(transformDefun(list.rest), scope, false, next);
+  }
+  
+  // (defun f (a b c ...) body...)
+  //
+  // (def f (fun (a b c ...) body...))
+  
+  private List transformDefun(List list)
+  {
+    return new List(Symbol.get("def"),
+           new List(list.first,
+           new List(new List(Symbol.get("fun"),
+                    new List(list.rest.first,
+                    list.rest.rest)),
+           List.Empty)));
   }
   
   private Inst compileSequence(List list, Scope scope, boolean tc, Inst next) throws CompileError
@@ -426,8 +450,10 @@ public class Compiler
       return compileLetStar(list, scope, tc, next);
     else if (list.first == Symbol.get("letrec"))
       return compileLetRec(list, scope, tc, next);
-    else if (list.first == Symbol.get("define"))
-      return compileDefine(list, scope, next);
+    else if (list.first == Symbol.get("def"))
+      return compileDef(list, scope, next);
+    else if (list.first == Symbol.get("defun"))
+      return compileDefun(list, scope, next);
     else if (list.first == Symbol.get("fun"))
       return compileFun(list, scope, next);
     else if (list.first == Symbol.get("quote"))
