@@ -2,7 +2,6 @@ package spartan.parsing;
 
 import java.util.Map;
 import java.util.IdentityHashMap;
-import spartan.Position;
 import spartan.data.Value;
 
 public class PositionMap

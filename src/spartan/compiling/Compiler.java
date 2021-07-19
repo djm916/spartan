@@ -4,7 +4,6 @@ import spartan.runtime.*;
 import spartan.data.*;
 import spartan.parsing.SourceValue;
 import spartan.parsing.PositionMap;
-import spartan.Position;
 import spartan.errors.CompileError;
 
 public class Compiler

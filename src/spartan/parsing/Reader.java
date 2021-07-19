@@ -12,7 +12,6 @@ import java.util.ArrayDeque;
 import java.util.Map;
 import java.util.IdentityHashMap;
 import spartan.data.*;
-import spartan.Position;
 import spartan.errors.SyntaxError;
 
 class MutablePosition

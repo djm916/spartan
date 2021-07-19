@@ -1,6 +1,6 @@
 package spartan.errors;
 
-import spartan.Position;
+import spartan.parsing.Position;
 
 public class SourceError extends Exception
 {

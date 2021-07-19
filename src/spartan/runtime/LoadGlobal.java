@@ -1,7 +1,7 @@
 package spartan.runtime;
 
 import spartan.data.Symbol;
-import spartan.Position;
+import spartan.parsing.Position;
 import spartan.errors.UnboundVariable;
 
 public class LoadGlobal extends Inst

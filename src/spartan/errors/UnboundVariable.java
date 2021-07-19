@@ -1,6 +1,6 @@
 package spartan.errors;
 
-import spartan.Position;
+import spartan.parsing.Position;
 import spartan.data.Symbol;
 
 public class UnboundVariable extends RuntimeError

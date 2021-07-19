@@ -3,7 +3,7 @@ package spartan.runtime;
 import spartan.data.PrimFun;
 import spartan.data.Closure;
 import spartan.data.Value;
-import spartan.Position;
+import spartan.parsing.Position;
 import spartan.errors.RuntimeError;
 import spartan.errors.Error;
 
