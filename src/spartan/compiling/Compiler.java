@@ -439,6 +439,23 @@ public class Compiler
              next));
   }
   
+  // (while test body...)
+  
+  private Inst compileWhile(List list, Scope scope, boolean tc, Inst next) throws CompileError
+  {
+    if (list.length() < 3)
+      throw new CompileError("malformed expression", positionMap.get(list));
+    
+    Value test = list.rest.first;
+    List body = list.rest.rest;
+    Jump jump = new Jump();
+    Inst code = compile(test, scope, false,
+                new Branch(compileSequence(body, scope, tc, jump),
+                           new LoadConst(Nil.Instance, next)));
+    jump.setTarget(code);
+    return code;
+  }
+  
   private Inst compileList(List list, Scope scope, boolean tc, Inst next) throws CompileError
   {
     if (list.first == Symbol.get("if"))
@@ -467,6 +484,8 @@ public class Compiler
       return compileDo(list, scope, tc, next);
     else if (list.first == Symbol.get("set!"))
       return compileSet(list, scope, tc, next);
+    else if (list.first == Symbol.get("while"))
+      return compileWhile(list, scope, tc, next);
     else
       return compileApply(list, scope, tc, next);
   }

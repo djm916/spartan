@@ -6,13 +6,13 @@ public enum Type
   Bool("bool"),
   Int("int"),
   Real("real"),
+  Symbol("symbol"),
+  Text("text"),
   List("list"),
   Vector("vector"),
   Record("record"),
-  Symbol("symbol"),
   PrimFun("function"),
-  Closure("function"),
-  Text("text");
+  Closure("function");
   
   public final String name;
   

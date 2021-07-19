@@ -1,6 +1,5 @@
 package spartan.parsing;
 
-//import java.io.Reader;
 import java.io.PushbackReader;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -271,7 +270,7 @@ public class Reader
     if (lastChar == '\'')
       return readQuote();
 
-    throw new SyntaxError("unrecognized character",
+    throw new SyntaxError("unrecognized character " + (char)lastChar,
                           new Position(source, currentPos.line, currentPos.column));
   }
   

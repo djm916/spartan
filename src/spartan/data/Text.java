@@ -14,7 +14,7 @@ public class Text extends Value
   
   public String repr()
   {
-    return value;
+    return "\"" + value + "\"";
   }
   
   public boolean eq(Text that)
