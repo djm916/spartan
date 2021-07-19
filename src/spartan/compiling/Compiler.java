@@ -234,7 +234,7 @@ public class Compiler
     else
       return new PushFrame(next,
              compilePushArgs(list, scope,
-             new Apply(list.length() - 1, positionMap.get(list))));
+             new Apply(numArgs, positionMap.get(list))));
   }
 
   private Inst compilePushArgs(List args, Scope scope, Inst next) throws CompileError
@@ -309,43 +309,43 @@ public class Compiler
   
   // (or a b ...)
   
-  private Inst compileOr(List list, Scope scope, Inst next) throws CompileError
+  private Inst compileOr(List list, Scope scope, boolean tc, Inst next) throws CompileError
   {
     if (list.length() < 2)
       throw new CompileError("malformed expression", positionMap.get(list));
     
-    return compileOrArgs(list.rest, scope, next);
+    return compileOrArgs(list.rest, scope, tc, next);
   }
   
-  private Inst compileOrArgs(List list, Scope scope, Inst next) throws CompileError
+  private Inst compileOrArgs(List list, Scope scope, boolean tc, Inst next) throws CompileError
   {
     if (list == List.Empty)
       return next;
     else
-      return compile(list.first, scope, false,
+      return compile(list.first, scope, tc && (list.rest == List.Empty),
              new Branch(
                next,
-               compileOrArgs(list.rest, scope, next)));
+               compileOrArgs(list.rest, scope, tc, next)));
   }
   
   // (and a b ...)
   
-  private Inst compileAnd(List list, Scope scope, Inst next) throws CompileError
+  private Inst compileAnd(List list, Scope scope, boolean tc, Inst next) throws CompileError
   {
     if (list.length() < 2)
       throw new CompileError("malformed expression", positionMap.get(list));
     
-    return compileAndArgs(list.rest, scope, next);
+    return compileAndArgs(list.rest, scope, tc, next);
   }
   
-  private Inst compileAndArgs(List list, Scope scope, Inst next) throws CompileError
+  private Inst compileAndArgs(List list, Scope scope, boolean tc, Inst next) throws CompileError
   {
     if (list == List.Empty)
       return next;
     else
-      return compile(list.first, scope, false,
+      return compile(list.first, scope, tc && (list.rest == List.Empty),
              new Branch(
-               compileAndArgs(list.rest, scope, next),
+               compileAndArgs(list.rest, scope, tc, next),
                next));
   }
   
@@ -366,9 +366,9 @@ public class Compiler
     else if (list.first == Symbol.get("quote"))
       return compileQuote(list, next);
     else if (list.first == Symbol.get("or"))
-      return compileOr(list, scope, next);
+      return compileOr(list, scope, tc, next);
     else if (list.first == Symbol.get("and"))
-      return compileAnd(list, scope, next);
+      return compileAnd(list, scope, tc, next);
     else
       return compileApply(list, scope, tc, next);
   }
