@@ -57,7 +57,8 @@ public class Compiler
     Symbol symb = (Symbol)list.rest.first;
     Value init = list.rest.rest.first;    
     
-    return compile(init, scope, false, new StoreGlobal(symb, next));
+    return compile(init, scope, false,
+           new StoreGlobal(symb, next));
   }
   
   private Inst compileSequence(List list, Scope scope, boolean tc, Inst next) throws CompileError
@@ -390,6 +391,31 @@ public class Compiler
     return compileSequence(list.rest, scope, tc, next);
   }
   
+  // (set! symbol init)
+  
+  private Inst compileSet(List list, Scope scope, boolean tc, Inst next) throws CompileError
+  {
+    if (list.length() != 3 || list.rest.first.type() != Type.Symbol)
+      throw new CompileError("malformed expression", positionMap.get(list));
+    
+    Symbol symb = (Symbol)list.rest.first;
+    Value init = list.rest.rest.first;
+    
+    DeBruijnIndex index = null;
+    
+    if (scope != null)
+      index = scope.lookup(symb);
+    
+    if (index == null)
+      return compile(init, scope, false,
+             new StoreGlobal(symb,
+             next));
+    else
+      return compile(init, scope, false,
+             new StoreLocal(index.depth, index.offset,
+             next));
+  }
+  
   private Inst compileList(List list, Scope scope, boolean tc, Inst next) throws CompileError
   {
     if (list.first == Symbol.get("if"))
@@ -414,6 +440,8 @@ public class Compiler
       return compileCond(list, scope, tc, next);
     else if (list.first == Symbol.get("do"))
       return compileDo(list, scope, tc, next);
+    else if (list.first == Symbol.get("set!"))
+      return compileSet(list, scope, tc, next);
     else
       return compileApply(list, scope, tc, next);
   }

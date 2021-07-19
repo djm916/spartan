@@ -4,23 +4,23 @@ import java.util.Map;
 import java.util.IdentityHashMap;
 import spartan.data.Symbol;
 
-public class Scope
+class Scope
 {
   private final Scope parent;
   private final Map<Symbol, Integer> bindings;
   
-  public Scope(Scope parent)
+  Scope(Scope parent)
   {
     this.parent = parent;
     this.bindings = new IdentityHashMap<>();
   }
   
-  public DeBruijnIndex lookup(Symbol s)
+  DeBruijnIndex lookup(Symbol s)
   {
     return lookup(s, 0);
   }
   
-  public boolean bind(Symbol s)
+  boolean bind(Symbol s)
   {
     if (bindings.containsKey(s))
       return false;
