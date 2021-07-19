@@ -65,7 +65,8 @@ public class Compiler
     if (list == List.Empty)
       return next;
     else
-      return compile(list.first, scope, (tc && list.rest == List.Empty), compileSequence(list.rest, scope, tc, next));
+      return compile(list.first, scope, (tc && list.rest == List.Empty),
+             compileSequence(list.rest, scope, tc, next));
   }
   
   // (if e1 e2)
@@ -97,6 +98,43 @@ public class Compiler
     }
     else
       throw new CompileError("malformed expression", positionMap.get(list));
+  }
+  
+  private Inst compileCond(List list, Scope scope, boolean tc, Inst next) throws CompileError
+  {
+    if (list.length() < 2 || !checkCondClauses(list.rest))
+      throw new CompileError("malformed expression", positionMap.get(list));
+    
+    return compileCondClauses(list.rest, scope, tc, next);
+  }
+  
+  private boolean checkCondClauses(List list)
+  {
+    for (; list != List.Empty; list = list.rest) {
+      if (list.first.type() != Type.List)
+        return false;
+      List clause = (List)list.first;
+      if (clause.length() < 2)
+        return false;
+    }
+    return true;
+  }
+  
+  private Inst compileCondClauses(List list, Scope scope, boolean tc, Inst next) throws CompileError
+  {
+    if (list == List.Empty)
+      return next;
+    else {
+      List clause = (List)list.first;
+      Value test = clause.first;
+      List body = clause.rest;
+      
+      return compile(test, scope, false,
+             new Branch(compileSequence(body, scope, tc, next),
+                        list.rest == List.Empty
+                          ? new LoadConst(Nil.Instance, next)
+                          : compileCondClauses(list.rest, scope, tc, next)));
+    }
   }
   
   private Inst compileLet(List list, Scope scope, boolean tc, Inst next) throws CompileError
@@ -146,11 +184,8 @@ public class Compiler
     
     List bindings = (List)list.rest.first;
     List body = list.rest.rest;
-    List xform = transformLetStar(bindings, body);
 
-    //System.out.println("let* transform = " + xform.repr());
-    
-    return compile(xform, scope, tc, next);
+    return compile(transformLetStar(bindings, body), scope, tc, next);
   }
   
   private boolean checkBindings(List bindings)
@@ -226,11 +261,9 @@ public class Compiler
   {
     int numArgs = list.length() - 1;
     
-    if (tc) {
-      System.out.println("tail call at " + positionMap.get(list));
+    if (tc)
       return compilePushArgs(list, scope,
              new Apply(numArgs, positionMap.get(list)));
-    }
     else
       return new PushFrame(next,
              compilePushArgs(list, scope,
@@ -270,7 +303,7 @@ public class Compiler
       throw new CompileError("malformed expression", positionMap.get(params));
     
     Inst code = new PushLocal(numParams,
-                compilePopArgs(params, 0,
+                compilePopArgs(0, numParams,
                 compileSequence(body, extendFunScope(params, scope), true,
                 new PopFrame())));
     
@@ -296,14 +329,14 @@ public class Compiler
     return scope;
   }
   
-  private Inst compilePopArgs(List params, int offset, Inst next) throws CompileError
+  private Inst compilePopArgs(int offset, int numParams, Inst next) throws CompileError
   {
-    if (params == List.Empty)
+    if (offset >= numParams)
       return next;
     else
       return new PopArg(
              new StoreLocal(0, offset,
-             compilePopArgs(params.rest, offset + 1,
+             compilePopArgs(offset + 1, numParams,
              next)));
   }
   
@@ -369,6 +402,8 @@ public class Compiler
       return compileOr(list, scope, tc, next);
     else if (list.first == Symbol.get("and"))
       return compileAnd(list, scope, tc, next);
+    else if (list.first == Symbol.get("cond"))
+      return compileCond(list, scope, tc, next);
     else
       return compileApply(list, scope, tc, next);
   }
