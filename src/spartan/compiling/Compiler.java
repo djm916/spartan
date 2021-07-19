@@ -382,6 +382,14 @@ public class Compiler
                next));
   }
   
+  private Inst compileDo(List list, Scope scope, boolean tc, Inst next) throws CompileError
+  {
+    if (list.length() < 2)
+      throw new CompileError("malformed expression", positionMap.get(list));
+    
+    return compileSequence(list.rest, scope, tc, next);
+  }
+  
   private Inst compileList(List list, Scope scope, boolean tc, Inst next) throws CompileError
   {
     if (list.first == Symbol.get("if"))
@@ -404,6 +412,8 @@ public class Compiler
       return compileAnd(list, scope, tc, next);
     else if (list.first == Symbol.get("cond"))
       return compileCond(list, scope, tc, next);
+    else if (list.first == Symbol.get("do"))
+      return compileDo(list, scope, tc, next);
     else
       return compileApply(list, scope, tc, next);
   }
