@@ -1,20 +1,20 @@
 package spartan.runtime;
 
-import spartan.data.Value;
+import spartan.data.Datum;
 
 public class LoadConst extends Inst
 {
-  private final Value value;
+  private final Datum x;
   
-  public LoadConst(Value value, Inst next)
+  public LoadConst(Datum x, Inst next)
   {
     super(next);
-    this.value = value;
+    this.x = x;
   }
   
   public void exec(VirtualMachine vm)
   {
-    vm.result = value;
+    vm.result = x;
     vm.control = next;
   }
 }

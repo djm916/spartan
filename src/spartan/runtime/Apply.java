@@ -2,7 +2,7 @@ package spartan.runtime;
 
 import spartan.data.PrimFun;
 import spartan.data.Closure;
-import spartan.data.Value;
+import spartan.data.Datum;
 import spartan.parsing.Position;
 import spartan.errors.RuntimeError;
 import spartan.errors.Error;
@@ -21,7 +21,7 @@ public class Apply extends Inst
   
   public void exec(VirtualMachine vm) throws RuntimeError
   {
-    final Value fun = vm.args.pop();
+    final Datum fun = vm.args.pop();
     
     switch (fun.type()) {
       case PrimFun: {

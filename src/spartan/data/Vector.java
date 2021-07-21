@@ -6,31 +6,31 @@ import spartan.errors.NoSuchElement;
 import spartan.errors.TypeMismatch;
 import spartan.builtins.Builtins;
 
-public class Vector extends Value
+public class Vector extends Datum
 {
-  public Vector(Value ... elems)
+  public Vector(Datum ... elems)
   {
     this.elems = elems;
   }
   
-  public Type type()
+  public final Type type()
   {
     return Type.Vector;
   }
   
-  public String repr()
+  public final String repr()
   {
     return Stream.of(elems)
       .map(e -> e.repr())
       .collect(Collectors.joining(", ", "(", ")"));
   }
   
-  public int size()
+  public final int size()
   {
     return elems.length;
   }
   
-  public Value at(int index) throws NoSuchElement
+  public final Datum at(int index) throws NoSuchElement
   {
     try {
       return elems[index];
@@ -40,7 +40,7 @@ public class Vector extends Value
     }
   }
   
-  public boolean eq(Vector that) throws TypeMismatch
+  public final boolean eq(Vector that) throws TypeMismatch
   {
     if (this.size() != that.size())
       return false;
@@ -52,5 +52,5 @@ public class Vector extends Value
     return true;
   }
 
-  private final Value[] elems;
+  private final Datum[] elems;
 }

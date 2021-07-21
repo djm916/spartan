@@ -3,7 +3,7 @@ package spartan.data;
 import java.util.Map;
 import java.util.HashMap;
 
-public class Symbol extends Value
+public class Symbol extends Datum
 {
   private Symbol(String value)
   {
@@ -18,21 +18,21 @@ public class Symbol extends Value
     return interned.get(value);
   }
   
-  public Type type()
+  public final Type type()
   {
     return Type.Symbol;
   }
   
-  public String repr()
+  public final String repr()
   {
     return value;
   }
   
-  public boolean eq(Symbol that)
+  public final boolean eq(Symbol that)
   {
     return this.value.equals(that.value);
   }
-    
+  
   private static Map<String, Symbol> interned = new HashMap<>();
   private final String value;
 }

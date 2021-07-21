@@ -1,58 +1,58 @@
 package spartan.data;
 
-public class Int extends Value
+public class Int extends Datum
 {
   public Int(int value)
   {
     this.value = value;
   }
   
-  public Type type()
+  public final Type type()
   {
     return Type.Int;
   }
   
-  public String repr()
+  public final String repr()
   {
     return Integer.toString(value);
   }
   
-  public Int neg()
+  public final Int neg()
   {
     return new Int(-value);
   }
   
-  public Int add(Int that)
+  public final Int add(Int that)
   {
     return new Int(this.value + that.value);
   }
   
-  public Int sub(Int that)
+  public final Int sub(Int that)
   {
     return new Int(this.value - that.value);
   }
   
-  public Int mul(Int that)
+  public final Int mul(Int that)
   {
     return new Int(this.value * that.value);
   }
   
-  public Int div(Int that)
+  public final Int div(Int that)
   {
     return new Int(this.value / that.value);
   }
   
-  public Int mod(Int that)
+  public final Int mod(Int that)
   {
     return new Int(this.value % that.value);
   }
   
-  public boolean eq(Int that)
+  public final boolean eq(Int that)
   {
     return this.value == that.value;
   }
   
-  public int compare(Int that)
+  public final int compare(Int that)
   {
     return Integer.compare(this.value, that.value);
   }

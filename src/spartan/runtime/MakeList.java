@@ -1,6 +1,6 @@
 package spartan.runtime;
 
-import spartan.data.Value;
+import spartan.data.Datum;
 import spartan.data.List;
 
 public class MakeList extends Inst

@@ -1,31 +1,31 @@
 package spartan.runtime;
 
-import spartan.data.Value;
+import spartan.data.Datum;
 
 public class LocalEnv
 {
-  Value[] bindings;
-  LocalEnv parent;
+  final Datum[] slots;
+  final LocalEnv parent;
   
-  public LocalEnv(int numBindings, LocalEnv parent)
+  public LocalEnv(int numSlots, LocalEnv parent)
   {
-    this.bindings = new Value[numBindings];
+    this.slots = new Datum[numSlots];
     this.parent = parent;
   }
   
-  public Value load(int depth, int offset)
+  public Datum load(int depth, int offset)
   {
     LocalEnv self = this;
     for (; depth > 0; --depth)
       self = self.parent;
-    return self.bindings[offset];
+    return self.slots[offset];
   }
   
-  public void store(Value value, int depth, int offset)
+  public void store(Datum x, int depth, int offset)
   {
     LocalEnv self = this;
     for (; depth > 0; --depth)
       self = self.parent;
-    self.bindings[offset] = value;
+    self.slots[offset] = x;
   }
 }

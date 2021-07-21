@@ -3,32 +3,37 @@ package spartan.data;
 import spartan.builtins.Builtins;
 import spartan.errors.TypeMismatch;
 
-public class List extends Value
+public class List extends Datum
 {
   public static final List Empty = new List(null, null);
   
-  public Type type()
+  public final Type type()
   {
     return Type.List;
   }
   
-  public String repr()
+  public final String repr()
   {
     return String.format("(%s)", repr(this));
   }
   
-  public final Value first;
+  public final Datum first;
   public final List rest;
   
-  public List(Value first, List rest)
+  public List(Datum first, List rest)
   {
     this.first = first;
     this.rest = rest;
   }
   
-  public int length()
+  public final int length()
   {
     return length(this);
+  }
+  
+  public final boolean eq(List that) throws TypeMismatch
+  {
+    return eq(this, that);
   }
   
   private static int length(List list)
@@ -37,11 +42,6 @@ public class List extends Value
     for (; list != Empty; list = list.rest)
       length += 1;
     return length;
-  }
-  
-  public boolean eq(List that) throws TypeMismatch
-  {
-    return eq(this, that);
   }
   
   private static boolean eq(List x, List y) throws TypeMismatch

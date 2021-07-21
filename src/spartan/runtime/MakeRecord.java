@@ -1,6 +1,6 @@
 package spartan.runtime;
 
-import spartan.data.Value;
+import spartan.data.Datum;
 import spartan.data.Record;
 
 public class MakeRecord extends Inst
@@ -15,7 +15,7 @@ public class MakeRecord extends Inst
   
   public void exec(VirtualMachine vm)
   {
-    Value[] values = new Value[labels.length];
+    Datum[] values = new Datum[labels.length];
     for (int i = labels.length - 1; i >= 0; --i)
       values[i] = vm.args.pop();
     vm.result = new Record(labels, values);

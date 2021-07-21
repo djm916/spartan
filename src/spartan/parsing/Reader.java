@@ -33,7 +33,7 @@ public class Reader
   private final MutablePosition currentPos = new MutablePosition(1, 0);
   private final String source;
   private PositionMap positionMap;
-  private static Map<Symbol, Value> keywordMap = new IdentityHashMap<>();
+  private static Map<Symbol, Datum> keywordMap = new IdentityHashMap<>();
   
   static
   {
@@ -152,7 +152,7 @@ public class Reader
     }
   }
 
-  private Value readNumber() throws IOException, SyntaxError
+  private Datum readNumber() throws IOException, SyntaxError
   {
     StringBuilder text = new StringBuilder();
     
@@ -184,7 +184,7 @@ public class Reader
     return new Int(Integer.parseInt(text.toString()));
   }
 
-  private Value readSymbol() throws IOException
+  private Datum readSymbol() throws IOException
   {
     Position savePosition = new Position(source, tokenStart.line, tokenStart.column);
     
@@ -206,7 +206,7 @@ public class Reader
     return symbol;
   }
 
-  private Value readText() throws SyntaxError, IOException
+  private Datum readText() throws SyntaxError, IOException
   {
     StringBuilder text = new StringBuilder();
         
@@ -225,15 +225,15 @@ public class Reader
     return new Text(text.toString());
   }
   
-  private Value readList() throws SyntaxError, IOException
+  private Datum readList() throws SyntaxError, IOException
   {
     Position savePosition = new Position(source, tokenStart.line, tokenStart.column);    
-    Deque<Value> stack = new ArrayDeque<>();
+    Deque<Datum> stack = new ArrayDeque<>();
     
     skipSpace();
     
     while (lastChar != -1 && lastChar != ')') {
-      stack.push(readValue());      
+      stack.push(readDatum());      
       skipSpace();
     }
     
@@ -245,13 +245,13 @@ public class Reader
     return result;
   }
     
-  private Value readQuote() throws SyntaxError, IOException
+  private Datum readQuote() throws SyntaxError, IOException
   {
     skipSpace();
-    return new List(Symbol.get("quote"), new List(readValue(), List.Empty));
+    return new List(Symbol.get("quote"), new List(readDatum(), List.Empty));
   }
     
-  private Value readValue() throws SyntaxError, IOException
+  private Datum readDatum() throws SyntaxError, IOException
   {
     markTokenStart();
     
@@ -292,13 +292,13 @@ public class Reader
     this.source = source;
   }
   
-  public SourceValue read() throws SyntaxError, IOException
+  public SourceDatum read() throws SyntaxError, IOException
   {
     positionMap = new PositionMap();
     skipSpace();
-    Value result = readValue();
+    Datum result = readDatum();
     if (result == null)
       return null;
-    return new SourceValue(result, positionMap);
+    return new SourceDatum(result, positionMap);
   }
 }

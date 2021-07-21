@@ -4,12 +4,12 @@ import spartan.errors.SyntaxError;
 import spartan.errors.CompileError;
 import spartan.errors.RuntimeError;
 import spartan.parsing.Reader;
-import spartan.parsing.SourceValue;
+import spartan.parsing.SourceDatum;
 import spartan.compiling.Compiler;
 import spartan.runtime.Inst;
 import spartan.runtime.VirtualMachine;
 import spartan.runtime.GlobalEnv;
-import spartan.data.Value;
+import spartan.data.Datum;
 import spartan.data.Symbol;
 import spartan.builtins.Builtins;
 import java.io.IOException;
@@ -47,12 +47,12 @@ public class Main
     do {
       //System.out.print(">");
       try {
-        SourceValue sourceValue = reader.read();
-        if (sourceValue == null)
+        SourceDatum sourceDatum = reader.read();
+        if (sourceDatum == null)
           break;
-        //System.out.println("reader: " + sourceValue.value.repr());
-        Inst code = compiler.compile(sourceValue);
-        Value result = vm.exec(code);
+        //System.out.println("reader: " + sourceDatum.value.repr());
+        Inst code = compiler.compile(sourceDatum);
+        Datum result = vm.exec(code);
         System.out.println(result.repr());
         //System.out.println("frames: " + vm.frameCount);
       }

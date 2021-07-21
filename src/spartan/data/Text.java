@@ -1,28 +1,28 @@
 package spartan.data;
 
-public class Text extends Value
+public class Text extends Datum
 {
   public Text(String value)
   {
     this.value = value;
   }
   
-  public Type type()
+  public final Type type()
   {
     return Type.Text;
   }
   
-  public String repr()
+  public final String repr()
   {
     return "\"" + value + "\"";
   }
   
-  public boolean eq(Text that)
+  public final boolean eq(Text that)
   {
     return this.value.equals(that.value);
   }
   
-  public int compare(Text that)
+  public final int compare(Text that)
   {
     return this.value.compareTo(that.value);
   }

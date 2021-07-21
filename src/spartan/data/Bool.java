@@ -1,32 +1,31 @@
 package spartan.data;
 
-public class Bool extends Value
+public final class Bool extends Datum
 {
-  public static final Bool True = new Bool(true);
-  
+  public static final Bool True = new Bool(true);  
   public static final Bool False = new Bool(false);
   
-  public Type type()
+  public final Type type()
   {
     return Type.Bool;
   }
   
-  public String repr()
+  public final String repr()
   {
     return value ? "true" : "false";
   }
   
-  public Bool not()
+  public final Bool not()
   {
     return value ? False : True;
   }
   
-  public Bool or(Bool that)
+  public final Bool or(Bool that)
   {
     return this.value || that.value ? True : False;
   }
   
-  public Bool and(Bool that)
+  public final Bool and(Bool that)
   {
     return this.value && that.value ? True : False;
   }

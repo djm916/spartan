@@ -1,7 +1,5 @@
 package spartan.runtime;
 
-import spartan.data.Value;
-
 public class StoreLocal extends Inst
 {
   private final int depth;

@@ -2,7 +2,7 @@ package spartan.compiling;
 
 import spartan.runtime.*;
 import spartan.data.*;
-import spartan.parsing.SourceValue;
+import spartan.parsing.SourceDatum;
 import spartan.parsing.PositionMap;
 import spartan.errors.CompileError;
 
@@ -10,7 +10,7 @@ public class Compiler
 {
   private PositionMap positionMap;
   
-  private static boolean isSelfEval(Value sexp)
+  private static boolean isSelfEval(Datum sexp)
   {
     return sexp.type() == Type.Bool
         || sexp.type() == Type.Int
@@ -22,7 +22,7 @@ public class Compiler
         || sexp == Nil.Instance;
   }
 
-  private Inst compileSelfEval(Value sexp, Inst next)
+  private Inst compileSelfEval(Datum sexp, Inst next)
   {
     return new LoadConst(sexp, next);
   }
@@ -54,7 +54,7 @@ public class Compiler
       throw new CompileError("malformed expression", positionMap.get(list));    
     
     Symbol symb = (Symbol)list.rest.first;
-    Value init = list.rest.rest.first;    
+    Datum init = list.rest.rest.first;    
     
     return compile(init, scope, false,
            new StoreGlobal(symb, next));
@@ -102,8 +102,8 @@ public class Compiler
     int length = list.length();
     
     if (length == 3) {
-      Value cond = list.rest.first;
-      Value trueBranch = list.rest.rest.first;
+      Datum cond = list.rest.first;
+      Datum trueBranch = list.rest.rest.first;
 
       return compile(cond, scope, false,
              new Branch(
@@ -111,9 +111,9 @@ public class Compiler
                new LoadConst(Nil.Instance, next)));
     }
     else if (length == 4) {
-      Value cond = list.rest.first;
-      Value trueBranch = list.rest.rest.first;
-      Value falseBranch = list.rest.rest.rest.first;
+      Datum cond = list.rest.first;
+      Datum trueBranch = list.rest.rest.first;
+      Datum falseBranch = list.rest.rest.rest.first;
       
       return compile(cond, scope, false,
              new Branch(
@@ -150,7 +150,7 @@ public class Compiler
       return next;
     else {
       List clause = (List)list.first;
-      Value test = clause.first;
+      Datum test = clause.first;
       List body = clause.rest;
       
       return compile(test, scope, false,
@@ -422,7 +422,7 @@ public class Compiler
       throw new CompileError("malformed expression", positionMap.get(list));
     
     Symbol symb = (Symbol)list.rest.first;
-    Value init = list.rest.rest.first;
+    Datum init = list.rest.rest.first;
     
     DeBruijnIndex index = null;
     
@@ -446,7 +446,7 @@ public class Compiler
     if (list.length() < 3)
       throw new CompileError("malformed expression", positionMap.get(list));
     
-    Value test = list.rest.first;
+    Datum test = list.rest.first;
     List body = list.rest.rest;
     Jump jump = new Jump();
     Inst code = compile(test, scope, false,
@@ -490,7 +490,7 @@ public class Compiler
       return compileApply(list, scope, tc, next);
   }
   
-  private Inst compile(Value sexp, Scope scope, boolean tc, Inst next) throws CompileError
+  private Inst compile(Datum sexp, Scope scope, boolean tc, Inst next) throws CompileError
   {
     if (isSelfEval(sexp))
       return compileSelfEval(sexp, next);
@@ -500,9 +500,9 @@ public class Compiler
       return compileList((List)sexp, scope, tc, next);
   }
   
-  public Inst compile(SourceValue sourceValue) throws CompileError
+  public Inst compile(SourceDatum sourceDatum) throws CompileError
   {
-    positionMap = sourceValue.positionMap;
-    return compile(sourceValue.value, null, false, null);
+    positionMap = sourceDatum.positionMap;
+    return compile(sourceDatum.datum, null, false, null);
   }
 }

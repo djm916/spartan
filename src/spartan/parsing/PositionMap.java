@@ -2,19 +2,19 @@ package spartan.parsing;
 
 import java.util.Map;
 import java.util.IdentityHashMap;
-import spartan.data.Value;
+import spartan.data.Datum;
 
 public class PositionMap
 {
-  private final Map<Value, Position> map = new IdentityHashMap<>();
+  private final Map<Datum, Position> map = new IdentityHashMap<>();
   
-  public void put(Value v, Position p)
+  public void put(Datum x, Position p)
   {
-    map.put(v, p);
+    map.put(x, p);
   }
   
-  public Position get(Value v)
+  public Position get(Datum x)
   {
-    return map.get(v);
+    return map.get(x);
   }
 }

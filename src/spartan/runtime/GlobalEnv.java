@@ -1,20 +1,20 @@
 package spartan.runtime;
 
-import spartan.data.Value;
+import spartan.data.Datum;
 import spartan.data.Symbol;
 import java.util.Map;
 import java.util.IdentityHashMap;
 
 public class GlobalEnv
 {
-  private final Map<Symbol, Value> globals = new IdentityHashMap<>();
+  private final Map<Symbol, Datum> globals = new IdentityHashMap<>();
 
-  public void bind(Symbol s, Value v)
+  public void bind(Symbol s, Datum x)
   {
-    globals.put(s, v);
+    globals.put(s, x);
   }
   
-  public Value lookup(Symbol s)
+  public Datum lookup(Symbol s)
   {
     return globals.get(s);
   }

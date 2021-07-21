@@ -1,6 +1,6 @@
 package spartan.runtime;
 
-import spartan.data.Value;
+import spartan.data.Datum;
 import java.util.Deque;
 import java.util.ArrayDeque;
 import java.util.List;
@@ -9,8 +9,8 @@ import spartan.errors.RuntimeError;
 
 public class VirtualMachine
 {
-  public Value result;
-  public Deque<Value> args = new ArrayDeque<Value>();
+  public Datum result;
+  public Deque<Datum> args = new ArrayDeque<Datum>();
   public Inst control;
   public LocalEnv locals;
   public GlobalEnv globals;
@@ -24,7 +24,7 @@ public class VirtualMachine
     this.globals = globals;
   }
   
-  public Value exec(Inst code) throws RuntimeError
+  public Datum exec(Inst code) throws RuntimeError
   {
     frameCount = 0;
     

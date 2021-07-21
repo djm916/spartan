@@ -9,9 +9,9 @@ import spartan.errors.NoSuchElement;
 import spartan.errors.TypeMismatch;
 import spartan.builtins.Builtins;
 
-public class Record extends Value
+public class Record extends Datum
 {
-  public Record(String[] labels, Value[] values)
+  public Record(String[] labels, Datum[] values)
   {
     members = new IdentityHashMap<>(labels.length);
     for (int i = 0; i < labels.length; ++i)
@@ -30,9 +30,9 @@ public class Record extends Value
       .collect(Collectors.joining(", ", "{", "}"));
   }
   
-  public Value at(String label) throws NoSuchElement
+  public Datum at(String label) throws NoSuchElement
   {
-    Value result = members.get(label);
+    Datum result = members.get(label);
     if (result == null)
       throw new NoSuchElement();
     return result;
@@ -58,5 +58,5 @@ public class Record extends Value
     return true;
   }
 
-  private final Map<String, Value> members;
+  private final Map<String, Datum> members;
 }

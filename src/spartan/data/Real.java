@@ -1,53 +1,53 @@
 package spartan.data;
 
-public class Real extends Value
+public class Real extends Datum
 {
   public Real(double value)
   {
     this.value = value;
   }
   
-  public Type type()
+  public final Type type()
   {
     return Type.Real;
   }
   
-  public String repr()
+  public final String repr()
   {
     return Double.toString(value);
   }
   
-  public Real neg()
+  public final Real neg()
   {
     return new Real(-value);
   }
   
-  public Real add(Real that)
+  public final Real add(Real that)
   {
     return new Real(this.value + that.value);
   }
   
-  public Real sub(Real that)
+  public final Real sub(Real that)
   {
     return new Real(this.value - that.value);
   }
   
-  public Real mul(Real that)
+  public final Real mul(Real that)
   {
     return new Real(this.value * that.value);
   }
   
-  public Real div(Real that)
+  public final Real div(Real that)
   {
     return new Real(this.value / that.value);
   }
   
-  public boolean eq(Real that)
+  public final boolean eq(Real that)
   {
     return this.value == that.value;
   }
   
-  public int compare(Real that)
+  public final int compare(Real that)
   {
     return Double.compare(this.value, that.value);
   }

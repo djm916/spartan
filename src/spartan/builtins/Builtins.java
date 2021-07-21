@@ -13,13 +13,13 @@ public final class Builtins
     return x ? Bool.True : Bool.False;
   }
   
-  public static boolean truth(Value x)
+  public static boolean truth(Datum x)
   {
     return !(x == Bool.False ||
              x == Nil.Instance);
   }
   
-  public static Value add(Value x, Value y) throws TypeMismatch
+  public static Datum add(Datum x, Datum y) throws TypeMismatch
   {
     if (x.type() == y.type()) {
       switch (x.type()) {
@@ -31,14 +31,14 @@ public final class Builtins
   }
   
   public static final PrimFun Add = new PrimFun(2) {
-    public Value apply(VirtualMachine vm) throws TypeMismatch {
-      Value x = vm.args.pop();
-      Value y = vm.args.pop();
+    public Datum apply(VirtualMachine vm) throws TypeMismatch {
+      Datum x = vm.args.pop();
+      Datum y = vm.args.pop();
       return add(x, y);
     }
   };
 
-  public static Value sub(Value x, Value y) throws TypeMismatch
+  public static Datum sub(Datum x, Datum y) throws TypeMismatch
   {
     if (x.type() == y.type()) {
       switch (x.type()) {
@@ -50,14 +50,14 @@ public final class Builtins
   }
   
   public static final PrimFun Sub = new PrimFun(2) {
-    public Value apply(VirtualMachine vm) throws TypeMismatch {
-      Value x = vm.args.pop();
-      Value y = vm.args.pop();
+    public Datum apply(VirtualMachine vm) throws TypeMismatch {
+      Datum x = vm.args.pop();
+      Datum y = vm.args.pop();
       return sub(x, y);
     }
   };
 
-  public static Value mul(Value x, Value y) throws TypeMismatch
+  public static Datum mul(Datum x, Datum y) throws TypeMismatch
   {
     if (x.type() == y.type()) {
       switch (x.type()) {
@@ -69,14 +69,14 @@ public final class Builtins
   }
     
   public static final PrimFun Mul = new PrimFun(2) {
-    public Value apply(VirtualMachine vm) throws TypeMismatch {
-      Value x = vm.args.pop();
-      Value y = vm.args.pop();
+    public Datum apply(VirtualMachine vm) throws TypeMismatch {
+      Datum x = vm.args.pop();
+      Datum y = vm.args.pop();
       return mul(x, y);
     }
   };
 
-  public static Value div(Value x, Value y) throws TypeMismatch
+  public static Datum div(Datum x, Datum y) throws TypeMismatch
   {
     if (x.type() == y.type()) {
       switch (x.type()) {
@@ -88,14 +88,14 @@ public final class Builtins
   }
   
   public static final PrimFun Div = new PrimFun(2) {
-    public Value apply(VirtualMachine vm) throws TypeMismatch {
-      Value x = vm.args.pop();
-      Value y = vm.args.pop();
+    public Datum apply(VirtualMachine vm) throws TypeMismatch {
+      Datum x = vm.args.pop();
+      Datum y = vm.args.pop();
       return div(x, y);
     }
   };
 
-  public static Value mod(Value x, Value y) throws TypeMismatch
+  public static Datum mod(Datum x, Datum y) throws TypeMismatch
   {
     if (x.type() == Type.Int && y.type() == Type.Int)
       return ((Int)x).mod((Int)y);
@@ -103,14 +103,14 @@ public final class Builtins
   }
   
   public static final PrimFun Mod = new PrimFun(2) {
-    public Value apply(VirtualMachine vm) throws TypeMismatch {
-      Value x = vm.args.pop();
-      Value y = vm.args.pop();
+    public Datum apply(VirtualMachine vm) throws TypeMismatch {
+      Datum x = vm.args.pop();
+      Datum y = vm.args.pop();
       return mod(x, y);
     }
   };
 
-  public static Value neg(Value x) throws TypeMismatch
+  public static Datum neg(Datum x) throws TypeMismatch
   {
     switch (x.type()) {
       case Int: return ((Int)x).neg();
@@ -120,13 +120,13 @@ public final class Builtins
   }
   
   public static final PrimFun Neg = new PrimFun(1) {
-    public Value apply(VirtualMachine vm) throws TypeMismatch {
-      Value x = vm.args.pop();
+    public Datum apply(VirtualMachine vm) throws TypeMismatch {
+      Datum x = vm.args.pop();
       return neg(x);
     }
   };
 
-  public static Bool not(Value x) throws TypeMismatch
+  public static Bool not(Datum x) throws TypeMismatch
   {
     if (x.type() == Type.Bool)
       return ((Bool)x).not();
@@ -134,13 +134,13 @@ public final class Builtins
   }
   
   public static final PrimFun Not = new PrimFun(1) {
-    public Value apply(VirtualMachine vm) throws TypeMismatch {
-      Value x = vm.args.pop();
+    public Datum apply(VirtualMachine vm) throws TypeMismatch {
+      Datum x = vm.args.pop();
       return not(x);
     }
   };
 
-  public static boolean eq(Value x, Value y) throws TypeMismatch
+  public static boolean eq(Datum x, Datum y) throws TypeMismatch
   {
     if (x.type() == y.type()) {
       switch (x.type()) {
@@ -158,27 +158,27 @@ public final class Builtins
   }
   
   public static final PrimFun Eq = new PrimFun(2) {
-    public Value apply(VirtualMachine vm) throws TypeMismatch {
-      Value x = vm.args.pop();
-      Value y = vm.args.pop();
+    public Datum apply(VirtualMachine vm) throws TypeMismatch {
+      Datum x = vm.args.pop();
+      Datum y = vm.args.pop();
       return truth(eq(x, y));
     }
   };
 
-  public static boolean ne(Value x, Value y) throws TypeMismatch
+  public static boolean ne(Datum x, Datum y) throws TypeMismatch
   {
     return !eq(x, y);
   }
   
   public static final PrimFun Ne = new PrimFun(2) {
-    public Value apply(VirtualMachine vm) throws TypeMismatch {
-      Value x = vm.args.pop();
-      Value y = vm.args.pop();
+    public Datum apply(VirtualMachine vm) throws TypeMismatch {
+      Datum x = vm.args.pop();
+      Datum y = vm.args.pop();
       return truth(ne(x, y));
     }
   };
 
-  public static boolean lt(Value x, Value y) throws TypeMismatch
+  public static boolean lt(Datum x, Datum y) throws TypeMismatch
   {
     if (x.type() == y.type()) {
       switch (x.type()) {
@@ -191,14 +191,14 @@ public final class Builtins
   }
   
   public static final PrimFun Lt = new PrimFun(2) {
-    public Value apply(VirtualMachine vm) throws TypeMismatch {
-      Value x = vm.args.pop();
-      Value y = vm.args.pop();
+    public Datum apply(VirtualMachine vm) throws TypeMismatch {
+      Datum x = vm.args.pop();
+      Datum y = vm.args.pop();
       return truth(lt(x, y));
     }
   };
 
-  public static boolean le(Value x, Value y) throws TypeMismatch
+  public static boolean le(Datum x, Datum y) throws TypeMismatch
   {
     if (x.type() == y.type()) {
       switch (x.type()) {
@@ -211,14 +211,14 @@ public final class Builtins
   }
   
   public static final PrimFun Le = new PrimFun(2) {
-    public Value apply(VirtualMachine vm) throws TypeMismatch {
-      Value x = vm.args.pop();
-      Value y = vm.args.pop();
+    public Datum apply(VirtualMachine vm) throws TypeMismatch {
+      Datum x = vm.args.pop();
+      Datum y = vm.args.pop();
       return truth(le(x, y));
     }
   };
 
-  public static boolean gt(Value x, Value y) throws TypeMismatch
+  public static boolean gt(Datum x, Datum y) throws TypeMismatch
   {
     if (x.type() == y.type()) {
       switch (x.type()) {
@@ -231,14 +231,14 @@ public final class Builtins
   }
   
   public static final PrimFun Gt = new PrimFun(2) {
-    public Value apply(VirtualMachine vm) throws TypeMismatch {
-      Value x = vm.args.pop();
-      Value y = vm.args.pop();
+    public Datum apply(VirtualMachine vm) throws TypeMismatch {
+      Datum x = vm.args.pop();
+      Datum y = vm.args.pop();
       return truth(gt(x, y));
     }
   };
 
-  public static boolean ge(Value x, Value y) throws TypeMismatch
+  public static boolean ge(Datum x, Datum y) throws TypeMismatch
   {
     if (x.type() == y.type()) {
       switch (x.type()) {
@@ -251,9 +251,9 @@ public final class Builtins
   }
   
   public static final PrimFun Ge = new PrimFun(2) {
-    public Value apply(VirtualMachine vm) throws TypeMismatch {
-      Value x = vm.args.pop();
-      Value y = vm.args.pop();
+    public Datum apply(VirtualMachine vm) throws TypeMismatch {
+      Datum x = vm.args.pop();
+      Datum y = vm.args.pop();
       return truth(ge(x, y));
     }
   };
