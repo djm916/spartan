@@ -17,7 +17,7 @@ public class MakeVector extends Inst
   {
     Datum[] elems = new Datum[numElems];
     for (int i = numElems - 1; i >= 0; --i)
-      elems[i] = vm.args.pop();
+      elems[i] = vm.popArg();
     vm.result = new Vector(elems);
     vm.control = next;
   }

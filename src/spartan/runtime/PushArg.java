@@ -9,7 +9,7 @@ public class PushArg extends Inst
   
   public void exec(VirtualMachine vm)
   {
-    vm.args.push(vm.result);
+    vm.pushArg(vm.result);
     vm.control = next;
   }
 }

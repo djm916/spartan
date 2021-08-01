@@ -11,6 +11,7 @@ public class PopFrame extends Inst
   {
     vm.control = vm.frame.returnTo;
     vm.locals = vm.frame.locals;
+    vm.args = vm.frame.args;
     vm.frame = vm.frame.parent;
   }
 }

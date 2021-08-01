@@ -5,18 +5,20 @@ import spartan.data.Closure;
 public class MakeClosure extends Inst
 {
   private final Inst code;
-  private final int numArgs;
+  private final int requiredArgs;
+  private final boolean isVariadic;
   
-  public MakeClosure(Inst code, int numArgs, Inst next)
+  public MakeClosure(Inst code, int requiredArgs, boolean isVariadic, Inst next)
   {
     super(next);
-    this.numArgs = numArgs;
     this.code = code;
+    this.requiredArgs = requiredArgs;
+    this.isVariadic = isVariadic;
   }
   
   public void exec(VirtualMachine vm)
   {
-    vm.result = new Closure(code, numArgs, vm.locals);
+    vm.result = new Closure(code, vm.locals, requiredArgs, isVariadic);
     vm.control = next;
   }
 }

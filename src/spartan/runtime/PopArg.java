@@ -9,7 +9,7 @@ public class PopArg extends Inst
   
   public void exec(VirtualMachine vm)
   {
-    vm.result = vm.args.pop();
+    vm.result = vm.popArg();
     vm.control = next;
   }
 }

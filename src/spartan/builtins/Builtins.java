@@ -32,8 +32,8 @@ public final class Builtins
   
   public static final PrimFun Add = new PrimFun(2) {
     public Datum apply(VirtualMachine vm) throws TypeMismatch {
-      Datum x = vm.args.pop();
-      Datum y = vm.args.pop();
+      Datum x = vm.popArg();
+      Datum y = vm.popArg();
       return add(x, y);
     }
   };
@@ -51,8 +51,8 @@ public final class Builtins
   
   public static final PrimFun Sub = new PrimFun(2) {
     public Datum apply(VirtualMachine vm) throws TypeMismatch {
-      Datum x = vm.args.pop();
-      Datum y = vm.args.pop();
+      Datum x = vm.popArg();
+      Datum y = vm.popArg();
       return sub(x, y);
     }
   };
@@ -70,8 +70,8 @@ public final class Builtins
     
   public static final PrimFun Mul = new PrimFun(2) {
     public Datum apply(VirtualMachine vm) throws TypeMismatch {
-      Datum x = vm.args.pop();
-      Datum y = vm.args.pop();
+      Datum x = vm.popArg();
+      Datum y = vm.popArg();
       return mul(x, y);
     }
   };
@@ -89,8 +89,8 @@ public final class Builtins
   
   public static final PrimFun Div = new PrimFun(2) {
     public Datum apply(VirtualMachine vm) throws TypeMismatch {
-      Datum x = vm.args.pop();
-      Datum y = vm.args.pop();
+      Datum x = vm.popArg();
+      Datum y = vm.popArg();
       return div(x, y);
     }
   };
@@ -104,8 +104,8 @@ public final class Builtins
   
   public static final PrimFun Mod = new PrimFun(2) {
     public Datum apply(VirtualMachine vm) throws TypeMismatch {
-      Datum x = vm.args.pop();
-      Datum y = vm.args.pop();
+      Datum x = vm.popArg();
+      Datum y = vm.popArg();
       return mod(x, y);
     }
   };
@@ -121,7 +121,7 @@ public final class Builtins
   
   public static final PrimFun Neg = new PrimFun(1) {
     public Datum apply(VirtualMachine vm) throws TypeMismatch {
-      Datum x = vm.args.pop();
+      Datum x = vm.popArg();
       return neg(x);
     }
   };
@@ -135,7 +135,7 @@ public final class Builtins
   
   public static final PrimFun Not = new PrimFun(1) {
     public Datum apply(VirtualMachine vm) throws TypeMismatch {
-      Datum x = vm.args.pop();
+      Datum x = vm.popArg();
       return not(x);
     }
   };
@@ -159,8 +159,8 @@ public final class Builtins
   
   public static final PrimFun Eq = new PrimFun(2) {
     public Datum apply(VirtualMachine vm) throws TypeMismatch {
-      Datum x = vm.args.pop();
-      Datum y = vm.args.pop();
+      Datum x = vm.popArg();
+      Datum y = vm.popArg();
       return truth(eq(x, y));
     }
   };
@@ -172,8 +172,8 @@ public final class Builtins
   
   public static final PrimFun Ne = new PrimFun(2) {
     public Datum apply(VirtualMachine vm) throws TypeMismatch {
-      Datum x = vm.args.pop();
-      Datum y = vm.args.pop();
+      Datum x = vm.popArg();
+      Datum y = vm.popArg();
       return truth(ne(x, y));
     }
   };
@@ -192,8 +192,8 @@ public final class Builtins
   
   public static final PrimFun Lt = new PrimFun(2) {
     public Datum apply(VirtualMachine vm) throws TypeMismatch {
-      Datum x = vm.args.pop();
-      Datum y = vm.args.pop();
+      Datum x = vm.popArg();
+      Datum y = vm.popArg();
       return truth(lt(x, y));
     }
   };
@@ -212,8 +212,8 @@ public final class Builtins
   
   public static final PrimFun Le = new PrimFun(2) {
     public Datum apply(VirtualMachine vm) throws TypeMismatch {
-      Datum x = vm.args.pop();
-      Datum y = vm.args.pop();
+      Datum x = vm.popArg();
+      Datum y = vm.popArg();
       return truth(le(x, y));
     }
   };
@@ -232,8 +232,8 @@ public final class Builtins
   
   public static final PrimFun Gt = new PrimFun(2) {
     public Datum apply(VirtualMachine vm) throws TypeMismatch {
-      Datum x = vm.args.pop();
-      Datum y = vm.args.pop();
+      Datum x = vm.popArg();
+      Datum y = vm.popArg();
       return truth(gt(x, y));
     }
   };
@@ -252,8 +252,8 @@ public final class Builtins
   
   public static final PrimFun Ge = new PrimFun(2) {
     public Datum apply(VirtualMachine vm) throws TypeMismatch {
-      Datum x = vm.args.pop();
-      Datum y = vm.args.pop();
+      Datum x = vm.popArg();
+      Datum y = vm.popArg();
       return truth(ge(x, y));
     }
   };

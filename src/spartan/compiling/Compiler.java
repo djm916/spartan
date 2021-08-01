@@ -271,6 +271,7 @@ public class Compiler
   }
   
   // (f a1 a2 ... aN)
+  //
   // push-frame
   // <<aN>>
   // push-arg
@@ -278,7 +279,6 @@ public class Compiler
   // <<a1>>
   // push-arg
   // <<f>>
-  // push-arg
   // apply
   
   private Inst compileApply(List list, Scope scope, boolean tc, Inst next) throws CompileError
@@ -286,12 +286,14 @@ public class Compiler
     int numArgs = list.length() - 1;
     
     if (tc)
-      return compilePushArgs(list, scope,
-             new Apply(numArgs, positionMap.get(list)));
+      return compilePushArgs(list.rest, scope,
+             compile(list.first, scope, false,
+             new Apply(numArgs, positionMap.get(list))));
     else
       return new PushFrame(next,
-             compilePushArgs(list, scope,
-             new Apply(numArgs, positionMap.get(list))));
+             compilePushArgs(list.rest, scope,
+             compile(list.first, scope, false,
+             new Apply(numArgs, positionMap.get(list)))));
   }
 
   private Inst compilePushArgs(List args, Scope scope, Inst next) throws CompileError
@@ -305,6 +307,7 @@ public class Compiler
   }
   
   // (fun (p1 p2 ... pN) body ...)
+  //
   // push-local N
   // pop-arg
   // store-local 0
@@ -320,18 +323,19 @@ public class Compiler
       throw new CompileError("malformed expression", positionMap.get(list));
     
     List params = (List)list.rest.first;
-    int numParams = params.length();
-    List body = list.rest.rest;
+    List body = list.rest.rest;    
     
     if (!checkParams(params))
-      throw new CompileError("malformed expression", positionMap.get(params));
+      throw new CompileError("malformed expression", positionMap.get(list));
+    
+    int numParams = params.length();
     
     Inst code = new PushLocal(numParams,
                 compilePopArgs(0, numParams,
                 compileSequence(body, extendFunScope(params, scope), true,
                 new PopFrame())));
     
-    return new MakeClosure(code, numParams, next);
+    return new MakeClosure(code, numParams, false, next);
   }
   
   private boolean checkParams(List params)
@@ -341,7 +345,7 @@ public class Compiler
         return false;
     return true;
   }
-  
+    
   private Scope extendFunScope(List params, Scope parent) throws CompileError
   {
     Scope scope = new Scope(parent);
@@ -353,17 +357,17 @@ public class Compiler
     return scope;
   }
   
-  private Inst compilePopArgs(int offset, int numParams, Inst next) throws CompileError
+  private Inst compilePopArgs(int offset, int requiredArgs, Inst next) throws CompileError
   {
-    if (offset >= numParams)
+    if (offset >= requiredArgs)
       return next;
     else
       return new PopArg(
              new StoreLocal(0, offset,
-             compilePopArgs(offset + 1, numParams,
+             compilePopArgs(offset + 1, requiredArgs,
              next)));
   }
-  
+    
   // (or a b ...)
   
   private Inst compileOr(List list, Scope scope, boolean tc, Inst next) throws CompileError

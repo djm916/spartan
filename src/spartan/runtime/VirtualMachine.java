@@ -1,16 +1,13 @@
 package spartan.runtime;
 
 import spartan.data.Datum;
-import java.util.Deque;
-import java.util.ArrayDeque;
-import java.util.List;
-import java.util.ArrayList;
+import spartan.data.List;
 import spartan.errors.RuntimeError;
 
 public class VirtualMachine
 {
   public Datum result;
-  public Deque<Datum> args = new ArrayDeque<Datum>();
+  public List args = List.Empty;
   public Inst control;
   public LocalEnv locals;
   public GlobalEnv globals;
@@ -34,5 +31,17 @@ public class VirtualMachine
       control.exec(this);
     
     return result;
+  }
+  
+  public Datum popArg()
+  {
+    Datum x = args.first;
+    args = args.rest;
+    return x;
+  }
+  
+  public void pushArg(Datum x)
+  {
+    args = new List(x, args);
   }
 }

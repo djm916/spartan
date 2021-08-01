@@ -6,14 +6,16 @@ import spartan.runtime.LocalEnv;
 public class Closure extends Datum
 {
   public final Inst code;
-  public final int numArgs;
   public final LocalEnv locals;
+  public final int requiredArgs;
+  public final boolean isVariadic;
   
-  public Closure(Inst code, int numArgs, LocalEnv locals)
+  public Closure(Inst code, LocalEnv locals, int requiredArgs, boolean isVariadic)
   {
     this.code = code;
-    this.numArgs = numArgs;
     this.locals = locals;
+    this.requiredArgs = requiredArgs;
+    this.isVariadic = isVariadic;
   }
   
   public final Type type()

@@ -17,7 +17,7 @@ public class MakeList extends Inst
   {
     List list = List.Empty;
     for (int i = 0; i < numElems; ++i)
-      list = new List(vm.args.pop(), list);
+      list = new List(vm.popArg(), list);
     vm.result = list;
     vm.control = next;
   }

@@ -17,7 +17,7 @@ public class MakeRecord extends Inst
   {
     Datum[] values = new Datum[labels.length];
     for (int i = labels.length - 1; i >= 0; --i)
-      values[i] = vm.args.pop();
+      values[i] = vm.popArg();
     vm.result = new Record(labels, values);
     vm.control = next;
   }
