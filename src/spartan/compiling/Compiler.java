@@ -329,23 +329,44 @@ public class Compiler
       throw new CompileError("malformed expression", positionMap.get(list));
     
     int numParams = params.length();
+    boolean isVariadic = numParams != 0 && isRestParam((Symbol)params.at(numParams - 1));
     
-    Inst code = new PushLocal(numParams,
-                compilePopArgs(0, numParams,
-                compileSequence(body, extendFunScope(params, scope), true,
-                new PopFrame())));
+    Inst code = null;
     
-    return new MakeClosure(code, numParams, false, next);
+    if (isVariadic) {
+      code = new PushLocal(numParams,
+             compilePopArgsVariadic(0, numParams,
+             compileSequence(body, extendFunScope(params, scope), true,
+             new PopFrame())));
+    }
+    else {
+      code = new PushLocal(numParams,
+             compilePopArgs(0, numParams,
+             compileSequence(body, extendFunScope(params, scope), true,
+             new PopFrame())));
+    }
+    
+    int requiredArgs = isVariadic ? numParams - 1 : numParams;
+    
+    return new MakeClosure(code, requiredArgs, isVariadic, next);
+  }
+  
+  private boolean isRestParam(Symbol s)
+  {
+    return s.repr().charAt(0) == '&';
   }
   
   private boolean checkParams(List params)
   {
-    for (; params != List.Empty; params = params.rest)
+    for (; params != List.Empty; params = params.rest) {
       if (params.first.type() != Type.Symbol)
         return false;
+      if (isRestParam((Symbol)params.first) && params.rest != List.Empty)
+        return false;
+    }
     return true;
   }
-    
+  
   private Scope extendFunScope(List params, Scope parent) throws CompileError
   {
     Scope scope = new Scope(parent);
@@ -357,17 +378,30 @@ public class Compiler
     return scope;
   }
   
-  private Inst compilePopArgs(int offset, int requiredArgs, Inst next) throws CompileError
+  private Inst compilePopArgs(int offset, int numParams, Inst next) throws CompileError
   {
-    if (offset >= requiredArgs)
+    if (offset == numParams)
       return next;
     else
       return new PopArg(
              new StoreLocal(0, offset,
-             compilePopArgs(offset + 1, requiredArgs,
+             compilePopArgs(offset + 1, numParams,
              next)));
   }
-    
+  
+  private Inst compilePopArgsVariadic(int offset, int numParams, Inst next) throws CompileError
+  {
+    if (offset == numParams - 1)
+      return new PopArgs(
+             new StoreLocal(0, offset,
+             next));
+    else
+      return new PopArg(
+             new StoreLocal(0, offset,
+             compilePopArgsVariadic(offset + 1, numParams,
+             next)));
+  }
+  
   // (or a b ...)
   
   private Inst compileOr(List list, Scope scope, boolean tc, Inst next) throws CompileError

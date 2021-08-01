@@ -31,6 +31,11 @@ public class List extends Datum
     return length(this);
   }
   
+  public final Datum at(int index)
+  {
+    return at(this, index);
+  }
+  
   public final boolean eq(List that) throws TypeMismatch
   {
     return eq(this, that);
@@ -42,6 +47,13 @@ public class List extends Datum
     for (; list != Empty; list = list.rest)
       length += 1;
     return length;
+  }
+  
+  private static Datum at(List list, int index)
+  {
+    while (index-- > 0)
+      list = list.rest;
+    return list.first;
   }
   
   private static boolean eq(List x, List y) throws TypeMismatch
