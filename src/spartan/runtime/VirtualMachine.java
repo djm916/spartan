@@ -45,6 +45,13 @@ public final class VirtualMachine
     return x;
   }
   
+  public final List popArgs()
+  {
+    List x = args;
+    args = List.Empty;
+    return x;
+  }
+  
   final void pushFrame(Inst returnTo)
   {
     ++frameCount;

@@ -275,4 +275,10 @@ public final class Builtins
       return ((List)x).rest;
     }
   };
+  
+  public static final PrimFun MakeVector = new PrimFun(0, true) {
+    public Datum apply(VirtualMachine vm) throws TypeMismatch {
+      return Vector.fromList(vm.popArgs());
+    }
+  };
 }

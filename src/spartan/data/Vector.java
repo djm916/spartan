@@ -8,9 +8,12 @@ import spartan.builtins.Builtins;
 
 public class Vector extends Datum
 {
-  public Vector(Datum ... elems)
+  public static Vector fromList(List elems)
   {
-    this.elems = elems;
+    Vector result = new Vector(elems.length());
+    for (int i = 0; elems != List.Empty; ++i, elems = elems.rest)
+      result.elems[i] = elems.first;
+    return result;
   }
   
   public final Type type()
@@ -22,7 +25,7 @@ public class Vector extends Datum
   {
     return Stream.of(elems)
       .map(e -> e.repr())
-      .collect(Collectors.joining(", ", "(", ")"));
+      .collect(Collectors.joining(" ", "[", "]"));
   }
   
   public final int size()
@@ -51,6 +54,11 @@ public class Vector extends Datum
     
     return true;
   }
-
+  
+  private Vector(int numElems)
+  {
+    this.elems = new Datum[numElems];
+  }
+  
   private final Datum[] elems;
 }

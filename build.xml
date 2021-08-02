@@ -9,7 +9,9 @@
 
   <target name="compile">
     <mkdir dir="${build.dir}"/>
-    <javac srcdir="${src.dir}" destdir="${build.dir}" debug="true" includeantruntime="false"/>
+    <javac srcdir="${src.dir}" destdir="${build.dir}" debug="true" includeantruntime="false">
+      <compilerarg value="-Xlint"/>
+    </javac>
   </target>
 
   <target name="jar" depends="compile">
@@ -22,7 +24,7 @@
   
   <target name="run" depends="jar">
     <java jar="./Spartan.jar" fork="true">
-      <arg value="${script}"/>
+      <arg value="-Xprof"/>
     </java>
   </target>
 </project>

@@ -11,8 +11,7 @@ public final class PopArgs extends Inst
   
   public void exec(VirtualMachine vm)
   {
-    vm.result = vm.args;
-    vm.args = List.Empty;
+    vm.result = vm.popArgs();
     vm.control = next;
   }
 }

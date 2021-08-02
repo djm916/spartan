@@ -7,3 +7,5 @@
   (if (= 0 n)
     false
     (even (- n 1))))
+
+(even 100000)

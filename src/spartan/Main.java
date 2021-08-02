@@ -37,6 +37,7 @@ public class Main
     globals.bind(Symbol.get("~"), Builtins.Neg);
     globals.bind(Symbol.get("first"), Builtins.First);
     globals.bind(Symbol.get("rest"), Builtins.Rest);
+    globals.bind(Symbol.get("vector"), Builtins.MakeVector);
   }
   
   public static void main(String[] args) throws IOException
