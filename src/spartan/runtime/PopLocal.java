@@ -1,6 +1,6 @@
 package spartan.runtime;
 
-public class PopLocal extends Inst
+public final class PopLocal extends Inst
 {
   public PopLocal(Inst next)
   {

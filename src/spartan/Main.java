@@ -35,6 +35,8 @@ public class Main
     globals.bind(Symbol.get("<="), Builtins.Le);
     globals.bind(Symbol.get(">="), Builtins.Ge);
     globals.bind(Symbol.get("~"), Builtins.Neg);
+    globals.bind(Symbol.get("first"), Builtins.First);
+    globals.bind(Symbol.get("rest"), Builtins.Rest);
   }
   
   public static void main(String[] args) throws IOException

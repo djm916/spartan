@@ -1,6 +1,6 @@
 package spartan.runtime;
 
-public class PopArg extends Inst
+public final class PopArg extends Inst
 {
   public PopArg(Inst next)
   {

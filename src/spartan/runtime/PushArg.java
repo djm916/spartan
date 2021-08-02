@@ -1,6 +1,6 @@
 package spartan.runtime;
 
-public class PushArg extends Inst
+public final class PushArg extends Inst
 {
   public PushArg(Inst next)
   {

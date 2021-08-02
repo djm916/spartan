@@ -330,27 +330,21 @@ public class Compiler
     
     int numParams = params.length();
     boolean isVariadic = numParams != 0 && isRestParam((Symbol)params.at(numParams - 1));
-    
-    Inst code = null;
-    
-    if (isVariadic) {
-      code = new PushLocal(numParams,
-             compilePopArgsVariadic(0, numParams,
-             compileSequence(body, extendFunScope(params, scope), true,
-             new PopFrame())));
-    }
-    else {
-      code = new PushLocal(numParams,
-             compilePopArgs(0, numParams,
-             compileSequence(body, extendFunScope(params, scope), true,
-             new PopFrame())));
-    }
-    
+
+    Inst code = isVariadic ? new PushLocal(numParams,
+                             compilePopArgsVariadic(0, numParams,
+                             compileSequence(body, extendFunScope(params, scope), true,
+                             new PopFrame())))
+                           
+                           : new PushLocal(numParams,
+                             compilePopArgs(0, numParams,
+                             compileSequence(body, extendFunScope(params, scope), true,
+                             new PopFrame())));
+
     int requiredArgs = isVariadic ? numParams - 1 : numParams;
-    
     return new MakeClosure(code, requiredArgs, isVariadic, next);
   }
-  
+    
   private boolean isRestParam(Symbol s)
   {
     return s.repr().charAt(0) == '&';

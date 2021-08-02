@@ -2,7 +2,7 @@ package spartan.runtime;
 
 import spartan.data.Symbol;
 
-public class StoreGlobal extends Inst
+public final class StoreGlobal extends Inst
 {
   private final Symbol symb;
   

@@ -2,7 +2,7 @@ package spartan.runtime;
 
 import spartan.data.List;
 
-public class Frame
+public final class Frame
 {
   public final Frame parent;
   public final LocalEnv locals;

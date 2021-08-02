@@ -4,24 +4,24 @@ import spartan.data.Datum;
 import spartan.data.List;
 import spartan.errors.RuntimeError;
 
-public class VirtualMachine
+public final class VirtualMachine
 {
-  public Datum result;
-  public List args = List.Empty;
-  public Inst control;
-  public LocalEnv locals;
-  public GlobalEnv globals;
-  public Frame frame;
+  Datum result;
+  List args = List.Empty;
+  Inst control;
+  LocalEnv locals;
+  GlobalEnv globals;
+  Frame frame;
   
   // Metrics
-  public int frameCount = 0;
+  int frameCount = 0;
   
   public VirtualMachine(GlobalEnv globals)
   {
     this.globals = globals;
   }
   
-  public Datum exec(Inst code) throws RuntimeError
+  public final Datum exec(Inst code) throws RuntimeError
   {
     frameCount = 0;
     
@@ -33,15 +33,30 @@ public class VirtualMachine
     return result;
   }
   
-  public Datum popArg()
+  public final void pushArg(Datum x)
+  {
+    args = new List(x, args);
+  }
+  
+  public final Datum popArg()
   {
     Datum x = args.first;
     args = args.rest;
     return x;
   }
   
-  public void pushArg(Datum x)
+  final void pushFrame(Inst returnTo)
   {
-    args = new List(x, args);
+    ++frameCount;
+    frame = new Frame(frame, locals, args, returnTo);
+    args = List.Empty;
+  }
+  
+  final void popFrame()
+  {
+    control = frame.returnTo;
+    locals = frame.locals;
+    args = frame.args;
+    frame = frame.parent;
   }
 }

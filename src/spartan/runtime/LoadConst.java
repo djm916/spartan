@@ -2,7 +2,7 @@ package spartan.runtime;
 
 import spartan.data.Datum;
 
-public class LoadConst extends Inst
+public final class LoadConst extends Inst
 {
   private final Datum x;
   

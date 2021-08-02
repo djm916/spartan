@@ -1,6 +1,6 @@
 package spartan.runtime;
 
-public class LoadLocal extends Inst
+public final class LoadLocal extends Inst
 {
   private final int depth;
   private final int offset;

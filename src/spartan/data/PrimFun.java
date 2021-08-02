@@ -5,11 +5,13 @@ import spartan.runtime.VirtualMachine;
 
 public abstract class PrimFun extends Datum
 {
-  public final int numArgs;
+  public final int requiredArgs;
+  public final boolean isVariadic;
   
-  protected PrimFun(int numArgs)
+  protected PrimFun(int requiredArgs, boolean isVariadic)
   {
-    this.numArgs = numArgs;
+    this.requiredArgs = requiredArgs;
+    this.isVariadic = isVariadic;
   }
   
   public final Type type()

@@ -1,11 +1,9 @@
-(define even
-  (fun (n)
-    (if (= 0 n)
-      true
-      (odd (- n 1)))))
+(defun even (n)
+  (if (= 0 n)
+    true
+    (odd (- n 1))))
 
-(define odd
-  (fun (n)
-    (if (= 0 n)
-      false
-      (even (- n 1)))))
+(defun odd (n)
+  (if (= 0 n)
+    false
+    (even (- n 1))))

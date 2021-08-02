@@ -1,6 +1,6 @@
 package spartan.runtime;
 
-public class PushLocal extends Inst
+public final class PushLocal extends Inst
 {
   private final int numBindings;
   

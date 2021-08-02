@@ -2,7 +2,7 @@ package spartan.runtime;
 
 import spartan.builtins.Builtins;
 
-public class Branch extends Inst
+public final class Branch extends Inst
 {
   private final Inst ifTrue;
   

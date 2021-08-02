@@ -6,7 +6,7 @@ public abstract class Inst
 {
   protected final Inst next;
   
-  public Inst(Inst next)
+  protected Inst(Inst next)
   {
     this.next = next;
   }

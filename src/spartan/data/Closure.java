@@ -25,7 +25,6 @@ public class Closure extends Datum
   
   public final String repr()
   {
-    return String.format("%s @ 0x%x",
-      Type.Closure.name, System.identityHashCode(this));
+    return String.format("%s @ 0x%x", Type.Closure.name, System.identityHashCode(this));
   }
 }

@@ -2,7 +2,7 @@ package spartan.runtime;
 
 import spartan.data.List;
 
-public class PopArgs extends Inst
+public final class PopArgs extends Inst
 {
   public PopArgs(Inst next)
   {

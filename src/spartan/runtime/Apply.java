@@ -8,7 +8,7 @@ import spartan.parsing.Position;
 import spartan.errors.RuntimeError;
 import spartan.errors.Error;
 
-public class Apply extends Inst
+public final class Apply extends Inst
 {
   private final int numArgs;
   private final Position position;
@@ -26,30 +26,26 @@ public class Apply extends Inst
     
     switch (fun.type()) {
       case PrimFun: {
-        final PrimFun primFun = (PrimFun)fun;
-        if (numArgs != primFun.numArgs)
+        final PrimFun prim = (PrimFun)fun;
+        if (numArgs < prim.requiredArgs || !prim.isVariadic && numArgs > prim.requiredArgs)
           throw new RuntimeError("incorrect number of arguments in call", position);
         try {
-          vm.result = primFun.apply(vm);
+          vm.result = prim.apply(vm);
         }
         catch (Error err) {
           throw new RuntimeError(err.getMessage(), position);
         }
         finally {
-          vm.control = vm.frame.returnTo;
-          vm.locals = vm.frame.locals;
-          vm.args = vm.frame.args;
-          vm.frame = vm.frame.parent;
+          vm.popFrame();
         }
         break;
       }
       case Closure: {
-        final Closure closure = (Closure)fun;
-        if (numArgs < closure.requiredArgs ||
-            !closure.isVariadic && numArgs > closure.requiredArgs)
+        final Closure clo = (Closure)fun;
+        if (numArgs < clo.requiredArgs || !clo.isVariadic && numArgs > clo.requiredArgs)
           throw new RuntimeError("incorrect number of arguments in call", position);
-        vm.locals = closure.locals;
-        vm.control = closure.code;
+        vm.locals = clo.locals;
+        vm.control = clo.code;
         break;
       }
       default:

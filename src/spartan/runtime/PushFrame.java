@@ -2,7 +2,7 @@ package spartan.runtime;
 
 import spartan.data.List;
 
-public class PushFrame extends Inst
+public final class PushFrame extends Inst
 {
   private final Inst returnTo;
   
@@ -14,9 +14,7 @@ public class PushFrame extends Inst
   
   public void exec(VirtualMachine vm)
   {
-    vm.frame = new Frame(vm.frame, vm.locals, vm.args, returnTo);
-    ++vm.frameCount;
-    vm.args = List.Empty;
+    vm.pushFrame(returnTo);
     vm.control = next;
   }
 }

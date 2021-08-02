@@ -30,7 +30,7 @@ public final class Builtins
     throw new TypeMismatch();
   }
   
-  public static final PrimFun Add = new PrimFun(2) {
+  public static final PrimFun Add = new PrimFun(2, false) {
     public Datum apply(VirtualMachine vm) throws TypeMismatch {
       Datum x = vm.popArg();
       Datum y = vm.popArg();
@@ -49,7 +49,7 @@ public final class Builtins
     throw new TypeMismatch();
   }
   
-  public static final PrimFun Sub = new PrimFun(2) {
+  public static final PrimFun Sub = new PrimFun(2, false) {
     public Datum apply(VirtualMachine vm) throws TypeMismatch {
       Datum x = vm.popArg();
       Datum y = vm.popArg();
@@ -68,7 +68,7 @@ public final class Builtins
     throw new TypeMismatch();
   }
     
-  public static final PrimFun Mul = new PrimFun(2) {
+  public static final PrimFun Mul = new PrimFun(2, false) {
     public Datum apply(VirtualMachine vm) throws TypeMismatch {
       Datum x = vm.popArg();
       Datum y = vm.popArg();
@@ -87,7 +87,7 @@ public final class Builtins
     throw new TypeMismatch();
   }
   
-  public static final PrimFun Div = new PrimFun(2) {
+  public static final PrimFun Div = new PrimFun(2, false) {
     public Datum apply(VirtualMachine vm) throws TypeMismatch {
       Datum x = vm.popArg();
       Datum y = vm.popArg();
@@ -102,7 +102,7 @@ public final class Builtins
     throw new TypeMismatch();
   }
   
-  public static final PrimFun Mod = new PrimFun(2) {
+  public static final PrimFun Mod = new PrimFun(2, false) {
     public Datum apply(VirtualMachine vm) throws TypeMismatch {
       Datum x = vm.popArg();
       Datum y = vm.popArg();
@@ -119,7 +119,7 @@ public final class Builtins
     throw new TypeMismatch();
   }
   
-  public static final PrimFun Neg = new PrimFun(1) {
+  public static final PrimFun Neg = new PrimFun(1, false) {
     public Datum apply(VirtualMachine vm) throws TypeMismatch {
       Datum x = vm.popArg();
       return neg(x);
@@ -133,7 +133,7 @@ public final class Builtins
     throw new TypeMismatch();
   }
   
-  public static final PrimFun Not = new PrimFun(1) {
+  public static final PrimFun Not = new PrimFun(1, false) {
     public Datum apply(VirtualMachine vm) throws TypeMismatch {
       Datum x = vm.popArg();
       return not(x);
@@ -157,7 +157,7 @@ public final class Builtins
     throw new TypeMismatch();
   }
   
-  public static final PrimFun Eq = new PrimFun(2) {
+  public static final PrimFun Eq = new PrimFun(2, false) {
     public Datum apply(VirtualMachine vm) throws TypeMismatch {
       Datum x = vm.popArg();
       Datum y = vm.popArg();
@@ -170,7 +170,7 @@ public final class Builtins
     return !eq(x, y);
   }
   
-  public static final PrimFun Ne = new PrimFun(2) {
+  public static final PrimFun Ne = new PrimFun(2, false) {
     public Datum apply(VirtualMachine vm) throws TypeMismatch {
       Datum x = vm.popArg();
       Datum y = vm.popArg();
@@ -190,7 +190,7 @@ public final class Builtins
     throw new TypeMismatch();
   }
   
-  public static final PrimFun Lt = new PrimFun(2) {
+  public static final PrimFun Lt = new PrimFun(2, false) {
     public Datum apply(VirtualMachine vm) throws TypeMismatch {
       Datum x = vm.popArg();
       Datum y = vm.popArg();
@@ -210,7 +210,7 @@ public final class Builtins
     throw new TypeMismatch();
   }
   
-  public static final PrimFun Le = new PrimFun(2) {
+  public static final PrimFun Le = new PrimFun(2, false) {
     public Datum apply(VirtualMachine vm) throws TypeMismatch {
       Datum x = vm.popArg();
       Datum y = vm.popArg();
@@ -230,7 +230,7 @@ public final class Builtins
     throw new TypeMismatch();
   }
   
-  public static final PrimFun Gt = new PrimFun(2) {
+  public static final PrimFun Gt = new PrimFun(2, false) {
     public Datum apply(VirtualMachine vm) throws TypeMismatch {
       Datum x = vm.popArg();
       Datum y = vm.popArg();
@@ -250,11 +250,29 @@ public final class Builtins
     throw new TypeMismatch();
   }
   
-  public static final PrimFun Ge = new PrimFun(2) {
+  public static final PrimFun Ge = new PrimFun(2, false) {
     public Datum apply(VirtualMachine vm) throws TypeMismatch {
       Datum x = vm.popArg();
       Datum y = vm.popArg();
       return truth(ge(x, y));
+    }
+  };
+  
+  public static final PrimFun First = new PrimFun(1, false) {
+    public Datum apply(VirtualMachine vm) throws TypeMismatch {
+      Datum x = vm.popArg();
+      if (x.type() != Type.List)
+        throw new TypeMismatch();
+      return ((List)x).first;
+    }
+  };
+  
+  public static final PrimFun Rest = new PrimFun(1, false) {
+    public Datum apply(VirtualMachine vm) throws TypeMismatch {
+      Datum x = vm.popArg();
+      if (x.type() != Type.List)
+        throw new TypeMismatch();
+      return ((List)x).rest;
     }
   };
 }

@@ -2,7 +2,7 @@ package spartan.runtime;
 
 import spartan.data.Closure;
 
-public class MakeClosure extends Inst
+public final class MakeClosure extends Inst
 {
   private final Inst code;
   private final int requiredArgs;

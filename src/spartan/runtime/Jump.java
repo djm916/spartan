@@ -1,6 +1,6 @@
 package spartan.runtime;
 
-public class Jump extends Inst
+public final class Jump extends Inst
 {
   private Inst target;
   
@@ -9,12 +9,12 @@ public class Jump extends Inst
     super(null);
   }
   
-  public void setTarget(Inst target)
+  public final void setTarget(Inst target)
   {
     this.target = target;
   }
   
-  public void exec(VirtualMachine vm)
+  public final void exec(VirtualMachine vm)
   {
     vm.control = target;
   }
