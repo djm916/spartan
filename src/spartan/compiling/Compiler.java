@@ -43,7 +43,7 @@ public class Compiler
       index = scope.lookup(symb);
     
     if (index == null)
-      return new LoadGlobal(positionMap.get(symb), symb, next);
+      return new LoadGlobal(symb, positionMap.get(symb), next);
     else
       return new LoadLocal(index.depth, index.offset, next);
   }

@@ -30,11 +30,14 @@ public final class Builtins
     throw new TypeMismatch();
   }
   
-  public static final PrimFun Add = new PrimFun(2, false) {
+  public static final PrimFun Add = new PrimFun(2, true) {
     public Datum apply(VirtualMachine vm) throws TypeMismatch {
-      Datum x = vm.popArg();
       Datum y = vm.popArg();
-      return add(x, y);
+      Datum x = vm.popArg();
+      Datum result = add(x, y);
+      for (List zs = vm.popArgs(); zs != List.Empty; zs = zs.rest)
+        result = add(result, zs.first);
+      return result;
     }
   };
 
@@ -68,11 +71,14 @@ public final class Builtins
     throw new TypeMismatch();
   }
     
-  public static final PrimFun Mul = new PrimFun(2, false) {
+  public static final PrimFun Mul = new PrimFun(2, true) {
     public Datum apply(VirtualMachine vm) throws TypeMismatch {
-      Datum x = vm.popArg();
       Datum y = vm.popArg();
-      return mul(x, y);
+      Datum x = vm.popArg();
+      Datum result = mul(x, y);
+      for (List zs = vm.popArgs(); zs != List.Empty; zs = zs.rest)
+        result = mul(result, zs.first);
+      return result;
     }
   };
 

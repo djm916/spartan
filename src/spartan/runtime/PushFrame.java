@@ -1,7 +1,5 @@
 package spartan.runtime;
 
-import spartan.data.List;
-
 public final class PushFrame extends Inst
 {
   private final Inst returnTo;

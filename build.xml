@@ -1,6 +1,7 @@
 <project name="Spartan">
   <property name="src.dir"     value="src"/>
   <property name="build.dir"   value="build"/>
+  <property name="doc.dir"     value="doc"/>
   <property name="main-class"  value="spartan.Main"/>
     
   <target name="clean">
@@ -26,5 +27,10 @@
     <java jar="./Spartan.jar" fork="true">
       <arg value="-Xprof"/>
     </java>
+  </target>
+  
+  <target name="doc">
+    <mkdir dir="${doc.dir}"/>
+    <javadoc sourcepath="${src.dir}" destdir="${doc.dir}"/>
   </target>
 </project>

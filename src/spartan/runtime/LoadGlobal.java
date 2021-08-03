@@ -6,14 +6,14 @@ import spartan.errors.UnboundVariable;
 
 public final class LoadGlobal extends Inst
 {
-  private final Position position;
   private final Symbol symb;
+  private final Position position;
   
-  public LoadGlobal(Position position, Symbol symb, Inst next)
+  public LoadGlobal(Symbol symb, Position position, Inst next)
   {
     super(next);
-    this.position = position;
     this.symb = symb;
+    this.position = position;
   }
   
   public void exec(VirtualMachine vm) throws UnboundVariable

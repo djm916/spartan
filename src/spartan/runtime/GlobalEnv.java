@@ -5,7 +5,7 @@ import spartan.data.Symbol;
 import java.util.Map;
 import java.util.IdentityHashMap;
 
-public final class GlobalEnv
+public class GlobalEnv
 {
   private final Map<Symbol, Datum> globals = new IdentityHashMap<>();
 

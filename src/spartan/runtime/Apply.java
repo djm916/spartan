@@ -2,8 +2,6 @@ package spartan.runtime;
 
 import spartan.data.PrimFun;
 import spartan.data.Closure;
-import spartan.data.Datum;
-import spartan.data.List;
 import spartan.parsing.Position;
 import spartan.errors.RuntimeError;
 import spartan.errors.Error;
@@ -22,11 +20,9 @@ public final class Apply extends Inst
   
   public void exec(VirtualMachine vm) throws RuntimeError
   {
-    final Datum fun = vm.result;
-    
-    switch (fun.type()) {
+    switch (vm.result.type()) {
       case PrimFun: {
-        final PrimFun prim = (PrimFun)fun;
+        final PrimFun prim = (PrimFun)vm.result;
         if (numArgs < prim.requiredArgs || !prim.isVariadic && numArgs > prim.requiredArgs)
           throw new RuntimeError("incorrect number of arguments in call", position);
         try {
@@ -41,7 +37,7 @@ public final class Apply extends Inst
         break;
       }
       case Closure: {
-        final Closure clo = (Closure)fun;
+        final Closure clo = (Closure)vm.result;
         if (numArgs < clo.requiredArgs || !clo.isVariadic && numArgs > clo.requiredArgs)
           throw new RuntimeError("incorrect number of arguments in call", position);
         vm.locals = clo.locals;

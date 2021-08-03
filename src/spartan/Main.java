@@ -8,43 +8,23 @@ import spartan.parsing.SourceDatum;
 import spartan.compiling.Compiler;
 import spartan.runtime.Inst;
 import spartan.runtime.VirtualMachine;
-import spartan.runtime.GlobalEnv;
+import spartan.runtime.BaseEnv;
 import spartan.data.Datum;
 import spartan.data.Symbol;
-import spartan.builtins.Builtins;
 import java.io.IOException;
 
 public class Main
 {
-  private static final GlobalEnv globals = new GlobalEnv();  
   private static final String IntroMessage =  
     "Welcome to the Spartan interpreter!\n" +
     "Enter expressions to be evaluated.\n" +
     "Enter Control-D (on Linux) or Control-Z (on Windows) to exit.";
 
-  static
-  {
-    globals.bind(Symbol.get("+"), Builtins.Add);
-    globals.bind(Symbol.get("-"), Builtins.Sub);
-    globals.bind(Symbol.get("*"), Builtins.Mul);
-    globals.bind(Symbol.get("/"), Builtins.Div);
-    globals.bind(Symbol.get("="), Builtins.Eq);
-    globals.bind(Symbol.get("/="), Builtins.Ne);
-    globals.bind(Symbol.get("<"), Builtins.Lt);
-    globals.bind(Symbol.get(">"), Builtins.Gt);
-    globals.bind(Symbol.get("<="), Builtins.Le);
-    globals.bind(Symbol.get(">="), Builtins.Ge);
-    globals.bind(Symbol.get("~"), Builtins.Neg);
-    globals.bind(Symbol.get("first"), Builtins.First);
-    globals.bind(Symbol.get("rest"), Builtins.Rest);
-    globals.bind(Symbol.get("vector"), Builtins.MakeVector);
-  }
-  
   public static void main(String[] args) throws IOException
   {
     Reader reader = Reader.readStdin();
     Compiler compiler = new Compiler();
-    VirtualMachine vm = new VirtualMachine(globals);
+    VirtualMachine vm = new VirtualMachine(new BaseEnv());
     
     System.out.println(IntroMessage);
     do {

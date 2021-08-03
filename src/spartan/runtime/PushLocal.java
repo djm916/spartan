@@ -2,17 +2,17 @@ package spartan.runtime;
 
 public final class PushLocal extends Inst
 {
-  private final int numBindings;
+  private final int numSlots;
   
-  public PushLocal(int numBindings, Inst next)
+  public PushLocal(int numSlots, Inst next)
   {
     super(next);
-    this.numBindings = numBindings;
+    this.numSlots = numSlots;
   }
   
   public void exec(VirtualMachine vm)
   {
-    vm.locals = new LocalEnv(numBindings, vm.locals);
+    vm.locals = new LocalEnv(numSlots, vm.locals);
     vm.control = next;
   }
 }
