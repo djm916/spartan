@@ -6,6 +6,7 @@
     
   <target name="clean">
     <delete dir="${build.dir}"/>
+    <delete dir="${doc.dir}"/>
   </target>
 
   <target name="compile">
