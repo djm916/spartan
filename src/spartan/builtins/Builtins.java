@@ -293,14 +293,26 @@ public final class Builtins
   };
   
   public static final PrimFun MakeList = new PrimFun(0, true) {
-    public Datum apply(VirtualMachine vm) throws TypeMismatch {
+    public Datum apply(VirtualMachine vm) {
       return vm.popArgs();
     }
   };
   
   public static final PrimFun MakeVector = new PrimFun(0, true) {
-    public Datum apply(VirtualMachine vm) throws TypeMismatch {
+    public Datum apply(VirtualMachine vm) {
       return Vector.fromList(vm.popArgs());
     }
   };
+  
+  /*
+  public static final PrimFun Apply = new PrimFun(2, false) {
+    public Datum apply(VirtualMachine vm) throws Error {
+      Datum x = vm.popArg();
+      Datum y = vm.popArg();
+      if (y.type() != Type.List)
+        throw new TypeMismatch();
+      return vm.apply(x, (List)y);
+    }
+  };
+  */
 }

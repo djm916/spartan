@@ -2,7 +2,12 @@ package spartan.runtime;
 
 import spartan.data.Datum;
 import spartan.data.List;
+import spartan.data.PrimFun;
+import spartan.data.Closure;
 import spartan.errors.RuntimeError;
+import spartan.errors.Error;
+import spartan.errors.TypeMismatch;
+import spartan.errors.WrongNumberArgs;
 
 public final class VirtualMachine
 {
@@ -66,4 +71,41 @@ public final class VirtualMachine
     args = frame.args;
     frame = frame.parent;
   }
+  
+  final void apply(int numArgs) throws Error
+  {
+    switch (result.type()) {
+      case PrimFun: {
+        final PrimFun prim = (PrimFun)result;
+        if (numArgs < prim.requiredArgs || !prim.isVariadic && numArgs > prim.requiredArgs)
+          throw new WrongNumberArgs();
+        try {
+          result = prim.apply(this);
+        }
+        finally {
+          popFrame();
+        }
+        break;
+      }
+      case Closure: {
+        final Closure clo = (Closure)result;
+        if (numArgs < clo.requiredArgs || !clo.isVariadic && numArgs > clo.requiredArgs)
+          throw new WrongNumberArgs();
+        locals = clo.locals;
+        control = clo.code;
+        break;
+      }
+      default:
+        throw new TypeMismatch();
+    }
+  }
+  /*
+  public final Datum apply(Datum f, List args) throws Error
+  {
+    result = f;
+    this.args = args;
+    apply(args.length());
+    return result;
+  }
+  */
 }

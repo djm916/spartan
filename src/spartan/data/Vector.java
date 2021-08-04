@@ -35,12 +35,9 @@ public class Vector extends Datum
   
   public final Datum at(int index) throws NoSuchElement
   {
-    try {
-      return elems[index];
-    }
-    catch (ArrayIndexOutOfBoundsException ex) {
+    if (index >= elems.length)
       throw new NoSuchElement();
-    }
+    return elems[index];
   }
   
   public final boolean eq(Vector that) throws TypeMismatch

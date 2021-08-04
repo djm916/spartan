@@ -1,7 +1,5 @@
 package spartan.runtime;
 
-import spartan.data.PrimFun;
-import spartan.data.Closure;
 import spartan.parsing.Position;
 import spartan.errors.RuntimeError;
 import spartan.errors.Error;
@@ -18,34 +16,13 @@ public final class Apply extends Inst
     this.position = position;
   }
   
-  public void exec(VirtualMachine vm) throws RuntimeError
+  public final void exec(VirtualMachine vm) throws RuntimeError
   {
-    switch (vm.result.type()) {
-      case PrimFun: {
-        final PrimFun prim = (PrimFun)vm.result;
-        if (numArgs < prim.requiredArgs || !prim.isVariadic && numArgs > prim.requiredArgs)
-          throw new RuntimeError("incorrect number of arguments in call", position);
-        try {
-          vm.result = prim.apply(vm);
-        }
-        catch (Error err) {
-          throw new RuntimeError(err.getMessage(), position);
-        }
-        finally {
-          vm.popFrame();
-        }
-        break;
-      }
-      case Closure: {
-        final Closure clo = (Closure)vm.result;
-        if (numArgs < clo.requiredArgs || !clo.isVariadic && numArgs > clo.requiredArgs)
-          throw new RuntimeError("incorrect number of arguments in call", position);
-        vm.locals = clo.locals;
-        vm.control = clo.code;
-        break;
-      }
-      default:
-        throw new RuntimeError("attempt to call non-function", position);
+    try {
+      vm.apply(numArgs);
+    }
+    catch (Error err) {
+      throw new RuntimeError(err.getMessage(), position);
     }
   }
 }
