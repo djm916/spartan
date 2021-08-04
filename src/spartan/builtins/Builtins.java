@@ -264,7 +264,7 @@ public final class Builtins
     }
   };
   
-  public static final PrimFun First = new PrimFun(1, false) {
+  public static final PrimFun Car = new PrimFun(1, false) {
     public Datum apply(VirtualMachine vm) throws TypeMismatch {
       Datum x = vm.popArg();
       if (x.type() != Type.List)
@@ -273,12 +273,28 @@ public final class Builtins
     }
   };
   
-  public static final PrimFun Rest = new PrimFun(1, false) {
+  public static final PrimFun Cdr = new PrimFun(1, false) {
     public Datum apply(VirtualMachine vm) throws TypeMismatch {
       Datum x = vm.popArg();
       if (x.type() != Type.List)
         throw new TypeMismatch();
       return ((List)x).rest;
+    }
+  };
+  
+  public static final PrimFun Cons = new PrimFun(2, false) {
+    public Datum apply(VirtualMachine vm) throws TypeMismatch {
+      Datum x = vm.popArg();
+      Datum y = vm.popArg();
+      if (y.type() != Type.List)
+        throw new TypeMismatch();
+      return new List(x, (List)y);
+    }
+  };
+  
+  public static final PrimFun MakeList = new PrimFun(0, true) {
+    public Datum apply(VirtualMachine vm) throws TypeMismatch {
+      return vm.popArgs();
     }
   };
   

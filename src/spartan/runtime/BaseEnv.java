@@ -17,8 +17,12 @@ public final class BaseEnv extends GlobalEnv
     bind(Symbol.get("<="), Le);
     bind(Symbol.get(">="), Ge);
     bind(Symbol.get("~"), Neg);
-    bind(Symbol.get("first"), First);
-    bind(Symbol.get("rest"), Rest);
+    
+    bind(Symbol.get("car"), Car);
+    bind(Symbol.get("cdr"), Cdr);
+    bind(Symbol.get("cons"), Cons);
+    
+    bind(Symbol.get("list"), MakeList);
     bind(Symbol.get("vector"), MakeVector);
   }
 }
