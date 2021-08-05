@@ -304,15 +304,17 @@ public final class Builtins
     }
   };
   
-  /*
   public static final PrimFun Apply = new PrimFun(2, false) {
     public Datum apply(VirtualMachine vm) throws Error {
       Datum x = vm.popArg();
       Datum y = vm.popArg();
       if (y.type() != Type.List)
         throw new TypeMismatch();
-      return vm.apply(x, (List)y);
+      vm.pushFrame(vm.frame.returnTo);
+      vm.result = x;
+      vm.args = (List)y;
+      vm.apply(vm.args.length());
+      return vm.result;
     }
   };
-  */
 }

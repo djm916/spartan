@@ -11,12 +11,12 @@ import spartan.errors.WrongNumberArgs;
 
 public final class VirtualMachine
 {
-  Datum result;
-  List args = List.Empty;
-  Inst control;
-  LocalEnv locals;
-  GlobalEnv globals;
-  Frame frame;
+  public Datum result;
+  public List args = List.Empty;
+  public Inst control;
+  public LocalEnv locals;
+  public GlobalEnv globals;
+  public Frame frame;
   
   // Metrics
   int frameCount = 0;
@@ -57,14 +57,14 @@ public final class VirtualMachine
     return x;
   }
   
-  final void pushFrame(Inst returnTo)
+  public final void pushFrame(Inst returnTo)
   {
     ++frameCount;
     frame = new Frame(frame, locals, args, returnTo);
     args = List.Empty;
   }
   
-  final void popFrame()
+  public final void popFrame()
   {
     control = frame.returnTo;
     locals = frame.locals;
@@ -72,7 +72,7 @@ public final class VirtualMachine
     frame = frame.parent;
   }
   
-  final void apply(int numArgs) throws Error
+  public final void apply(int numArgs) throws Error
   {
     switch (result.type()) {
       case PrimFun: {

@@ -2,12 +2,12 @@ package spartan.runtime;
 
 import spartan.data.List;
 
-final class Frame
+public final class Frame
 {
-  final Frame parent;
-  final LocalEnv locals;
-  final List args;
-  final Inst returnTo;
+  public final Frame parent;
+  public final LocalEnv locals;
+  public final List args;
+  public final Inst returnTo;
   
   Frame(Frame parent, LocalEnv locals, List args, Inst returnTo)
   {
