@@ -2,8 +2,7 @@ package spartan.runtime;
 
 import spartan.data.Datum;
 import spartan.data.List;
-import spartan.data.PrimFun;
-import spartan.data.Closure;
+import spartan.data.Callable;
 import spartan.errors.RuntimeError;
 import spartan.errors.Error;
 import spartan.errors.TypeMismatch;
@@ -79,25 +78,9 @@ public final class VirtualMachine
   
   public final void apply(int numArgs) throws Error
   {
-    switch (result.type()) {
-      case PrimFun: {
-        final PrimFun prim = (PrimFun)result;
-        if (numArgs < prim.requiredArgs || !prim.isVariadic && numArgs > prim.requiredArgs)
-          throw new WrongNumberArgs();
-        prim.apply(this);
-        break;
-      }
-      case Closure: {
-        final Closure clo = (Closure)result;
-        if (numArgs < clo.requiredArgs || !clo.isVariadic && numArgs > clo.requiredArgs)
-          throw new WrongNumberArgs();
-        locals = clo.locals;
-        control = clo.code;
-        break;
-      }
-      default:
-        throw new TypeMismatch();
-    }
+    if (! (result instanceof Callable))
+      throw new TypeMismatch();
+    ((Callable)result).apply(this, numArgs);
   }
   
   public final void reset()

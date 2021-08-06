@@ -30,7 +30,7 @@ public final class Builtins
   }
     
   public static final PrimFun Add = new PrimFun(2, true) {
-    public void apply(VirtualMachine vm) throws TypeMismatch {
+    public void doApply(VirtualMachine vm) throws TypeMismatch {
       vm.result = add(vm.popArg(), vm.popArg());
       while (vm.args != List.Empty)
         vm.result = add(vm.result, vm.popArg());
@@ -50,7 +50,7 @@ public final class Builtins
   }
   
   public static final PrimFun Sub = new PrimFun(2, false) {
-    public void apply(VirtualMachine vm) throws TypeMismatch {
+    public void doApply(VirtualMachine vm) throws TypeMismatch {
       vm.result = sub(vm.popArg(), vm.popArg());
       vm.popFrame();
     }
@@ -68,7 +68,7 @@ public final class Builtins
   }
     
   public static final PrimFun Mul = new PrimFun(2, true) {
-    public void apply(VirtualMachine vm) throws TypeMismatch {
+    public void doApply(VirtualMachine vm) throws TypeMismatch {
       vm.result = mul(vm.popArg(), vm.popArg());
       while (vm.args != List.Empty)
         vm.result = mul(vm.result, vm.popArg());
@@ -88,7 +88,7 @@ public final class Builtins
   }
   
   public static final PrimFun Div = new PrimFun(2, false) {
-    public void apply(VirtualMachine vm) throws TypeMismatch {
+    public void doApply(VirtualMachine vm) throws TypeMismatch {
       vm.result = div(vm.popArg(), vm.popArg());
       vm.popFrame();
     }
@@ -102,7 +102,7 @@ public final class Builtins
   }
   
   public static final PrimFun Mod = new PrimFun(2, false) {
-    public void apply(VirtualMachine vm) throws TypeMismatch {
+    public void doApply(VirtualMachine vm) throws TypeMismatch {
       vm.result = mod(vm.popArg(), vm.popArg());
       vm.popFrame();
     }
@@ -118,7 +118,7 @@ public final class Builtins
   }
   
   public static final PrimFun Neg = new PrimFun(1, false) {
-    public void apply(VirtualMachine vm) throws TypeMismatch {
+    public void doApply(VirtualMachine vm) throws TypeMismatch {
       vm.result = neg(vm.popArg());
       vm.popFrame();
     }
@@ -132,7 +132,7 @@ public final class Builtins
   }
   
   public static final PrimFun Not = new PrimFun(1, false) {
-    public void apply(VirtualMachine vm) throws TypeMismatch {
+    public void doApply(VirtualMachine vm) throws TypeMismatch {
       vm.result = not(vm.popArg());
       vm.popFrame();
     }
@@ -156,7 +156,7 @@ public final class Builtins
   }
   
   public static final PrimFun Eq = new PrimFun(2, false) {
-    public void apply(VirtualMachine vm) throws TypeMismatch {
+    public void doApply(VirtualMachine vm) throws TypeMismatch {
       vm.result = truth(eq(vm.popArg(), vm.popArg()));
       vm.popFrame();
     }
@@ -168,7 +168,7 @@ public final class Builtins
   }
   
   public static final PrimFun Ne = new PrimFun(2, false) {
-    public void apply(VirtualMachine vm) throws TypeMismatch {
+    public void doApply(VirtualMachine vm) throws TypeMismatch {
       vm.result = truth(ne(vm.popArg(), vm.popArg()));
       vm.popFrame();
     }
@@ -187,7 +187,7 @@ public final class Builtins
   }
   
   public static final PrimFun Lt = new PrimFun(2, false) {
-    public void apply(VirtualMachine vm) throws TypeMismatch {
+    public void doApply(VirtualMachine vm) throws TypeMismatch {
       vm.result = truth(lt(vm.popArg(), vm.popArg()));
       vm.popFrame();
     }
@@ -206,7 +206,7 @@ public final class Builtins
   }
   
   public static final PrimFun Le = new PrimFun(2, false) {
-    public void apply(VirtualMachine vm) throws TypeMismatch {
+    public void doApply(VirtualMachine vm) throws TypeMismatch {
       vm.result = truth(le(vm.popArg(), vm.popArg()));
       vm.popFrame();
     }
@@ -225,7 +225,7 @@ public final class Builtins
   }
   
   public static final PrimFun Gt = new PrimFun(2, false) {
-    public void apply(VirtualMachine vm) throws TypeMismatch {
+    public void doApply(VirtualMachine vm) throws TypeMismatch {
       vm.result = truth(gt(vm.popArg(), vm.popArg()));
       vm.popFrame();
     }
@@ -244,7 +244,7 @@ public final class Builtins
   }
   
   public static final PrimFun Ge = new PrimFun(2, false) {
-    public void apply(VirtualMachine vm) throws TypeMismatch {
+    public void doApply(VirtualMachine vm) throws TypeMismatch {
       vm.result = truth(ge(vm.popArg(), vm.popArg()));
       vm.popFrame();
     }
@@ -258,7 +258,7 @@ public final class Builtins
   }
   
   public static final PrimFun Car = new PrimFun(1, false) {
-    public void apply(VirtualMachine vm) throws TypeMismatch {
+    public void doApply(VirtualMachine vm) throws TypeMismatch {
       vm.result = car(vm.popArg());
       vm.popFrame();
     }
@@ -272,7 +272,7 @@ public final class Builtins
   }
   
   public static final PrimFun Cdr = new PrimFun(1, false) {
-    public void apply(VirtualMachine vm) throws TypeMismatch {
+    public void doApply(VirtualMachine vm) throws TypeMismatch {
       vm.result = cdr(vm.popArg());
       vm.popFrame();
     }
@@ -286,28 +286,28 @@ public final class Builtins
   }
   
   public static final PrimFun Cons = new PrimFun(2, false) {
-    public void apply(VirtualMachine vm) throws TypeMismatch {
+    public void doApply(VirtualMachine vm) throws TypeMismatch {
       vm.result = cons(vm.popArg(), vm.popArg());
       vm.popFrame();
     }
   };
   
   public static final PrimFun MakeList = new PrimFun(0, true) {
-    public void apply(VirtualMachine vm) {
+    public void doApply(VirtualMachine vm) {
       vm.result = vm.popArgs();
       vm.popFrame();
     }
   };
   
   public static final PrimFun MakeVector = new PrimFun(0, true) {
-    public void apply(VirtualMachine vm) {
+    public void doApply(VirtualMachine vm) {
       vm.result = Vector.fromList(vm.popArgs());
       vm.popFrame();
     }
   };
   
   public static final PrimFun Apply = new PrimFun(2, false) {
-    public void apply(VirtualMachine vm) throws Error {
+    public void doApply(VirtualMachine vm) throws Error {
       vm.result = vm.popArg();
       if (vm.peekArg().type() != Type.List)
         throw new TypeMismatch();

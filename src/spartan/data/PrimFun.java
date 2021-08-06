@@ -1,9 +1,10 @@
 package spartan.data;
 
 import spartan.errors.Error;
+import spartan.errors.WrongNumberArgs;
 import spartan.runtime.VirtualMachine;
 
-public abstract class PrimFun extends Datum
+public abstract class PrimFun extends Datum implements Callable
 {
   public final int requiredArgs;
   public final boolean isVariadic;
@@ -24,5 +25,12 @@ public abstract class PrimFun extends Datum
     return Type.PrimFun.name;
   }
   
-  public abstract void apply(VirtualMachine vm) throws Error;
+  public final void apply(VirtualMachine vm, int numArgs) throws Error
+  {
+    if (numArgs < requiredArgs || !isVariadic && numArgs > requiredArgs)
+      throw new WrongNumberArgs();
+    doApply(vm);
+  }
+  
+  public abstract void doApply(VirtualMachine vm) throws Error;
 }

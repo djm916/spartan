@@ -2,8 +2,11 @@ package spartan.data;
 
 import spartan.runtime.Inst;
 import spartan.runtime.LocalEnv;
+import spartan.runtime.VirtualMachine;
+import spartan.errors.Error;
+import spartan.errors.WrongNumberArgs;
 
-public class Closure extends Datum
+public class Closure extends Datum implements Callable
 {
   public final Inst code;
   public final LocalEnv locals;
@@ -26,5 +29,13 @@ public class Closure extends Datum
   public final String repr()
   {
     return String.format("%s @ 0x%x", Type.Closure.name, System.identityHashCode(this));
+  }
+  
+  public void apply(VirtualMachine vm, int numArgs) throws Error
+  {
+    if (numArgs < requiredArgs || !isVariadic && numArgs > requiredArgs)
+      throw new WrongNumberArgs();
+    vm.locals = locals;
+    vm.control = code;
   }
 }
