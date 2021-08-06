@@ -2,11 +2,14 @@ package spartan.data;
 
 import java.util.stream.Stream;
 import java.util.stream.Collectors;
+import spartan.runtime.VirtualMachine;
+import spartan.errors.Error;
+import spartan.errors.WrongNumberArgs;
 import spartan.errors.NoSuchElement;
 import spartan.errors.TypeMismatch;
 import spartan.builtins.Builtins;
 
-public class Vector extends Datum
+public class Vector extends Datum implements Callable
 {
   public static Vector fromList(List elems)
   {
@@ -50,6 +53,16 @@ public class Vector extends Datum
         return false;
     
     return true;
+  }
+  
+  public void apply(VirtualMachine vm, int numArgs) throws Error
+  {
+    if (numArgs != 1)
+      throw new WrongNumberArgs();
+    if (vm.peekArg().type() != Type.Int)
+      throw new TypeMismatch();
+    vm.result = at(((Int)vm.popArg()).value);
+    vm.popFrame();
   }
   
   private Vector(int numElems)

@@ -8,10 +8,10 @@ import spartan.errors.WrongNumberArgs;
 
 public class Closure extends Datum implements Callable
 {
-  public final Inst code;
-  public final LocalEnv locals;
-  public final int requiredArgs;
-  public final boolean isVariadic;
+  private final Inst code;
+  private final LocalEnv locals;
+  private final int requiredArgs;
+  private final boolean isVariadic;
   
   public Closure(Inst code, LocalEnv locals, int requiredArgs, boolean isVariadic)
   {

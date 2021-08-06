@@ -6,8 +6,8 @@ import spartan.runtime.VirtualMachine;
 
 public abstract class PrimFun extends Datum implements Callable
 {
-  public final int requiredArgs;
-  public final boolean isVariadic;
+  private final int requiredArgs;
+  private final boolean isVariadic;
   
   protected PrimFun(int requiredArgs, boolean isVariadic)
   {
