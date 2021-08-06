@@ -5,12 +5,15 @@ import java.util.Map;
 import java.util.IdentityHashMap;
 import java.util.stream.Stream;
 import java.util.stream.Collectors;
+import spartan.errors.Error;
+import spartan.errors.WrongNumberArgs;
 import spartan.errors.NoSuchElement;
 import spartan.errors.TypeMismatch;
 import spartan.builtins.Builtins;
 import spartan.data.Symbol;
+import spartan.runtime.VirtualMachine;
 
-public class Record extends Datum
+public class Record extends Datum implements Callable
 {
   public static Record fromList(List elems) throws TypeMismatch
   {
@@ -68,6 +71,16 @@ public class Record extends Datum
     return true;
   }
 
+  public void apply(VirtualMachine vm, int numArgs) throws Error
+  {
+    if (numArgs != 1)
+      throw new WrongNumberArgs();
+    if (vm.peekArg().type() != Type.Symbol)
+      throw new TypeMismatch();
+    vm.result = at((Symbol)vm.popArg());
+    vm.popFrame();
+  }
+  
   private Record()
   {
     members = new IdentityHashMap<>();

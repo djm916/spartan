@@ -29,7 +29,7 @@ public final class Bool extends Datum
   {
     return this.value && that.value ? True : False;
   }
-  
+    
   private Bool(boolean value)
   {
     this.value = value;
