@@ -42,8 +42,12 @@ public class Main
       catch (IOException ex) {
         System.out.println("error: " + ex.getMessage());
       }
-      catch (SyntaxError | CompileError | RuntimeError ex) {
+      catch (SyntaxError | CompileError ex) {
         System.out.println(ex);
+      }
+      catch (RuntimeError ex) {
+        System.out.println(ex);
+        vm.reset();
       }
     }
     while (true);

@@ -24,5 +24,5 @@ public abstract class PrimFun extends Datum
     return Type.PrimFun.name;
   }
   
-  public abstract Datum apply(VirtualMachine vm) throws Error;
+  public abstract void apply(VirtualMachine vm) throws Error;
 }

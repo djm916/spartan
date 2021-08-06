@@ -50,6 +50,11 @@ public final class VirtualMachine
     return x;
   }
   
+  public final Datum peekArg()
+  {
+    return args.first;
+  }
+  
   public final List popArgs()
   {
     List x = args;
@@ -79,12 +84,7 @@ public final class VirtualMachine
         final PrimFun prim = (PrimFun)result;
         if (numArgs < prim.requiredArgs || !prim.isVariadic && numArgs > prim.requiredArgs)
           throw new WrongNumberArgs();
-        try {
-          result = prim.apply(this);
-        }
-        finally {
-          popFrame();
-        }
+        prim.apply(this);
         break;
       }
       case Closure: {
@@ -99,13 +99,12 @@ public final class VirtualMachine
         throw new TypeMismatch();
     }
   }
-  /*
-  public final Datum apply(Datum f, List args) throws Error
+  
+  public final void reset()
   {
-    result = f;
-    this.args = args;
-    apply(args.length());
-    return result;
+    control = null;
+    args = List.Empty;
+    locals = null;
+    frame = null;
   }
-  */
 }

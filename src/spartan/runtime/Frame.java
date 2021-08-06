@@ -9,7 +9,7 @@ public final class Frame
   public final List args;
   public final Inst returnTo;
   
-  Frame(Frame parent, LocalEnv locals, List args, Inst returnTo)
+  public Frame(Frame parent, LocalEnv locals, List args, Inst returnTo)
   {
     this.parent = parent;
     this.locals = locals;
