@@ -306,6 +306,13 @@ public final class Builtins
     }
   };
   
+  public static final PrimFun MakeRecord = new PrimFun(0, true) {
+    public void doApply(VirtualMachine vm) throws TypeMismatch {
+      vm.result = Record.fromList(vm.popArgs());
+      vm.popFrame();
+    }
+  };
+  
   public static final PrimFun Apply = new PrimFun(2, false) {
     public void doApply(VirtualMachine vm) throws Error {
       vm.result = vm.popArg();

@@ -8,37 +8,47 @@ import java.util.stream.Collectors;
 import spartan.errors.NoSuchElement;
 import spartan.errors.TypeMismatch;
 import spartan.builtins.Builtins;
+import spartan.data.Symbol;
 
 public class Record extends Datum
 {
-  public Record(String[] labels, Datum[] values)
+  public static Record fromList(List elems) throws TypeMismatch
   {
-    members = new IdentityHashMap<>(labels.length);
-    for (int i = 0; i < labels.length; ++i)
-      members.put(labels[i], values[i]);
+    Record result = new Record();
+    for (; elems != List.Empty; elems = elems.rest) {
+      if (elems.first.type() != Type.Symbol)
+        throw new TypeMismatch();
+      Symbol key = (Symbol)elems.first;
+      if (elems.rest == List.Empty)
+        throw new TypeMismatch();
+      Datum value = elems.rest.first;
+      elems = elems.rest;
+      result.members.put(key, value);
+    }
+    return result;
   }
   
-  public Type type()
+  public final Type type()
   {
     return Type.Record;
   }
   
-  public String repr()
+  public final String repr()
   {
     return members.entrySet().stream()
-      .map(e -> String.format("%s: %s", e.getKey(), e.getValue().repr()))
-      .collect(Collectors.joining(", ", "{", "}"));
+      .map(e -> String.format("%s %s", e.getKey().repr(), e.getValue().repr()))
+      .collect(Collectors.joining(" ", "{", "}"));
   }
   
-  public Datum at(String label) throws NoSuchElement
+  public final Datum at(Symbol key) throws NoSuchElement
   {
-    Datum result = members.get(label);
-    if (result == null)
+    Datum value = members.get(key);
+    if (value == null)
       throw new NoSuchElement();
-    return result;
+    return value;
   }
 
-  public int size()
+  public final int size()
   {
     return members.size();
   }
@@ -48,15 +58,20 @@ public class Record extends Datum
     if (this.size() != that.size())
       return false;
         
-    for (String label : this.members.keySet()) {
-      if (!that.members.containsKey(label))
+    for (Symbol key : this.members.keySet()) {
+      if (!that.members.containsKey(key))
         return false;
-      if (!Builtins.eq(this.members.get(label), that.members.get(label)))
+      if (!Builtins.eq(this.members.get(key), that.members.get(key)))
         return false;
     }
     
     return true;
   }
 
-  private final Map<String, Datum> members;
+  private Record()
+  {
+    members = new IdentityHashMap<>();
+  }
+  
+  private final Map<Symbol, Datum> members;
 }
