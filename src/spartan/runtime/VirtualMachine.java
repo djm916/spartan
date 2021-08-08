@@ -44,14 +44,14 @@ public final class VirtualMachine
   
   public final Datum popArg()
   {
-    Datum x = args.first;
-    args = args.rest;
+    Datum x = args.car();
+    args = args.cdr();
     return x;
   }
   
   public final Datum peekArg()
   {
-    return args.first;
+    return args.car();
   }
   
   public final List popArgs()

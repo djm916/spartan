@@ -32,7 +32,7 @@ public class Compiler
     if (list.length() != 2)
       throw new CompileError("malformed expression", positionMap.get(list));
     
-    return new LoadConst(list.rest.first, next);
+    return new LoadConst(list.cdr().car(), next);
   }
   
   private Inst compileSymbol(Symbol symb, Scope scope, Inst next) throws CompileError
@@ -50,11 +50,11 @@ public class Compiler
   
   private Inst compileDef(List list, Scope scope, Inst next) throws CompileError
   {
-    if (list.length() != 3 || list.rest.first.type() != Type.Symbol)
+    if (list.length() != 3 || list.cdr().car().type() != Type.Symbol)
       throw new CompileError("malformed expression", positionMap.get(list));    
     
-    Symbol symb = (Symbol)list.rest.first;
-    Datum init = list.rest.rest.first;    
+    Symbol symb = (Symbol)list.cdr().car();
+    Datum init = list.cdr().cdr().car();    
     
     return compile(init, scope, false,
            new StoreGlobal(symb, next));
@@ -64,10 +64,10 @@ public class Compiler
   
   private Inst compileDefun(List list, Scope scope, Inst next) throws CompileError
   {
-    if (list.length() < 4 || list.rest.first.type() != Type.Symbol)
+    if (list.length() < 4 || list.cdr().car().type() != Type.Symbol)
       throw new CompileError("malformed expression", positionMap.get(list));
     
-    return compile(transformDefun(list.rest), scope, false, next);
+    return compile(transformDefun(list.cdr()), scope, false, next);
   }
   
   // (defun f (a b c ...) body...)
@@ -77,10 +77,10 @@ public class Compiler
   private List transformDefun(List list)
   {
     return new List(Symbol.get("def"),
-           new List(list.first,
+           new List(list.car(),
            new List(new List(Symbol.get("fun"),
-                    new List(list.rest.first,
-                    list.rest.rest)),
+                    new List(list.cdr().car(),
+                    list.cdr().cdr())),
            List.Empty)));
   }
   
@@ -89,8 +89,8 @@ public class Compiler
     if (list == List.Empty)
       return next;
     else
-      return compile(list.first, scope, (tc && list.rest == List.Empty),
-             compileSequence(list.rest, scope, tc, next));
+      return compile(list.car(), scope, (tc && list.cdr() == List.Empty),
+             compileSequence(list.cdr(), scope, tc, next));
   }
   
   // (if e1 e2)
@@ -102,8 +102,8 @@ public class Compiler
     int length = list.length();
     
     if (length == 3) {
-      Datum cond = list.rest.first;
-      Datum trueBranch = list.rest.rest.first;
+      Datum cond = list.cdr().car();
+      Datum trueBranch = list.cdr().cdr().car();
 
       return compile(cond, scope, false,
              new Branch(
@@ -111,9 +111,9 @@ public class Compiler
                new LoadConst(Nil.Instance, next)));
     }
     else if (length == 4) {
-      Datum cond = list.rest.first;
-      Datum trueBranch = list.rest.rest.first;
-      Datum falseBranch = list.rest.rest.rest.first;
+      Datum cond = list.cdr().car();
+      Datum trueBranch = list.cdr().cdr().car();
+      Datum falseBranch = list.cdr().cdr().cdr().car();
       
       return compile(cond, scope, false,
              new Branch(
@@ -126,18 +126,18 @@ public class Compiler
   
   private Inst compileCond(List list, Scope scope, boolean tc, Inst next) throws CompileError
   {
-    if (list.length() < 2 || !checkCondClauses(list.rest))
+    if (list.length() < 2 || !checkCondClauses(list.cdr()))
       throw new CompileError("malformed expression", positionMap.get(list));
     
-    return compileCondClauses(list.rest, scope, tc, next);
+    return compileCondClauses(list.cdr(), scope, tc, next);
   }
   
   private boolean checkCondClauses(List list)
   {
-    for (; list != List.Empty; list = list.rest) {
-      if (list.first.type() != Type.List)
+    for (; list != List.Empty; list = list.cdr()) {
+      if (list.car().type() != Type.List)
         return false;
-      List clause = (List)list.first;
+      List clause = (List)list.car();
       if (clause.length() < 2)
         return false;
     }
@@ -149,26 +149,26 @@ public class Compiler
     if (list == List.Empty)
       return next;
     else {
-      List clause = (List)list.first;
-      Datum test = clause.first;
-      List body = clause.rest;
+      List clause = (List)list.car();
+      Datum test = clause.car();
+      List body = clause.cdr();
       
       return compile(test, scope, false,
              new Branch(compileSequence(body, scope, tc, next),
-                        list.rest == List.Empty
+                        list.cdr() == List.Empty
                           ? new LoadConst(Nil.Instance, next)
-                          : compileCondClauses(list.rest, scope, tc, next)));
+                          : compileCondClauses(list.cdr(), scope, tc, next)));
     }
   }
   
   private Inst compileLet(List list, Scope scope, boolean tc, Inst next) throws CompileError
   {
-    if (list.length() < 3 || list.rest.first.type() != Type.List)
+    if (list.length() < 3 || list.cdr().car().type() != Type.List)
       throw new CompileError("malformed expression", positionMap.get(list));
     
-    List bindings = (List)list.rest.first;
+    List bindings = (List)list.cdr().car();
     int numBindings = bindings.length();
-    List body = list.rest.rest;
+    List body = list.cdr().cdr();
 
     if (!checkBindings(bindings))
       throw new CompileError("malformed expression", positionMap.get(list));
@@ -182,12 +182,12 @@ public class Compiler
   
   private Inst compileLetRec(List list, Scope scope, boolean tc, Inst next) throws CompileError
   {
-    if (list.length() < 3 || list.rest.first.type() != Type.List)
+    if (list.length() < 3 || list.cdr().car().type() != Type.List)
       throw new CompileError("malformed expression", positionMap.get(list));
     
-    List bindings = (List)list.rest.first;
+    List bindings = (List)list.cdr().car();
     int numBindings = bindings.length();
-    List body = list.rest.rest;
+    List body = list.cdr().cdr();
 
     if (!checkBindings(bindings))
       throw new CompileError("malformed expression", positionMap.get(list));
@@ -203,22 +203,22 @@ public class Compiler
   
   private Inst compileLetStar(List list, Scope scope, boolean tc, Inst next) throws CompileError
   {
-    if (list.length() < 3 || list.rest.first.type() != Type.List)
+    if (list.length() < 3 || list.cdr().car().type() != Type.List)
       throw new CompileError("malformed expression", positionMap.get(list));
     
-    List bindings = (List)list.rest.first;
-    List body = list.rest.rest;
+    List bindings = (List)list.cdr().car();
+    List body = list.cdr().cdr();
 
     return compile(transformLetStar(bindings, body), scope, tc, next);
   }
   
   private boolean checkBindings(List bindings)
   {
-    for (; bindings != List.Empty; bindings = bindings.rest) {
-      if (bindings.first.type() != Type.List)
+    for (; bindings != List.Empty; bindings = bindings.cdr()) {
+      if (bindings.car().type() != Type.List)
         return false;
-      List binding = (List)bindings.first;
-      if (binding.length() != 2 || binding.first.type() != Type.Symbol)
+      List binding = (List)bindings.car();
+      if (binding.length() != 2 || binding.car().type() != Type.Symbol)
         return false;
     }
     return true;
@@ -227,9 +227,9 @@ public class Compiler
   private Scope extendLetScope(List bindings, Scope parent) throws CompileError
   {
     Scope scope = new Scope(parent);
-    for (; bindings != List.Empty; bindings = bindings.rest) {
-      List binding = (List)bindings.first;
-      Symbol symb = (Symbol)binding.first;
+    for (; bindings != List.Empty; bindings = bindings.cdr()) {
+      List binding = (List)bindings.car();
+      Symbol symb = (Symbol)binding.car();
       if (!scope.bind(symb))
         throw new CompileError("multiple definition of " + symb.repr(), positionMap.get(symb));
     }
@@ -241,9 +241,9 @@ public class Compiler
     if (bindings == List.Empty)
       return next;
     else {
-      List binding = (List)bindings.first;
-      return evalInitializers(bindings.rest, scope,
-             compile(binding.rest.first, scope, false,
+      List binding = (List)bindings.car();
+      return evalInitializers(bindings.cdr(), scope,
+             compile(binding.cdr().car(), scope, false,
              new PushArg(next)));
     }
   }
@@ -264,10 +264,10 @@ public class Compiler
       return new List(Symbol.get("let"), new List(List.Empty, body));
     else
       return new List(Symbol.get("let"),
-             new List(new List(bindings.first, List.Empty),
-             bindings.rest == List.Empty
+             new List(new List(bindings.car(), List.Empty),
+             bindings.cdr() == List.Empty
                ? body
-               : new List(transformLetStar(bindings.rest, body), List.Empty)));
+               : new List(transformLetStar(bindings.cdr(), body), List.Empty)));
   }
   
   // (f a1 a2 ... aN)
@@ -286,13 +286,13 @@ public class Compiler
     int numArgs = list.length() - 1;
     
     if (tc)
-      return compilePushArgs(list.rest, scope,
-             compile(list.first, scope, false,
+      return compilePushArgs(list.cdr(), scope,
+             compile(list.car(), scope, false,
              new Apply(numArgs, positionMap.get(list))));
     else
       return new PushFrame(next,
-             compilePushArgs(list.rest, scope,
-             compile(list.first, scope, false,
+             compilePushArgs(list.cdr(), scope,
+             compile(list.car(), scope, false,
              new Apply(numArgs, positionMap.get(list)))));
   }
 
@@ -301,8 +301,8 @@ public class Compiler
     if (args == List.Empty)
       return next;
     else
-      return compilePushArgs(args.rest, scope,
-             compile(args.first, scope, false,
+      return compilePushArgs(args.cdr(), scope,
+             compile(args.car(), scope, false,
              new PushArg(next)));
   }
   
@@ -319,11 +319,11 @@ public class Compiler
 
   private Inst compileFun(List list, Scope scope, Inst next) throws CompileError
   {
-    if (list.length() < 3 || list.rest.first.type() != Type.List)
+    if (list.length() < 3 || list.cdr().car().type() != Type.List)
       throw new CompileError("malformed expression", positionMap.get(list));
     
-    List params = (List)list.rest.first;
-    List body = list.rest.rest;    
+    List params = (List)list.cdr().car();
+    List body = list.cdr().cdr();    
     
     if (!checkParams(params))
       throw new CompileError("malformed expression", positionMap.get(list));
@@ -352,10 +352,10 @@ public class Compiler
   
   private boolean checkParams(List params)
   {
-    for (; params != List.Empty; params = params.rest) {
-      if (params.first.type() != Type.Symbol)
+    for (; params != List.Empty; params = params.cdr()) {
+      if (params.car().type() != Type.Symbol)
         return false;
-      if (isRestParam((Symbol)params.first) && params.rest != List.Empty)
+      if (isRestParam((Symbol)params.car()) && params.cdr() != List.Empty)
         return false;
     }
     return true;
@@ -364,8 +364,8 @@ public class Compiler
   private Scope extendFunScope(List params, Scope parent) throws CompileError
   {
     Scope scope = new Scope(parent);
-    for (; params != List.Empty; params = params.rest) {
-      Symbol symb = (Symbol)params.first;
+    for (; params != List.Empty; params = params.cdr()) {
+      Symbol symb = (Symbol)params.car();
       if (!scope.bind(symb))
         throw new CompileError("multiple definition of " + symb.repr(), positionMap.get(symb));
     }
@@ -403,7 +403,7 @@ public class Compiler
     if (list.length() < 2)
       throw new CompileError("malformed expression", positionMap.get(list));
     
-    return compileOrArgs(list.rest, scope, tc, next);
+    return compileOrArgs(list.cdr(), scope, tc, next);
   }
   
   private Inst compileOrArgs(List list, Scope scope, boolean tc, Inst next) throws CompileError
@@ -411,10 +411,10 @@ public class Compiler
     if (list == List.Empty)
       return next;
     else
-      return compile(list.first, scope, tc && (list.rest == List.Empty),
+      return compile(list.car(), scope, tc && (list.cdr() == List.Empty),
              new Branch(
                next,
-               compileOrArgs(list.rest, scope, tc, next)));
+               compileOrArgs(list.cdr(), scope, tc, next)));
   }
   
   // (and a b ...)
@@ -424,7 +424,7 @@ public class Compiler
     if (list.length() < 2)
       throw new CompileError("malformed expression", positionMap.get(list));
     
-    return compileAndArgs(list.rest, scope, tc, next);
+    return compileAndArgs(list.cdr(), scope, tc, next);
   }
   
   private Inst compileAndArgs(List list, Scope scope, boolean tc, Inst next) throws CompileError
@@ -432,9 +432,9 @@ public class Compiler
     if (list == List.Empty)
       return next;
     else
-      return compile(list.first, scope, tc && (list.rest == List.Empty),
+      return compile(list.car(), scope, tc && (list.cdr() == List.Empty),
              new Branch(
-               compileAndArgs(list.rest, scope, tc, next),
+               compileAndArgs(list.cdr(), scope, tc, next),
                next));
   }
   
@@ -443,18 +443,18 @@ public class Compiler
     if (list.length() < 2)
       throw new CompileError("malformed expression", positionMap.get(list));
     
-    return compileSequence(list.rest, scope, tc, next);
+    return compileSequence(list.cdr(), scope, tc, next);
   }
   
   // (set! symbol init)
   
   private Inst compileSet(List list, Scope scope, boolean tc, Inst next) throws CompileError
   {
-    if (list.length() != 3 || list.rest.first.type() != Type.Symbol)
+    if (list.length() != 3 || list.cdr().car().type() != Type.Symbol)
       throw new CompileError("malformed expression", positionMap.get(list));
     
-    Symbol symb = (Symbol)list.rest.first;
-    Datum init = list.rest.rest.first;
+    Symbol symb = (Symbol)list.cdr().car();
+    Datum init = list.cdr().cdr().car();
     
     DeBruijnIndex index = null;
     
@@ -478,8 +478,8 @@ public class Compiler
     if (list.length() < 3)
       throw new CompileError("malformed expression", positionMap.get(list));
     
-    Datum test = list.rest.first;
-    List body = list.rest.rest;
+    Datum test = list.cdr().car();
+    List body = list.cdr().cdr();
     Jump jump = new Jump();
     Inst code = compile(test, scope, false,
                 new Branch(compileSequence(body, scope, tc, jump),
@@ -490,33 +490,33 @@ public class Compiler
   
   private Inst compileList(List list, Scope scope, boolean tc, Inst next) throws CompileError
   {
-    if (list.first == Symbol.get("if"))
+    if (list.car() == Symbol.get("if"))
       return compileIf(list, scope, tc, next);
-    else if (list.first == Symbol.get("let"))
+    else if (list.car() == Symbol.get("let"))
       return compileLet(list, scope, tc, next);
-    else if (list.first == Symbol.get("let*"))
+    else if (list.car() == Symbol.get("let*"))
       return compileLetStar(list, scope, tc, next);
-    else if (list.first == Symbol.get("letrec"))
+    else if (list.car() == Symbol.get("letrec"))
       return compileLetRec(list, scope, tc, next);
-    else if (list.first == Symbol.get("def"))
+    else if (list.car() == Symbol.get("def"))
       return compileDef(list, scope, next);
-    else if (list.first == Symbol.get("defun"))
+    else if (list.car() == Symbol.get("defun"))
       return compileDefun(list, scope, next);
-    else if (list.first == Symbol.get("fun"))
+    else if (list.car() == Symbol.get("fun"))
       return compileFun(list, scope, next);
-    else if (list.first == Symbol.get("quote"))
+    else if (list.car() == Symbol.get("quote"))
       return compileQuote(list, next);
-    else if (list.first == Symbol.get("or"))
+    else if (list.car() == Symbol.get("or"))
       return compileOr(list, scope, tc, next);
-    else if (list.first == Symbol.get("and"))
+    else if (list.car() == Symbol.get("and"))
       return compileAnd(list, scope, tc, next);
-    else if (list.first == Symbol.get("cond"))
+    else if (list.car() == Symbol.get("cond"))
       return compileCond(list, scope, tc, next);
-    else if (list.first == Symbol.get("do"))
+    else if (list.car() == Symbol.get("do"))
       return compileDo(list, scope, tc, next);
-    else if (list.first == Symbol.get("set!"))
+    else if (list.car() == Symbol.get("set!"))
       return compileSet(list, scope, tc, next);
-    else if (list.first == Symbol.get("while"))
+    else if (list.car() == Symbol.get("while"))
       return compileWhile(list, scope, tc, next);
     else
       return compileApply(list, scope, tc, next);

@@ -14,8 +14,8 @@ public class Vector extends Datum implements Callable
   public static Vector fromList(List elems)
   {
     Vector result = new Vector(elems.length());
-    for (int i = 0; elems != List.Empty; ++i, elems = elems.rest)
-      result.elems[i] = elems.first;
+    for (int i = 0; elems != List.Empty; ++i, elems = elems.cdr())
+      result.elems[i] = elems.car();
     return result;
   }
   

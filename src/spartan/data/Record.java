@@ -18,14 +18,14 @@ public class Record extends Datum implements Callable
   public static Record fromList(List elems) throws TypeMismatch
   {
     Record result = new Record();
-    for (; elems != List.Empty; elems = elems.rest) {
-      if (elems.first.type() != Type.Symbol)
+    for (; elems != List.Empty; elems = elems.cdr()) {
+      if (elems.car().type() != Type.Symbol)
         throw new TypeMismatch();
-      Symbol key = (Symbol)elems.first;
-      if (elems.rest == List.Empty)
+      Symbol key = (Symbol)elems.car();
+      if (elems.cdr() == List.Empty)
         throw new TypeMismatch();
-      Datum value = elems.rest.first;
-      elems = elems.rest;
+      Datum value = elems.cdr().car();
+      elems = elems.cdr();
       result.members.put(key, value);
     }
     return result;

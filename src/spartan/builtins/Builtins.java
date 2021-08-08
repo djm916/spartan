@@ -254,7 +254,7 @@ public final class Builtins
   {
     if (x.type() != Type.List)
       throw new TypeMismatch();
-    return ((List)x).first;    
+    return ((List)x).car();
   }
   
   public static final PrimFun Car = new PrimFun(1, false) {
@@ -268,7 +268,7 @@ public final class Builtins
   {
     if (x.type() != Type.List)
       throw new TypeMismatch();
-    return ((List)x).rest;
+    return ((List)x).cdr();
   }
   
   public static final PrimFun Cdr = new PrimFun(1, false) {

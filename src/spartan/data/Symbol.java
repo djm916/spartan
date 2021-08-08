@@ -25,7 +25,7 @@ public class Symbol extends Datum
   
   public final String repr()
   {
-    return value;
+    return "\'" + value;
   }
   
   public final boolean eq(Symbol that)

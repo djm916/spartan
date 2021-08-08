@@ -7,6 +7,27 @@ public class List extends Datum
 {
   public static final List Empty = new List(null, null);
   
+  public static class Builder
+  {
+    private List head = Empty, tail = Empty;
+    
+    public Builder add(Datum x)
+    {
+      if (head == Empty)
+        head = tail = new List(x, Empty);
+      else {
+        tail.rest = new List(x, Empty);
+        tail = tail.rest;
+      }
+      return this;
+    }
+    
+    public List build()
+    {
+      return head;
+    }
+  }
+  
   public final Type type()
   {
     return Type.List;
@@ -17,15 +38,22 @@ public class List extends Datum
     return String.format("(%s)", repr(this));
   }
   
-  public final Datum first;
-  public final List rest;
-  
   public List(Datum first, List rest)
   {
     this.first = first;
     this.rest = rest;
   }
   
+  public final Datum car()
+  {
+    return first;
+  }
+  
+  public final List cdr()
+  {
+    return rest;
+  }
+    
   public final int length()
   {
     return length(this);
@@ -75,4 +103,7 @@ public class List extends Datum
     
     return String.format("%s %s", self.first.repr(), repr(self.rest));
   }
+    
+  private Datum first;
+  private List rest;  
 }

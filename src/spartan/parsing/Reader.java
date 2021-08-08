@@ -6,8 +6,6 @@ import java.io.InputStreamReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.FileNotFoundException;
-import java.util.Deque;
-import java.util.ArrayDeque;
 import java.util.Map;
 import java.util.IdentityHashMap;
 import spartan.data.*;
@@ -228,23 +226,54 @@ public class Reader
   private Datum readList() throws SyntaxError, IOException
   {
     Position savePosition = new Position(source, tokenStart.line, tokenStart.column);    
-    Deque<Datum> stack = new ArrayDeque<>();
+    List.Builder builder = new List.Builder();
     
     skipSpace();
     
     while (lastChar != -1 && lastChar != ')') {
-      stack.push(readDatum());      
+      builder.add(readDatum());
       skipSpace();
     }
     
-    List result = List.Empty;
-    while (!stack.isEmpty())
-      result = new List(stack.pop(), result);
-    
+    List result = builder.build();
     positionMap.put(result, savePosition);
     return result;
   }
+  
+  private Datum readVector() throws SyntaxError, IOException
+  {
+    Position savePosition = new Position(source, tokenStart.line, tokenStart.column);    
+    List.Builder builder = new List.Builder();
     
+    skipSpace();
+    
+    while (lastChar != -1 && lastChar != ']') {
+      builder.add(readDatum());
+      skipSpace();
+    }
+    
+    List result = new List(Symbol.get("vector"), builder.build());
+    positionMap.put(result, savePosition);
+    return result;
+  }
+  
+  private Datum readRecord() throws SyntaxError, IOException
+  {
+    Position savePosition = new Position(source, tokenStart.line, tokenStart.column);    
+    List.Builder builder = new List.Builder();
+    
+    skipSpace();
+    
+    while (lastChar != -1 && lastChar != '}') {
+      builder.add(readDatum());
+      skipSpace();
+    }
+    
+    List result = new List(Symbol.get("record"), builder.build());
+    positionMap.put(result, savePosition);
+    return result;
+  }
+  
   private Datum readQuote() throws SyntaxError, IOException
   {
     skipSpace();
@@ -259,6 +288,10 @@ public class Reader
       return null;
     if (lastChar == '(')
       return readList();
+    if (lastChar == '[')
+      return readVector();
+    if (lastChar == '{')
+      return readRecord();
     if (isSign(lastChar) && isDigit(peekChar()))
       return readNumber();
     if (isDigit(lastChar))
