@@ -1,11 +1,15 @@
 package spartan.runtime;
 
-import static spartan.builtins.Builtins.*;
-import spartan.data.Symbol;
+import static spartan.Builtins.*;
+import spartan.data.*;
 
 public final class BaseEnv extends GlobalEnv
 {
   {
+    bind(Symbol.get("true"), Bool.True);
+    bind(Symbol.get("false"), Bool.False);
+    bind(Symbol.get("nil"), Nil.Instance);
+    
     bind(Symbol.get("+"), Add);
     bind(Symbol.get("-"), Sub);
     bind(Symbol.get("*"), Mul);

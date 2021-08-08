@@ -1,6 +1,6 @@
 package spartan.runtime;
 
-import spartan.builtins.Builtins;
+import spartan.Builtins;
 
 public final class Branch extends Inst
 {

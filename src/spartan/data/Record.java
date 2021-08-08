@@ -9,7 +9,7 @@ import spartan.errors.Error;
 import spartan.errors.WrongNumberArgs;
 import spartan.errors.NoSuchElement;
 import spartan.errors.TypeMismatch;
-import spartan.builtins.Builtins;
+import spartan.Builtins;
 import spartan.data.Symbol;
 import spartan.runtime.VirtualMachine;
 

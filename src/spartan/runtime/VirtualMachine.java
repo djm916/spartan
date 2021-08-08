@@ -6,7 +6,6 @@ import spartan.data.Callable;
 import spartan.errors.RuntimeError;
 import spartan.errors.Error;
 import spartan.errors.TypeMismatch;
-import spartan.errors.WrongNumberArgs;
 
 public final class VirtualMachine
 {

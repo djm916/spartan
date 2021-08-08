@@ -4,7 +4,7 @@ import spartan.data.Datum;
 
 public final class LocalEnv
 {
-  final Datum[] slots;
+  private final Datum[] slots;
   final LocalEnv parent;
   
   LocalEnv(int numSlots, LocalEnv parent)

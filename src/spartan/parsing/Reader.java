@@ -4,10 +4,9 @@ import java.io.PushbackReader;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.FileInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.FileNotFoundException;
-import java.util.Map;
-import java.util.IdentityHashMap;
 import spartan.data.*;
 import spartan.errors.SyntaxError;
 
@@ -26,19 +25,11 @@ public class Reader
 {
   private static final String DefaultEncoding = "UTF-8";
   private final PushbackReader input;
+  private final String source;
   private int lastChar = -1;
   private final MutablePosition tokenStart = new MutablePosition(0, 0);
   private final MutablePosition currentPos = new MutablePosition(1, 0);
-  private final String source;
-  private PositionMap positionMap;
-  private static Map<Symbol, Datum> keywordMap = new IdentityHashMap<>();
-  
-  static
-  {
-    keywordMap.put(Symbol.get("true"), Bool.True);
-    keywordMap.put(Symbol.get("false"), Bool.False);
-    keywordMap.put(Symbol.get("nil"), Nil.Instance);
-  }
+  private PositionMap positionMap = new PositionMap();
   
   private static boolean isDigit(int ch)
   {
@@ -195,11 +186,7 @@ public class Reader
       text.append((char)lastChar);
     }
     
-    Symbol symbol = Symbol.get(text.toString());
-    
-    if (keywordMap.containsKey(symbol))
-      return keywordMap.get(symbol);
-    
+    Symbol symbol = Symbol.get(text.toString());    
     positionMap.put(symbol, savePosition);
     return symbol;
   }
@@ -307,19 +294,25 @@ public class Reader
                           new Position(source, currentPos.line, currentPos.column));
   }
   
-  public static Reader readFile(String fileName) throws FileNotFoundException, IOException
+  public static Reader forFile(String fileName) throws FileNotFoundException, IOException
   {
     java.io.Reader r = new BufferedReader(new InputStreamReader(new FileInputStream(fileName), DefaultEncoding));
     return new Reader(r, fileName);
   }
   
-  public static Reader readStdin() throws IOException
+  public static Reader forConsole() throws IOException
   {
     java.io.Reader r = new BufferedReader(new InputStreamReader(System.in, DefaultEncoding));
-    return new Reader(r, "stdin");
+    return new Reader(r, "standard input");
   }
   
-  public Reader(java.io.Reader r, String source)
+  public static Reader forString(String s) throws IOException
+  {
+    java.io.Reader r = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(s.getBytes(DefaultEncoding))));
+    return new Reader(r, "unknown source");
+  }
+  
+  private Reader(java.io.Reader r, String source)
   {
     this.input = new PushbackReader(r);
     this.source = source;
@@ -327,7 +320,7 @@ public class Reader
   
   public SourceDatum read() throws SyntaxError, IOException
   {
-    positionMap = new PositionMap();
+    positionMap.clear();
     skipSpace();
     Datum result = readDatum();
     if (result == null)

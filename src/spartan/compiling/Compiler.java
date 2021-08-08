@@ -124,6 +124,8 @@ public class Compiler
       throw new CompileError("malformed expression", positionMap.get(list));
   }
   
+  // (cond (test body...)...)
+  
   private Inst compileCond(List list, Scope scope, boolean tc, Inst next) throws CompileError
   {
     if (list.length() < 2 || !checkCondClauses(list.cdr()))
@@ -137,8 +139,7 @@ public class Compiler
     for (; list != List.Empty; list = list.cdr()) {
       if (list.car().type() != Type.List)
         return false;
-      List clause = (List)list.car();
-      if (clause.length() < 2)
+      if (((List)list.car()).length() < 2)
         return false;
     }
     return true;
@@ -147,7 +148,7 @@ public class Compiler
   private Inst compileCondClauses(List list, Scope scope, boolean tc, Inst next) throws CompileError
   {
     if (list == List.Empty)
-      return next;
+      return new LoadConst(Nil.Instance, next);
     else {
       List clause = (List)list.car();
       Datum test = clause.car();
@@ -155,9 +156,7 @@ public class Compiler
       
       return compile(test, scope, false,
              new Branch(compileSequence(body, scope, tc, next),
-                        list.cdr() == List.Empty
-                          ? new LoadConst(Nil.Instance, next)
-                          : compileCondClauses(list.cdr(), scope, tc, next)));
+                        compileCondClauses(list.cdr(), scope, tc, next)));
     }
   }
   

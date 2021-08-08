@@ -17,4 +17,9 @@ public class PositionMap
   {
     return map.get(x);
   }
+  
+  public void clear()
+  {
+    map.clear();
+  }
 }

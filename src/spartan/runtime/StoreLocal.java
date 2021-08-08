@@ -12,7 +12,7 @@ public final class StoreLocal extends Inst
     this.offset = offset;
   }
   
-  public void exec(VirtualMachine vm)
+  public final void exec(VirtualMachine vm)
   {
     vm.locals.store(vm.result, depth, offset);
     vm.control = next;

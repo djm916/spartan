@@ -7,7 +7,7 @@ import spartan.errors.Error;
 import spartan.errors.WrongNumberArgs;
 import spartan.errors.NoSuchElement;
 import spartan.errors.TypeMismatch;
-import spartan.builtins.Builtins;
+import spartan.Builtins;
 
 public class Vector extends Datum implements Callable
 {

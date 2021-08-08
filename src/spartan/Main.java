@@ -1,16 +1,15 @@
 package spartan;
 
-import spartan.errors.SyntaxError;
-import spartan.errors.CompileError;
-import spartan.errors.RuntimeError;
 import spartan.parsing.Reader;
 import spartan.parsing.SourceDatum;
+import spartan.data.Datum;
 import spartan.compiling.Compiler;
 import spartan.runtime.Inst;
 import spartan.runtime.VirtualMachine;
 import spartan.runtime.BaseEnv;
-import spartan.data.Datum;
-import spartan.data.Symbol;
+import spartan.errors.SyntaxError;
+import spartan.errors.CompileError;
+import spartan.errors.RuntimeError;
 import java.io.IOException;
 
 public class Main
@@ -22,7 +21,7 @@ public class Main
 
   public static void main(String[] args) throws IOException
   {
-    Reader reader = Reader.readStdin();
+    Reader reader = Reader.forConsole();
     Compiler compiler = new Compiler();
     VirtualMachine vm = new VirtualMachine(new BaseEnv());
     

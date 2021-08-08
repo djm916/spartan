@@ -1,6 +1,6 @@
 package spartan.data;
 
-import spartan.builtins.Builtins;
+import spartan.Builtins;
 import spartan.errors.TypeMismatch;
 
 public class List extends Datum
