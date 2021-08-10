@@ -1,22 +1,16 @@
 <project name="Spartan">
-  <property name="source.dir" value="source"/>
-  <property name="build.dir" value="build"/>
-  <property name="doc.dir" value="doc"/>
-  <property name="test-results.dir" value="test-results"/>
-  <property name="jar-file" value="Spartan.jar"/>
-  <property name="main-class" value="spartan.Main"/>
   <property name="classpath" value="C:/JUnit/junit.jar"/>
     
   <target name="clean">
-    <delete dir="${build.dir}"/>
-    <delete dir="${doc.dir}"/>
-    <delete dir="${test-results.dir}"/>
+    <delete dir="build"/>
+    <delete dir="javadoc"/>
+    <delete dir="test-results"/>
   </target>
 
   <target name="compile">
-    <mkdir dir="${build.dir}"/>
-    <javac srcdir="${source.dir}"
-           destdir="${build.dir}"
+    <mkdir dir="build"/>
+    <javac srcdir="source"
+           destdir="build"
            debug="true"
            includeantruntime="false"
            classpath="${classpath}">
@@ -25,32 +19,30 @@
   </target>
 
   <target name="jar" depends="compile">
-    <jar destfile="${jar-file}"
-         basedir="${build.dir}"
-         excludes="**/tests/**">
+    <jar destfile="build/Spartan.jar"
+         basedir="build"
+         excludes="spartan/tests/">
       <manifest>
-        <attribute name="Main-Class" value="${main-class}"/>
+        <attribute name="Main-Class" value="spartan.Main"/>
       </manifest>
     </jar>
   </target>
   
-  <target name="run" depends="jar">
-    <java jar="${jar-file}" fork="true">
-      <arg value="-Xprof"/>
-    </java>
-  </target>
-  
-  <target name="doc">
-    <mkdir dir="${doc.dir}"/>
-    <javadoc sourcepath="${source.dir}" destdir="${doc.dir}"/>
+  <target name="javadoc">
+    <mkdir dir="javadoc"/>
+    <javadoc sourcepath="source" destdir="javadoc">
+      <excludepackage name="spartan.tests"/>
+    </javadoc>
   </target>
   
   <target name="test" depends="compile">
-    <mkdir dir="${test-results.dir}"/>
+    <mkdir dir="test-results"/>
     <junit printsummary="withOutAndErr">
       <formatter type="brief"/>
-      <classpath path="${build.dir}"/>
-      <test name="spartan.tests.ReaderTest" todir="${test-results.dir}"/>
+      <classpath path="${classpath};build"/>
+      <batchtest todir="test-results">
+        <fileset dir="build" includes="spartan/tests/"/>
+      </batchtest>
     </junit>
   </target>
 
