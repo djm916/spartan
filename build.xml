@@ -1,20 +1,21 @@
 <project name="Spartan">
-  <property name="src.dir"     value="src"/>
-  <property name="build.dir"   value="build"/>
-  <property name="doc.dir"     value="doc"/>
-  <property name="jar-file"    value="Spartan.jar"/>
-  <property name="main-class"  value="spartan.Main"/>
-  <property name="classpath"   value="C:/JUnit/junit.jar"/>
-  <property name="tests.dir"   value="tests"/>
-  
+  <property name="source.dir" value="source"/>
+  <property name="build.dir" value="build"/>
+  <property name="doc.dir" value="doc"/>
+  <property name="test-results.dir" value="test-results"/>
+  <property name="jar-file" value="Spartan.jar"/>
+  <property name="main-class" value="spartan.Main"/>
+  <property name="classpath" value="C:/JUnit/junit.jar"/>
+    
   <target name="clean">
     <delete dir="${build.dir}"/>
     <delete dir="${doc.dir}"/>
+    <delete dir="${test-results.dir}"/>
   </target>
 
   <target name="compile">
     <mkdir dir="${build.dir}"/>
-    <javac srcdir="${src.dir}"
+    <javac srcdir="${source.dir}"
            destdir="${build.dir}"
            debug="true"
            includeantruntime="false"
@@ -26,7 +27,7 @@
   <target name="jar" depends="compile">
     <jar destfile="${jar-file}"
          basedir="${build.dir}"
-         excludes="**/${tests.dir}/**">
+         excludes="**/tests/**">
       <manifest>
         <attribute name="Main-Class" value="${main-class}"/>
       </manifest>
@@ -41,13 +42,15 @@
   
   <target name="doc">
     <mkdir dir="${doc.dir}"/>
-    <javadoc sourcepath="${src.dir}" destdir="${doc.dir}"/>
+    <javadoc sourcepath="${source.dir}" destdir="${doc.dir}"/>
   </target>
   
   <target name="test" depends="compile">
-    <junit showoutput="yes" printsummary="withOutAndErr" fork="true">
+    <mkdir dir="${test-results.dir}"/>
+    <junit printsummary="withOutAndErr">
+      <formatter type="brief"/>
       <classpath path="${build.dir}"/>
-      <test name="spartan.tests.ReaderTest"/>
+      <test name="spartan.tests.ReaderTest" todir="${test-results.dir}"/>
     </junit>
   </target>
 
