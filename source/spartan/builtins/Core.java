@@ -1,12 +1,11 @@
-package spartan;
+package spartan.builtins;
 
 import spartan.data.*;
 import spartan.errors.Error;
 import spartan.runtime.VirtualMachine;
 import spartan.errors.TypeMismatch;
-import spartan.errors.NoSuchElement;
 
-public final class Builtins
+public final class Core
 {
   public static Bool truth(boolean x)
   {
@@ -18,112 +17,6 @@ public final class Builtins
     return !(x == Bool.False || x == Nil.Instance);
   }
   
-  public static Datum add(Datum x, Datum y) throws TypeMismatch
-  {
-    if (x.type() == y.type()) {
-      switch (x.type()) {
-        case Int: return ((Int)x).add((Int)y);
-        case Real: return ((Real)x).add((Real)y);
-      }
-    }
-    throw new TypeMismatch();
-  }
-    
-  public static final PrimFun Add = new PrimFun(2, true) {
-    public void doApply(VirtualMachine vm) throws TypeMismatch {
-      vm.result = add(vm.popArg(), vm.popArg());
-      while (vm.args != List.Empty)
-        vm.result = add(vm.result, vm.popArg());
-      vm.popFrame();
-    }
-  };
-  
-  public static Datum sub(Datum x, Datum y) throws TypeMismatch
-  {
-    if (x.type() == y.type()) {
-      switch (x.type()) {
-        case Int: return ((Int)x).sub((Int)y);
-        case Real: return ((Real)x).sub((Real)y);
-      }
-    }
-    throw new TypeMismatch();
-  }
-  
-  public static final PrimFun Sub = new PrimFun(2, false) {
-    public void doApply(VirtualMachine vm) throws TypeMismatch {
-      vm.result = sub(vm.popArg(), vm.popArg());
-      vm.popFrame();
-    }
-  };
-
-  public static Datum mul(Datum x, Datum y) throws TypeMismatch
-  {
-    if (x.type() == y.type()) {
-      switch (x.type()) {
-        case Int: return ((Int)x).mul((Int)y);
-        case Real: return ((Real)x).mul((Real)y);
-      }
-    }
-    throw new TypeMismatch();
-  }
-    
-  public static final PrimFun Mul = new PrimFun(2, true) {
-    public void doApply(VirtualMachine vm) throws TypeMismatch {
-      vm.result = mul(vm.popArg(), vm.popArg());
-      while (vm.args != List.Empty)
-        vm.result = mul(vm.result, vm.popArg());
-      vm.popFrame();
-    }
-  };
-
-  public static Datum div(Datum x, Datum y) throws TypeMismatch
-  {
-    if (x.type() == y.type()) {
-      switch (x.type()) {
-        case Int: return ((Int)x).div((Int)y);
-        case Real: return ((Real)x).div((Real)y);
-      }
-    }
-    throw new TypeMismatch();
-  }
-  
-  public static final PrimFun Div = new PrimFun(2, false) {
-    public void doApply(VirtualMachine vm) throws TypeMismatch {
-      vm.result = div(vm.popArg(), vm.popArg());
-      vm.popFrame();
-    }
-  };
-
-  public static Datum mod(Datum x, Datum y) throws TypeMismatch
-  {
-    if (x.type() == Type.Int && y.type() == Type.Int)
-      return ((Int)x).mod((Int)y);
-    throw new TypeMismatch();
-  }
-  
-  public static final PrimFun Mod = new PrimFun(2, false) {
-    public void doApply(VirtualMachine vm) throws TypeMismatch {
-      vm.result = mod(vm.popArg(), vm.popArg());
-      vm.popFrame();
-    }
-  };
-
-  public static Datum neg(Datum x) throws TypeMismatch
-  {
-    switch (x.type()) {
-      case Int: return ((Int)x).neg();
-      case Real: return ((Real)x).neg();
-    }
-    throw new TypeMismatch();
-  }
-  
-  public static final PrimFun Neg = new PrimFun(1, false) {
-    public void doApply(VirtualMachine vm) throws TypeMismatch {
-      vm.result = neg(vm.popArg());
-      vm.popFrame();
-    }
-  };
-
   public static Bool not(Datum x) throws TypeMismatch
   {
     if (x.type() == Type.Bool)

@@ -1,6 +1,6 @@
 package spartan.data;
 
-import spartan.Builtins;
+import spartan.builtins.Core;
 import spartan.errors.TypeMismatch;
 
 public class List extends Datum
@@ -87,7 +87,7 @@ public class List extends Datum
   private static boolean eq(List x, List y) throws TypeMismatch
   {
     for (; x != Empty && y != Empty; x = x.rest, y = y.rest)
-      if (!Builtins.eq(x.first, y.first))
+      if (!Core.eq(x.first, y.first))
         return false;
     
     return x == Empty && y == Empty;

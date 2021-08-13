@@ -9,7 +9,7 @@ import spartan.errors.Error;
 import spartan.errors.WrongNumberArgs;
 import spartan.errors.NoSuchElement;
 import spartan.errors.TypeMismatch;
-import spartan.Builtins;
+import spartan.builtins.Core;
 import spartan.data.Symbol;
 import spartan.runtime.VirtualMachine;
 
@@ -64,7 +64,7 @@ public class Record extends Datum implements Callable
     for (Symbol key : this.members.keySet()) {
       if (!that.members.containsKey(key))
         return false;
-      if (!Builtins.eq(this.members.get(key), that.members.get(key)))
+      if (!Core.eq(this.members.get(key), that.members.get(key)))
         return false;
     }
     

@@ -17,9 +17,10 @@ import java.io.EOFException;
 public class Main
 {
   private static final String UsageMessage =
-    "Usage: java -jar Spartan.jar [option...] [file] [args...]\n\n" +
+    "Usage: java -jar Spartan.jar [option...] [args...]\n\n" +
     "Options:\n" +
-    "  --help        Display this message and exit immediately";
+    "  --help            Display this message\n" +
+    "  --file <path>     Execute script at <path>";
   
   private static final String IntroMessage =  
     "Welcome to the Spartan interpreter!\n" +
@@ -28,7 +29,6 @@ public class Main
   
   private static String inputFile;
   private static List sysArgs = List.Empty;
-  private static int returnCode;
   
   public static void main(String[] args)
   {
@@ -37,17 +37,20 @@ public class Main
     GlobalEnv globals = new BaseEnv();
     globals.bind(Symbol.get("sys/args"), sysArgs);
     
+    int returnCode;
+    
     try {
       if (inputFile == null)
         returnCode = evalInteractive(globals);
       else
         returnCode = evalFile(inputFile, globals);
-      System.exit(returnCode);
     }
     catch (IOException ex) {
       System.err.println("error: " + ex.getMessage());
-      System.exit(-1);
+      returnCode = -1;
     }
+    
+    System.exit(returnCode);
   }
   
   private static int evalInteractive(GlobalEnv globals) throws IOException
@@ -100,11 +103,17 @@ public class Main
         System.out.println(UsageMessage);
         System.exit(0);
       }
+      else if (args[i].equals("--file")) {
+        if (i >= args.length) {
+          System.err.println("--file requires argument");
+          System.exit(-1);
+        }
+        inputFile = args[i + 1];
+      }
       else {
-        inputFile = args[i];
-        for (int j = args.length - 1; j > i; --j)
+        for (int j = args.length - 1; j >= i; --j)
           sysArgs = new List(new Text(args[j]), sysArgs);
-        return;
+        break;
       }
     }
   }

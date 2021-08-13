@@ -24,6 +24,11 @@ public class Int extends Datum
     return new Int(-value);
   }
   
+  public final Int abs()
+  {
+    return new Int(Math.abs(value));
+  }
+  
   public final Int add(Int that)
   {
     return new Int(this.value + that.value);

@@ -12,9 +12,8 @@ public class Symbol extends Datum
   
   public static Symbol get(String value)
   {
-    if (!interned.containsKey(value)) {
+    if (!interned.containsKey(value))
       interned.put(value, new Symbol(value));
-    }
     return interned.get(value);
   }
   
@@ -25,7 +24,7 @@ public class Symbol extends Datum
   
   public final String repr()
   {
-    return "\'" + value;
+    return value;
   }
   
   public final boolean eq(Symbol that)

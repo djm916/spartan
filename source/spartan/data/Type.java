@@ -12,7 +12,8 @@ public enum Type
   Vector("vector"),
   Record("record"),
   PrimFun("function"),
-  Closure("function");
+  Closure("function"),
+  Port("port");
   
   public final String name;
   

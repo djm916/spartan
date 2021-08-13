@@ -1,6 +1,6 @@
 package spartan.runtime;
 
-import spartan.Builtins;
+import spartan.builtins.Core;
 
 public final class Branch extends Inst
 {
@@ -14,7 +14,7 @@ public final class Branch extends Inst
   
   public void eval(VirtualMachine vm)
   {
-    if (Builtins.truth(vm.result))
+    if (Core.truth(vm.result))
       vm.control = ifTrue;
     else
       vm.control = next;

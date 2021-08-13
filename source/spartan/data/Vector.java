@@ -7,7 +7,7 @@ import spartan.errors.Error;
 import spartan.errors.WrongNumberArgs;
 import spartan.errors.NoSuchElement;
 import spartan.errors.TypeMismatch;
-import spartan.Builtins;
+import spartan.builtins.Core;
 
 public class Vector extends Datum implements Callable
 {
@@ -38,7 +38,7 @@ public class Vector extends Datum implements Callable
   
   public final Datum at(int index) throws NoSuchElement
   {
-    if (index >= elems.length)
+    if (index < 0 || index >= elems.length)
       throw new NoSuchElement();
     return elems[index];
   }
@@ -49,7 +49,7 @@ public class Vector extends Datum implements Callable
       return false;
     
     for (int i = 0; i < this.size(); ++i)
-      if (!Builtins.eq(this.elems[i], that.elems[i]))
+      if (!Core.eq(this.elems[i], that.elems[i]))
         return false;
     
     return true;
