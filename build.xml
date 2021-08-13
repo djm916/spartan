@@ -14,12 +14,12 @@
            debug="true"
            includeantruntime="false"
            classpath="${classpath}">
-      <compilerarg value="-Xlint"/>
+      <!-- <compilerarg value="-Xlint"/> -->
     </javac>
   </target>
 
   <target name="jar" depends="compile">
-    <jar destfile="build/Spartan.jar"
+    <jar destfile="Spartan.jar"
          basedir="build"
          excludes="spartan/tests/">
       <manifest>
@@ -36,6 +36,7 @@
   </target>
   
   <target name="test" depends="compile">
+    <delete dir="test-results"/>
     <mkdir dir="test-results"/>
     <junit printsummary="withOutAndErr">
       <formatter type="brief"/>

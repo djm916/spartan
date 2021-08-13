@@ -16,7 +16,7 @@ public final class MakeClosure extends Inst
     this.isVariadic = isVariadic;
   }
   
-  public final void exec(VirtualMachine vm)
+  public final void eval(VirtualMachine vm)
   {
     vm.result = new Closure(code, vm.locals, requiredArgs, isVariadic);
     vm.control = next;

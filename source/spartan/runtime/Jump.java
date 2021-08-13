@@ -14,7 +14,7 @@ public final class Jump extends Inst
     this.target = target;
   }
   
-  public final void exec(VirtualMachine vm)
+  public final void eval(VirtualMachine vm)
   {
     vm.control = target;
   }

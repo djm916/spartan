@@ -7,7 +7,7 @@ public final class PopArg extends Inst
     super(next);
   }
   
-  public final void exec(VirtualMachine vm)
+  public final void eval(VirtualMachine vm)
   {
     vm.result = vm.popArg();
     vm.control = next;

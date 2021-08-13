@@ -10,7 +10,7 @@ public final class PushLocal extends Inst
     this.numSlots = numSlots;
   }
   
-  public final void exec(VirtualMachine vm)
+  public final void eval(VirtualMachine vm)
   {
     vm.locals = new LocalEnv(numSlots, vm.locals);
     vm.control = next;

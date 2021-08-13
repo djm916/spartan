@@ -16,7 +16,7 @@ public final class LoadGlobal extends Inst
     this.position = position;
   }
   
-  public final void exec(VirtualMachine vm) throws UnboundVariable
+  public final void eval(VirtualMachine vm) throws UnboundVariable
   {
     vm.result = vm.globals.lookup(symb);
     if (vm.result == null)

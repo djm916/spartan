@@ -12,7 +12,7 @@ public final class LoadConst extends Inst
     this.x = x;
   }
   
-  public void exec(VirtualMachine vm)
+  public void eval(VirtualMachine vm)
   {
     vm.result = x;
     vm.control = next;

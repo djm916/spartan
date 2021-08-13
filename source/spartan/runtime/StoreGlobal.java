@@ -12,7 +12,7 @@ public final class StoreGlobal extends Inst
     this.symb = symb;
   }
   
-  public final void exec(VirtualMachine vm)
+  public final void eval(VirtualMachine vm)
   {
     vm.globals.bind(symb, vm.result);
     vm.control = next;

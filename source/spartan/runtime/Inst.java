@@ -11,5 +11,5 @@ public abstract class Inst
     this.next = next;
   }
   
-  public abstract void exec(VirtualMachine vm) throws RuntimeError;
+  public abstract void eval(VirtualMachine vm) throws RuntimeError;
 }

@@ -12,7 +12,7 @@ public final class Branch extends Inst
     this.ifTrue = ifTrue;
   }
   
-  public void exec(VirtualMachine vm)
+  public void eval(VirtualMachine vm)
   {
     if (Builtins.truth(vm.result))
       vm.control = ifTrue;

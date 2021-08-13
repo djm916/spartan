@@ -24,14 +24,19 @@ public final class VirtualMachine
     this.globals = globals;
   }
   
-  public final Datum exec(Inst code) throws RuntimeError
+  public final Datum eval(Inst code) throws RuntimeError
   {
-    frameCount = 0;
-    
+    frameCount = 0;    
     control = code;
     
-    while (control != null)
-      control.exec(this);
+    try {
+      while (control != null)
+        control.eval(this);
+    }
+    catch (RuntimeError ex) {
+      reset();
+      throw ex;
+    }
     
     return result;
   }

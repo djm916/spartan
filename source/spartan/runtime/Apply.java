@@ -16,7 +16,7 @@ public final class Apply extends Inst
     this.position = position;
   }
   
-  public final void exec(VirtualMachine vm) throws RuntimeError
+  public final void eval(VirtualMachine vm) throws RuntimeError
   {
     try {
       vm.apply(numArgs);

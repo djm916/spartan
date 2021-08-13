@@ -7,7 +7,7 @@ public final class PopFrame extends Inst
     super(null);
   }
   
-  public final void exec(VirtualMachine vm)
+  public final void eval(VirtualMachine vm)
   {
     vm.popFrame();
   }

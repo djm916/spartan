@@ -12,8 +12,7 @@ public class ReaderTest
    @Test
    public void test1()
    {
-     try {
-       Reader r = Reader.forString("");
+     try (Reader r = Reader.forString("")) {
        assertNull(r.read());
      }
      catch (IOException | SyntaxError ex) {

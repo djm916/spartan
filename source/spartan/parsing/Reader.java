@@ -6,8 +6,10 @@ import java.io.InputStreamReader;
 import java.io.FileInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.EOFException;
 import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
+import java.lang.AutoCloseable;
 import spartan.data.*;
 import spartan.errors.SyntaxError;
 
@@ -22,7 +24,7 @@ class MutablePosition
   }
 }
 
-public class Reader
+public class Reader implements AutoCloseable
 {
   private static final String DefaultEncoding = "UTF-8";
   private final PushbackReader input;
@@ -127,13 +129,28 @@ public class Reader
     tokenStart.column = currentPos.column;
   }
   
+  private SyntaxError error(String message)
+  {
+    flush();
+    return new SyntaxError(message, new Position(source, tokenStart.line, tokenStart.column));
+  }
+  
+  private void flush()
+  {
+    try {
+      while (input.ready())
+        getChar();
+    }
+    catch (IOException ex) {
+      // ignore
+    }
+  }
+  
   private void readDigits(StringBuilder text) throws IOException, SyntaxError
   {
-    if (!isDigit(lastChar)) {
-      throw new SyntaxError("malformed numeric literal",
-                            new Position(source, tokenStart.line, tokenStart.column));
-    }
-    
+    if (!isDigit(lastChar))
+      throw error("malformed numeric literal");
+
     text.append((char)lastChar);
     
     while (isDigit(peekChar())) {
@@ -203,10 +220,8 @@ public class Reader
     
     getChar();
     
-    if (lastChar != '\"') {
-      throw new SyntaxError("undelimited string literal",
-                            new Position(source, tokenStart.line, tokenStart.column));
-    }
+    if (lastChar != '\"')
+      throw error("undelimited string literal");
     
     return new Text(text.toString());
   }
@@ -290,9 +305,8 @@ public class Reader
       return readText();
     if (lastChar == '\'')
       return readQuote();
-
-    throw new SyntaxError("unrecognized character " + (char)lastChar,
-                          new Position(source, currentPos.line, currentPos.column));
+    
+    throw error("unrecognized character " + (char)lastChar);
   }
   
   public static Reader forFile(String fileName) throws FileNotFoundException, UnsupportedEncodingException
@@ -319,13 +333,18 @@ public class Reader
     this.source = source;
   }
   
-  public SourceDatum read() throws SyntaxError, IOException
+  public SourceDatum read() throws SyntaxError, EOFException, IOException
   {
     positionMap.clear();
     skipSpace();
     Datum result = readDatum();
     if (result == null)
-      return null;
+      throw new EOFException();
     return new SourceDatum(result, positionMap);
+  }
+  
+  public void close() throws IOException
+  {
+    input.close();
   }
 }

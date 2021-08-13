@@ -7,7 +7,7 @@ public final class PopLocal extends Inst
     super(next);
   }
   
-  public final void exec(VirtualMachine vm)
+  public final void eval(VirtualMachine vm)
   {
     vm.locals = vm.locals.parent;
     vm.control = next;

@@ -10,7 +10,7 @@ public final class PushFrame extends Inst
     this.returnTo = returnTo;
   }
   
-  public final void exec(VirtualMachine vm)
+  public final void eval(VirtualMachine vm)
   {
     vm.pushFrame(returnTo);
     vm.control = next;

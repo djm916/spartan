@@ -5,16 +5,16 @@ import spartan.data.Symbol;
 import java.util.Map;
 import java.util.IdentityHashMap;
 
-class GlobalEnv
+public class GlobalEnv
 {
   private final Map<Symbol, Datum> globals = new IdentityHashMap<>();
 
-  final void bind(Symbol s, Datum x)
+  public void bind(Symbol s, Datum x)
   {
     globals.put(s, x);
   }
   
-  final Datum lookup(Symbol s)
+  public Datum lookup(Symbol s)
   {
     return globals.get(s);
   }

@@ -12,7 +12,7 @@ public final class LoadLocal extends Inst
     this.offset = offset;
   }
   
-  public final void exec(VirtualMachine vm)
+  public final void eval(VirtualMachine vm)
   {
     vm.result = vm.locals.load(depth, offset);
     vm.control = next;

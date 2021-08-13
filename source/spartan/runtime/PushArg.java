@@ -7,7 +7,7 @@ public final class PushArg extends Inst
     super(next);
   }
   
-  public final void exec(VirtualMachine vm)
+  public final void eval(VirtualMachine vm)
   {
     vm.pushArg(vm.result);
     vm.control = next;
