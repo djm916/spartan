@@ -143,17 +143,17 @@ public final class Math
     }
   };
   
-  public static Datum ceiling(Datum x) throws TypeMismatch
+  public static Datum ceil(Datum x) throws TypeMismatch
   {
     switch (x.type()) {
-      case Real: return ((Real)x).ceiling();
+      case Real: return ((Real)x).ceil();
     }
     throw new TypeMismatch();
   }
   
-  public static final PrimFun Ceiling = new PrimFun(1, false) {
+  public static final PrimFun Ceil = new PrimFun(1, false) {
     public void doApply(VirtualMachine vm) throws TypeMismatch {
-      vm.result = ceiling(vm.popArg());
+      vm.result = ceil(vm.popArg());
       vm.popFrame();
     }
   };
@@ -233,6 +233,51 @@ public final class Math
   public static final PrimFun Tan = new PrimFun(1, false) {
     public void doApply(VirtualMachine vm) throws TypeMismatch {
       vm.result = tan(vm.popArg());
+      vm.popFrame();
+    }
+  };
+  
+  public static Datum asin(Datum x) throws TypeMismatch
+  {
+    switch (x.type()) {
+      case Real: return ((Real)x).asin();
+    }
+    throw new TypeMismatch();
+  }
+  
+  public static final PrimFun Asin = new PrimFun(1, false) {
+    public void doApply(VirtualMachine vm) throws TypeMismatch {
+      vm.result = asin(vm.popArg());
+      vm.popFrame();
+    }
+  };
+  
+  public static Datum acos(Datum x) throws TypeMismatch
+  {
+    switch (x.type()) {
+      case Real: return ((Real)x).acos();
+    }
+    throw new TypeMismatch();
+  }
+  
+  public static final PrimFun Acos = new PrimFun(1, false) {
+    public void doApply(VirtualMachine vm) throws TypeMismatch {
+      vm.result = acos(vm.popArg());
+      vm.popFrame();
+    }
+  };
+  
+  public static Datum atan(Datum x) throws TypeMismatch
+  {
+    switch (x.type()) {
+      case Real: return ((Real)x).atan();
+    }
+    throw new TypeMismatch();
+  }
+  
+  public static final PrimFun Atan = new PrimFun(1, false) {
+    public void doApply(VirtualMachine vm) throws TypeMismatch {
+      vm.result = atan(vm.popArg());
       vm.popFrame();
     }
   };

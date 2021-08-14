@@ -36,7 +36,7 @@ public class Real extends Datum
     return new Real(Math.floor(value));
   }
   
-  public final Real ceiling()
+  public final Real ceil()
   {
     return new Real(Math.ceil(value));
   }
@@ -64,6 +64,21 @@ public class Real extends Datum
   public final Real tan()
   {
     return new Real(Math.tan(value));
+  }
+  
+  public final Real asin()
+  {
+    return new Real(Math.asin(value));
+  }
+  
+  public final Real acos()
+  {
+    return new Real(Math.acos(value));
+  }
+  
+  public final Real atan()
+  {
+    return new Real(Math.atan(value));
   }
   
   public final Real add(Real that)

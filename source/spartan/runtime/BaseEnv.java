@@ -26,12 +26,15 @@ public final class BaseEnv extends GlobalEnv
     bind(Symbol.get("not"), Not);
     bind(Symbol.get("abs"), Abs);
     bind(Symbol.get("floor"), Floor);
-    bind(Symbol.get("ceiling"), Ceiling);
+    bind(Symbol.get("ceil"), Ceil);
     bind(Symbol.get("exp"), Exp);
     bind(Symbol.get("log"), Log);
     bind(Symbol.get("sin"), Sin);
     bind(Symbol.get("cos"), Cos);
     bind(Symbol.get("tan"), Tan);
+    bind(Symbol.get("asin"), Sin);
+    bind(Symbol.get("acos"), Cos);
+    bind(Symbol.get("atan"), Tan);
     
     bind(Symbol.get("E"), Real.E);
     bind(Symbol.get("PI"), Real.PI);
