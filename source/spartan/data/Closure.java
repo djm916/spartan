@@ -26,11 +26,6 @@ public class Closure extends Datum implements Callable
     return Type.Closure;
   }
   
-  public String repr()
-  {
-    return String.format("%s @ 0x%x", type().name, System.identityHashCode(this));
-  }
-  
   public void apply(VirtualMachine vm, int numArgs) throws Error
   {
     if (numArgs < requiredArgs || !isVariadic && numArgs > requiredArgs)

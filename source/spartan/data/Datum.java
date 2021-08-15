@@ -3,5 +3,9 @@ package spartan.data;
 public abstract class Datum
 {
   public abstract Type type();
-  public abstract String repr();
+  
+  public String repr()
+  {
+    return String.format("%s @ 0x%x", type().name, System.identityHashCode(this));
+  }
 }

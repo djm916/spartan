@@ -10,9 +10,4 @@ public class Port extends Datum
   {
     return Type.Port;
   }
-  
-  public final String repr()
-  {
-    return String.format("%s @ 0x%x", Type.Port.name, System.identityHashCode(this));
-  }
 }

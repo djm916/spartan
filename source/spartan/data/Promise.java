@@ -14,9 +14,4 @@ public class Promise extends Closure implements Callable
   {
     return Type.Promise;
   }
-  
-  public final String repr()
-  {
-    return String.format("%s @ 0x%x", type().name, System.identityHashCode(this));
-  }  
 }

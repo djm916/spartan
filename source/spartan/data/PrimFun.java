@@ -20,11 +20,6 @@ public abstract class PrimFun extends Datum implements Callable
     return Type.PrimFun;
   }
   
-  public final String repr()
-  {
-    return Type.PrimFun.name;
-  }
-  
   public final void apply(VirtualMachine vm, int numArgs) throws Error
   {
     if (numArgs < requiredArgs || !isVariadic && numArgs > requiredArgs)
