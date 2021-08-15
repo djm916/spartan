@@ -214,5 +214,13 @@ public final class Core
       vm.args = (List)vm.popArg();
       vm.apply(vm.args.length());
     }
-  };  
+  };
+  
+  public static final PrimFun Print = new PrimFun(1, false) {
+    public void doApply(VirtualMachine vm) {
+      System.out.println(vm.popArg().repr());
+      vm.result = Nil.Instance;
+      vm.popFrame();
+    }
+  };
 }

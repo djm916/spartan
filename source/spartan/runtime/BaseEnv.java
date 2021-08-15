@@ -48,5 +48,7 @@ public final class BaseEnv extends GlobalEnv
     bind(Symbol.get("record"), MakeRecord);
     
     bind(Symbol.get("apply"), Apply);
+    
+    bind(Symbol.get("print"), Print);
   }
 }
