@@ -214,5 +214,5 @@ public final class Core
       vm.args = (List)vm.popArg();
       vm.apply(vm.args.length());
     }
-  };
+  };  
 }

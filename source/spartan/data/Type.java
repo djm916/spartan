@@ -13,6 +13,7 @@ public enum Type
   Record("record"),
   PrimFun("function"),
   Closure("function"),
+  Promise("promise"),
   Port("port");
   
   public final String name;

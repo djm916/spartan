@@ -21,14 +21,14 @@ public class Closure extends Datum implements Callable
     this.isVariadic = isVariadic;
   }
   
-  public final Type type()
+  public Type type()
   {
     return Type.Closure;
   }
   
-  public final String repr()
+  public String repr()
   {
-    return String.format("%s @ 0x%x", Type.Closure.name, System.identityHashCode(this));
+    return String.format("%s @ 0x%x", type().name, System.identityHashCode(this));
   }
   
   public void apply(VirtualMachine vm, int numArgs) throws Error

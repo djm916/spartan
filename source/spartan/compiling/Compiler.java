@@ -491,6 +491,27 @@ public class Compiler
     return code;
   }
   
+  // (delay exp...)
+  
+  private Inst compileDelay(List exp, Scope scope, boolean tc, Inst next) throws CompileError
+  {
+    if (exp.length() < 2)
+      throw malformedExp(exp);
+    
+    Inst body = new LoadLocal(0, 0,
+                new Branch(new PopFrame(),
+                           compileSequence(exp.cdr(), new Scope(scope), false,
+                           new StoreLocal(0, 0,
+                           new PopFrame()))));
+    
+    return new PushLocal(1,
+           new LoadConst(Nil.Instance,
+           new StoreLocal(0, 0,
+           new MakePromise(body,
+           new PopLocal(
+           next)))));
+  }
+  
   private Inst compileCombination(List exp, Scope scope, boolean tc, Inst next) throws CompileError
   {
     if (exp.car() == Symbol.get("if"))
@@ -521,6 +542,8 @@ public class Compiler
       return compileSet(exp, scope, tc, next);
     else if (exp.car() == Symbol.get("while"))
       return compileWhile(exp, scope, tc, next);
+    else if (exp.car() == Symbol.get("delay"))
+      return compileDelay(exp, scope, tc, next);
     else
       return compileApply(exp, scope, tc, next);
   }
