@@ -39,10 +39,10 @@ public final class BaseEnv extends GlobalEnv
     bind(Symbol.get("E"), Real.E);
     bind(Symbol.get("PI"), Real.PI);
     
+    bind(Symbol.get("cons"), Cons);
     bind(Symbol.get("car"), Car);
     bind(Symbol.get("cdr"), Cdr);
     bind(Symbol.get("cadr"), Cadr);
-    bind(Symbol.get("cons"), Cons);
     
     bind(Symbol.get("list"), MakeList);
     bind(Symbol.get("vector"), MakeVector);
@@ -51,5 +51,7 @@ public final class BaseEnv extends GlobalEnv
     bind(Symbol.get("apply"), Apply);
     
     bind(Symbol.get("print"), Print);
+    bind(Symbol.get("type"), TypeOf);
+    bind(Symbol.get("length"), Length);
   }
 }

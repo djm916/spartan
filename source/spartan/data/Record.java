@@ -51,14 +51,14 @@ public class Record extends Datum implements Callable
     return value;
   }
 
-  public final int size()
+  public final int length()
   {
     return members.size();
   }
   
   public boolean eq(Record that) throws TypeMismatch
   {
-    if (this.size() != that.size())
+    if (this.length() != that.length())
       return false;
         
     for (Symbol key : this.members.keySet()) {

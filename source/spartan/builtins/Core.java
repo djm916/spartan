@@ -230,4 +230,29 @@ public final class Core
       vm.popFrame();
     }
   };
+  
+  public static int length(Datum x) throws TypeMismatch
+  {
+    switch (x.type()) {
+      case List: return ((List)x).length();
+      case Vector: return ((Vector)x).length();
+      case Record: return ((Record)x).length();
+      case Text: return ((Text)x).length();
+    }
+    throw new TypeMismatch();
+  }
+  
+  public static final PrimFun Length = new PrimFun(1, false) {
+    public void doApply(VirtualMachine vm) throws TypeMismatch {
+      vm.result = new Int(length(vm.popArg()));
+      vm.popFrame();
+    }
+  };
+  
+  public static final PrimFun TypeOf = new PrimFun(1, false) {
+    public void doApply(VirtualMachine vm) throws TypeMismatch {
+      vm.result = Symbol.get(vm.popArg().type().name);
+      vm.popFrame();
+    }
+  };
 }

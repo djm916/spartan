@@ -2,19 +2,19 @@ package spartan.data;
 
 public enum Type
 {
-  Nil("nil"),
-  Bool("bool"),
-  Int("int"),
-  Real("real"),
-  Symbol("symbol"),
-  Text("text"),
-  List("list"),
-  Vector("vector"),
-  Record("record"),
-  PrimFun("function"),
-  Closure("function"),
-  Promise("promise"),
-  Port("port");
+  Nil("type/nil"),
+  Bool("type/bool"),
+  Int("type/int"),
+  Real("type/real"),
+  Symbol("type/symbol"),
+  Text("type/text"),
+  List("type/list"),
+  Vector("type/vector"),
+  Record("type/record"),
+  PrimFun("type/function"),
+  Closure("type/function"),
+  Promise("type/promise"),
+  Port("type/port");
   
   public final String name;
   

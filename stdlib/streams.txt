@@ -20,7 +20,7 @@
     ()
     (list n (+ n 1))))
 
-(def ints-up-to-3-stream (stream/new generate-ints-up-to-3 0))
+(def ints-up-to-3-stream (stream/new generate-ints-up-to-3 1))
 
 (let ((s ints-up-to-3-stream))
   (while (not (stream/empty? s))

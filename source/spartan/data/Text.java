@@ -17,6 +17,11 @@ public class Text extends Datum
     return "\"" + value + "\"";
   }
   
+  public final int length()
+  {
+    return value.length();
+  }
+  
   public final boolean eq(Text that)
   {
     return this.value.equals(that.value);

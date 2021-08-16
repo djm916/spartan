@@ -31,7 +31,7 @@ public class Vector extends Datum implements Callable
       .collect(Collectors.joining(" ", "[", "]"));
   }
   
-  public final int size()
+  public final int length()
   {
     return elems.length;
   }
@@ -45,10 +45,10 @@ public class Vector extends Datum implements Callable
   
   public final boolean eq(Vector that) throws TypeMismatch
   {
-    if (this.size() != that.size())
+    if (this.length() != that.length())
       return false;
     
-    for (int i = 0; i < this.size(); ++i)
+    for (int i = 0; i < this.length(); ++i)
       if (!Core.eq(this.elems[i], that.elems[i]))
         return false;
     
