@@ -145,7 +145,7 @@ public final class Core
   
   public static Datum car(Datum x) throws TypeMismatch
   {
-    if (x.type() != Type.List)
+    if (x.type() != Type.List || x == List.Empty)
       throw new TypeMismatch();
     return ((List)x).car();
   }
@@ -159,7 +159,7 @@ public final class Core
   
   public static List cdr(Datum x) throws TypeMismatch
   {
-    if (x.type() != Type.List)
+    if (x.type() != Type.List || x == List.Empty)
       throw new TypeMismatch();
     return ((List)x).cdr();
   }
@@ -167,6 +167,13 @@ public final class Core
   public static final PrimFun Cdr = new PrimFun(1, false) {
     public void doApply(VirtualMachine vm) throws TypeMismatch {
       vm.result = cdr(vm.popArg());
+      vm.popFrame();
+    }
+  };
+  
+  public static final PrimFun Cadr = new PrimFun(1, false) {
+    public void doApply(VirtualMachine vm) throws TypeMismatch {
+      vm.result = car(cdr(vm.popArg()));
       vm.popFrame();
     }
   };
