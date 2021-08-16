@@ -8,4 +8,13 @@
     false
     (even (- n 1))))
 
-(even 100000)
+(letrec
+  ((even? (fun (n)
+            (if (= 0 n)
+              true
+              (odd? (- n 1)))))
+   (odd?  (fun (n)
+            (if (= 0 n)
+              false
+              (even? (- n 1))))))
+   (even? 11))

@@ -28,6 +28,19 @@ public class List extends Datum
     }
   }
   
+  public static List cons(Datum first, List rest)
+  {
+    return new List(first, rest);
+  }
+  
+  public static List of(Datum... elems)
+  {
+    List result = Empty;
+    for (int i = elems.length - 1; i >= 0; --i)
+      result = new List(elems[i], result);
+    return result;
+  }
+  
   public final Type type()
   {
     return Type.List;
@@ -44,6 +57,11 @@ public class List extends Datum
     this.rest = rest;
   }
   
+  public final boolean empty()
+  {
+    return this == Empty;
+  }
+  
   public final Datum car()
   {
     return first;
@@ -53,7 +71,27 @@ public class List extends Datum
   {
     return rest;
   }
-    
+  
+  public final Datum cadr()
+  {
+    return rest.first;
+  }
+  
+  public final Datum caddr()
+  {
+    return rest.rest.first;
+  }
+  
+  public final Datum cadddr()
+  {
+    return rest.rest.rest.first;
+  }
+  
+  public final List cddr()
+  {
+    return rest.rest;
+  }
+  
   public final int length()
   {
     return length(this);

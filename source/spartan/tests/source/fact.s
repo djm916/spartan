@@ -13,3 +13,6 @@
         (set! p (* n p))
         (set! n (- n 1)))
       p)))
+
+(fact-rec 6)
+(fact-loop 6)

@@ -5,24 +5,24 @@
       (if (= () next-pair)
         ()
         (list (car next-pair)
-              (stream/new generator (car (cdr next-pair))))))))
+              (stream/new generator (cadr next-pair)))))))
 
 (defun stream/car (s) (car (s)))
 
-(defun stream/cdr (s) (car (cdr (s))))
+(defun stream/cdr (s) (cadr (s)))
 
 (defun stream/empty? (s) (= (s) ()))
 
 ;----
 
-(defun ints-up-to-3 (n)
+(defun generate-ints-up-to-3 (n)
   (if (> n 3)
     ()
     (list n (+ n 1))))
 
-(def ints (stream/new ints-up-to-3 0))
+(def ints-up-to-3-stream (stream/new generate-ints-up-to-3 0))
 
-(let ((i ints))
-  (while (not (stream/empty? i))
-    (print (stream/car i))
-    (set! i (stream/cdr i))))
+(let ((s ints-up-to-3-stream))
+  (while (not (stream/empty? s))
+    (print (stream/car s))
+    (set! s (stream/cdr s))))
