@@ -10,7 +10,11 @@ import spartan.errors.MultipleDefinition;
 
 public class Compiler
 {
-  private PositionMap positionMap;
+  public Inst compile(SourceDatum sourceDatum) throws CompileError
+  {
+    positionMap = sourceDatum.positionMap;
+    return compile(sourceDatum.datum, null, false, null);
+  }
   
   private MalformedExpression malformedExp(Datum exp)
   {
@@ -48,7 +52,7 @@ public class Compiler
   
   private Inst compileVarRef(Symbol symb, Scope scope, Inst next)
   {
-    DeBruijnIndex index = (scope == null) ? null : scope.lookup(symb);
+    var index = (scope == null) ? null : scope.lookup(symb);
     
     return (index == null) ? new LoadGlobal(symb, positionMap.get(symb), next)
                            : new LoadLocal(index.depth, index.offset, next);
@@ -61,8 +65,8 @@ public class Compiler
     if (exp.length() != 3 || exp.cadr().type() != Type.Symbol)
       throw malformedExp(exp);
     
-    Symbol symb = (Symbol) exp.cadr();
-    Datum init = exp.caddr();
+    var symb = (Symbol) exp.cadr();
+    var init = exp.caddr();
     
     return compile(init, scope, false,
            new StoreGlobal(symb, next));
@@ -78,66 +82,64 @@ public class Compiler
     return compile(transformDefun(exp.cdr()), scope, false, next);
   }
   
-  // (if test subs)
+  // (if test sub)
   //
-  // (if test subs alt)
+  // (if test sub alt)
   
-  private Inst compileIf(List exp, Scope scope, boolean tc, Inst next) throws CompileError
+  private Inst compileIf(List exp, Scope scope, boolean tail, Inst next) throws CompileError
   {
     int length = exp.length();
     
     if (length < 3 || length > 4)
       throw malformedExp(exp);
     
-    Datum test = exp.cadr();
-    Datum subs = exp.caddr();
-    Datum alt  = length == 3 ? Nil.Instance : exp.cadddr();
+    var test = exp.cadr();
+    var sub = exp.caddr();
+    var alt = length == 3 ? Nil.Instance : exp.cadddr();
     
     return compile(test, scope, false,
-           new Branch(compile(subs, scope, tc, next),
-                      compile(alt, scope, tc, next)));
+           new Branch(compile(sub, scope, tail, next),
+                      compile(alt, scope, tail, next)));
   }
   
-  private Inst compileCond(List exp, Scope scope, boolean tc, Inst next) throws CompileError
+  private Inst compileCond(List exp, Scope scope, boolean tail, Inst next) throws CompileError
   {
     if (exp.length() < 2 || !checkCondClauses(exp.cdr()))
       throw malformedExp(exp);
     
-    return compileCondClauses(exp.cdr(), scope, tc, next);
+    return compileCondClauses(exp.cdr(), scope, tail, next);
   }
   
-  private boolean checkCondClauses(List exp)
+  private boolean checkCondClauses(List clauses)
   {
-    for (; exp != List.Empty; exp = exp.cdr()) {
-      if (exp.car().type() != Type.List)
+    for (; clauses != List.Empty; clauses = clauses.cdr())
+      if (clauses.car().type() != Type.List || ((List) clauses.car()).length() < 2)
         return false;
-      if (((List)exp.car()).length() < 2)
-        return false;
-    }
+
     return true;
   }
-  
-  private Inst compileCondClauses(List exp, Scope scope, boolean tc, Inst next) throws CompileError
+    
+  private Inst compileCondClauses(List clauses, Scope scope, boolean tail, Inst next) throws CompileError
   {
-    if (exp == List.Empty)
+    if (clauses == List.Empty)
       return new LoadConst(Nil.Instance, next);
 
-    List clause = (List) exp.car();
-    Datum test = clause.car();
-    List body = clause.cdr();
+    var clause = (List) clauses.car();
+    var test = clause.car();
+    var body = clause.cdr();
     
     return compile(test, scope, false,
-           new Branch(compileSequence(body, scope, tc, next),
-                      compileCondClauses(exp.cdr(), scope, tc, next)));
+           new Branch(compileSequence(body, scope, tail, next),
+                      compileCondClauses(clauses.cdr(), scope, tail, next)));
   }
   
-  private Inst compileLet(List exp, Scope scope, boolean tc, Inst next) throws CompileError
+  private Inst compileLet(List exp, Scope scope, boolean tail, Inst next) throws CompileError
   {
     if (exp.length() < 3 || exp.cadr().type() != Type.List)
       throw malformedExp(exp);
     
-    List bindings = (List) exp.cadr();
-    List body = exp.cddr();
+    var bindings = (List) exp.cadr();
+    var body = exp.cddr();
     
     if (!checkLetBindings(bindings))
       throw malformedExp(bindings);
@@ -147,17 +149,17 @@ public class Compiler
     return evalInitializers(bindings, scope,
            new PushLocal(numBindings,
            performBindings(0, numBindings,
-           compileSequence(body, extendLetScope(bindings, scope), tc,
+           compileSequence(body, extendLetScope(bindings, scope), tail,
            new PopLocal(next)))));
   }
   
-  private Inst compileLetRec(List exp, Scope scope, boolean tc, Inst next) throws CompileError
+  private Inst compileLetRec(List exp, Scope scope, boolean tail, Inst next) throws CompileError
   {
     if (exp.length() < 3 || exp.cadr().type() != Type.List)
       throw malformedExp(exp);
     
-    List bindings = (List) exp.cadr();
-    List body = exp.cddr();
+    var bindings = (List) exp.cadr();
+    var body = exp.cddr();
     
     if (!checkLetBindings(bindings))
       throw malformedExp(exp);
@@ -169,36 +171,39 @@ public class Compiler
     return new PushLocal(numBindings,
            evalInitializers(bindings, scope,
            performBindings(0, numBindings,
-           compileSequence(body, scope, tc,
+           compileSequence(body, scope, tail,
            new PopLocal(next)))));
   }
   
-  private Inst compileLetStar(List exp, Scope scope, boolean tc, Inst next) throws CompileError
+  private Inst compileLetStar(List exp, Scope scope, boolean tail, Inst next) throws CompileError
   {
     if (exp.length() < 3 || exp.cadr().type() != Type.List)
       throw malformedExp(exp);
     
-    List bindings = (List) exp.cadr();
-    List body = exp.cddr();
+    var bindings = (List) exp.cadr();
+    var body = exp.cddr();
     
     if (!checkLetBindings(bindings))
       throw malformedExp(bindings);
     
-    return compile(transformLetStar(bindings, body), scope, tc, next);
+    return compile(transformLetStar(bindings, body), scope, tail, next);
   }
   
   private boolean checkLetBindings(List bindings)
   {
     if (bindings == List.Empty)
       return false;
-    for (; bindings != List.Empty; bindings = bindings.cdr()) {
-      if (bindings.car().type() != Type.List)
+    
+    for (; bindings != List.Empty; bindings = bindings.cdr())
+      if (bindings.car().type() != Type.List || !checkBinding((List) bindings.car()))
         return false;
-      List binding = (List)bindings.car();
-      if (binding.length() != 2 || binding.car().type() != Type.Symbol)
-        return false;
-    }
+    
     return true;
+  }
+  
+  private boolean checkBinding(List binding)
+  {
+    return binding.length() == 2 && binding.car().type() == Type.Symbol;
   }
   
   private Scope extendLetScope(List bindings, Scope parent) throws MultipleDefinition
@@ -206,8 +211,8 @@ public class Compiler
     Scope scope = new Scope(parent);
     
     for (; bindings != List.Empty; bindings = bindings.cdr()) {
-      List binding = (List)bindings.car();
-      Symbol symb = (Symbol)binding.car();
+      var binding = (List) bindings.car();
+      var symb = (Symbol) binding.car();
       if (!scope.bind(symb))
         throw multipleDef(symb);
     }
@@ -220,7 +225,7 @@ public class Compiler
     if (bindings == List.Empty)
       return next;
 
-    List binding = (List)bindings.car();
+    var binding = (List) bindings.car();
     
     return evalInitializers(bindings.cdr(), scope,
            compile(binding.cadr(), scope, false,
@@ -268,11 +273,11 @@ public class Compiler
   // <<f>>
   // apply
   
-  private Inst compileApply(List exp, Scope scope, boolean tc, Inst next) throws CompileError
+  private Inst compileApply(List exp, Scope scope, boolean tail, Inst next) throws CompileError
   {
     int numArgs = exp.length() - 1;
     
-    return tc ? compilePushArgs(exp.cdr(), scope,
+    return tail ? compilePushArgs(exp.cdr(), scope,
                 compile(exp.car(), scope, false,
                 new Apply(numArgs, positionMap.get(exp))))
         
@@ -308,17 +313,17 @@ public class Compiler
     if (exp.length() < 3 || exp.cadr().type() != Type.List)
       throw malformedExp(exp);
     
-    List params = (List) exp.cadr();
-    List body = exp.cddr();
+    var params = (List) exp.cadr();
+    var body = exp.cddr();
     
     if (!checkParams(params))
       throw malformedExp(exp);
     
-    int numParams = params.length();
-    boolean isVariadic = numParams != 0 && isRestParam((Symbol) params.at(numParams - 1));
-    int requiredArgs = isVariadic ? numParams - 1 : numParams;
+    var numParams = params.length();
+    var isVariadic = numParams != 0 && isRestParam((Symbol) params.at(numParams - 1));
+    var requiredArgs = isVariadic ? numParams - 1 : numParams;
     
-    Inst code = isVariadic ? new PushLocal(numParams,
+    var code = isVariadic  ? new PushLocal(numParams,
                              compilePopArgsVariadic(0, numParams,
                              compileSequence(body, extendFunScope(params, scope), true,
                              new PopFrame())))
@@ -349,10 +354,10 @@ public class Compiler
   
   private Scope extendFunScope(List params, Scope parent) throws MultipleDefinition
   {
-    Scope scope = new Scope(parent);
+    var scope = new Scope(parent);
     
     for (; params != List.Empty; params = params.cdr()) {
-      Symbol symb = (Symbol) params.car();
+      var symb = (Symbol) params.car();
       if (!scope.bind(symb))
         throw multipleDef(symb);
     }
@@ -386,87 +391,82 @@ public class Compiler
   
   // (or a b ...)
   
-  private Inst compileOr(List exp, Scope scope, boolean tc, Inst next) throws CompileError
+  private Inst compileOr(List exp, Scope scope, boolean tail, Inst next) throws CompileError
   {
     if (exp.length() < 2)
       throw malformedExp(exp);
     
-    return compileOrArgs(exp.cdr(), scope, tc, next);
+    return compileOrArgs(exp.cdr(), scope, tail, next);
   }
   
-  private Inst compileOrArgs(List exp, Scope scope, boolean tc, Inst next) throws CompileError
+  private Inst compileOrArgs(List exp, Scope scope, boolean tail, Inst next) throws CompileError
   {
     if (exp == List.Empty)
       return next;
 
-    return compile(exp.car(), scope, tc && (exp.cdr() == List.Empty),
+    return compile(exp.car(), scope, tail && (exp.cdr() == List.Empty),
            new Branch(next,
-                      compileOrArgs(exp.cdr(), scope, tc, next)));
+                      compileOrArgs(exp.cdr(), scope, tail, next)));
   }
   
   // (and a b ...)
   
-  private Inst compileAnd(List exp, Scope scope, boolean tc, Inst next) throws CompileError
+  private Inst compileAnd(List exp, Scope scope, boolean tail, Inst next) throws CompileError
   {
     if (exp.length() < 2)
       throw malformedExp(exp);
     
-    return compileAndArgs(exp.cdr(), scope, tc, next);
+    return compileAndArgs(exp.cdr(), scope, tail, next);
   }
   
-  private Inst compileAndArgs(List exp, Scope scope, boolean tc, Inst next) throws CompileError
+  private Inst compileAndArgs(List exp, Scope scope, boolean tail, Inst next) throws CompileError
   {
     if (exp == List.Empty)
       return next;
 
-    return compile(exp.car(), scope, tc && (exp.cdr() == List.Empty),
-           new Branch(compileAndArgs(exp.cdr(), scope, tc, next),
+    return compile(exp.car(), scope, tail && (exp.cdr() == List.Empty),
+           new Branch(compileAndArgs(exp.cdr(), scope, tail, next),
                       next));
   }
   
-  private Inst compileDo(List exp, Scope scope, boolean tc, Inst next) throws CompileError
+  private Inst compileDo(List exp, Scope scope, boolean tail, Inst next) throws CompileError
   {
     if (exp.length() < 2)
       throw malformedExp(exp);
     
-    return compileSequence(exp.cdr(), scope, tc, next);
+    return compileSequence(exp.cdr(), scope, tail, next);
   }
   
-  private Inst compileSequence(List exp, Scope scope, boolean tc, Inst next) throws CompileError
+  private Inst compileSequence(List exp, Scope scope, boolean tail, Inst next) throws CompileError
   {
     if (exp == List.Empty)
       return next;
 
-    return compile(exp.car(), scope, (tc && exp.cdr() == List.Empty),
-           compileSequence(exp.cdr(), scope, tc, next));
+    return compile(exp.car(), scope, (tail && exp.cdr() == List.Empty),
+           compileSequence(exp.cdr(), scope, tail, next));
   }
   
   // (set! symbol init)
   
-  private Inst compileSet(List exp, Scope scope, boolean tc, Inst next) throws CompileError
+  private Inst compileSet(List exp, Scope scope, boolean tail, Inst next) throws CompileError
   {
     if (exp.length() != 3 || exp.cdr().car().type() != Type.Symbol)
       throw malformedExp(exp);
     
-    Symbol symb = (Symbol) exp.cadr();
-    Datum init = exp.caddr();
-    
-    DeBruijnIndex index = (scope == null) ? null : scope.lookup(symb);
+    var symb = (Symbol) exp.cadr();
+    var init = exp.caddr();
+    var index = (scope == null) ? null : scope.lookup(symb);
     
     return (index == null)
-      
       ? compile(init, scope, false,
-        new StoreGlobal(symb,
-        next))
-      
+        new StoreGlobal(symb, next))
       : compile(init, scope, false,
-        new StoreLocal(index.depth, index.offset,
-        next));
+        new StoreLocal(index.depth, index.offset, next));
   }
   
   // (while test body...)
   
-  private Inst compileWhile(List exp, Scope scope, boolean tc, Inst next) throws CompileError
+  private Inst compileWhile(List exp, Scope scope, boolean tail, Inst next) throws CompileError
   {
     if (exp.length() < 3)
       throw malformedExp(exp);
@@ -475,7 +475,7 @@ public class Compiler
     List body = exp.cddr();
     Jump jump = new Jump();
     Inst code = compile(test, scope, false,
-                new Branch(compileSequence(body, scope, tc, jump),
+                new Branch(compileSequence(body, scope, tail, jump),
                            new LoadConst(Nil.Instance, next)));
     jump.setTarget(code);
     return code;
@@ -483,7 +483,7 @@ public class Compiler
   
   // (delay exp...)
   
-  private Inst compileDelay(List exp, Scope scope, boolean tc, Inst next) throws CompileError
+  private Inst compileDelay(List exp, Scope scope, boolean tail, Inst next) throws CompileError
   {
     if (exp.length() < 2)
       throw malformedExp(exp);
@@ -502,16 +502,16 @@ public class Compiler
            next)))));
   }
   
-  private Inst compileList(List exp, Scope scope, boolean tc, Inst next) throws CompileError
+  private Inst compileList(List exp, Scope scope, boolean tail, Inst next) throws CompileError
   {
     if (exp.car() == Symbol.get("if"))
-      return compileIf(exp, scope, tc, next);
+      return compileIf(exp, scope, tail, next);
     else if (exp.car() == Symbol.get("let"))
-      return compileLet(exp, scope, tc, next);
+      return compileLet(exp, scope, tail, next);
     else if (exp.car() == Symbol.get("let*"))
-      return compileLetStar(exp, scope, tc, next);
+      return compileLetStar(exp, scope, tail, next);
     else if (exp.car() == Symbol.get("letrec"))
-      return compileLetRec(exp, scope, tc, next);
+      return compileLetRec(exp, scope, tail, next);
     else if (exp.car() == Symbol.get("def"))
       return compileDef(exp, scope, next);
     else if (exp.car() == Symbol.get("defun"))
@@ -521,36 +521,32 @@ public class Compiler
     else if (exp.car() == Symbol.get("quote"))
       return compileQuote(exp, next);
     else if (exp.car() == Symbol.get("or"))
-      return compileOr(exp, scope, tc, next);
+      return compileOr(exp, scope, tail, next);
     else if (exp.car() == Symbol.get("and"))
-      return compileAnd(exp, scope, tc, next);
+      return compileAnd(exp, scope, tail, next);
     else if (exp.car() == Symbol.get("cond"))
-      return compileCond(exp, scope, tc, next);
+      return compileCond(exp, scope, tail, next);
     else if (exp.car() == Symbol.get("do"))
-      return compileDo(exp, scope, tc, next);
+      return compileDo(exp, scope, tail, next);
     else if (exp.car() == Symbol.get("set!"))
-      return compileSet(exp, scope, tc, next);
+      return compileSet(exp, scope, tail, next);
     else if (exp.car() == Symbol.get("while"))
-      return compileWhile(exp, scope, tc, next);
+      return compileWhile(exp, scope, tail, next);
     else if (exp.car() == Symbol.get("delay"))
-      return compileDelay(exp, scope, tc, next);
+      return compileDelay(exp, scope, tail, next);
     else
-      return compileApply(exp, scope, tc, next);
+      return compileApply(exp, scope, tail, next);
   }
   
-  private Inst compile(Datum exp, Scope scope, boolean tc, Inst next) throws CompileError
+  private Inst compile(Datum exp, Scope scope, boolean tail, Inst next) throws CompileError
   {
     if (isSelfEval(exp))
       return compileSelfEval(exp, next);
     else if (exp.type() == Type.Symbol)
       return compileVarRef((Symbol)exp, scope, next);
     else
-      return compileList((List)exp, scope, tc, next);
+      return compileList((List)exp, scope, tail, next);
   }
-  
-  public Inst compile(SourceDatum sourceDatum) throws CompileError
-  {
-    positionMap = sourceDatum.positionMap;
-    return compile(sourceDatum.datum, null, false, null);
-  }
+
+  private PositionMap positionMap;
 }

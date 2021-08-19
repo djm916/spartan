@@ -1,8 +1,6 @@
 package spartan.data;
 
 import java.util.Set;
-import java.util.Map;
-import java.util.IdentityHashMap;
 import java.util.stream.Stream;
 import java.util.stream.Collectors;
 import spartan.errors.Error;
@@ -13,19 +11,19 @@ import spartan.builtins.Core;
 import spartan.data.Symbol;
 import spartan.runtime.VirtualMachine;
 
-public class Record extends Datum implements Callable
+public class Map extends Datum implements Callable
 {
-  public static Record fromList(List elems) throws TypeMismatch
+  public static Map fromList(List elems) throws TypeMismatch
   {
-    Record result = new Record();
+    var result = new Map();
     for (; elems != List.Empty; elems = elems.cdr()) {
       if (elems.car().type() != Type.Symbol)
         throw new TypeMismatch();
-      Symbol key = (Symbol)elems.car();
+      var key = (Symbol) elems.car();
       if (elems.cdr() == List.Empty)
         throw new TypeMismatch();
-      Datum value = elems.cdr().car();
       elems = elems.cdr();
+      var value = elems.car();
       result.members.put(key, value);
     }
     return result;
@@ -33,7 +31,7 @@ public class Record extends Datum implements Callable
   
   public final Type type()
   {
-    return Type.Record;
+    return Type.Map;
   }
   
   public final String repr()
@@ -56,7 +54,7 @@ public class Record extends Datum implements Callable
     return members.size();
   }
   
-  public boolean eq(Record that) throws TypeMismatch
+  public boolean eq(Map that) throws TypeMismatch
   {
     if (this.length() != that.length())
       return false;
@@ -81,10 +79,10 @@ public class Record extends Datum implements Callable
     vm.popFrame();
   }
   
-  private Record()
+  private Map()
   {
-    members = new IdentityHashMap<>();
+    members = new java.util.IdentityHashMap<>();
   }
   
-  private final Map<Symbol, Datum> members;
+  private final java.util.Map<Symbol, Datum> members;
 }

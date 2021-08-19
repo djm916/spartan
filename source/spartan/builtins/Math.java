@@ -17,7 +17,7 @@ public final class Math
     throw new TypeMismatch();
   }
     
-  public static final PrimFun Add = new PrimFun(2, true) {
+  public static final Primitive Add = new Primitive(2, true) {
     public void doApply(VirtualMachine vm) throws TypeMismatch {
       vm.result = add(vm.popArg(), vm.popArg());
       while (vm.args != List.Empty)
@@ -37,7 +37,7 @@ public final class Math
     throw new TypeMismatch();
   }
   
-  public static final PrimFun Sub = new PrimFun(2, false) {
+  public static final Primitive Sub = new Primitive(2, false) {
     public void doApply(VirtualMachine vm) throws TypeMismatch {
       vm.result = sub(vm.popArg(), vm.popArg());
       vm.popFrame();
@@ -55,7 +55,7 @@ public final class Math
     throw new TypeMismatch();
   }
     
-  public static final PrimFun Mul = new PrimFun(2, true) {
+  public static final Primitive Mul = new Primitive(2, true) {
     public void doApply(VirtualMachine vm) throws TypeMismatch {
       vm.result = mul(vm.popArg(), vm.popArg());
       while (vm.args != List.Empty)
@@ -75,7 +75,7 @@ public final class Math
     throw new TypeMismatch();
   }
   
-  public static final PrimFun Div = new PrimFun(2, false) {
+  public static final Primitive Div = new Primitive(2, false) {
     public void doApply(VirtualMachine vm) throws TypeMismatch {
       vm.result = div(vm.popArg(), vm.popArg());
       vm.popFrame();
@@ -89,7 +89,7 @@ public final class Math
     throw new TypeMismatch();
   }
   
-  public static final PrimFun Mod = new PrimFun(2, false) {
+  public static final Primitive Mod = new Primitive(2, false) {
     public void doApply(VirtualMachine vm) throws TypeMismatch {
       vm.result = mod(vm.popArg(), vm.popArg());
       vm.popFrame();
@@ -105,7 +105,7 @@ public final class Math
     throw new TypeMismatch();
   }
   
-  public static final PrimFun Neg = new PrimFun(1, false) {
+  public static final Primitive Neg = new Primitive(1, false) {
     public void doApply(VirtualMachine vm) throws TypeMismatch {
       vm.result = neg(vm.popArg());
       vm.popFrame();
@@ -121,7 +121,7 @@ public final class Math
     throw new TypeMismatch();
   }
   
-  public static final PrimFun Abs = new PrimFun(1, false) {
+  public static final Primitive Abs = new Primitive(1, false) {
     public void doApply(VirtualMachine vm) throws TypeMismatch {
       vm.result = abs(vm.popArg());
       vm.popFrame();
@@ -136,7 +136,7 @@ public final class Math
     throw new TypeMismatch();
   }
   
-  public static final PrimFun Floor = new PrimFun(1, false) {
+  public static final Primitive Floor = new Primitive(1, false) {
     public void doApply(VirtualMachine vm) throws TypeMismatch {
       vm.result = floor(vm.popArg());
       vm.popFrame();
@@ -151,7 +151,7 @@ public final class Math
     throw new TypeMismatch();
   }
   
-  public static final PrimFun Ceil = new PrimFun(1, false) {
+  public static final Primitive Ceil = new Primitive(1, false) {
     public void doApply(VirtualMachine vm) throws TypeMismatch {
       vm.result = ceil(vm.popArg());
       vm.popFrame();
@@ -168,7 +168,7 @@ public final class Math
     throw new TypeMismatch();
   }
   
-  public static final PrimFun Exp = new PrimFun(2, false) {
+  public static final Primitive Exp = new Primitive(2, false) {
     public void doApply(VirtualMachine vm) throws TypeMismatch {
       vm.result = exp(vm.popArg(), vm.popArg());
       vm.popFrame();
@@ -185,7 +185,7 @@ public final class Math
     throw new TypeMismatch();
   }
   
-  public static final PrimFun Log = new PrimFun(2, false) {
+  public static final Primitive Log = new Primitive(2, false) {
     public void doApply(VirtualMachine vm) throws TypeMismatch {
       vm.result = log(vm.popArg(), vm.popArg());
       vm.popFrame();
@@ -200,7 +200,7 @@ public final class Math
     throw new TypeMismatch();
   }
   
-  public static final PrimFun Sin = new PrimFun(1, false) {
+  public static final Primitive Sin = new Primitive(1, false) {
     public void doApply(VirtualMachine vm) throws TypeMismatch {
       vm.result = sin(vm.popArg());
       vm.popFrame();
@@ -215,7 +215,7 @@ public final class Math
     throw new TypeMismatch();
   }
   
-  public static final PrimFun Cos = new PrimFun(1, false) {
+  public static final Primitive Cos = new Primitive(1, false) {
     public void doApply(VirtualMachine vm) throws TypeMismatch {
       vm.result = cos(vm.popArg());
       vm.popFrame();
@@ -230,7 +230,7 @@ public final class Math
     throw new TypeMismatch();
   }
   
-  public static final PrimFun Tan = new PrimFun(1, false) {
+  public static final Primitive Tan = new Primitive(1, false) {
     public void doApply(VirtualMachine vm) throws TypeMismatch {
       vm.result = tan(vm.popArg());
       vm.popFrame();
@@ -245,7 +245,7 @@ public final class Math
     throw new TypeMismatch();
   }
   
-  public static final PrimFun Asin = new PrimFun(1, false) {
+  public static final Primitive Asin = new Primitive(1, false) {
     public void doApply(VirtualMachine vm) throws TypeMismatch {
       vm.result = asin(vm.popArg());
       vm.popFrame();
@@ -260,7 +260,7 @@ public final class Math
     throw new TypeMismatch();
   }
   
-  public static final PrimFun Acos = new PrimFun(1, false) {
+  public static final Primitive Acos = new Primitive(1, false) {
     public void doApply(VirtualMachine vm) throws TypeMismatch {
       vm.result = acos(vm.popArg());
       vm.popFrame();
@@ -275,7 +275,7 @@ public final class Math
     throw new TypeMismatch();
   }
   
-  public static final PrimFun Atan = new PrimFun(1, false) {
+  public static final Primitive Atan = new Primitive(1, false) {
     public void doApply(VirtualMachine vm) throws TypeMismatch {
       vm.result = atan(vm.popArg());
       vm.popFrame();

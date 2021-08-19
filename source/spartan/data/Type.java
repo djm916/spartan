@@ -10,8 +10,8 @@ public enum Type
   Text("type/text"),
   List("type/list"),
   Vector("type/vector"),
-  Record("type/record"),
-  PrimFun("type/function"),
+  Map("type/map"),
+  Primitive("type/function"),
   Closure("type/function"),
   Promise("type/promise"),
   Port("type/port");

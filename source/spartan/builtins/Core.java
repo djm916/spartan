@@ -24,7 +24,7 @@ public final class Core
     throw new TypeMismatch();
   }
   
-  public static final PrimFun Not = new PrimFun(1, false) {
+  public static final Primitive Not = new Primitive(1, false) {
     public void doApply(VirtualMachine vm) throws TypeMismatch {
       vm.result = not(vm.popArg());
       vm.popFrame();
@@ -40,7 +40,7 @@ public final class Core
         case Text: return ((Text)x).eq((Text)y);
         case Vector: return ((Vector)x).eq((Vector)y);
         case List: return ((List)x).eq((List)y);
-        case Record: return ((Record)x).eq((Record)y);
+        case Map: return ((Map)x).eq((Map)y);
         case Bool: 
         case Symbol: return x == y;
       }
@@ -48,7 +48,7 @@ public final class Core
     throw new TypeMismatch();
   }
   
-  public static final PrimFun Eq = new PrimFun(2, false) {
+  public static final Primitive Eq = new Primitive(2, false) {
     public void doApply(VirtualMachine vm) throws TypeMismatch {
       vm.result = truth(eq(vm.popArg(), vm.popArg()));
       vm.popFrame();
@@ -60,7 +60,7 @@ public final class Core
     return !eq(x, y);
   }
   
-  public static final PrimFun Ne = new PrimFun(2, false) {
+  public static final Primitive Ne = new Primitive(2, false) {
     public void doApply(VirtualMachine vm) throws TypeMismatch {
       vm.result = truth(ne(vm.popArg(), vm.popArg()));
       vm.popFrame();
@@ -79,7 +79,7 @@ public final class Core
     throw new TypeMismatch();
   }
   
-  public static final PrimFun Lt = new PrimFun(2, false) {
+  public static final Primitive Lt = new Primitive(2, false) {
     public void doApply(VirtualMachine vm) throws TypeMismatch {
       vm.result = truth(lt(vm.popArg(), vm.popArg()));
       vm.popFrame();
@@ -98,7 +98,7 @@ public final class Core
     throw new TypeMismatch();
   }
   
-  public static final PrimFun Le = new PrimFun(2, false) {
+  public static final Primitive Le = new Primitive(2, false) {
     public void doApply(VirtualMachine vm) throws TypeMismatch {
       vm.result = truth(le(vm.popArg(), vm.popArg()));
       vm.popFrame();
@@ -117,7 +117,7 @@ public final class Core
     throw new TypeMismatch();
   }
   
-  public static final PrimFun Gt = new PrimFun(2, false) {
+  public static final Primitive Gt = new Primitive(2, false) {
     public void doApply(VirtualMachine vm) throws TypeMismatch {
       vm.result = truth(gt(vm.popArg(), vm.popArg()));
       vm.popFrame();
@@ -136,7 +136,7 @@ public final class Core
     throw new TypeMismatch();
   }
   
-  public static final PrimFun Ge = new PrimFun(2, false) {
+  public static final Primitive Ge = new Primitive(2, false) {
     public void doApply(VirtualMachine vm) throws TypeMismatch {
       vm.result = truth(ge(vm.popArg(), vm.popArg()));
       vm.popFrame();
@@ -150,7 +150,7 @@ public final class Core
     return ((List)x).car();
   }
   
-  public static final PrimFun Car = new PrimFun(1, false) {
+  public static final Primitive Car = new Primitive(1, false) {
     public void doApply(VirtualMachine vm) throws TypeMismatch {
       vm.result = car(vm.popArg());
       vm.popFrame();
@@ -164,14 +164,14 @@ public final class Core
     return ((List)x).cdr();
   }
   
-  public static final PrimFun Cdr = new PrimFun(1, false) {
+  public static final Primitive Cdr = new Primitive(1, false) {
     public void doApply(VirtualMachine vm) throws TypeMismatch {
       vm.result = cdr(vm.popArg());
       vm.popFrame();
     }
   };
   
-  public static final PrimFun Cadr = new PrimFun(1, false) {
+  public static final Primitive Cadr = new Primitive(1, false) {
     public void doApply(VirtualMachine vm) throws TypeMismatch {
       vm.result = car(cdr(vm.popArg()));
       vm.popFrame();
@@ -185,35 +185,35 @@ public final class Core
     return new List(first, (List)rest);
   }
   
-  public static final PrimFun Cons = new PrimFun(2, false) {
+  public static final Primitive Cons = new Primitive(2, false) {
     public void doApply(VirtualMachine vm) throws TypeMismatch {
       vm.result = cons(vm.popArg(), vm.popArg());
       vm.popFrame();
     }
   };
   
-  public static final PrimFun MakeList = new PrimFun(0, true) {
+  public static final Primitive MakeList = new Primitive(0, true) {
     public void doApply(VirtualMachine vm) {
       vm.result = vm.popArgs();
       vm.popFrame();
     }
   };
   
-  public static final PrimFun MakeVector = new PrimFun(0, true) {
+  public static final Primitive MakeVector = new Primitive(0, true) {
     public void doApply(VirtualMachine vm) {
       vm.result = Vector.fromList(vm.popArgs());
       vm.popFrame();
     }
   };
   
-  public static final PrimFun MakeRecord = new PrimFun(0, true) {
+  public static final Primitive MakeRecord = new Primitive(0, true) {
     public void doApply(VirtualMachine vm) throws TypeMismatch {
-      vm.result = Record.fromList(vm.popArgs());
+      vm.result = Map.fromList(vm.popArgs());
       vm.popFrame();
     }
   };
   
-  public static final PrimFun Apply = new PrimFun(2, false) {
+  public static final Primitive Apply = new Primitive(2, false) {
     public void doApply(VirtualMachine vm) throws Error {
       vm.result = vm.popArg();
       if (vm.peekArg().type() != Type.List)
@@ -223,7 +223,7 @@ public final class Core
     }
   };
   
-  public static final PrimFun Print = new PrimFun(1, false) {
+  public static final Primitive Print = new Primitive(1, false) {
     public void doApply(VirtualMachine vm) {
       System.out.println(vm.popArg().repr());
       vm.result = Nil.Instance;
@@ -236,20 +236,20 @@ public final class Core
     switch (x.type()) {
       case List: return ((List)x).length();
       case Vector: return ((Vector)x).length();
-      case Record: return ((Record)x).length();
+      case Map: return ((Map)x).length();
       case Text: return ((Text)x).length();
     }
     throw new TypeMismatch();
   }
   
-  public static final PrimFun Length = new PrimFun(1, false) {
+  public static final Primitive Length = new Primitive(1, false) {
     public void doApply(VirtualMachine vm) throws TypeMismatch {
       vm.result = new Int(length(vm.popArg()));
       vm.popFrame();
     }
   };
   
-  public static final PrimFun TypeOf = new PrimFun(1, false) {
+  public static final Primitive TypeOf = new Primitive(1, false) {
     public void doApply(VirtualMachine vm) throws TypeMismatch {
       vm.result = Symbol.get(vm.popArg().type().name);
       vm.popFrame();
