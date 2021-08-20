@@ -502,6 +502,44 @@ public class Compiler
            next)))));
   }
   
+  // (defmacro f (param...) body...)
+  
+  private Inst compileDefMacro(List exp, Scope scope, Inst next) throws CompileError
+  {
+    if (exp.length() < 4 || exp.cadr().type() != Type.Symbol || exp.caddr().type() != Type.List)
+      throw malformedExp(exp);
+    
+    var symb = (Symbol) exp.cadr();
+    var macro = makeMacro(exp);
+    macros.put(symb, macro);
+    return new LoadConst(Nil.Instance, next);
+  }
+  
+  private Macro makeMacro(List exp) throws CompileError
+  {
+    var params = (List) exp.caddr();
+    var body = exp.cdddr();
+    
+    if (!checkParams(params))
+      throw malformedExp(exp);
+    
+    var numParams = params.length();
+    var isVariadic = numParams != 0 && isRestParam((Symbol) params.at(numParams - 1));
+    var requiredArgs = isVariadic ? numParams - 1 : numParams;
+    
+    var code = isVariadic  ? new PushLocal(numParams,
+                             compilePopArgsVariadic(0, numParams,
+                             compileSequence(body, extendFunScope(params, null), true,
+                             new PopFrame())))
+                           
+                           : new PushLocal(numParams,
+                             compilePopArgs(0, numParams,
+                             compileSequence(body, extendFunScope(params, null), true,
+                             new PopFrame())));
+   
+    return new Macro(code, requiredArgs, isVariadic);
+  }
+  
   private Inst compileList(List exp, Scope scope, boolean tail, Inst next) throws CompileError
   {
     if (exp.car() == Symbol.get("if"))
@@ -516,6 +554,8 @@ public class Compiler
       return compileDef(exp, scope, next);
     else if (exp.car() == Symbol.get("defun"))
       return compileDefun(exp, scope, next);
+    else if (exp.car() == Symbol.get("defmacro"))
+      return compileDefMacro(exp, scope, next);
     else if (exp.car() == Symbol.get("fun"))
       return compileFun(exp, scope, next);
     else if (exp.car() == Symbol.get("quote"))
@@ -549,4 +589,5 @@ public class Compiler
   }
 
   private PositionMap positionMap;
+  private java.util.Map<Symbol, Macro> macros = new java.util.IdentityHashMap<>();
 }

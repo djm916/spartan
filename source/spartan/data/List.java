@@ -92,6 +92,11 @@ public class List extends Datum
     return rest.rest;
   }
   
+  public final List cdddr()
+  {
+    return rest.rest.rest;
+  }
+  
   public final int length()
   {
     return length(this);
