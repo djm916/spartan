@@ -7,6 +7,9 @@ import spartan.parsing.PositionMap;
 import spartan.errors.CompileError;
 import spartan.errors.MalformedExpression;
 import spartan.errors.MultipleDefinition;
+import spartan.errors.RuntimeError;
+import spartan.runtime.VirtualMachine;
+import spartan.runtime.BaseEnv;
 
 public class Compiler
 {
@@ -530,14 +533,40 @@ public class Compiler
     var code = isVariadic  ? new PushLocal(numParams,
                              compilePopArgsVariadic(0, numParams,
                              compileSequence(body, extendFunScope(params, null), true,
-                             new PopFrame())))
+                             null)))
                            
                            : new PushLocal(numParams,
                              compilePopArgs(0, numParams,
                              compileSequence(body, extendFunScope(params, null), true,
-                             new PopFrame())));
+                             null)));
    
     return new Macro(code, requiredArgs, isVariadic);
+  }
+  
+  private Datum transformMacro(Macro macro, List args) throws CompileError
+  {
+    vm.args = args;
+    try {
+      Datum transformedExp = vm.eval(macro.code);
+      System.out.println("macro transformed: " + transformedExp.repr());
+      return transformedExp;
+    }
+    catch (RuntimeError err) {
+      throw new CompileError(err.getMessage(), err.position);
+    }
+  }
+  
+  private Inst compileApplyMacro(List exp, Scope scope, boolean tail, Inst next) throws CompileError
+  {
+    var macro = macros.get(exp.car());
+    var args = exp.cdr();
+    
+    int numArgs = args.length();
+    
+    if (numArgs < macro.requiredArgs || !macro.isVariadic && numArgs > macro.requiredArgs)
+      throw malformedExp(exp);
+    
+    return compile(transformMacro(macro, args), scope, tail, next);
   }
   
   private Inst compileList(List exp, Scope scope, boolean tail, Inst next) throws CompileError
@@ -574,6 +603,8 @@ public class Compiler
       return compileWhile(exp, scope, tail, next);
     else if (exp.car() == Symbol.get("delay"))
       return compileDelay(exp, scope, tail, next);
+    else if (macros.containsKey(exp.car()))
+      return compileApplyMacro(exp, scope, tail, next);
     else
       return compileApply(exp, scope, tail, next);
   }
@@ -589,5 +620,6 @@ public class Compiler
   }
 
   private PositionMap positionMap;
-  private java.util.Map<Symbol, Macro> macros = new java.util.IdentityHashMap<>();
+  private final java.util.Map<Symbol, Macro> macros = new java.util.IdentityHashMap<>();
+  private final VirtualMachine vm = new VirtualMachine(new BaseEnv());
 }
