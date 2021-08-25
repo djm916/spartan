@@ -7,6 +7,7 @@ import spartan.parsing.PositionMap;
 import spartan.errors.CompileError;
 import spartan.errors.MalformedExpression;
 import spartan.errors.MultipleDefinition;
+import spartan.errors.WrongNumberArgs;
 import spartan.errors.RuntimeError;
 import spartan.runtime.VirtualMachine;
 import spartan.runtime.BaseEnv;
@@ -533,40 +534,31 @@ public class Compiler
     var code = isVariadic  ? new PushLocal(numParams,
                              compilePopArgsVariadic(0, numParams,
                              compileSequence(body, extendFunScope(params, null), true,
-                             null)))
+                             new PopFrame())))
                            
                            : new PushLocal(numParams,
                              compilePopArgs(0, numParams,
                              compileSequence(body, extendFunScope(params, null), true,
-                             null)));
+                             new PopFrame())));
    
     return new Macro(code, requiredArgs, isVariadic);
-  }
-  
-  private Datum transformMacro(Macro macro, List args) throws CompileError
-  {
-    vm.args = args;
-    try {
-      Datum transformedExp = vm.eval(macro.code);
-      System.out.println("macro transformed: " + transformedExp.repr());
-      return transformedExp;
-    }
-    catch (RuntimeError err) {
-      throw new CompileError(err.getMessage(), err.position);
-    }
   }
   
   private Inst compileApplyMacro(List exp, Scope scope, boolean tail, Inst next) throws CompileError
   {
     var macro = macros.get(exp.car());
     var args = exp.cdr();
+    Datum expansion = null;
     
-    int numArgs = args.length();
-    
-    if (numArgs < macro.requiredArgs || !macro.isVariadic && numArgs > macro.requiredArgs)
-      throw malformedExp(exp);
-    
-    return compile(transformMacro(macro, args), scope, tail, next);
+    try {
+      expansion = macro.apply(vm, args);
+    }
+    catch (WrongNumberArgs | RuntimeError err) {
+      throw new CompileError(err.getMessage(), positionMap.get(exp));
+    }
+
+    System.out.println("macro expansion: " + expansion.repr());
+    return compile(expansion, scope, tail, next);
   }
   
   private Inst compileList(List exp, Scope scope, boolean tail, Inst next) throws CompileError
