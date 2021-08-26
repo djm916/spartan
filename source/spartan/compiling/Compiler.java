@@ -54,6 +54,67 @@ public class Compiler
     return new LoadConst(exp.cadr(), next);
   }
   
+  // (quasiquote x)
+  
+  private Inst compileQuasiquote(List exp, Scope scope, Inst next) throws CompileError
+  {
+    if (exp.length() != 2)
+      throw malformedExp(exp);
+    
+    var transformed = transformQuasiquote(exp.cadr());
+    
+    System.out.println("quasiquote transformation = " + transformed.repr());
+    
+    return compile(transformed, scope, false, next);
+  }
+  
+  // Reduce a quasiquote form (quasiquote x)
+  
+  private List transformQuasiquote(Datum exp) throws CompileError
+  {
+    // (quasiquote x) => (quote x) for non-list x
+    
+    if (exp.type() != Type.List || exp == List.Empty)
+      return List.of(Symbol.get("quote"), exp);
+    
+    List list = (List) exp;
+    
+    // (quasiquote (unquote x) xs...) => (cons x (quasiquote xs...))
+    
+    if (list.car().type() == Type.List) {
+      List list2 = (List) list.car();
+      if (list2.car() == Symbol.get("unquote")) {
+        if (list2.length() != 2)
+          throw malformedExp(exp);
+        return List.cons(Symbol.get("cons"),
+               List.cons(list2.cadr(),
+               List.cons(transformQuasiquote(list.cdr()),
+               List.Empty)));
+      }
+    }
+    
+    // (quasiquote (unquote-splicing x) xs...) => (concat (quote x) (quasiquote xs...))
+    
+    if (list.car().type() == Type.List) {
+      List list2 = (List) list.car();
+      if (list2.car() == Symbol.get("unquote-splicing")) {
+        if (list2.length() != 2)
+          throw malformedExp(exp);
+        return List.cons(Symbol.get("concat"),
+               List.cons(List.of(Symbol.get("quote"), list2.cadr()),
+               List.cons(transformQuasiquote(list.cdr()),
+               List.Empty)));
+      }
+    }
+    
+    // (quasiquote x xs...) => (cons (quote x) (quasiquote xs))
+    
+    return List.cons(Symbol.get("cons"),
+           List.cons(List.of(Symbol.get("quote"), list.car()),
+           List.cons(transformQuasiquote(list.cdr()),
+           List.Empty)));
+  }
+  
   private Inst compileVarRef(Symbol symb, Scope scope, Inst next)
   {
     var index = (scope == null) ? null : scope.lookup(symb);
@@ -581,6 +642,8 @@ public class Compiler
       return compileFun(exp, scope, next);
     else if (exp.car() == Symbol.get("quote"))
       return compileQuote(exp, next);
+    else if (exp.car() == Symbol.get("quasiquote"))
+      return compileQuasiquote(exp, scope, next);
     else if (exp.car() == Symbol.get("or"))
       return compileOr(exp, scope, tail, next);
     else if (exp.car() == Symbol.get("and"))

@@ -112,6 +112,11 @@ public class List extends Datum
     return eq(this, that);
   }
   
+  public final List concat(List that)
+  {
+    return concat(this, that);
+  }
+  
   private static int length(List list)
   {
     int length = 0;
@@ -134,6 +139,13 @@ public class List extends Datum
         return false;
     
     return x == Empty && y == Empty;
+  }
+  
+  private static List concat(List x, List y)
+  {
+    if (x == Empty)
+      return y;
+    return List.cons(x.car(), concat(x.cdr(), y));
   }
   
   private static String repr(List self)

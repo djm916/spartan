@@ -56,8 +56,9 @@ Enter Control-D (on Linux) or Control-Z (on Windows) to exit.""";
           var exp = reader.read();
           if (exp == null)
             System.exit(0);
+          System.out.println("reader = " + exp.datum.repr());
           var result = vm.eval(compiler.compile(exp));
-          System.out.println(result.repr());
+          System.out.println("eval = " + result.repr());
         }
         catch (SyntaxError | CompileError | RuntimeError ex) {
           System.err.println(ex);

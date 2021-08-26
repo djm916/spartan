@@ -300,7 +300,26 @@ public class Reader implements AutoCloseable
     skipSpace();
     return List.of(Symbol.get("quote"), readDatum());
   }
+  
+  private Datum readUnquote() throws SyntaxError, IOException
+  {
+    skipSpace();
+    return List.of(Symbol.get("unquote"), readDatum());
+  }
 
+  private Datum readUnquoteSplicing() throws SyntaxError, IOException
+  {
+    getChar();
+    skipSpace();
+    return List.of(Symbol.get("unquote-splicing"), readDatum());
+  }
+
+  private Datum readQuasiQuote() throws SyntaxError, IOException
+  {
+    skipSpace();
+    return List.of(Symbol.get("quasiquote"), readDatum());
+  }
+  
   private Datum readDatum() throws SyntaxError, IOException
   {
     markTokenStart();
@@ -323,6 +342,12 @@ public class Reader implements AutoCloseable
       return readText();
     if (lastChar == '\'')
       return readQuote();
+    if (lastChar == ',' && peekChar() == '@')
+      return readUnquoteSplicing();
+    if (lastChar == ',')
+      return readUnquote();
+    if (lastChar == '`')
+      return readQuasiQuote();
 
     throw error("unrecognized character " + (char)lastChar);
   }

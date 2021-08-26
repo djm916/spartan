@@ -255,4 +255,18 @@ public final class Core
       vm.popFrame();
     }
   };
+  
+  public static final List concat(Datum x, Datum y) throws TypeMismatch
+  {
+    if (x.type() != Type.List || y.type() != Type.List)
+      throw new TypeMismatch();
+    return ((List)x).concat((List)y);
+  }
+  
+  public static final Primitive Concat = new Primitive(2, false) {
+    public void doApply(VirtualMachine vm) throws TypeMismatch {
+      vm.result = concat(vm.popArg(), vm.popArg());
+      vm.popFrame();
+    }
+  };
 }

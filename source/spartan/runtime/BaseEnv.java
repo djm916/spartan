@@ -43,6 +43,7 @@ public final class BaseEnv extends GlobalEnv
     bind(Symbol.get("car"), Car);
     bind(Symbol.get("cdr"), Cdr);
     bind(Symbol.get("cadr"), Cadr);
+    bind(Symbol.get("concat"), Concat);
     
     bind(Symbol.get("list"), MakeList);
     bind(Symbol.get("vector"), MakeVector);
