@@ -26,7 +26,7 @@
         <attribute name="Main-Class" value="spartan.Main"/>
       </manifest>
     </jar>
-    <exec executable="make"
+    <exec executable="mingw32-make"
           dir="native"
           failonerror="true">
     </exec>
