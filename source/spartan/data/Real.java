@@ -111,5 +111,5 @@ public class Real extends Datum
     return Double.compare(this.value, that.value);
   }
   
-  private final double value;
+  final double value;
 }

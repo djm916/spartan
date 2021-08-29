@@ -6,6 +6,7 @@ public enum Type
   Bool("type/bool"),
   Int("type/int"),
   Real("type/real"),
+  Complex("type/complex"),
   Symbol("type/symbol"),
   Text("type/text"),
   List("type/list"),

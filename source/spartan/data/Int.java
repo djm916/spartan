@@ -2,8 +2,6 @@ package spartan.data;
 
 public class Int extends Datum
 {
-  public final int value;
-  
   public Int(int value)
   {
     this.value = value;
@@ -63,4 +61,6 @@ public class Int extends Datum
   {
     return Integer.compare(this.value, that.value);
   }
+
+  final int value;
 }

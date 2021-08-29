@@ -12,6 +12,7 @@ public final class Math
       switch (x.type()) {
         case Int: return ((Int)x).add((Int)y);
         case Real: return ((Real)x).add((Real)y);
+        case Complex: return Complex.add((Complex)x, (Complex)y);
       }
     }
     throw new TypeMismatch();
@@ -163,6 +164,7 @@ public final class Math
     if (x.type() == y.type()) {
       switch (x.type()) {
         case Real: return ((Real)x).exp((Real)y);
+        case Complex: return Complex.exp((Complex)x, (Complex)y);
       }
     }
     throw new TypeMismatch();
@@ -180,6 +182,7 @@ public final class Math
     if (x.type() == y.type()) {
       switch (x.type()) {
         case Real: return ((Real)x).log((Real)y);
+        case Complex: return Complex.log((Complex)x, (Complex)y);
       }
     }
     throw new TypeMismatch();

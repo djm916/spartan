@@ -213,6 +213,20 @@ public final class Core
     }
   };
   
+  public static final Complex makeComplex(Datum x, Datum y) throws TypeMismatch
+  {
+    if (x.type() != Type.Real || y.type() != Type.Real)
+      throw new TypeMismatch();
+    return new Complex((Real)x, (Real)y);
+  }
+  
+  public static final Primitive MakeComplex = new Primitive(2, false) {
+    public void doApply(VirtualMachine vm) throws TypeMismatch {
+      vm.result = makeComplex(vm.popArg(), vm.popArg());
+      vm.popFrame();
+    }
+  };
+  
   public static final Primitive Apply = new Primitive(2, false) {
     public void doApply(VirtualMachine vm) throws Error {
       vm.result = vm.popArg();

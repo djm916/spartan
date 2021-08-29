@@ -48,6 +48,7 @@ public final class BaseEnv extends GlobalEnv
     bind(Symbol.get("list"), MakeList);
     bind(Symbol.get("vector"), MakeVector);
     bind(Symbol.get("record"), MakeRecord);
+    bind(Symbol.get("complex"), MakeComplex);
     
     bind(Symbol.get("apply"), Apply);
     

@@ -35,5 +35,5 @@ public final class Bool extends Datum
     this.value = value;
   }
   
-  private final boolean value;
+  final boolean value;
 }

@@ -1,6 +1,6 @@
 <project name="Spartan">
   <property name="classpath" value="C:/JUnit/junit.jar"/>
-    
+  
   <target name="clean">
     <delete dir="build"/>
     <delete dir="javadoc"/>
@@ -13,9 +13,14 @@
            destdir="build"
            debug="true"
            includeantruntime="false"
-           classpath="${classpath}">
+           classpath="${classpath}"
+           nativeheaderdir="native">
       <!-- <compilerarg value="-Xlint"/> -->
     </javac>
+    <exec executable="make"
+          dir="native"
+          failonerror="true">
+    </exec>
   </target>
 
   <target name="jar" depends="compile">

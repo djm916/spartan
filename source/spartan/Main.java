@@ -29,9 +29,11 @@ Enter Control-D (on Linux) or Control-Z (on Windows) to exit.""";
 
   private static String inputFile;
   private static List sysArgs = List.Empty;
-  
+    
   public static void main(String[] args) throws IOException
   {
+    System.loadLibrary("libspartan");
+    
     parseCommandLine(args);
     
     var globals = new BaseEnv();
