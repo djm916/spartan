@@ -199,6 +199,7 @@ public final class Math
   {
     switch (x.type()) {
       case Real: return ((Real)x).sin();
+      case Complex: return Complex.sin((Complex)x);
     }
     throw new TypeMismatch();
   }
@@ -214,6 +215,7 @@ public final class Math
   {
     switch (x.type()) {
       case Real: return ((Real)x).cos();
+      case Complex: return Complex.cos((Complex)x);
     }
     throw new TypeMismatch();
   }
@@ -229,6 +231,7 @@ public final class Math
   {
     switch (x.type()) {
       case Real: return ((Real)x).tan();
+      case Complex: return Complex.tan((Complex)x);
     }
     throw new TypeMismatch();
   }
@@ -244,6 +247,7 @@ public final class Math
   {
     switch (x.type()) {
       case Real: return ((Real)x).asin();
+      case Complex: return Complex.asin((Complex)x);
     }
     throw new TypeMismatch();
   }
@@ -259,6 +263,7 @@ public final class Math
   {
     switch (x.type()) {
       case Real: return ((Real)x).acos();
+      case Complex: return Complex.acos((Complex)x);
     }
     throw new TypeMismatch();
   }
@@ -274,6 +279,7 @@ public final class Math
   {
     switch (x.type()) {
       case Real: return ((Real)x).atan();
+      case Complex: return Complex.atan((Complex)x);
     }
     throw new TypeMismatch();
   }

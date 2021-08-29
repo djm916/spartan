@@ -62,23 +62,54 @@ public class Complex extends Datum
     return false;
   }
   
-  // Computes the base x logarithm of y
-  
   public static Complex log(Complex x, Complex y)
   {
     return log(x.real, x.imag, y.real, y.imag);
   }
-  
-  public static native Complex log(double x1, double y1, double x2, double y2);
-  
-  // Computes the base x exponent of y
   
   public static Complex exp(Complex x, Complex y)
   {
     return exp(x.real, x.imag, y.real, y.imag);
   }
   
-  public static native Complex exp(double x1, double y1, double x2, double y2);
+  public static Complex sin(Complex x)
+  {
+    return sin(x.real, x.imag);
+  }
+  
+  public static Complex cos(Complex x)
+  {
+    return cos(x.real, x.imag);
+  }
+  
+  public static Complex tan(Complex x)
+  {
+    return tan(x.real, x.imag);
+  }
+  
+  public static Complex asin(Complex x)
+  {
+    return asin(x.real, x.imag);
+  }
+  
+  public static Complex acos(Complex x)
+  {
+    return acos(x.real, x.imag);
+  }
+  
+  public static Complex atan(Complex x)
+  {
+    return atan(x.real, x.imag);
+  }
+  
+  private static native Complex log(double x1, double y1, double x2, double y2);
+  private static native Complex exp(double x1, double y1, double x2, double y2);
+  private static native Complex sin(double x, double y);
+  private static native Complex cos(double x, double y);
+  private static native Complex tan(double x, double y);
+  private static native Complex asin(double x, double y);
+  private static native Complex acos(double x, double y);
+  private static native Complex atan(double x, double y);
   
   private final double real;
   private final double imag;
