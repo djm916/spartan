@@ -64,52 +64,52 @@ public class Complex extends Datum
   
   public static Complex log(Complex x, Complex y)
   {
-    return log(x.real, x.imag, y.real, y.imag);
+    return clog(x.real, x.imag, y.real, y.imag);
   }
   
   public static Complex exp(Complex x, Complex y)
   {
-    return exp(x.real, x.imag, y.real, y.imag);
+    return cexp(x.real, x.imag, y.real, y.imag);
   }
   
   public static Complex sin(Complex x)
   {
-    return sin(x.real, x.imag);
+    return csin(x.real, x.imag);
   }
   
   public static Complex cos(Complex x)
   {
-    return cos(x.real, x.imag);
+    return ccos(x.real, x.imag);
   }
   
   public static Complex tan(Complex x)
   {
-    return tan(x.real, x.imag);
+    return ctan(x.real, x.imag);
   }
   
   public static Complex asin(Complex x)
   {
-    return asin(x.real, x.imag);
+    return casin(x.real, x.imag);
   }
   
   public static Complex acos(Complex x)
   {
-    return acos(x.real, x.imag);
+    return cacos(x.real, x.imag);
   }
   
   public static Complex atan(Complex x)
   {
-    return atan(x.real, x.imag);
+    return catan(x.real, x.imag);
   }
   
-  private static native Complex log(double x1, double y1, double x2, double y2);
-  private static native Complex exp(double x1, double y1, double x2, double y2);
-  private static native Complex sin(double x, double y);
-  private static native Complex cos(double x, double y);
-  private static native Complex tan(double x, double y);
-  private static native Complex asin(double x, double y);
-  private static native Complex acos(double x, double y);
-  private static native Complex atan(double x, double y);
+  private static native Complex clog(double x1, double y1, double x2, double y2);
+  private static native Complex cexp(double x1, double y1, double x2, double y2);
+  private static native Complex csin(double x, double y);
+  private static native Complex ccos(double x, double y);
+  private static native Complex ctan(double x, double y);
+  private static native Complex casin(double x, double y);
+  private static native Complex cacos(double x, double y);
+  private static native Complex catan(double x, double y);
   
   private final double real;
   private final double imag;

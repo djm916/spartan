@@ -2,7 +2,7 @@
 #include <complex.h> // Requires C99
 
 JNIEXPORT jobject JNICALL
-Java_spartan_data_Complex_log(JNIEnv *env, jclass clazz, jdouble x1, jdouble y1, jdouble x2, jdouble y2)
+Java_spartan_data_Complex_clog(JNIEnv *env, jclass clazz, jdouble x1, jdouble y1, jdouble x2, jdouble y2)
 {
   complex double z1 = x1 + y1 * I;
   complex double z2 = x2 + y2 * I;
@@ -11,7 +11,7 @@ Java_spartan_data_Complex_log(JNIEnv *env, jclass clazz, jdouble x1, jdouble y1,
 }
 
 JNIEXPORT jobject JNICALL
-Java_spartan_data_Complex_exp(JNIEnv *env, jclass clazz, jdouble x1, jdouble y1, jdouble x2, jdouble y2)
+Java_spartan_data_Complex_cexp(JNIEnv *env, jclass clazz, jdouble x1, jdouble y1, jdouble x2, jdouble y2)
 {
   complex double z1 = x1 + y1 * I;
   complex double z2 = x2 + y2 * I;
@@ -20,7 +20,7 @@ Java_spartan_data_Complex_exp(JNIEnv *env, jclass clazz, jdouble x1, jdouble y1,
 }
 
 JNIEXPORT jobject JNICALL
-Java_spartan_data_Complex_cos(JNIEnv *env, jclass clazz, jdouble x, jdouble y)
+Java_spartan_data_Complex_ccos(JNIEnv *env, jclass clazz, jdouble x, jdouble y)
 {
   complex double z = x + y * I;
   complex double result = ccos(z);
@@ -28,7 +28,7 @@ Java_spartan_data_Complex_cos(JNIEnv *env, jclass clazz, jdouble x, jdouble y)
 }
 
 JNIEXPORT jobject JNICALL
-Java_spartan_data_Complex_sin(JNIEnv *env, jclass clazz, jdouble x, jdouble y)
+Java_spartan_data_Complex_csin(JNIEnv *env, jclass clazz, jdouble x, jdouble y)
 {
   complex double z = x + y * I;
   complex double result = csin(z);
@@ -36,7 +36,7 @@ Java_spartan_data_Complex_sin(JNIEnv *env, jclass clazz, jdouble x, jdouble y)
 }
 
 JNIEXPORT jobject JNICALL
-Java_spartan_data_Complex_tan(JNIEnv *env, jclass clazz, jdouble x, jdouble y)
+Java_spartan_data_Complex_ctan(JNIEnv *env, jclass clazz, jdouble x, jdouble y)
 {
   complex double z = (double)x + (double)y * I;
   complex double result = ctan(z);
@@ -44,7 +44,7 @@ Java_spartan_data_Complex_tan(JNIEnv *env, jclass clazz, jdouble x, jdouble y)
 }
 
 JNIEXPORT jobject JNICALL
-Java_spartan_data_Complex_acos(JNIEnv *env, jclass clazz, jdouble x, jdouble y)
+Java_spartan_data_Complex_cacos(JNIEnv *env, jclass clazz, jdouble x, jdouble y)
 {
   complex double z = (double)x + (double)y * I;
   complex double result = cacos(z);
@@ -52,7 +52,7 @@ Java_spartan_data_Complex_acos(JNIEnv *env, jclass clazz, jdouble x, jdouble y)
 }
 
 JNIEXPORT jobject JNICALL
-Java_spartan_data_Complex_asin(JNIEnv *env, jclass clazz, jdouble x, jdouble y)
+Java_spartan_data_Complex_casin(JNIEnv *env, jclass clazz, jdouble x, jdouble y)
 {
   complex double z = (double)x + (double)y * I;
   complex double result = casin(z);
@@ -60,7 +60,7 @@ Java_spartan_data_Complex_asin(JNIEnv *env, jclass clazz, jdouble x, jdouble y)
 }
 
 JNIEXPORT jobject JNICALL
-Java_spartan_data_Complex_atan(JNIEnv *env, jclass clazz, jdouble x, jdouble y)
+Java_spartan_data_Complex_catan(JNIEnv *env, jclass clazz, jdouble x, jdouble y)
 {
   complex double z = (double)x + (double)y * I;
   complex double result = catan(z);

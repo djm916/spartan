@@ -30,10 +30,14 @@ Enter Control-D (on Linux) or Control-Z (on Windows) to exit.""";
   private static String inputFile;
   private static List sysArgs = List.Empty;
     
+  static
+  {
+    System.out.println("loading libspartan.dll...");
+    //System.loadLibrary("libspartan");
+  }
+  
   public static void main(String[] args) throws IOException
   {
-    System.loadLibrary("libspartan");
-    
     parseCommandLine(args);
     
     var globals = new BaseEnv();

@@ -5,6 +5,8 @@
     <delete dir="build"/>
     <delete dir="javadoc"/>
     <delete dir="test-results"/>
+    <delete file="Spartan.jar"/>
+    <delete file="libspartan.dll"/>
   </target>
 
   <target name="compile">
@@ -16,14 +18,7 @@
            classpath="${classpath}"
            nativeheaderdir="native">
       <!-- <compilerarg value="-Xlint"/> -->
-    </javac>
-    <exec executable="make"
-          dir="native"
-          failonerror="true">
-    </exec>
-  </target>
-
-  <target name="jar" depends="compile">
+    </javac>    
     <jar destfile="Spartan.jar"
          basedir="build"
          excludes="spartan/tests/">
@@ -31,8 +26,13 @@
         <attribute name="Main-Class" value="spartan.Main"/>
       </manifest>
     </jar>
+    <exec executable="make"
+          dir="native"
+          failonerror="true">
+    </exec>
+    <copy file="native/libspartan.dll" tofile="libspartan.dll"/>
   </target>
-  
+
   <target name="javadoc">
     <mkdir dir="javadoc"/>
     <javadoc sourcepath="source" destdir="javadoc">

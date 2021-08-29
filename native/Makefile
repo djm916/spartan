@@ -1,7 +1,7 @@
 GCC = gcc
 
 # Name of the shared library file to be created
-LIB = "..\libspartan.dll"
+LIB = libspartan.dll
 
 # Location of JDK include files
 JDK_INC = "C:\Program Files\Java\jdk-16.0.2\include"
