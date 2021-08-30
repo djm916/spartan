@@ -2,10 +2,12 @@ package spartan.data;
 
 public class Complex extends Datum
 {
-  public Complex(double real, double imag)
+  public static final Complex I = new Complex(0.0, 1.0);
+  
+  public Complex(double x, double y)
   {
-    this.real = real;
-    this.imag = imag;
+    this.real = x;
+    this.imag = y;
   }
   
   public Complex(Real x, Real y)  
@@ -25,41 +27,63 @@ public class Complex extends Datum
                          Double.toString(real),
                          Double.toString(imag));
   }
+
+  public final List toRect()
+  {
+    return List.of(new Real(real), new Real(imag));
+  }
+  
+  public final List toPolar()
+  {
+    return List.of(new Real(Math.hypot(real, imag)),
+                   new Real(Math.atan2(imag, real)));
+  }
+  
+  public static boolean eq(Complex x, Complex y)
+  {
+    return x.real == y.real && x.imag == y.imag;
+  }
   
   public final Complex neg()
   {
-    return null;
+    return new Complex(-real, -imag);
   }
   
-  public final Complex abs()
+  public final Real abs()
   {
-    return null;
+    return new Real(Math.hypot(real, imag));
   }
   
-  public final static Complex add(Complex x, Complex y)
+  public static Complex add(Complex x, Complex y)
   {
     return new Complex(x.real + y.real, x.imag + y.imag);
   }
   
-  public final static Complex sub(Complex x, Complex y)
+  public static Complex sub(Complex x, Complex y)
   {
     return new Complex(x.real - y.real, x.imag - y.imag);
   }
   
-  public final static Complex mul(Complex x, Complex y)
+  public static Complex mul(Complex x, Complex y)
   {
     return new Complex(x.real * y.real - x.imag * y.imag,
                        x.real * y.imag + x.imag * y.real);
   }
   
-  public final static Complex div(Complex that)
-  {
-    return null;
-  }
+  // x = a + b*i, y = c + d*i
+  // conj(y) = c - d*i
+  // y * conj(y) = (c + d*i) * (c - d*i) = c^2 + d^2
+  // x / y = (x / y) * (conj(y) / conj(y))
+  //       = (x * conj(y)) / (c^2 + d^2)
+  //       = ((a + b*i) * (c - d*i)) / (c^2 + d^2)
+  //       = ((a*c + b*d) + (b*c - a*d)*i) / (c^2 + d^2)
+  //       = ((a*c + b*d) / (c^2 + d^2)) + ((b*c - a*d) / (c^2 + d^2))*i
   
-  public final static boolean eq(Complex that)
+  public static Complex div(Complex x, Complex y)
   {
-    return false;
+    double scale = 1.0 / (y.real * y.real + y.imag * y.imag);
+    return new Complex(scale * (x.real * y.real + x.imag * y.imag),
+                       scale * (x.imag * y.real - x.real * y.imag));
   }
   
   public static Complex log(Complex x, Complex y)
@@ -72,34 +96,39 @@ public class Complex extends Datum
     return cexp(x.real, x.imag, y.real, y.imag);
   }
   
-  public static Complex sin(Complex x)
+  public final Complex sin()
   {
-    return csin(x.real, x.imag);
+    return csin(real, imag);
   }
   
-  public static Complex cos(Complex x)
+  public final Complex cos()
   {
-    return ccos(x.real, x.imag);
+    return ccos(real, imag);
   }
   
-  public static Complex tan(Complex x)
+  public final Complex tan()
   {
-    return ctan(x.real, x.imag);
+    return ctan(real, imag);
   }
   
-  public static Complex asin(Complex x)
+  public final Complex asin()
   {
-    return casin(x.real, x.imag);
+    return casin(real, imag);
   }
   
-  public static Complex acos(Complex x)
+  public final Complex acos()
   {
-    return cacos(x.real, x.imag);
+    return cacos(real, imag);
   }
   
-  public static Complex atan(Complex x)
+  public final Complex atan()
   {
-    return catan(x.real, x.imag);
+    return catan(real, imag);
+  }
+  
+  public final Complex catan()
+  {
+    return catan(real, imag);
   }
   
   private static native Complex clog(double x1, double y1, double x2, double y2);

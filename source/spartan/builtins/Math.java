@@ -10,7 +10,7 @@ public final class Math
   {
     if (x.type() == y.type()) {
       switch (x.type()) {
-        case Int: return ((Int)x).add((Int)y);
+        case Int: return Int.add((Int)x, (Int)y);
         case Real: return ((Real)x).add((Real)y);
         case Complex: return Complex.add((Complex)x, (Complex)y);
       }
@@ -31,8 +31,9 @@ public final class Math
   {
     if (x.type() == y.type()) {
       switch (x.type()) {
-        case Int: return ((Int)x).sub((Int)y);
+        case Int: return Int.sub((Int)x, (Int)y);
         case Real: return ((Real)x).sub((Real)y);
+        case Complex: return Complex.sub((Complex)x, (Complex)y);
       }
     }
     throw new TypeMismatch();
@@ -49,8 +50,9 @@ public final class Math
   {
     if (x.type() == y.type()) {
       switch (x.type()) {
-        case Int: return ((Int)x).mul((Int)y);
+        case Int: return Int.mul((Int)x, (Int)y);
         case Real: return ((Real)x).mul((Real)y);
+        case Complex: return Complex.mul((Complex)x, (Complex)y);
       }
     }
     throw new TypeMismatch();
@@ -69,8 +71,9 @@ public final class Math
   {
     if (x.type() == y.type()) {
       switch (x.type()) {
-        case Int: return ((Int)x).div((Int)y);
+        case Int: return Int.div((Int)x, (Int)y);
         case Real: return ((Real)x).div((Real)y);
+        case Complex: return Complex.div((Complex)x, (Complex)y);
       }
     }
     throw new TypeMismatch();
@@ -86,7 +89,7 @@ public final class Math
   public static Datum mod(Datum x, Datum y) throws TypeMismatch
   {
     if (x.type() == Type.Int && y.type() == Type.Int)
-      return ((Int)x).mod((Int)y);
+      return Int.mod((Int)x, (Int)y);
     throw new TypeMismatch();
   }
   
@@ -102,6 +105,7 @@ public final class Math
     switch (x.type()) {
       case Int: return ((Int)x).neg();
       case Real: return ((Real)x).neg();
+      case Complex: return ((Complex)x).neg();
     }
     throw new TypeMismatch();
   }
@@ -118,6 +122,7 @@ public final class Math
     switch (x.type()) {
       case Int: return ((Int)x).abs();
       case Real: return ((Real)x).abs();
+      case Complex: return ((Complex)x).abs();
     }
     throw new TypeMismatch();
   }
@@ -199,7 +204,7 @@ public final class Math
   {
     switch (x.type()) {
       case Real: return ((Real)x).sin();
-      case Complex: return Complex.sin((Complex)x);
+      case Complex: return ((Complex)x).sin();
     }
     throw new TypeMismatch();
   }
@@ -215,7 +220,7 @@ public final class Math
   {
     switch (x.type()) {
       case Real: return ((Real)x).cos();
-      case Complex: return Complex.cos((Complex)x);
+      case Complex: return ((Complex)x).cos();
     }
     throw new TypeMismatch();
   }
@@ -231,7 +236,7 @@ public final class Math
   {
     switch (x.type()) {
       case Real: return ((Real)x).tan();
-      case Complex: return Complex.tan((Complex)x);
+      case Complex: return ((Complex)x).tan();
     }
     throw new TypeMismatch();
   }
@@ -247,7 +252,7 @@ public final class Math
   {
     switch (x.type()) {
       case Real: return ((Real)x).asin();
-      case Complex: return Complex.asin((Complex)x);
+      case Complex: return ((Complex)x).asin();
     }
     throw new TypeMismatch();
   }
@@ -263,7 +268,7 @@ public final class Math
   {
     switch (x.type()) {
       case Real: return ((Real)x).acos();
-      case Complex: return Complex.acos((Complex)x);
+      case Complex: return ((Complex)x).acos();
     }
     throw new TypeMismatch();
   }
@@ -279,7 +284,7 @@ public final class Math
   {
     switch (x.type()) {
       case Real: return ((Real)x).atan();
-      case Complex: return Complex.atan((Complex)x);
+      case Complex: return ((Complex)x).atan();
     }
     throw new TypeMismatch();
   }

@@ -1,65 +1,65 @@
 package spartan.data;
 
-public class Int extends Datum
+public final class Int extends Datum
 {
   public Int(int value)
   {
     this.value = value;
   }
   
-  public final Type type()
+  public Type type()
   {
     return Type.Int;
   }
   
-  public final String repr()
+  public String repr()
   {
     return Integer.toString(value);
   }
   
-  public final Int neg()
+  public Int neg()
   {
     return new Int(-value);
   }
   
-  public final Int abs()
+  public Int abs()
   {
     return new Int(Math.abs(value));
   }
   
-  public final Int add(Int that)
+  public static Int add(Int x, Int y)
   {
-    return new Int(this.value + that.value);
+    return new Int(x.value + y.value);
   }
   
-  public final Int sub(Int that)
+  public static Int sub(Int x, Int y)
   {
-    return new Int(this.value - that.value);
+    return new Int(x.value - y.value);
   }
   
-  public final Int mul(Int that)
+  public static Int mul(Int x, Int y)
   {
-    return new Int(this.value * that.value);
+    return new Int(x.value * y.value);
   }
   
-  public final Int div(Int that)
+  public static Int div(Int x, Int y)
   {
-    return new Int(this.value / that.value);
+    return new Int(x.value / y.value);
   }
   
-  public final Int mod(Int that)
+  public static Int mod(Int x, Int y)
   {
-    return new Int(this.value % that.value);
+    return new Int(x.value % y.value);
   }
   
-  public final boolean eq(Int that)
+  public static boolean eq(Int x, Int y)
   {
-    return this.value == that.value;
+    return x.value == y.value;
   }
   
-  public final int compare(Int that)
+  public static int compare(Int x, Int y)
   {
-    return Integer.compare(this.value, that.value);
+    return Integer.compare(x.value, y.value);
   }
 
   final int value;

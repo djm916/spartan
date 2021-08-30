@@ -35,7 +35,7 @@ public final class Core
   {
     if (x.type() == y.type()) {
       switch (x.type()) {
-        case Int: return ((Int)x).eq((Int)y);
+        case Int: return Int.eq((Int)x, (Int)y);
         case Real: return ((Real)x).eq((Real)y);
         case Text: return ((Text)x).eq((Text)y);
         case Vector: return ((Vector)x).eq((Vector)y);
@@ -71,7 +71,7 @@ public final class Core
   {
     if (x.type() == y.type()) {
       switch (x.type()) {
-        case Int: return ((Int)x).compare((Int)y) < 0;
+        case Int: return Int.compare((Int)x, (Int)y) < 0;
         case Real: return ((Real)x).compare((Real)y) < 0;
         case Text: return ((Text)x).compare((Text)y) < 0;
       }
@@ -90,7 +90,7 @@ public final class Core
   {
     if (x.type() == y.type()) {
       switch (x.type()) {
-        case Int: return ((Int)x).compare((Int)y) <= 0;
+        case Int: return Int.compare((Int)x, (Int)y) <= 0;
         case Real: return ((Real)x).compare((Real)y) <= 0;
         case Text: return ((Text)x).compare((Text)y) <= 0;
       }
@@ -109,7 +109,7 @@ public final class Core
   {
     if (x.type() == y.type()) {
       switch (x.type()) {
-        case Int: return ((Int)x).compare((Int)y) > 0;
+        case Int: return Int.compare((Int)x, (Int)y) > 0;
         case Real: return ((Real)x).compare((Real)y) > 0;
         case Text: return ((Text)x).compare((Text)y) > 0;
       }
@@ -128,7 +128,7 @@ public final class Core
   {
     if (x.type() == y.type()) {
       switch (x.type()) {
-        case Int: return ((Int)x).compare((Int)y) >= 0;
+        case Int: return Int.compare((Int)x, (Int)y) >= 0;
         case Real: return ((Real)x).compare((Real)y) >= 0;
         case Text: return ((Text)x).compare((Text)y) >= 0;
       }
