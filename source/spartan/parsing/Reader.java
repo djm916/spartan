@@ -204,9 +204,37 @@ public class Reader implements AutoCloseable
         getChar();
         readDigits(text);
       }
+      if (isSign(peekChar())) {
+        var real = Double.parseDouble(text.toString());
+        text = new StringBuilder();
+        getChar();
+        text.append((char)lastChar);
+        getChar();
+        readDigits(text);
+        if (peekChar() != '.')
+          throw error("malformed numeric literal");
+        getChar();
+        text.append((char)lastChar);
+        getChar();
+        readDigits(text);
+        if (isExponent(peekChar())) {
+          getChar();
+          text.append((char)lastChar);
+          if (isSign(peekChar())) {
+            getChar();
+            text.append((char)lastChar);
+          }
+          getChar();
+          readDigits(text);
+        }
+        var imag = Double.parseDouble(text.toString());
+        if (peekChar() != 'i')
+          throw error("malformed numeric literal");
+        getChar();
+        return new Complex(real, imag);
+      }
       return new Real(Double.parseDouble(text.toString()));
     }
-
     return new Int(Integer.parseInt(text.toString()));
   }
 
