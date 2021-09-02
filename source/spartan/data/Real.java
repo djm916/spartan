@@ -17,8 +17,7 @@ public class Real extends Datum
   
   public final String repr()
   {
-    //return String.format("%.3f", value);
-    return Double.toString(value);
+    return String.format("%g", value);
   }
   
   public final Real neg()

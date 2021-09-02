@@ -23,9 +23,7 @@ public class Complex extends Datum
   
   public final String repr()
   {
-    return String.format("(complex %s %s)",
-                         Double.toString(real),
-                         Double.toString(imag));
+    return String.format("%g%+gi", real, imag);
   }
 
   public final List toRect()

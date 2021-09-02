@@ -165,6 +165,8 @@ public class Reader implements AutoCloseable
     }
   }
 
+  // readUnsignedInt?
+  
   private void readDigits(StringBuilder text) throws IOException, SyntaxError
   {
     if (!isDigit(lastChar))
@@ -177,6 +179,35 @@ public class Reader implements AutoCloseable
       text.append((char)lastChar);
     }
   }
+
+  private void readSignedInt(StringBuilder text) throws IOException, SyntaxError
+  {
+    if (isSign(peekChar())) {
+      getChar();
+      text.append((char)lastChar);
+    }
+    
+    getChar();
+    readDigits(text);
+  }
+  
+  private void readFraction(StringBuilder text) throws IOException, SyntaxError
+  {
+    
+  }
+  
+  /*
+    
+    <number> -> <sign>? <int> | <real> | <complex>
+    <int> -> <digits>
+    <real> -> <digits> "." <digits> <exp>?
+    <complex> -> <real> <sign>? <real> "i"
+    <sign> -> "-" | "+"
+    <digit> -> "0" | "1" | ... | "9"
+    <digits> -> <digit>+
+    <exp> -> "e" <sign>? <digits>
+  
+  */
 
   private Datum readNumber() throws IOException, SyntaxError
   {
@@ -194,15 +225,10 @@ public class Reader implements AutoCloseable
       text.append((char)lastChar);
       getChar();
       readDigits(text);
-      if (isExponent(peekChar())) {
+      if (peekChar() == 'e') {
         getChar();
         text.append((char)lastChar);
-        if (isSign(peekChar())) {
-          getChar();
-          text.append((char)lastChar);
-        }
-        getChar();
-        readDigits(text);
+        readSignedInt(text);
       }
       if (isSign(peekChar())) {
         var real = Double.parseDouble(text.toString());
@@ -217,15 +243,10 @@ public class Reader implements AutoCloseable
         text.append((char)lastChar);
         getChar();
         readDigits(text);
-        if (isExponent(peekChar())) {
+        if (peekChar() == 'e') {
           getChar();
           text.append((char)lastChar);
-          if (isSign(peekChar())) {
-            getChar();
-            text.append((char)lastChar);
-          }
-          getChar();
-          readDigits(text);
+          readSignedInt(text);
         }
         var imag = Double.parseDouble(text.toString());
         if (peekChar() != 'i')
