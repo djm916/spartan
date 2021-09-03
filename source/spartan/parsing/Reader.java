@@ -98,9 +98,14 @@ public class Reader implements AutoCloseable
 
   private static boolean isExponent(int ch)
   {
-    return ch == 'E' || ch == 'e';
+    return ch == 'e' || ch == 'E';
   }
-
+  
+  private static boolean isRadix(int ch)
+  {
+    return ch == '.';
+  }
+  
   private void getChar() throws IOException
   {
     lastChar = input.read();
@@ -164,10 +169,8 @@ public class Reader implements AutoCloseable
       // ignore
     }
   }
-
-  // readUnsignedInt?
   
-  private void readDigits(StringBuilder text) throws IOException, SyntaxError
+  private void readUnsignedInt(StringBuilder text) throws IOException, SyntaxError
   {
     if (!isDigit(lastChar))
       throw error("malformed numeric literal");
@@ -182,18 +185,42 @@ public class Reader implements AutoCloseable
 
   private void readSignedInt(StringBuilder text) throws IOException, SyntaxError
   {
+    getChar();
+    text.append((char)lastChar);
+    
     if (isSign(peekChar())) {
       getChar();
       text.append((char)lastChar);
     }
     
     getChar();
-    readDigits(text);
+    readUnsignedInt(text);
   }
   
-  private void readFraction(StringBuilder text) throws IOException, SyntaxError
+  private void readReal(StringBuilder text) throws IOException, SyntaxError
   {
+    getChar();
+    text.append((char)lastChar);    
     
+    getChar();
+    readUnsignedInt(text);
+    
+    if (isExponent(peekChar()))
+      readSignedInt(text);
+  }
+  
+  private void readImag(StringBuilder text) throws IOException, SyntaxError
+  {
+    getChar();
+    text.append((char)lastChar);
+    getChar();
+    readUnsignedInt(text);
+    if (peekChar() != '.')
+      throw error("malformed numeric literal");
+    readReal(text);
+    if (peekChar() != 'i')
+      throw error("malformed numeric literal");
+    getChar();
   }
   
   /*
@@ -218,40 +245,15 @@ public class Reader implements AutoCloseable
       getChar();
     }
 
-    readDigits(text);
+    readUnsignedInt(text);
 
     if (peekChar() == '.') {
-      getChar();
-      text.append((char)lastChar);
-      getChar();
-      readDigits(text);
-      if (peekChar() == 'e') {
-        getChar();
-        text.append((char)lastChar);
-        readSignedInt(text);
-      }
+      readReal(text);      
       if (isSign(peekChar())) {
         var real = Double.parseDouble(text.toString());
         text = new StringBuilder();
-        getChar();
-        text.append((char)lastChar);
-        getChar();
-        readDigits(text);
-        if (peekChar() != '.')
-          throw error("malformed numeric literal");
-        getChar();
-        text.append((char)lastChar);
-        getChar();
-        readDigits(text);
-        if (peekChar() == 'e') {
-          getChar();
-          text.append((char)lastChar);
-          readSignedInt(text);
-        }
+        readImag(text);
         var imag = Double.parseDouble(text.toString());
-        if (peekChar() != 'i')
-          throw error("malformed numeric literal");
-        getChar();
         return new Complex(real, imag);
       }
       return new Real(Double.parseDouble(text.toString()));
