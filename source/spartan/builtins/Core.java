@@ -19,9 +19,7 @@ public final class Core
   
   public static Bool not(Datum x) throws TypeMismatch
   {
-    if (x.type() == Type.Bool)
-      return ((Bool)x).not();
-    throw new TypeMismatch();
+    return truth(!truth(x));
   }
   
   public static final Primitive Not = new Primitive(1, false) {
@@ -143,55 +141,6 @@ public final class Core
     }
   };
   
-  public static Datum car(Datum x) throws TypeMismatch
-  {
-    if (x.type() != Type.List || x == List.Empty)
-      throw new TypeMismatch();
-    return ((List)x).car();
-  }
-  
-  public static final Primitive Car = new Primitive(1, false) {
-    public void apply(VirtualMachine vm) throws TypeMismatch {
-      vm.result = car(vm.popArg());
-      vm.popFrame();
-    }
-  };
-  
-  public static List cdr(Datum x) throws TypeMismatch
-  {
-    if (x.type() != Type.List || x == List.Empty)
-      throw new TypeMismatch();
-    return ((List)x).cdr();
-  }
-  
-  public static final Primitive Cdr = new Primitive(1, false) {
-    public void apply(VirtualMachine vm) throws TypeMismatch {
-      vm.result = cdr(vm.popArg());
-      vm.popFrame();
-    }
-  };
-  
-  public static final Primitive Cadr = new Primitive(1, false) {
-    public void apply(VirtualMachine vm) throws TypeMismatch {
-      vm.result = car(cdr(vm.popArg()));
-      vm.popFrame();
-    }
-  };
-  
-  public static List cons(Datum first, Datum rest) throws TypeMismatch
-  {
-    if (rest.type() != Type.List)
-      throw new TypeMismatch();
-    return List.cons(first, (List)rest);
-  }
-  
-  public static final Primitive Cons = new Primitive(2, false) {
-    public void apply(VirtualMachine vm) throws TypeMismatch {
-      vm.result = cons(vm.popArg(), vm.popArg());
-      vm.popFrame();
-    }
-  };
-  
   public static final Primitive MakeList = new Primitive(0, true) {
     public void apply(VirtualMachine vm) {
       vm.result = vm.popArgs();
@@ -266,20 +215,6 @@ public final class Core
   public static final Primitive TypeOf = new Primitive(1, false) {
     public void apply(VirtualMachine vm) throws TypeMismatch {
       vm.result = Symbol.get(vm.popArg().type().name);
-      vm.popFrame();
-    }
-  };
-  
-  public static final List concat(Datum x, Datum y) throws TypeMismatch
-  {
-    if (x.type() != Type.List || y.type() != Type.List)
-      throw new TypeMismatch();
-    return ((List)x).concat((List)y);
-  }
-  
-  public static final Primitive Concat = new Primitive(2, false) {
-    public void apply(VirtualMachine vm) throws TypeMismatch {
-      vm.result = concat(vm.popArg(), vm.popArg());
       vm.popFrame();
     }
   };

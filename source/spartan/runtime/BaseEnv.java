@@ -2,6 +2,7 @@ package spartan.runtime;
 
 import static spartan.builtins.Core.*;
 import static spartan.builtins.Math.*;
+import static spartan.builtins.Lists.*;
 import spartan.data.*;
 
 public final class BaseEnv extends GlobalEnv

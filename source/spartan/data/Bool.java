@@ -14,22 +14,7 @@ public final class Bool extends Datum
   {
     return value ? "true" : "false";
   }
-  
-  public Bool not()
-  {
-    return value ? False : True;
-  }
-  
-  public Bool or(Bool that)
-  {
-    return this.value || that.value ? True : False;
-  }
-  
-  public Bool and(Bool that)
-  {
-    return this.value && that.value ? True : False;
-  }
-    
+      
   private Bool(boolean value)
   {
     this.value = value;
