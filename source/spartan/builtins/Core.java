@@ -25,7 +25,7 @@ public final class Core
   }
   
   public static final Primitive Not = new Primitive(1, false) {
-    public void doApply(VirtualMachine vm) throws TypeMismatch {
+    public void apply(VirtualMachine vm) throws TypeMismatch {
       vm.result = not(vm.popArg());
       vm.popFrame();
     }
@@ -49,7 +49,7 @@ public final class Core
   }
   
   public static final Primitive Eq = new Primitive(2, false) {
-    public void doApply(VirtualMachine vm) throws TypeMismatch {
+    public void apply(VirtualMachine vm) throws TypeMismatch {
       vm.result = truth(eq(vm.popArg(), vm.popArg()));
       vm.popFrame();
     }
@@ -61,7 +61,7 @@ public final class Core
   }
   
   public static final Primitive Ne = new Primitive(2, false) {
-    public void doApply(VirtualMachine vm) throws TypeMismatch {
+    public void apply(VirtualMachine vm) throws TypeMismatch {
       vm.result = truth(ne(vm.popArg(), vm.popArg()));
       vm.popFrame();
     }
@@ -80,7 +80,7 @@ public final class Core
   }
   
   public static final Primitive Lt = new Primitive(2, false) {
-    public void doApply(VirtualMachine vm) throws TypeMismatch {
+    public void apply(VirtualMachine vm) throws TypeMismatch {
       vm.result = truth(lt(vm.popArg(), vm.popArg()));
       vm.popFrame();
     }
@@ -99,7 +99,7 @@ public final class Core
   }
   
   public static final Primitive Le = new Primitive(2, false) {
-    public void doApply(VirtualMachine vm) throws TypeMismatch {
+    public void apply(VirtualMachine vm) throws TypeMismatch {
       vm.result = truth(le(vm.popArg(), vm.popArg()));
       vm.popFrame();
     }
@@ -118,7 +118,7 @@ public final class Core
   }
   
   public static final Primitive Gt = new Primitive(2, false) {
-    public void doApply(VirtualMachine vm) throws TypeMismatch {
+    public void apply(VirtualMachine vm) throws TypeMismatch {
       vm.result = truth(gt(vm.popArg(), vm.popArg()));
       vm.popFrame();
     }
@@ -137,7 +137,7 @@ public final class Core
   }
   
   public static final Primitive Ge = new Primitive(2, false) {
-    public void doApply(VirtualMachine vm) throws TypeMismatch {
+    public void apply(VirtualMachine vm) throws TypeMismatch {
       vm.result = truth(ge(vm.popArg(), vm.popArg()));
       vm.popFrame();
     }
@@ -151,7 +151,7 @@ public final class Core
   }
   
   public static final Primitive Car = new Primitive(1, false) {
-    public void doApply(VirtualMachine vm) throws TypeMismatch {
+    public void apply(VirtualMachine vm) throws TypeMismatch {
       vm.result = car(vm.popArg());
       vm.popFrame();
     }
@@ -165,14 +165,14 @@ public final class Core
   }
   
   public static final Primitive Cdr = new Primitive(1, false) {
-    public void doApply(VirtualMachine vm) throws TypeMismatch {
+    public void apply(VirtualMachine vm) throws TypeMismatch {
       vm.result = cdr(vm.popArg());
       vm.popFrame();
     }
   };
   
   public static final Primitive Cadr = new Primitive(1, false) {
-    public void doApply(VirtualMachine vm) throws TypeMismatch {
+    public void apply(VirtualMachine vm) throws TypeMismatch {
       vm.result = car(cdr(vm.popArg()));
       vm.popFrame();
     }
@@ -186,28 +186,28 @@ public final class Core
   }
   
   public static final Primitive Cons = new Primitive(2, false) {
-    public void doApply(VirtualMachine vm) throws TypeMismatch {
+    public void apply(VirtualMachine vm) throws TypeMismatch {
       vm.result = cons(vm.popArg(), vm.popArg());
       vm.popFrame();
     }
   };
   
   public static final Primitive MakeList = new Primitive(0, true) {
-    public void doApply(VirtualMachine vm) {
+    public void apply(VirtualMachine vm) {
       vm.result = vm.popArgs();
       vm.popFrame();
     }
   };
   
   public static final Primitive MakeVector = new Primitive(0, true) {
-    public void doApply(VirtualMachine vm) {
+    public void apply(VirtualMachine vm) {
       vm.result = Vector.fromList(vm.popArgs());
       vm.popFrame();
     }
   };
   
   public static final Primitive MakeRecord = new Primitive(0, true) {
-    public void doApply(VirtualMachine vm) throws TypeMismatch {
+    public void apply(VirtualMachine vm) throws TypeMismatch {
       vm.result = Map.fromList(vm.popArgs());
       vm.popFrame();
     }
@@ -221,14 +221,14 @@ public final class Core
   }
   
   public static final Primitive MakeComplex = new Primitive(2, false) {
-    public void doApply(VirtualMachine vm) throws TypeMismatch {
+    public void apply(VirtualMachine vm) throws TypeMismatch {
       vm.result = makeComplex(vm.popArg(), vm.popArg());
       vm.popFrame();
     }
   };
   
   public static final Primitive Apply = new Primitive(2, false) {
-    public void doApply(VirtualMachine vm) throws Error {
+    public void apply(VirtualMachine vm) throws Error {
       vm.result = vm.popArg();
       if (vm.peekArg().type() != Type.List)
         throw new TypeMismatch();
@@ -238,7 +238,7 @@ public final class Core
   };
   
   public static final Primitive Print = new Primitive(1, false) {
-    public void doApply(VirtualMachine vm) {
+    public void apply(VirtualMachine vm) {
       System.out.println(vm.popArg().repr());
       vm.result = Nil.Instance;
       vm.popFrame();
@@ -257,14 +257,14 @@ public final class Core
   }
   
   public static final Primitive Length = new Primitive(1, false) {
-    public void doApply(VirtualMachine vm) throws TypeMismatch {
+    public void apply(VirtualMachine vm) throws TypeMismatch {
       vm.result = new Int(length(vm.popArg()));
       vm.popFrame();
     }
   };
   
   public static final Primitive TypeOf = new Primitive(1, false) {
-    public void doApply(VirtualMachine vm) throws TypeMismatch {
+    public void apply(VirtualMachine vm) throws TypeMismatch {
       vm.result = Symbol.get(vm.popArg().type().name);
       vm.popFrame();
     }
@@ -278,7 +278,7 @@ public final class Core
   }
   
   public static final Primitive Concat = new Primitive(2, false) {
-    public void doApply(VirtualMachine vm) throws TypeMismatch {
+    public void apply(VirtualMachine vm) throws TypeMismatch {
       vm.result = concat(vm.popArg(), vm.popArg());
       vm.popFrame();
     }

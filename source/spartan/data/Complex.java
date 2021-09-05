@@ -1,6 +1,6 @@
 package spartan.data;
 
-public class Complex extends Datum
+public final class Complex extends Datum
 {
   public static final Complex I = new Complex(0.0, 1.0);
   
@@ -16,40 +16,40 @@ public class Complex extends Datum
     this.imag = y.value;
   }
   
-  public final Type type()
+  public Type type()
   {
     return Type.Complex;
   }
   
-  public final String repr()
+  public String repr()
   {
     return String.format("%g%+gi", real, imag);
   }
 
-  public final List toRect()
+  public List toRect()
   {
     return List.of(new Real(real), new Real(imag));
   }
   
-  public final List toPolar()
+  public List toPolar()
   {
     return List.of(new Real(Math.hypot(real, imag)),
                    new Real(Math.atan2(imag, real)));
   }
   
-  public static boolean eq(Complex x, Complex y)
-  {
-    return x.real == y.real && x.imag == y.imag;
-  }
-  
-  public final Complex neg()
+  public Complex neg()
   {
     return new Complex(-real, -imag);
   }
   
-  public final Real abs()
+  public Real abs()
   {
     return new Real(Math.hypot(real, imag));
+  }
+  
+  public static boolean eq(Complex x, Complex y)
+  {
+    return x.real == y.real && x.imag == y.imag;
   }
   
   public static Complex add(Complex x, Complex y)
@@ -94,37 +94,37 @@ public class Complex extends Datum
     return cexp(x.real, x.imag, y.real, y.imag);
   }
   
-  public final Complex sin()
+  public Complex sin()
   {
     return csin(real, imag);
   }
   
-  public final Complex cos()
+  public Complex cos()
   {
     return ccos(real, imag);
   }
   
-  public final Complex tan()
+  public Complex tan()
   {
     return ctan(real, imag);
   }
   
-  public final Complex asin()
+  public Complex asin()
   {
     return casin(real, imag);
   }
   
-  public final Complex acos()
+  public Complex acos()
   {
     return cacos(real, imag);
   }
   
-  public final Complex atan()
+  public Complex atan()
   {
     return catan(real, imag);
   }
   
-  public final Complex catan()
+  public Complex catan()
   {
     return catan(real, imag);
   }

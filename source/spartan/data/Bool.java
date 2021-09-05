@@ -5,27 +5,27 @@ public final class Bool extends Datum
   public static final Bool True = new Bool(true);  
   public static final Bool False = new Bool(false);
   
-  public final Type type()
+  public Type type()
   {
     return Type.Bool;
   }
   
-  public final String repr()
+  public String repr()
   {
     return value ? "true" : "false";
   }
   
-  public final Bool not()
+  public Bool not()
   {
     return value ? False : True;
   }
   
-  public final Bool or(Bool that)
+  public Bool or(Bool that)
   {
     return this.value || that.value ? True : False;
   }
   
-  public final Bool and(Bool that)
+  public Bool and(Bool that)
   {
     return this.value && that.value ? True : False;
   }
@@ -35,5 +35,5 @@ public final class Bool extends Datum
     this.value = value;
   }
   
-  final boolean value;
+  private final boolean value;
 }

@@ -5,6 +5,7 @@ import spartan.data.List;
 import spartan.data.Callable;
 import spartan.errors.RuntimeError;
 import spartan.errors.Error;
+import spartan.errors.WrongNumberArgs;
 import spartan.errors.TypeMismatch;
 
 public final class VirtualMachine
@@ -16,9 +17,6 @@ public final class VirtualMachine
   public GlobalEnv globals;
   public Frame frame;
   
-  // Metrics
-  int frameCount = 0;
-  
   public VirtualMachine(GlobalEnv globals)
   {
     this.globals = globals;
@@ -26,7 +24,6 @@ public final class VirtualMachine
   
   public final Datum eval(Inst code) throws RuntimeError
   {
-    frameCount = 0;    
     control = code;
     
     try {
@@ -67,7 +64,6 @@ public final class VirtualMachine
   
   public final void pushFrame(Inst returnTo)
   {
-    ++frameCount;
     frame = new Frame(frame, locals, args, returnTo);
     args = List.Empty;
   }
@@ -84,7 +80,10 @@ public final class VirtualMachine
   {
     if (! (result instanceof Callable))
       throw new TypeMismatch();
-    ((Callable)result).apply(this, numArgs);
+    Callable f = (Callable) result;
+    if (!f.checkArity(numArgs))
+      throw new WrongNumberArgs();
+    f.apply(this);
   }
   
   public final void reset()

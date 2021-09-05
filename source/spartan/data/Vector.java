@@ -9,7 +9,7 @@ import spartan.errors.NoSuchElement;
 import spartan.errors.TypeMismatch;
 import spartan.builtins.Core;
 
-public class Vector extends Datum implements Callable
+public class Vector extends Callable
 {
   public static Vector fromList(List elems)
   {
@@ -55,10 +55,8 @@ public class Vector extends Datum implements Callable
     return true;
   }
   
-  public void apply(VirtualMachine vm, int numArgs) throws Error
+  public void apply(VirtualMachine vm) throws Error
   {
-    if (numArgs != 1)
-      throw new WrongNumberArgs();
     if (vm.peekArg().type() != Type.Int)
       throw new TypeMismatch();
     vm.result = at(((Int)vm.popArg()).value);
@@ -67,6 +65,7 @@ public class Vector extends Datum implements Callable
   
   private Vector(int numElems)
   {
+    super(1, false);
     this.elems = new Datum[numElems];
   }
   

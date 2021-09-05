@@ -4,21 +4,17 @@ import spartan.runtime.Inst;
 import spartan.runtime.LocalEnv;
 import spartan.runtime.VirtualMachine;
 import spartan.errors.Error;
-import spartan.errors.WrongNumberArgs;
 
-public class Closure extends Datum implements Callable
+public final class Closure extends Callable
 {
   private final Inst code;
   private final LocalEnv locals;
-  private final int requiredArgs;
-  private final boolean isVariadic;
   
   public Closure(Inst code, LocalEnv locals, int requiredArgs, boolean isVariadic)
   {
+    super(requiredArgs, isVariadic);
     this.code = code;
     this.locals = locals;
-    this.requiredArgs = requiredArgs;
-    this.isVariadic = isVariadic;
   }
   
   public Type type()
@@ -26,10 +22,8 @@ public class Closure extends Datum implements Callable
     return Type.Closure;
   }
   
-  public void apply(VirtualMachine vm, int numArgs) throws Error
-  {
-    if (numArgs < requiredArgs || !isVariadic && numArgs > requiredArgs)
-      throw new WrongNumberArgs();
+  public void apply(VirtualMachine vm) throws Error
+  {    
     vm.locals = locals;
     vm.control = code;
   }

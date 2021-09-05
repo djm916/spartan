@@ -11,7 +11,7 @@ import spartan.builtins.Core;
 import spartan.data.Symbol;
 import spartan.runtime.VirtualMachine;
 
-public class Map extends Datum implements Callable
+public class Map extends Callable
 {
   public static Map fromList(List elems) throws TypeMismatch
   {
@@ -69,10 +69,8 @@ public class Map extends Datum implements Callable
     return true;
   }
 
-  public void apply(VirtualMachine vm, int numArgs) throws Error
+  public void apply(VirtualMachine vm) throws Error
   {
-    if (numArgs != 1)
-      throw new WrongNumberArgs();
     if (vm.peekArg().type() != Type.Symbol)
       throw new TypeMismatch();
     vm.result = at((Symbol)vm.popArg());
@@ -81,6 +79,7 @@ public class Map extends Datum implements Callable
   
   private Map()
   {
+    super(1, false);
     members = new java.util.IdentityHashMap<>();
   }
   

@@ -1,31 +1,14 @@
 package spartan.data;
 
-import spartan.errors.Error;
-import spartan.errors.WrongNumberArgs;
-import spartan.runtime.VirtualMachine;
-
-public abstract class Primitive extends Datum implements Callable
+public abstract class Primitive extends Callable
 {
-  private final int requiredArgs;
-  private final boolean isVariadic;
-  
   protected Primitive(int requiredArgs, boolean isVariadic)
   {
-    this.requiredArgs = requiredArgs;
-    this.isVariadic = isVariadic;
+    super(requiredArgs, isVariadic);
   }
   
   public final Type type()
   {
     return Type.Primitive;
   }
-  
-  public final void apply(VirtualMachine vm, int numArgs) throws Error
-  {
-    if (numArgs < requiredArgs || !isVariadic && numArgs > requiredArgs)
-      throw new WrongNumberArgs();
-    doApply(vm);
-  }
-  
-  public abstract void doApply(VirtualMachine vm) throws Error;
 }
