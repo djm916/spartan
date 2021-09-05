@@ -1,7 +1,9 @@
 package spartan.builtins;
 
-import spartan.data.*;
-import spartan.errors.Error;
+import spartan.data.Datum;
+import spartan.data.Type;
+import spartan.data.Primitive;
+import spartan.data.List;
 import spartan.runtime.VirtualMachine;
 import spartan.errors.TypeMismatch;
 

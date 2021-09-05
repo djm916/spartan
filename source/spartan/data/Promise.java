@@ -23,7 +23,7 @@ public final class Promise extends Callable
   }
   
   public void apply(VirtualMachine vm) throws Error
-  {    
+  {
     vm.locals = locals;
     vm.control = code;
   }

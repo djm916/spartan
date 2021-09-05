@@ -495,6 +495,8 @@ public class Compiler
                       next));
   }
   
+  // (do exp...)
+  
   private Inst compileDo(List exp, Scope scope, boolean tail, Inst next) throws CompileError
   {
     if (exp.length() < 2)
@@ -547,7 +549,20 @@ public class Compiler
     return code;
   }
   
-  // (delay exp...)
+  /*
+     (delay exp...)
+     
+     let thunk = (fun () exp...)
+     
+     (fun (thunk)
+       (let ((value-ready? false)
+             (cached-value nil))
+         (if (not value-ready?)
+           (do (set! cached-value (thunk))
+               (set! value-ready? true)))
+         cached-value))
+  
+  */
   
   private Inst compileDelay(List exp, Scope scope, boolean tail, Inst next) throws CompileError
   {
