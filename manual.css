@@ -1,0 +1,17 @@
+
+body {
+  color: black;
+  background-color: tan;
+  font-size: large;
+  text-align: left;
+  padding: 5%;
+}
+
+div.codeblock {
+  font-family: monospace;
+  margin-left: 5%;
+}
+
+.code {
+  font-family: monospace;
+}

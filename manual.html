@@ -1,0 +1,678 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Spartan Manual</title>
+<link href="manual.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+
+<h2>Table of Contents</h2>
+<ol>
+  <li><a href="#intro">Introduction</a></li>
+  <li><a href="#chapter_1">Basic Concepts</a></li>
+  <li><a href="#chapter_2">Data Types</a></li>
+  <li><a href="#chapter_3">Expressions</a></li>
+  <li><a href="#chapter_4">Currying and Partial Application</a></li>
+  <li><a href="#chapter_5">Tail Recursion</a></li>
+  <li><a href="#chapter_6">Operator Precedence</a></li>
+  <li><a href="#chapter_7">Miscellaneous</a></li>
+  <li><a href="#appendix_1">Formal Grammar</a></li>
+</ol>
+
+<a id="intro"><h2>Introduction</h2></a>
+
+<p>This document presents Spartan, a minimal, yet expressive, programming
+language. Spartan is primarily a functional language, but it supports both
+functional and imperative programming styles. 
+<ul>
+  <li>Primarily functional: immutable variables, high-order functions</li>
+  <li>Imperative features: mutable variables, loops</li>
+  <li>Statically scoped</li>
+  <li>Dynamically typed</li>
+  <li>Strict evaluation</li>
+</ul>
+</p>
+
+It 
+was designed to be minimalistic yet expressive. 
+in an interactive environment.</p> 
+
+<a id="chapter_1"><h2>Basic Concepts</h2></a>
+
+<h3>Programs and Modules</h3>
+
+<p>
+</p>
+
+<h3>Expressions and Evaluation</h3>
+
+<p>A program written in a functional language is conceptually similar to a set
+of mathematical expressions, of we are to find the value. The program is executed
+by evaluating these expressions according to the rules defined by the language,
+whether that be mathematics or a programming language. Expressions in a functional
+programming language have essentially the same structure and meaning as do mathematical
+expressions, and are evaluated similarly: variables are
+replaced with their values and sub-expressions are evaluated until the expression reduces to a
+single irreducible value.</p>
+
+<p>While the mathematical </p>
+There is one important 
+difference. In mathematics, the order in which 
+sub-expressions are evaluated does not affect the result. In 
+Spartan, however, evaluation may induce side-effects, so the 
+order of evaluation can affect the result. Since there is no 
+"best" evaluation order, Spartan's order of evaluation is 
+undefined unless explicitly specified otherwise.</p>
+
+<h3>Variables, Scope, and Environments</h3>
+
+<p>In mathematics, variables enable generalized (i.e., 
+parameterized) expressions. To evaluate an expression that 
+includes variables, the variables must first be bound to some 
+known values. Those values may vary with each distinct 
+evaluation of a given expression, but they are fixed<a href="#footnote_1"><sup>1</sup></a>
+and may
+not be rebound during evaluation.</p>
+ 
+<p>A variable's scope refers to the extent of its 
+visibility, i.e., the set of expressions in which that 
+particular variable is bound. In Spartan, there are two 
+kinds of variables: global and local. A global variable has 
+global scope, so it is bound throughout the program. A local 
+variable has limited scope, restricted to a defined set of 
+expressions. It is always an error to refer to an unbound 
+variable.</p>
+
+<p>Spartan needs to keep account of the current value of 
+each variable at each point during evaluation. This mapping 
+of variables to values is known as an environment. Thus, 
+evaluation takes place in the context of an 
+environment which includes the values of all variables 
+in the scope of the expression currently being evaluated.</p> 
+
+<h3>Values and Types</h3>
+
+<p>When an expression has been completely evaluated, a value
+is produced. Values have types. In mathematics, for instance,
+the type of value may be numeric, set, matrix, etc. Similarly,
+Spartan values have types, including numeric, string, list, etc.
+Additionally, there is a set of type rules that determines which
+types of values to which an operation can be legally applied.
+These type rules are important because they prevent one from
+invoking undefined behavior.</p>
+
+<p>Spartan is dynamically and strongly typed. Dynamic typing
+means the type rules are enforced as the program runs
+rather than before. This frees the programmer from 
+writing type declarations, making the language simpler
+and more expressive. Of course, the downside is that 
+it increases the potential of running more programs that fail to 
+obey the type rules. Strongly typed simply means that the 
+types <i>are</i> checked, and that no implicit invalid type 
+conversions will be performed in order to avoid a type error.
+Instead, an error is raised at runtime when a violation of the
+type rules occurs.</p> 
+
+<a id="chapter_2"><h2>Types</h2></a>
+
+<p>Every value has a type. The expression <code>type </i><i>x</i></code>
+returns the type of value <i>x</i>, one of the following symbols:</p>
+
+<table title="type table" border=1>
+  <tr><td>$unit</td>  <td>$complex</td>  <td>$func</td>    <td/>$bytes</td></tr>
+  <tr><td>$bool</td>  <td>$tuple</td>    <td>$string</td>  <td/>$port</td></tr>
+  <tr><td>$int</td>   <td>$list</td>     <td>$symbol</td>  <td/>$promise</td></tr>
+  <tr><td>$real</td>  <td>$record</td>   <td>$ref</td>     <td/></tr>
+</table>
+
+<p>Each of these types is described in this section.</p>
+
+<h3>Unit</h3>
+
+<p>The <i>unit</i> value, denoted <code>()</code>, signifies the absence of a meaningful
+value. It is the only value of type <b>unit</b>.</p>
+
+<h3>Boolean</h3>
+
+<p>A <i>boolean</i> represents a true or false value, denoted <code>true</code> and
+<code>false</code>, respectively. Any non-<code>false</code> value is
+considered equivalent to <code>true</code>.</p>
+
+<h3>Numeric</h3>
+
+<p>The numeric types (<i>integer</i>, <i>real</i>, and <i>complex</i>) are arranged
+in the standard mathematical heirarchy. That is, every integer is a real
+number (with zero fractional part), and every real number is a complex number
+(with a zero imaginary part). Thus numeric values may safely be converted to
+any type higher in the heirarchy; this is known as type promotion.</p>
+
+<p>The actual underlying representations and ranges are as follows:</p>
+
+<ul>
+  <li>Integers use signed 32 bit 2's complement representation</li>
+  <li>Reals use the IEEE 754 double-precision representation</li>
+  <li>A complex number uses 2 real components</li>
+</ul>
+
+<h3>Tuples</h3>
+
+<p>An <i>N-tuple</i> an ordered set of <i>N > 1</i> values, denoted<p>
+
+<div class="codeblock"><pre>
+(<i>x<sub>1</sub></i>, <i>x<sub>2</sub></i>, ..., <i>x<sub>N</sub></i>)
+</pre></div>
+
+<p>Note that there are no 0-tuples or 1-tuples: <code>(x)</code> denotes a
+single parenthesized expression, while <code>()</code> denotes unit.</p>
+
+<p>The selector expression <code><i>t</i>.<i>i</i></code> denotes the value <code><i>x<sub>i</sub></i></code> in tuple <code><i>t</i></code>.</p>
+
+<h3>Lists</h3>
+
+<p>A <i>list</i> is an ordered sequence of zero or more values, denoted<p>
+
+<div class = "codeblock"><pre>
+[<i>x<sub>1</sub></i>, ..., <i>x<sub>N</sub></i>]
+</pre></div>
+
+<p>The empty list is denoted <code>[]</code>.</p>
+
+<p>The <code>:</code> operator constructs lists, so the above form is equivalent to</p>
+
+<div class = "codeblock">
+<i>x<sub>1</sub></i> : ... : <i>x<sub>N</sub></i> : []
+<pre></pre></div>
+
+<h3>Records</h3>
+
+<p>A <i>record</i> is a set of labeled values, denoted<p>
+
+<div class="codeblock"><pre>
+{<i>id<sub>1</sub></i> = <i>x<sub>1</sub></i>, ..., <i>id<sub>N</sub></i> = <i>x<sub>N</sub></i>}
+</pre></div>
+
+<p>Labels must be unique within a record.</p>
+
+<p>The expression <code><i>r</i>.<i>id<sub>i</sub></i></code> denotes the
+labeled value <code><i>id<sub>i</sub></i></code> in record <code><i>r</i></code>.</p>
+
+<h3>Functions</h3>
+
+<p>The <i>function</i> is fundamental in any functional language.
+They are the primary means of abstraction and composition. They represent
+mathematical (i.e., pure) functions as well as effectful procedures. They
+are first-class closures, so may be freely passed to and returned
+from other functions, as well as nested within other functions. Finally,
+all functions are automatically curried, enabling partial function application.<p>
+
+<h3>References</h3>
+
+<p>Immutability is desirable, but mutable state is often required in some
+algorithms. For this reason references are provided. A <i>reference</i>
+value points to (i.e., stores the location of) another value. They model a
+single-value mutable memory cell, enabling stateful programming techniques.<p>
+
+<p>The primary operations on a reference are:</p>
+
+<ul>
+  <li>Construct a new reference with the <code>ref</code> operator.</li>
+  <li>Retrieve the current value stored in a reference.</li>
+  <li>Assign a new value to (i.e., mutate) the reference.</li>
+</ul>
+
+<h3>Symbols</h3>
+
+<p>Symbols are denoted <code>$<i>x</i></code>, where <code><i>x</i></code> is an identifier.<p>
+
+<p>A <i>symbol</i> is a unique named constant value. Unlike a variable, whose
+value usually changes with each evaluation of an expression, a symbol's value
+never changes -- it always denotes itself.</p>
+
+<h3>Strings</h3>
+
+<p>A <i>string</i> is a sequence of zero or more Unicode characters. A <i>string
+literal</i> is a sequence of Unicode characters encoded directly in the source
+text. This encoding may (optionally) be specified; the default is UTF-8.</p>
+
+<p>String literals are delimited with double quotes (<code>"</code>). Inside a
+string literal, the following escape sequences have special meaning:</p>
+
+<ul>
+  <li><code>\u</code> followed immediately by exactly 4 uppercase hexadecimal
+      digits denotes the Unicode character whose code point is equal to the
+      specified value.</li>
+  <li><code>\n</code> denotes the newline character.</li>
+  <li><code>\t</code> denotes the tab character.</li>
+  <li><code>\\</code> denotes a literal <code>\</code></li>
+  <li><code>\"</code> denotes a literal <code>"</code></li>
+</ul>
+
+<h3>Ports and Bytes</h3>
+
+<p>A byte is the lowest common denominator unit of data at the interface
+between Spartan and external devices, such as memory and disk. In Spartan,
+all I/O operations are done via a <i>port</i>, which transfers <i>bytes</i>
+between Spartan and an external device. Spartan values may be converted to
+<i>bytes</i> and vice-versa to allow for data persistence.</p>
+
+<h3>Promises</h3>
+
+<p>Promises, along with the operators <code>delay</code> and <code>force</code>
+provide a simple interface to support lazy evaluation. The operator
+<code>delay</code> accepts an expression (which is not immediately evaluated),
+and returns a promise to return its value. The counterpart operator, <code>force</code>,
+accepts a promise and evaluates the original expression, in the context of its
+original environment, and returns the result. The expression is guaranteed to
+only be evaluated once.</p>
+
+<a id="chapter_4"><h2>Expressions</h2></a>
+
+<h3>Variables</h3>
+
+<p>Identifiers in a program denote either a variable reference or a variable
+binding, which depends on the context of use. Variable bindings occur in local and
+global definitions and in function definitions. All other identifiers denote
+variable references. It is always an error to refer to an unbound variable.</p>
+
+<h3>Conditionals</h3>
+
+<p>A conditional expression of the form</p>
+<div class="codeblock">
+if <i>exp<sub>1</sub></i> then <i>exp<sub>2</sub></i> else <i>exp<sub>3</sub></i>
+</div>
+<p>first evaluates <i>exp<sub>1</sub></i>. If the result is true, <i>exp<sub>2</sub></i> is evaluated and its value is returned.
+Otherwise, <i>exp<sub>3</sub></i> is evaluated and its value is returned. If
+the <code>else</code> branch is not given and <i>exp<sub>1</sub></i> is <code>false</code>,
+unit is returned.</p>
+
+<h3>Sequencing</h3>
+
+<p>An expression sequence</p>
+<div class="codeblock">
+(<i>exp<sub>1</sub></i> ; ... ; <i>exp<sub>N</sub></i>)
+</div>
+<p>evaluates each <code><i>exp</i></code> in order from 1 to <i>N</i>. The
+value of <code><i>exp<sub>N</sub></i></code> is returned as the result of the
+entire expression.</p>
+
+<h3>Let Expressions</h3>
+
+<p>A let expression binds a set of local variables in a new environment and
+evaluates its body expression in the context of that environment. There are
+three forms: basic, sequential, and recursive.</p>
+
+<p>The basic let expression has the form</p>
+
+<div class="codeblock"><pre>
+let <i>id</i> = <i>init</i> in <i>body</i>
+</pre></div>
+
+<p>The basic form is evaluated as follows: First, the <i>init</i> expression is
+evaluated in the current environment. Then the current environment is extended
+with <i>id</i> bound to the value of <i>init</i>. Finally, the <i>body</i> is
+evaluated in the extended environment and its result is returned as the value
+of the let expression.</p>
+
+<p>The sequential form</p>
+
+<div class="codeblock"><pre>
+let <i>id<sub>1</sub></i> = <i>init<sub>1</sub></i>, ..., <i>id<sub>N</sub></i> = <i>init<sub>N</sub></i> in <i>body</i>
+</pre></div>
+
+<p>is semantically equivalent to the series of nested let expressions</p>
+
+<div class="codeblock"><pre>
+let <i>id<sub>1</sub></i> = <i>init<sub>1</sub></i>
+in ...
+let <i>id<sub>N</sub></i> = <i>init<sub>N</sub></i>
+in <i>body</i>
+</pre></div>
+
+<p>The bindings are performed sequentially, so any <i>init<sub>j</sub></i> may
+refer to any previous binding <i>id<sub>i</sub></i>, where <i>i < j</i>.</p>
+
+<p>A recursive let expression has the form<p>
+
+<div class="codeblock"><pre>
+let rec <i>id<sub>1</sub></i> = <i>init<sub>1</sub></i>, ..., <i>id<sub>N</sub></i> = <i>init<sub>N</sub></i> in <i>body</i>
+</pre></div>
+
+</p>and is evaluated as follows: First, the current environment is
+extended with each <i>id</i> bound to an undefined value. Then, each <i>init</i>
+is evaluated and bound to the corresponding <i>id</i> in the extended environment.
+Finally, the <i>body</i> is evaluated in the extended environment and its result
+is returned as the value of the let expression.</p>
+
+<p>The recursive form allows the definition of self-recursive and sets of
+mutually-recursive functions. Each <i>init</i> must be a lambda expression.</p>
+
+<h3>Function Application</h3>
+
+<p>Function application is denoted by the juxtaposition of expressions. That is,
+the expression <code><i>f x</i></code> denotes the application of function <i>f</i>
+to argument <i>x</i>. Function application associates to the left, so that
+<code><i>x</i> <i>y</i> <i>z</i></code> is equivalent to
+<code>(<i>x</i> <i>y</i>) <i>z</i></code>. The left associativity of function
+application works in tandem with function currying to enable partial
+application.</p>
+
+<h3>Lambdas</h3>
+
+<p>Functions are defined with lambda expressions. In general, functions may be
+nullary (0 parameters), unary (1 parameter), or n-ary (<i>n > 1</i> parameters).
+However, in Spartan, all functions are essentially unary.</p>
+
+<p>A unary function is defined by a lambda expression of the form</p>
+
+<div class="codeblock">
+\ <i>id</i> -> <i>body</i>
+</div>
+
+<p>and evaluates to a new function <i>f</i> with 1 parameter <i>id</i>. The
+<i>body</i> may refer to the parameter <i>id</i> as well as any other variable
+currently in scope. Evaluation of the <i>body</i> is deferred until <i>f</i>
+is called with an argument <i>x</i>. When <i>f</i> is called, <i>body</i>
+is evaluated in the environment of the lambda expression, extended with <i>id</i>
+bound to the given argument <i>x</i>.</p>
+
+<p>An n-ary function of <i>n > 1</i> parameters is defined by a lambda expression of the form</p>
+
+<div class="codeblock">
+\ <i>id<sub>1</sub></i> ... <i>id<sub>n</sub></i> -> <i>body</i>
+</div>
+
+<p>and this expression is semantically equivalent to</p>
+
+<div class="codeblock">
+\ <i>id<sub>1</sub></i> -> ... -> \ <i>id<sub>n</sub></i> -> <i>body</i>
+</div>
+
+<p>A nullary function is defined by a lambda expression with no parameters</p>
+
+<div class="codeblock">
+\ -> <i>body</i>
+</div>
+
+<p>A nullary function is equivalent to a unary function where the argument is
+simply ignored. Nullary functions are called by passing the unit value as an
+argument, as in <code>f ()</code>.</p>
+
+<a id="chapter_5"><h2>Currying and Partial Application</h2></a>
+
+<p>Currying tranforms a multi-argument function into a series of nested functions,
+each of which accepts an argument and returns another function which accepts the
+next argument. When all arguments are accepted, the function's body is finally
+evaluated.</p>
+
+<p>The combination of the left-associativity of function application and
+currying enables partial application. That is, the application of a multi
+parameter function</p>
+
+<div class="codeblock">
+<pre>
+<i>fn</i> <i>X<sub>1</sub></i> <i>X<sub>2</sub></i> ... <i>X<sub>N</sub></i> => ...
+</pre>
+</div>
+
+<p>is equivalent to the curried form</p>
+
+<div class="codeblock">
+<pre>
+<i>fn</i> <i>X<sub>1</sub></i> => fn <i>X<sub>2</sub></i> => ... => fn <i>X<sub>N</sub></i> => ...
+</pre>
+</div>
+
+<p>and is applied naturally as</p>
+
+<div class="codeblock">
+<pre>
+<i>f</i> <i>x<sub>1</sub></i> <i>x<sub>2</sub></i> ... <i>x<sub>N</sub></i>
+</pre>
+</div>
+
+<p>because it is equivalent to</p>
+
+<div class="codeblock">
+<pre>
+<i>(((f</i> <i>x<sub>1</sub></i>) <i>x<sub>2</sub></i>) ... <i>x<sub>N</sub></i>)
+</pre>
+</div>
+
+<p>This is beneficial because now a function may be partially applied,
+resulting in a new, specialized version of the original function that has
+some parameters fixed.</p>
+
+<a id="chapter_6"><h2>Proper Tail Recursion</h2></a>
+
+<p>In functional programming, iteration is typically expressed by recursive
+function calls. In general, each call consumes space on the system call stack,
+and an excessive number of active calls can result in unbounded consumption of
+system stack space. However, calls that occur in <i>tail context</i> are
+guaranteed <i>not</i> to cause unbounded consumption of space. Tail context is
+defined inductively as follows:</p>
+
+<ul>
+  <li>The body of a function always occurs in tail context.</li>
+  <li>If a conditional occurs in tail context, then both its branches occur in tail context.</li>
+  <li>If a let binding occurs in tail context, then its body occurs in tail context.</li>
+  <li>If a sequence occurs in tail context, then the last expression in the sequence occurs in tail context.</li>
+  <li>No other expression occurs in tail context.</li>
+</ul>
+
+<a id="chapter_7"><h2>Operators</h2></a>
+
+<p>The following table gives the precedence (from high to low) and associativity of each operator.</p>
+<table border="1">
+  <tr><td><b>Operator</b></td><td><b>Associativity</b></td></tr>
+  <tr><td>.</td><td>left to right</td></tr>
+  <tr><td>function application (juxtaposition)</td><td>left to right</td></tr>  
+  <tr><td>- (unary), not, !</td><td>right to left</td></tr>
+  <tr><td>*, /, //, %</td><td>left to right</td></tr>
+  <tr><td>+, -</td><td>left to right</td></tr>
+  <tr><td>&lt;, &lt;=, &gt;, &gt;=</td><td>non-associative</td></tr>
+  <tr><td>=, /=</td><td>non-associative</td></tr>
+  <tr><td>and</td><td>left to right</td></tr>
+  <tr><td>or</td><td>left to right</td></tr>
+  <tr><td>:</td><td>right to left</td></tr>
+  <tr><td>:=</td><td>right to left</td></tr>
+</table>
+
+<a id="chapter_8"><h2>Miscellaneous</h2></a>
+
+<h3>Operators vs. Functions</h3>
+
+<p>While an operator is conceptually equivalent to a function, there is subtle
+syntactic difference between the two. For instance, the expression</p>
+
+<div class="codeblock">
+<i>x</i> &#x2A01; <i>y</i>
+</div>
+
+<p>denotes the immediate application of a binary function &#x2A01; to some
+arguments <i>x</i> and <i>y</i>. However, the operator symbol &#x2A01 itself
+does not syntactically denote a function, and the arguments <b>must</b>
+be supplied immediately. <i>Operator literals</i> provide a concise way of
+referring to any operator as a function. The operator literal expression</p>
+
+<div class="codeblock">
+op &#x2A01
+</div>
+
+<p>denotes the value of the (unary or binary) function that implements the operator &#x2A01;.</p>
+ 
+<h3>Integer Division</h3>
+
+<p>When the division operator <code>/</code> is applied to two integers,
+it returns a real-valued approximation of the rational number.
+The operators <code>//</code> and <code>%</code> perform integral division
+and modulus (remainder after division), respectively.</p>
+
+<h3>Short Circuit Boolean Operators</h3>
+
+<p>The operators <code>and</code> and <code>or</code> always evaluate both
+operands and return <code>true</code> or <code>false</code>. The short circuit
+boolean operators <code>andalso</code> and <code>orelse</code> may not evaluate
+both operands if the result can be determined without doing so, and return
+one of their operands, not necessarily a boolean-typed value. Specifically,
+<code><i>x</i> andalso <i>y</i></code> is equivalent to
+<code>if <i>x</i> then <i>y</i> else <i>x</i></code>, and 
+<code><i>x</i> orelse <i>y</i></code> is equivalent to
+<code>if <i>x</i> then <i>x</i> else <i>y</i></code>, except that <i>x</i>
+is evaluated only once.</p>
+
+<h3>Record and Tuple Selectors</h3>
+
+<p>The <code>.</code> operator is used to retrieve an element of a tuple or
+record. The expression <code><i>r</i>.<i>id</i></code> evaluates to the
+value of the named element <i>id</i> in record <i>r</i>, and the expression
+<code><i>t</i>.<i>i</i></code> evaluates to the <i>i</i>th element in tuple
+<i>t</i>. It is an error if no such element exists.</p>
+
+<h2>Programming Techniques</h2>
+
+<h3>Modeling Objects</h3>
+
+<p>Among other things, the closure property of functions allows one to model stateful objects and
+methods. For example, consider a simple monotonically increasing counter, with
+two associated operations: <i>value</i>, which gets the current value of the
+counter, and <i>tick</i> which increments the counter. This can expressed as</p>
+
+<div class="codeblock"><pre>
+let Counter = \ ->
+  let count = ref 0,
+      value = \ -> val count,
+      tick = \ -> set count (+ 1 (val count))
+  in { value, tick };
+  
+let c = Counter();
+(.value c)();  # 0
+(.tick c)();
+(.value c)();  # 1
+</pre></div>
+
+<p>This technique of modeling objects with functions easily extends to more
+complex cases.</p>
+
+<a id="appendix_1"><h2>Formal Grammar</h2></a>
+
+<p>This section contains Spartan's complete formal grammar, specified in EBNF.
+We use <b>bold</b> to designate terminals and <i>italics</i> to designate
+non-terminals.<p>
+
+<p>Following the grammar is a LL(1) conversion.</p>
+
+<pre>
+Program ::= {Definition ";"}
+
+Definition ::= "let" Id "=" Exp
+
+Exp ::= Atom
+      | Apply
+      | Lambda
+      | Cond
+      | Let
+      | While
+
+Atom ::= Literal
+       | Id
+       | Operator
+       | Selector
+       | "(" Exp ")"
+
+Literal ::= Unit
+          | Bool
+          | Int
+          | Float
+          | String
+          | List
+          | Tuple
+          | Record
+          | Symbol
+
+Digit ::= "0" | "1" | ... | "9"
+
+Digits ::= Digit {Digit}
+
+Int ::= ["~"] Digits
+
+Float ::= ["~"] Digits "." Digits ["e" ["~"] Digits]
+
+Id ::= InitialIdChar {SubsequentIdChar}
+
+Letter ::= "a" | ... | "z" | "A" | ... | "Z"
+
+InitialIdChar ::= Letter
+
+SubsequentIdChar ::= Letter | Digit | SpecialIdChar
+
+SpecialIdChar ::= "_" | "'" | "?" | "!"
+
+Binding ::= Id "=" Exp
+
+Unit ::= "()"
+
+Bool ::= "true" | "false"
+
+Tuple ::= "(" Exp "," Exp {"," Exp} ")"
+
+List ::= "[]"
+       | "[" Exp {"," Exp} "]"
+
+Record ::= "{" Binding {"," Binding} "}"
+
+String ::= """ {StringChar} """
+
+Symbol ::= "$" Id
+
+Apply ::= Atom Atom {Atom}
+
+Lambda ::= "\" {Id} "->" Exp
+
+Let ::= "let" ["rec"] Binding {"," Binding} "in" Exp
+
+Cond ::= "if" Exp "then" Exp ["else" Exp]
+
+While ::= "while" Exp "do" Exp
+
+Operator ::= "~" | "+" | "-" | "*" | "/" | "%" | "=" | "/=" | "<" | ">" | "<=" | ">="
+
+Selector ::= RecordSelector | TupleSelector
+
+RecordSelector ::= "." Id
+
+TupleSelector ::= "." Digits
+
+</pre>
+
+<p>The grammar as given is ambiguous for easier understanding, but may easily be
+converted to an unambiguous LL(1) grammar by removing left recursion and by
+enforcing operator precedence in the grammar itself. This is left as an excercise
+for the reader.</p>
+
+<hr/>
+
+<!-- Footnotes -->
+
+<a id="footnote_1">
+<p>[1] Since the value bound to a variable is fixed, the term 
+"variable" may seem a misnomer from those coming from 
+traditional programming languages, in which a variable 
+denotes a mutable memory cell. It does, however, coincide 
+with common mathematical usage. Furthermore, immutability of 
+variables (and elimination of state, in general) is a core 
+philosophy of functional programming. Finally, the perceived 
+lack of mutable variables is greatly diminished when a 
+functional, rather than imperative, style is used.</p>
+</a>
+
+<a id="footnote_2">
+<p>[2] Binding forms, including let bindings and function definitions
+may be nested, thus creating nested scopes. Binding forms always introduce
+<i>new</i> bindings, temporarily shadowing any existing bindings to the
+same variables throughout the new variables' scope.</p>
+
+</a>
+
+</body>
+</html>
