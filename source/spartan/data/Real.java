@@ -1,6 +1,6 @@
 package spartan.data;
 
-public class Real extends Datum
+public final class Real extends Datum
 {
   public static final Real PI = new Real(Math.PI);
   public static final Real E = new Real(Math.E);
@@ -10,102 +10,102 @@ public class Real extends Datum
     this.value = value;
   }
   
-  public final Type type()
+  public Type type()
   {
     return Type.Real;
   }
   
-  public final String repr()
+  public String repr()
   {
     return String.format("%g", value);
   }
   
-  public final Real neg()
+  public Real neg()
   {
     return new Real(-value);
   }
   
-  public final Real abs()
+  public Real abs()
   {
     return new Real(Math.abs(value));
   }
   
-  public final Real floor()
+  public Real floor()
   {
     return new Real(Math.floor(value));
   }
   
-  public final Real ceil()
+  public Real ceil()
   {
     return new Real(Math.ceil(value));
   }
   
-  public final Real exp(Real that)
+  public Real exp(Real that)
   {
     return new Real(Math.pow(this.value, that.value));
   }
   
-  public final Real log(Real that)
+  public Real log(Real that)
   {
     return new Real(Math.log(this.value) / Math.log(that.value));
   }
   
-  public final Real sin()
+  public Real sin()
   {
     return new Real(Math.sin(value));
   }
   
-  public final Real cos()
+  public Real cos()
   {
     return new Real(Math.cos(value));
   }
   
-  public final Real tan()
+  public Real tan()
   {
     return new Real(Math.tan(value));
   }
   
-  public final Real asin()
+  public Real asin()
   {
     return new Real(Math.asin(value));
   }
   
-  public final Real acos()
+  public Real acos()
   {
     return new Real(Math.acos(value));
   }
   
-  public final Real atan()
+  public Real atan()
   {
     return new Real(Math.atan(value));
   }
   
-  public final Real add(Real that)
+  public Real add(Real that)
   {
     return new Real(this.value + that.value);
   }
   
-  public final Real sub(Real that)
+  public Real sub(Real that)
   {
     return new Real(this.value - that.value);
   }
   
-  public final Real mul(Real that)
+  public Real mul(Real that)
   {
     return new Real(this.value * that.value);
   }
   
-  public final Real div(Real that)
+  public Real div(Real that)
   {
     return new Real(this.value / that.value);
   }
   
-  public final boolean eq(Real that)
+  public boolean eq(Real that)
   {
     return this.value == that.value;
   }
   
-  public final int compare(Real that)
+  public int compare(Real that)
   {
     return Double.compare(this.value, that.value);
   }

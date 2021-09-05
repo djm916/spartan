@@ -3,35 +3,35 @@ package spartan.data;
 import java.util.Map;
 import java.util.HashMap;
 
-public class Symbol extends Datum
+public final class Symbol extends Datum
 {
-  private Symbol(String value)
+  public static Symbol get(String id)
   {
-    this.value = value;
+    if (!interned.containsKey(id))
+      interned.put(id, new Symbol(id));
+    return interned.get(id);
   }
   
-  public static Symbol get(String value)
-  {
-    if (!interned.containsKey(value))
-      interned.put(value, new Symbol(value));
-    return interned.get(value);
-  }
-  
-  public final Type type()
+  public Type type()
   {
     return Type.Symbol;
   }
   
-  public final String repr()
+  public String repr()
   {
-    return value;
+    return id;
   }
   
-  public final boolean eq(Symbol that)
+  public boolean eq(Symbol that)
   {
-    return this.value.equals(that.value);
+    return this.id.equals(that.id);
+  }
+
+  private Symbol(String id)
+  {
+    this.id = id;
   }
   
   private static Map<String, Symbol> interned = new HashMap<>();
-  private final String value;
+  private final String id;
 }

@@ -2,7 +2,6 @@ package spartan.data;
 
 import spartan.runtime.VirtualMachine;
 import spartan.errors.Error;
-import spartan.errors.WrongNumberArgs;
 
 public abstract class Callable extends Datum
 {

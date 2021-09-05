@@ -19,7 +19,7 @@ public final class Promise extends Callable
   
   public Type type()
   {
-    return Type.Closure;
+    return Type.Promise;
   }
   
   public void apply(VirtualMachine vm) throws Error

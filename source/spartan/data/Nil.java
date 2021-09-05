@@ -1,15 +1,15 @@
 package spartan.data;
 
-public class Nil extends Datum
+public final class Nil extends Datum
 {
   public static final Nil Instance = new Nil();
   
-  public final Type type()
+  public Type type()
   {
     return Type.Nil;
   }
   
-  public final String repr()
+  public String repr()
   {
     return "nil";
   }

@@ -4,12 +4,11 @@ import java.util.stream.Stream;
 import java.util.stream.Collectors;
 import spartan.runtime.VirtualMachine;
 import spartan.errors.Error;
-import spartan.errors.WrongNumberArgs;
 import spartan.errors.NoSuchElement;
 import spartan.errors.TypeMismatch;
 import spartan.builtins.Core;
 
-public class Vector extends Callable
+public final class Vector extends Callable
 {
   public static Vector fromList(List elems)
   {
@@ -19,31 +18,29 @@ public class Vector extends Callable
     return result;
   }
   
-  public final Type type()
+  public Type type()
   {
     return Type.Vector;
   }
   
-  public final String repr()
+  public String repr()
   {
     return Stream.of(elems)
       .map(e -> e.repr())
       .collect(Collectors.joining(" ", "[", "]"));
   }
   
-  public final int length()
+  public int length()
   {
     return elems.length;
   }
   
-  public final Datum at(int index) throws NoSuchElement
+  public Datum at(int index) throws NoSuchElement
   {
-    if (index < 0 || index >= elems.length)
-      throw new NoSuchElement();
     return elems[index];
   }
   
-  public final boolean eq(Vector that) throws TypeMismatch
+  public boolean eq(Vector that) throws TypeMismatch
   {
     if (this.length() != that.length())
       return false;
@@ -55,11 +52,14 @@ public class Vector extends Callable
     return true;
   }
   
-  public void apply(VirtualMachine vm) throws Error
+  public void apply(VirtualMachine vm) throws TypeMismatch, NoSuchElement
   {
     if (vm.peekArg().type() != Type.Int)
       throw new TypeMismatch();
-    vm.result = at(((Int)vm.popArg()).value);
+    int index = ((Int)vm.popArg()).value;
+    if (index < 0 || index >= elems.length)
+      throw new NoSuchElement();
+    vm.result = at(index);
     vm.popFrame();
   }
   
