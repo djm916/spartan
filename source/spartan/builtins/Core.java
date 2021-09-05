@@ -182,7 +182,7 @@ public final class Core
   {
     if (rest.type() != Type.List)
       throw new TypeMismatch();
-    return new List(first, (List)rest);
+    return List.cons(first, (List)rest);
   }
   
   public static final Primitive Cons = new Primitive(2, false) {

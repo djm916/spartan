@@ -3,7 +3,7 @@ package spartan.data;
 import spartan.builtins.Core;
 import spartan.errors.TypeMismatch;
 
-public class List extends Datum
+public final class List extends Datum
 {
   public static final List Empty = new List(null, null);
   
@@ -15,10 +15,9 @@ public class List extends Datum
     {
       if (head == Empty)
         head = tail = new List(x, Empty);
-      else {
-        tail.rest = new List(x, Empty);
-        tail = tail.rest;
-      }
+      else
+        tail = tail.rest = new List(x, Empty);
+      
       return this;
     }
     
@@ -35,84 +34,78 @@ public class List extends Datum
   
   public static List of(Datum... elems)
   {
-    List result = Empty;
+    var result = Empty;
     for (int i = elems.length - 1; i >= 0; --i)
-      result = new List(elems[i], result);
+      result = cons(elems[i], result);
     return result;
   }
-  
-  public final Type type()
+
+  public Type type()
   {
     return Type.List;
   }
   
-  public final String repr()
+  public String repr()
   {
     return String.format("(%s)", repr(this));
   }
-  
-  public List(Datum first, List rest)
-  {
-    this.first = first;
-    this.rest = rest;
-  }
-  
-  public final boolean empty()
+    
+  public boolean empty()
   {
     return this == Empty;
   }
   
-  public final Datum car()
+  public Datum car()
   {
     return first;
   }
   
-  public final List cdr()
+  public List cdr()
   {
     return rest;
   }
   
-  public final Datum cadr()
+  public Datum cadr()
   {
     return rest.first;
   }
   
-  public final Datum caddr()
+  public Datum caddr()
   {
     return rest.rest.first;
   }
   
-  public final Datum cadddr()
+  public Datum cadddr()
   {
     return rest.rest.rest.first;
   }
   
-  public final List cddr()
+  public List cddr()
   {
     return rest.rest;
   }
   
-  public final List cdddr()
+  public List cdddr()
   {
     return rest.rest.rest;
   }
   
-  public final int length()
+  public int length()
   {
     return length(this);
   }
   
-  public final Datum at(int index)
+  public Datum at(int index)
   {
     return at(this, index);
   }
   
-  public final boolean eq(List that) throws TypeMismatch
+  public boolean eq(List that) throws TypeMismatch
   {
     return eq(this, that);
   }
   
-  public final List concat(List that)
+  public List concat(List that)
   {
     return concat(this, that);
   }
@@ -157,6 +150,12 @@ public class List extends Datum
       return self.first.repr();
     
     return String.format("%s %s", self.first.repr(), repr(self.rest));
+  }
+
+  private List(Datum first, List rest)
+  {
+    this.first = first;
+    this.rest = rest;
   }
     
   private Datum first;

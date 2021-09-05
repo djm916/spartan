@@ -40,7 +40,7 @@ public final class VirtualMachine
   
   public final void pushArg(Datum x)
   {
-    args = new List(x, args);
+    args = List.cons(x, args);
   }
   
   public final Datum popArg()

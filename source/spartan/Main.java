@@ -110,7 +110,7 @@ Enter Control-D (on Linux) or Control-Z (on Windows) to exit.""";
       }
       else {
         for (int j = args.length - 1; j >= i; --j)
-          sysArgs = new List(new Text(args[j]), sysArgs);
+          sysArgs = List.cons(new Text(args[j]), sysArgs);
         break;
       }
     }

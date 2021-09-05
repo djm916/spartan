@@ -17,7 +17,8 @@ public abstract class Callable extends Datum
   
   public final boolean checkArity(int numArgs)
   {
-    return !isVariadic ? numArgs == requiredArgs : numArgs >= requiredArgs;
+    return !isVariadic ? numArgs == requiredArgs
+                       : numArgs >= requiredArgs;
   }
   
   public abstract void apply(VirtualMachine vm) throws Error;
