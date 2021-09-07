@@ -35,6 +35,11 @@ public final class VirtualMachine
       throw ex;
     }
     
+    assert control == null;
+    assert args == List.Empty;
+    assert locals == null;
+    assert frame == null;
+
     return result;
   }
   

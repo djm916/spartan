@@ -1,8 +1,8 @@
 package spartan.runtime;
 
-public final class PopLocal extends Inst
+public final class PopEnv extends Inst
 {
-  public PopLocal(Inst next)
+  public PopEnv(Inst next)
   {
     super(next);
   }

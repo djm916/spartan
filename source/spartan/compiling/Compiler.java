@@ -213,10 +213,10 @@ public class Compiler
     int numBindings = bindings.length();
 
     return evalInitializers(bindings, scope,
-           new PushLocal(numBindings,
+           new PushEnv(numBindings,
            performBindings(0, numBindings,
            compileSequence(body, extendLetScope(bindings, scope), tail,
-           new PopLocal(next)))));
+           new PopEnv(next)))));
   }
   
   private Inst compileLetRec(List exp, Scope scope, boolean tail, Inst next) throws CompileError
@@ -234,11 +234,11 @@ public class Compiler
     
     int numBindings = bindings.length();
     
-    return new PushLocal(numBindings,
+    return new PushEnv(numBindings,
            evalInitializers(bindings, scope,
            performBindings(0, numBindings,
            compileSequence(body, scope, tail,
-           new PopLocal(next)))));
+           new PopEnv(next)))));
   }
   
   private Inst compileLetStar(List exp, Scope scope, boolean tail, Inst next) throws CompileError
@@ -389,12 +389,12 @@ public class Compiler
     var isVariadic = numParams != 0 && isRestParam((Symbol) params.at(numParams - 1));
     var requiredArgs = isVariadic ? numParams - 1 : numParams;
     
-    var code = isVariadic  ? new PushLocal(numParams,
+    var code = isVariadic  ? new PushEnv(numParams,
                              compilePopArgsVariadic(0, numParams,
                              compileSequence(body, extendFunScope(params, scope), true,
                              new PopFrame())))
                            
-                           : new PushLocal(numParams,
+                           : new PushEnv(numParams,
                              compilePopArgs(0, numParams,
                              compileSequence(body, extendFunScope(params, scope), true,
                              new PopFrame())));
@@ -551,16 +551,26 @@ public class Compiler
   
   /*
      (delay exp...)
+          
+     (let ((thunk (fn () exp...))
+           (value-ready? false)
+           (cached-value nil))
+       (fn () (if (not value-ready?)
+                (do (set! cached-value (thunk))
+                    (set! value-ready? true))
+              cached-value))
      
-     let thunk = (fun () exp...)
+     push-local 1
+     load-const nil
+     store-local 0 0
+     make-promise body
+     pop-local
      
-     (fun (thunk)
-       (let ((value-ready? false)
-             (cached-value nil))
-         (if (not value-ready?)
-           (do (set! cached-value (thunk))
-               (set! value-ready? true)))
-         cached-value))
+     body:   load-local 0 0
+             branch done
+             <<exp>>
+             store-local 0 0
+     done:   pop-frame
   
   */
   
@@ -575,11 +585,11 @@ public class Compiler
                            new StoreLocal(0, 0,
                            new PopFrame()))));
     
-    return new PushLocal(1,
+    return new PushEnv(1,
            new LoadConst(Nil.Instance,
            new StoreLocal(0, 0,
            new MakePromise(body,
-           new PopLocal(
+           new PopEnv(
            next)))));
   }
   
@@ -608,12 +618,12 @@ public class Compiler
     var isVariadic = numParams != 0 && isRestParam((Symbol) params.at(numParams - 1));
     var requiredArgs = isVariadic ? numParams - 1 : numParams;
     
-    var code = isVariadic  ? new PushLocal(numParams,
+    var code = isVariadic  ? new PushEnv(numParams,
                              compilePopArgsVariadic(0, numParams,
                              compileSequence(body, extendFunScope(params, null), true,
                              new PopFrame())))
                            
-                           : new PushLocal(numParams,
+                           : new PushEnv(numParams,
                              compilePopArgs(0, numParams,
                              compileSequence(body, extendFunScope(params, null), true,
                              new PopFrame())));

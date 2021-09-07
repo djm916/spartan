@@ -1,10 +1,10 @@
 package spartan.runtime;
 
-public final class PushLocal extends Inst
+public final class PushEnv extends Inst
 {
   private final int numSlots;
   
-  public PushLocal(int numSlots, Inst next)
+  public PushEnv(int numSlots, Inst next)
   {
     super(next);
     this.numSlots = numSlots;
