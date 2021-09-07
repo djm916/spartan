@@ -3,7 +3,6 @@ package spartan.data;
 import spartan.runtime.Inst;
 import spartan.runtime.LocalEnv;
 import spartan.runtime.VirtualMachine;
-import spartan.errors.Error;
 
 public final class Promise extends Callable
 {
@@ -22,8 +21,8 @@ public final class Promise extends Callable
     return Type.Promise;
   }
   
-  public void apply(VirtualMachine vm) throws Error
-  {
+  public void apply(VirtualMachine vm)
+  {    
     vm.locals = locals;
     vm.control = code;
   }

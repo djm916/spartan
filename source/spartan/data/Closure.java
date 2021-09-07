@@ -3,7 +3,6 @@ package spartan.data;
 import spartan.runtime.Inst;
 import spartan.runtime.LocalEnv;
 import spartan.runtime.VirtualMachine;
-import spartan.errors.Error;
 
 public final class Closure extends Callable
 {
@@ -22,7 +21,7 @@ public final class Closure extends Callable
     return Type.Closure;
   }
   
-  public void apply(VirtualMachine vm) throws Error
+  public void apply(VirtualMachine vm)
   {    
     vm.locals = locals;
     vm.control = code;

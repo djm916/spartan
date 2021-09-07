@@ -363,17 +363,21 @@ public class Compiler
            new PushArg(next)));
   }
   
-  // (fun (p1 p2 ... pN) body ...)
-  //
-  // push-local N
-  // pop-arg
-  // store-local 0
-  // ...
-  // pop-arg
-  // store-local N-1
-  // <<body>>
-  // pop-frame
- 
+  /* Evaluate a lambda expression (anonymous function)
+  
+     Syntax: (fun (param1 ... paramN) body...)
+  
+     Compilation:
+     
+     push-env N
+     pop-arg
+     store-local 0
+     ...
+     pop-arg
+     store-local N-1
+     <<body>>
+     pop-frame
+  */
   private Inst compileFun(List exp, Scope scope, Inst next) throws CompileError
   {
     if (exp.length() < 3 || exp.cadr().type() != Type.List)
@@ -455,47 +459,65 @@ public class Compiler
            next)));
   }
   
-  // (or a b ...)
+  /* Evalutes the logical disjunction of a sequence of predicates.
+          
+     Syntax: (or exp1 ... expN)
+     
+     test1:    <<exp1>>
+               branch done test2
+     ...
+     testN:    <<expN>>
+     done:     ...
+  */
   
   private Inst compileOr(List exp, Scope scope, boolean tail, Inst next) throws CompileError
   {
     if (exp.length() < 2)
       throw malformedExp(exp);
     
-    return compileOrArgs(exp.cdr(), scope, tail, next);
+    return compileDisjunction(exp.cdr(), scope, tail, next);
   }
   
-  private Inst compileOrArgs(List exp, Scope scope, boolean tail, Inst next) throws CompileError
+  private Inst compileDisjunction(List exp, Scope scope, boolean tail, Inst next) throws CompileError
   {
-    if (exp == List.Empty)
+    if (exp.empty()) 
       return next;
 
-    return compile(exp.car(), scope, tail && (exp.cdr() == List.Empty),
+    return compile(exp.car(), scope, tail && exp.cdr().empty(),
            new Branch(next,
-                      compileOrArgs(exp.cdr(), scope, tail, next)));
+                      compileDisjunction(exp.cdr(), scope, tail, next)));
   }
   
-  // (and a b ...)
+  /* Evalutes the logical conjunction of a sequence of predicates.
+          
+     Syntax: (and exp1 ... expN)
+     
+     test1:    <<exp1>>
+               branch test2 done
+     ...
+     testN:    <<expN>>
+     done:     ...
+  */
   
   private Inst compileAnd(List exp, Scope scope, boolean tail, Inst next) throws CompileError
   {
     if (exp.length() < 2)
       throw malformedExp(exp);
     
-    return compileAndArgs(exp.cdr(), scope, tail, next);
+    return compileConjuction(exp.cdr(), scope, tail, next);
   }
   
-  private Inst compileAndArgs(List exp, Scope scope, boolean tail, Inst next) throws CompileError
+  private Inst compileConjuction(List exp, Scope scope, boolean tail, Inst next) throws CompileError
   {
-    if (exp == List.Empty)
+    if (exp.empty())
       return next;
 
-    return compile(exp.car(), scope, tail && (exp.cdr() == List.Empty),
-           new Branch(compileAndArgs(exp.cdr(), scope, tail, next),
+    return compile(exp.car(), scope, tail && exp.cdr().empty(),
+           new Branch(compileConjuction(exp.cdr(), scope, tail, next),
                       next));
   }
   
-  // (do exp...)
+  /* (do exp...) */
   
   private Inst compileDo(List exp, Scope scope, boolean tail, Inst next) throws CompileError
   {
@@ -505,12 +527,26 @@ public class Compiler
     return compileSequence(exp.cdr(), scope, tail, next);
   }
   
+  /* Evaluates a list of expressions in sequence.
+     Returns the value of the last expression.
+     The last expression is in tail context.
+     
+     Syntax: exp1 exp2 ... expN
+     
+     Compilation:
+     
+     <<exp1>>
+     <<exp2>>
+     ...
+     <<expN>>
+  */
+  
   private Inst compileSequence(List exp, Scope scope, boolean tail, Inst next) throws CompileError
   {
     if (exp == List.Empty)
       return next;
 
-    return compile(exp.car(), scope, (tail && exp.cdr() == List.Empty),
+    return compile(exp.car(), scope, (tail && !exp.cdr().empty()),
            compileSequence(exp.cdr(), scope, tail, next));
   }
   
@@ -532,25 +568,31 @@ public class Compiler
         new StoreLocal(index.depth, index.offset, next));
   }
   
-  // (while test body...)
+  /* (while predicate body...)
+  
+     loop:     <<predicate>>
+               branch continue done
+     continue: <<body>>
+               jump loop
+     done:     ...
+           
+  */
   
   private Inst compileWhile(List exp, Scope scope, boolean tail, Inst next) throws CompileError
   {
     if (exp.length() < 3)
       throw malformedExp(exp);
     
-    Datum test = exp.cadr();
-    List body = exp.cddr();
-    Jump jump = new Jump();
-    Inst code = compile(test, scope, false,
-                new Branch(compileSequence(body, scope, tail, jump),
-                           new LoadConst(Nil.Instance, next)));
-    jump.setTarget(code);
-    return code;
+    var jump = new Jump();
+    var loop = compile(exp.cadr(), scope, false,
+               new Branch(
+                 compileSequence(exp.cddr(), scope, tail, jump),
+                 next));
+    jump.setTarget(loop);
+    return loop;
   }
   
-  /*
-     (delay exp...)
+  /* (delay exp...)
           
      (let ((thunk (fn () exp...))
            (value-ready? false)
@@ -560,17 +602,22 @@ public class Compiler
                     (set! value-ready? true))
               cached-value))
      
-     push-local 1
-     load-const nil
+     push-env 2
+     load-const false
      store-local 0 0
+     load-const nil
+     store-local 0 1
      make-promise body
-     pop-local
+     pop-env
      
-     body:   load-local 0 0
+     body:   load-local 0 0        
              branch done
-             <<exp>>
+             <<exp>>               
+             store-local 0 1
+             load-const true
              store-local 0 0
-     done:   pop-frame
+     done:   load-local 0 1
+             pop-frame
   
   */
   
@@ -579,18 +626,23 @@ public class Compiler
     if (exp.length() < 2)
       throw malformedExp(exp);
     
+    Inst done = new LoadLocal(0, 1,
+                new PopFrame());
+                
     Inst body = new LoadLocal(0, 0,
-                new Branch(new PopFrame(),
-                           compileSequence(exp.cdr(), new Scope(scope), false,
-                           new StoreLocal(0, 0,
-                           new PopFrame()))));
+                new Branch(done,
+                  compileSequence(exp.cdr(), new Scope(scope), false,
+                  new StoreLocal(0, 1,
+                  new LoadConst(Bool.True,
+                  done)))));
     
-    return new PushEnv(1,
-           new LoadConst(Nil.Instance,
+    return new PushEnv(2,
+           new LoadConst(Bool.False,           
            new StoreLocal(0, 0,
+           new LoadConst(Nil.Instance,           
+           new StoreLocal(0, 1,
            new MakePromise(body,
-           new PopEnv(
-           next)))));
+           new PopEnv(next)))))));
   }
   
   // (defmacro f (param...) body...)

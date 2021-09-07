@@ -1,19 +1,30 @@
 
-(defun stream/new (generator initial-value)
+;; Create a new stream
+;; Parameters:
+;; gen   A generator function that produces succesive stream values
+;; init  The initial value passed to the generator
+
+(defun stream/new (gen init)
   (delay
-    (let ((next-pair (generator initial-value)))
+    (let ((next-pair (gen init)))
       (if (= () next-pair)
         ()
         (list (car next-pair)
-              (stream/new generator (cadr next-pair)))))))
+              (stream/new gen (cadr next-pair)))))))
+
+;; Return the next element of a stream
 
 (defun stream/car (s) (car (s)))
 
+;; Return the remainder of a stream
+
 (defun stream/cdr (s) (cadr (s)))
+
+;; Determine if a stream is empty
 
 (defun stream/empty? (s) (= (s) ()))
 
-;----
+;; Tests
 
 (defun generate-ints-up-to-3 (n)
   (if (> n 3)
