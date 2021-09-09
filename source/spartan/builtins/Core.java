@@ -143,21 +143,21 @@ public final class Core
   
   public static final Primitive MakeList = new Primitive(0, true) {
     public void apply(VirtualMachine vm) {
-      vm.result = vm.popArgs();
+      vm.result = vm.popRestArgs();
       vm.popFrame();
     }
   };
   
   public static final Primitive MakeVector = new Primitive(0, true) {
     public void apply(VirtualMachine vm) {
-      vm.result = Vector.fromList(vm.popArgs());
+      vm.result = Vector.fromList(vm.popRestArgs());
       vm.popFrame();
     }
   };
   
   public static final Primitive MakeRecord = new Primitive(0, true) {
     public void apply(VirtualMachine vm) throws TypeMismatch {
-      vm.result = Map.fromList(vm.popArgs());
+      vm.result = Map.fromList(vm.popRestArgs());
       vm.popFrame();
     }
   };

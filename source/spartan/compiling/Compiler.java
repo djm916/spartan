@@ -138,20 +138,30 @@ public class Compiler
            new StoreGlobal(symb, next));
   }
   
-  // (defun f (a b c ...) body...)
+  // (defun f (param...) body...)
   
   private Inst compileDefun(List exp, Scope scope, Inst next) throws CompileError
   {
-    if (exp.length() < 4 || exp.cadr().type() != Type.Symbol)
+    if (exp.length() < 4)
       throw malformedExp(exp);
     
-    return compile(transformDefun(exp.cdr()), scope, false, next);
+    return compile(transformDefun(exp), scope, false, next);
   }
   
-  // (if test sub)
-  //
-  // (if test sub alt)
-  
+  /* Compile an "if" special form.
+
+     Syntax: (if pred sub alt)
+             (if pred sub) => (if pred sub nil)
+     
+     Compilation:
+     
+           <<pred>>
+           branch sub alt
+     sub:  <<sub>>
+           jump next
+     alt:  <<alt>>
+     next: ...     
+  */  
   private Inst compileIf(List exp, Scope scope, boolean tail, Inst next) throws CompileError
   {
     int length = exp.length();
@@ -159,15 +169,35 @@ public class Compiler
     if (length < 3 || length > 4)
       throw malformedExp(exp);
     
-    var test = exp.cadr();
+    var pred = exp.cadr();
     var sub = exp.caddr();
-    var alt = length == 3 ? Nil.Instance : exp.cadddr();
+    var alt = length == 4 ? exp.cadddr() : Nil.Instance;
     
-    return compile(test, scope, false,
+    return compile(pred, scope, false,
            new Branch(compile(sub, scope, tail, next),
                       compile(alt, scope, tail, next)));
   }
   
+  /* Compiles a "cond" special form.
+    
+     Syntax: (cond (pred1 body1)
+                   ...
+                   (predN bodyN))
+     
+     Compilation:
+     
+     pred1:  <<pred1>>
+             branch body1 pred2
+     body1:  <<body1>>
+             jump next
+     pred2:  ...
+     predN:  <<predN>>
+             branch bodyN none
+     bodyN:  <<bodyN>>
+             jump next
+     none:   load-const nil
+     next:   ...
+  */
   private Inst compileCond(List exp, Scope scope, boolean tail, Inst next) throws CompileError
   {
     if (exp.length() < 2 || !checkCondClauses(exp.cdr()))
@@ -199,6 +229,30 @@ public class Compiler
                       compileCondClauses(clauses.cdr(), scope, tail, next)));
   }
   
+  /* Compiles the "let" special form
+  
+     Syntax:  (let ((symb1 init1)
+                    ...
+                    (symbN initN))
+                body...)
+     
+     Compilation:
+     
+     <<initN>>
+     push-arg
+     ...
+     <<init1>>
+     push-arg
+     push-env N
+     pop-arg
+     store-local 0 0
+     ...
+     pop-arg
+     store-local 0 N-1
+     <<body>>
+     pop-env     
+  */
+  
   private Inst compileLet(List exp, Scope scope, boolean tail, Inst next) throws CompileError
   {
     if (exp.length() < 3 || exp.cadr().type() != Type.List)
@@ -212,13 +266,36 @@ public class Compiler
     
     int numBindings = bindings.length();
 
-    return evalInitializers(bindings, scope,
+    return evalBindings(bindings, scope,
            new PushEnv(numBindings,
            performBindings(0, numBindings,
            compileSequence(body, extendLetScope(bindings, scope), tail,
            new PopEnv(next)))));
   }
   
+  /* Compiles the "letrec" special form
+  
+     Syntax:  (letrec ((symb1 init1)
+                       ...
+                       (symbN initN))
+                body...)
+     
+     Compilation:
+     
+     push-env N
+     <<initN>>
+     push-arg
+     ...
+     <<init1>>
+     push-arg     
+     pop-arg
+     store-local 0 0
+     ...
+     pop-arg
+     store-local 0 N-1
+     <<body>>
+     pop-env     
+  */
   private Inst compileLetRec(List exp, Scope scope, boolean tail, Inst next) throws CompileError
   {
     if (exp.length() < 3 || exp.cadr().type() != Type.List)
@@ -235,7 +312,7 @@ public class Compiler
     int numBindings = bindings.length();
     
     return new PushEnv(numBindings,
-           evalInitializers(bindings, scope,
+           evalBindings(bindings, scope,
            performBindings(0, numBindings,
            compileSequence(body, scope, tail,
            new PopEnv(next)))));
@@ -286,15 +363,25 @@ public class Compiler
     return scope;
   }
   
-  private Inst evalInitializers(List bindings, Scope scope, Inst next) throws CompileError
+  private Inst evalBindings(List bindings, Scope scope, Inst next) throws CompileError
   {
     if (bindings == List.Empty)
       return next;
 
     var binding = (List) bindings.car();
     
-    return evalInitializers(bindings.cdr(), scope,
+    return evalBindings(bindings.cdr(), scope,
            compile(binding.cadr(), scope, false,
+           new PushArg(next)));
+  }
+  
+  private Inst evalArgs(List args, Scope scope, Inst next) throws CompileError
+  {
+    if (args == List.Empty)
+      return next;
+
+    return evalArgs(args.cdr(), scope,
+           compile(args.car(), scope, false,
            new PushArg(next)));
   }
   
@@ -308,17 +395,40 @@ public class Compiler
            performBindings(offset + 1, numBindings, next)));
   }
   
-  // (defun f (a b c ...) body...)
-  //
-  // (def f (fun (a b c ...) body...))
+  /* Transforms the "defun" special form
+  
+       (defun f (params...) body...)
+     
+     into the equivalent
+       
+       (def f (fun (params...) body...))
+  */
   
   private List transformDefun(List exp)
   {
-    return List.of(Symbol.get("def"),
-                   exp.car(),
-                   List.cons(Symbol.get("fun"), List.cons(exp.cadr(), exp.cdr().cdr())));
-                           
+    var symbol = exp.cadr();
+    var params = exp.caddr();
+    var body = exp.cdddr();
+    
+    var result = List.of(Symbol.get("def"), symbol, List.cons(Symbol.get("fun"), List.cons(params, body)));
+    positionMap.put(result, positionMap.get(exp));
+    return result;
   }
+  
+  /* Transforms the "let*" special form
+  
+       (let* ((symb1 init1)
+              ...
+              (symbN initN))
+         body...)
+     
+     into the equivalent nested "let" form
+     
+       (let ((symb1 init1))
+         ...
+           (let ((symbN initN))
+             body...))
+  */
   
   private List transformLetStar(List bindings, List body)
   {
@@ -328,55 +438,69 @@ public class Compiler
                                         : List.of(transformLetStar(bindings.cdr(), body))));
   }
   
-  // (f a1 a2 ... aN)
-  //
-  // push-frame
-  // <<aN>>
-  // push-arg
-  // ...
-  // <<a1>>
-  // push-arg
-  // <<f>>
-  // apply
+  /* Compiles a function application.
+
+     Syntax: (f arg1 arg2 ... argN)
+     
+     Compilation:
+     
+     push-frame  // note: frame ommitted when call appears in tail context
+     <<argN>>
+     push-arg
+     ...
+     <<arg1>>
+     push-arg
+     <<f>>
+     apply
+  */
   
   private Inst compileApply(List exp, Scope scope, boolean tail, Inst next) throws CompileError
   {
     int numArgs = exp.length() - 1;
     
-    return tail ? compilePushArgs(exp.cdr(), scope,
-                compile(exp.car(), scope, false,
-                new Apply(numArgs, positionMap.get(exp))))
+    return tail ? evalArgs(exp.cdr(), scope,
+                  compile(exp.car(), scope, false,
+                  new Apply(numArgs, positionMap.get(exp))))
         
-              : new PushFrame(next,
-                compilePushArgs(exp.cdr(), scope,
-                compile(exp.car(), scope, false,
-                new Apply(numArgs, positionMap.get(exp)))));
+                : new PushFrame(next,
+                  evalArgs(exp.cdr(), scope,
+                  compile(exp.car(), scope, false,
+                  new Apply(numArgs, positionMap.get(exp)))));
   }
-
-  private Inst compilePushArgs(List args, Scope scope, Inst next) throws CompileError
-  {
-    if (args == List.Empty)
-      return next;
-
-    return compilePushArgs(args.cdr(), scope,
-           compile(args.car(), scope, false,
-           new PushArg(next)));
-  }
-  
-  /* Evaluate a lambda expression (anonymous function)
-  
-     Syntax: (fun (param1 ... paramN) body...)
-  
-     Compilation:
+ 
+  /* Compiles a lambda expression (anonymous function)
      
-     push-env N
-     pop-arg
-     store-local 0
-     ...
-     pop-arg
-     store-local N-1
-     <<body>>
-     pop-frame
+     Case 1: Fixed number of arguments
+     
+       Syntax: (fun (param1 ... paramN) body...)
+    
+       Compilation:
+       
+       push-env N
+       pop-arg
+       store-local 0 0
+       ...
+       pop-arg
+       store-local 0 N-1
+       <<body>>
+       pop-frame
+     
+     Case 2: Variadic
+     
+       Syntax: (fun (param1 ... paramN-1 &paramN) body...)
+    
+       Compilation:
+       
+       push-env N
+       pop-arg
+       store-local 0 0
+       ...
+       pop-arg
+       store-local 0 N-2
+       pop-rest-args
+       store-local 0 N-1
+       <<body>>
+       pop-frame
   */
   private Inst compileFun(List exp, Scope scope, Inst next) throws CompileError
   {
@@ -393,19 +517,21 @@ public class Compiler
     var isVariadic = numParams != 0 && isRestParam((Symbol) params.at(numParams - 1));
     var requiredArgs = isVariadic ? numParams - 1 : numParams;
     
-    var code = isVariadic  ? new PushEnv(numParams,
-                             compilePopArgsVariadic(0, numParams,
+    var code = !isVariadic ? new PushEnv(numParams,
+                             performBindings(0, numParams,
                              compileSequence(body, extendFunScope(params, scope), true,
                              new PopFrame())))
                            
                            : new PushEnv(numParams,
-                             compilePopArgs(0, numParams,
+                             performBindings(0, numParams - 1,                             
+                             new PopRestArgs(
+                             new StoreLocal(0, numParams - 1,
                              compileSequence(body, extendFunScope(params, scope), true,
-                             new PopFrame())));
+                             new PopFrame())))));
    
     return new MakeClosure(code, requiredArgs, isVariadic, next);
   }
-    
+  
   private boolean isRestParam(Symbol s)
   {
     return s.repr().charAt(0) == '&';
@@ -434,34 +560,12 @@ public class Compiler
     
     return scope;
   }
-  
-  private Inst compilePopArgs(int offset, int numParams, Inst next)
-  {
-    if (offset == numParams)
-      return next;
-
-    return new PopArg(
-           new StoreLocal(0, offset,
-           compilePopArgs(offset + 1, numParams,
-           next)));
-  }
-  
-  private Inst compilePopArgsVariadic(int offset, int numParams, Inst next)
-  {
-    if (offset == numParams - 1)
-      return new PopArgs(
-             new StoreLocal(0, offset,
-             next));
-    
-    return new PopArg(
-           new StoreLocal(0, offset,
-           compilePopArgsVariadic(offset + 1, numParams,
-           next)));
-  }
-  
-  /* Evalutes the logical disjunction of a sequence of predicates.
-          
+      
+  /* Compiles the "or" special form, a logical disjunction.
+     
      Syntax: (or exp1 ... expN)
+     
+     Compilation:
      
      test1:    <<exp1>>
                branch done test2
@@ -488,9 +592,11 @@ public class Compiler
                       compileDisjunction(exp.cdr(), scope, tail, next)));
   }
   
-  /* Evalutes the logical conjunction of a sequence of predicates.
+  /* Compiles the "and" special form, a logical conjunction.
           
      Syntax: (and exp1 ... expN)
+     
+     Compilation:
      
      test1:    <<exp1>>
                branch test2 done
@@ -660,6 +766,7 @@ public class Compiler
   
   private Macro makeMacro(List exp) throws CompileError
   {
+    /*
     var params = (List) exp.caddr();
     var body = exp.cdddr();
     
@@ -681,6 +788,8 @@ public class Compiler
                              new PopFrame())));
    
     return new Macro(code, requiredArgs, isVariadic);
+    */
+    return null;
   }
   
   private Inst compileApplyMacro(List exp, Scope scope, boolean tail, Inst next) throws CompileError
