@@ -1,15 +1,15 @@
 package spartan.runtime;
 
-public final class PopArgs extends Inst
+public final class PopRestArgs extends Inst
 {
-  public PopArgs(Inst next)
+  public PopRestArgs(Inst next)
   {
     super(next);
   }
   
   public final void eval(VirtualMachine vm)
   {
-    vm.result = vm.popArgs();
+    vm.result = vm.popRestArgs();
     vm.control = next;
   }
 }

@@ -60,7 +60,7 @@ public final class VirtualMachine
     return args.car();
   }
   
-  public final List popArgs()
+  public final List popRestArgs()
   {
     List x = args;
     args = List.Empty;

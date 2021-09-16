@@ -266,7 +266,7 @@ public class Compiler
     
     int numBindings = bindings.length();
 
-    return evalInitializers(bindings, scope,
+    return evalBindings(bindings, scope,
            new PushEnv(numBindings,
            performBindings(0, numBindings,
            compileSequence(body, extendLetScope(bindings, scope), tail,
@@ -312,7 +312,7 @@ public class Compiler
     int numBindings = bindings.length();
     
     return new PushEnv(numBindings,
-           evalInitializers(bindings, scope,
+           evalBindings(bindings, scope,
            performBindings(0, numBindings,
            compileSequence(body, scope, tail,
            new PopEnv(next)))));
@@ -363,15 +363,25 @@ public class Compiler
     return scope;
   }
   
-  private Inst evalInitializers(List bindings, Scope scope, Inst next) throws CompileError
+  private Inst evalBindings(List bindings, Scope scope, Inst next) throws CompileError
   {
     if (bindings == List.Empty)
       return next;
 
     var binding = (List) bindings.car();
     
-    return evalInitializers(bindings.cdr(), scope,
+    return evalBindings(bindings.cdr(), scope,
            compile(binding.cadr(), scope, false,
+           new PushArg(next)));
+  }
+  
+  private Inst evalArgs(List args, Scope scope, Inst next) throws CompileError
+  {
+    if (args == List.Empty)
+      return next;
+
+    return evalArgs(args.cdr(), scope,
+           compile(args.car(), scope, false,
            new PushArg(next)));
   }
   
@@ -448,40 +458,49 @@ public class Compiler
   {
     int numArgs = exp.length() - 1;
     
-    return tail ? compilePushArgs(exp.cdr(), scope,
+    return tail ? evalArgs(exp.cdr(), scope,
                   compile(exp.car(), scope, false,
                   new Apply(numArgs, positionMap.get(exp))))
         
                 : new PushFrame(next,
-                  compilePushArgs(exp.cdr(), scope,
+                  evalArgs(exp.cdr(), scope,
                   compile(exp.car(), scope, false,
                   new Apply(numArgs, positionMap.get(exp)))));
   }
-
-  private Inst compilePushArgs(List args, Scope scope, Inst next) throws CompileError
-  {
-    if (args == List.Empty)
-      return next;
-
-    return compilePushArgs(args.cdr(), scope,
-           compile(args.car(), scope, false,
-           new PushArg(next)));
-  }
-  
+ 
   /* Compiles a lambda expression (anonymous function)
-  
-     Syntax: (fun (param1 ... paramN) body...)
-  
-     Compilation:
      
-     push-env N
-     pop-arg
-     store-local 0 0
-     ...
-     pop-arg
-     store-local 0 N-1
-     <<body>>
-     pop-frame
+     Case 1: Fixed number of arguments
+     
+       Syntax: (fun (param1 ... paramN) body...)
+    
+       Compilation:
+       
+       push-env N
+       pop-arg
+       store-local 0 0
+       ...
+       pop-arg
+       store-local 0 N-1
+       <<body>>
+       pop-frame
+     
+     Case 2: Variadic
+     
+       Syntax: (fun (param1 ... paramN-1 &paramN) body...)
+    
+       Compilation:
+       
+       push-env N
+       pop-arg
+       store-local 0 0
+       ...
+       pop-arg
+       store-local 0 N-2
+       pop-rest-args
+       store-local 0 N-1
+       <<body>>
+       pop-frame
   */
   private Inst compileFun(List exp, Scope scope, Inst next) throws CompileError
   {
@@ -498,19 +517,21 @@ public class Compiler
     var isVariadic = numParams != 0 && isRestParam((Symbol) params.at(numParams - 1));
     var requiredArgs = isVariadic ? numParams - 1 : numParams;
     
-    var code = isVariadic  ? new PushEnv(numParams,
-                             compilePopArgsVariadic(0, numParams,
+    var code = !isVariadic ? new PushEnv(numParams,
+                             performBindings(0, numParams,
                              compileSequence(body, extendFunScope(params, scope), true,
                              new PopFrame())))
                            
                            : new PushEnv(numParams,
-                             compilePopArgs(0, numParams,
+                             performBindings(0, numParams - 1,                             
+                             new PopRestArgs(
+                             new StoreLocal(0, numParams - 1,
                              compileSequence(body, extendFunScope(params, scope), true,
-                             new PopFrame())));
+                             new PopFrame())))));
    
     return new MakeClosure(code, requiredArgs, isVariadic, next);
   }
-    
+  
   private boolean isRestParam(Symbol s)
   {
     return s.repr().charAt(0) == '&';
@@ -539,31 +560,7 @@ public class Compiler
     
     return scope;
   }
-  
-  private Inst compilePopArgs(int offset, int numParams, Inst next)
-  {
-    if (offset == numParams)
-      return next;
 
-    return new PopArg(
-           new StoreLocal(0, offset,
-           compilePopArgs(offset + 1, numParams,
-           next)));
-  }
-  
-  private Inst compilePopArgsVariadic(int offset, int numParams, Inst next)
-  {
-    if (offset == numParams - 1)
-      return new PopArgs(
-             new StoreLocal(0, offset,
-             next));
-    
-    return new PopArg(
-           new StoreLocal(0, offset,
-           compilePopArgsVariadic(offset + 1, numParams,
-           next)));
-  }
-  
   /* Compiles the "or" special form, a logical disjunction.
      
      Syntax: (or exp1 ... expN)
@@ -769,6 +766,7 @@ public class Compiler
   
   private Macro makeMacro(List exp) throws CompileError
   {
+    /*
     var params = (List) exp.caddr();
     var body = exp.cdddr();
     
@@ -790,6 +788,8 @@ public class Compiler
                              new PopFrame())));
    
     return new Macro(code, requiredArgs, isVariadic);
+    */
+    return null;
   }
   
   private Inst compileApplyMacro(List exp, Scope scope, boolean tail, Inst next) throws CompileError
