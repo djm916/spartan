@@ -318,6 +318,24 @@ public class Compiler
            new PopEnv(next)))));
   }
   
+  /* Compiles the "let*" special form
+  
+     Syntax:  (let* ((symb1 init1)
+                     ...
+                     (symbN initN))
+                body...)
+     
+     Compilation:
+     
+     push-env N
+     <<init1>>
+     store-local 0 0
+     ...
+     <<initN>>
+     store-local 0 N-1
+     <<body>>
+     pop-env     
+  */
   private Inst compileLetStar(List exp, Scope scope, boolean tail, Inst next) throws CompileError
   {
     if (exp.length() < 3 || exp.cadr().type() != Type.List)
@@ -327,9 +345,37 @@ public class Compiler
     var body = exp.cddr();
     
     if (!checkLetBindings(bindings))
-      throw malformedExp(bindings);
+      throw malformedExp(exp);
     
-    return compile(transformLetStar(bindings, body), scope, tail, next);
+    int numBindings = bindings.length();
+    
+    return new PushEnv(numBindings,
+           bindLocalsSequential(bindings, 0, new Scope(scope),
+           compileSequence(body, extendLetScope(bindings, scope), tail,
+           new PopEnv(next))));
+  }
+  
+  private Inst bindLocalsSequential(List bindings, int offset, Scope scope, Inst next) throws CompileError
+  {
+    if (bindings.empty())
+      return next;
+    
+    var binding = (List) bindings.car();
+    var symb = (Symbol) binding.car();
+    var init = binding.cadr();
+    
+    return compile(init, scope, false,
+                   new StoreLocal(0, offset,
+                   bindLocalsSequential(bindings.cdr(), offset + 1, bindLocal(symb, scope),
+                   next)));
+  }
+  
+  private Scope bindLocal(Symbol symb, Scope scope) throws CompileError
+  {
+    if (!scope.bind(symb))
+      throw multipleDef(symb);
+    
+    return scope;
   }
   
   private boolean checkLetBindings(List bindings)
