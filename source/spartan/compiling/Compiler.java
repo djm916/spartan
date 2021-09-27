@@ -261,14 +261,14 @@ public class Compiler
     var bindings = (List) exp.cadr();
     var body = exp.cddr();
     
-    if (!checkLetBindings(bindings))
+    if (!checkBindingsForm(bindings))
       throw malformedExp(bindings);
     
     int numBindings = bindings.length();
 
     return evalBindings(bindings, scope,
            new PushEnv(numBindings,
-           performBindings(0, numBindings,
+           bindLocals(0, numBindings,
            compileSequence(body, extendLetScope(bindings, scope), tail,
            new PopEnv(next)))));
   }
@@ -283,15 +283,10 @@ public class Compiler
      Compilation:
      
      push-env N
-     <<initN>>
-     push-arg
-     ...
      <<init1>>
-     push-arg     
-     pop-arg
      store-local 0 0
      ...
-     pop-arg
+     <<initN>>
      store-local 0 N-1
      <<body>>
      pop-env     
@@ -304,18 +299,31 @@ public class Compiler
     var bindings = (List) exp.cadr();
     var body = exp.cddr();
     
-    if (!checkLetBindings(bindings))
+    if (!checkBindingsForm(bindings))
       throw malformedExp(exp);
     
-    scope = extendLetScope(bindings, scope);
-    
+    scope = extendLetScope(bindings, scope);    
     int numBindings = bindings.length();
     
     return new PushEnv(numBindings,
-           evalBindings(bindings, scope,
-           performBindings(0, numBindings,
+           compileRecursiveBindings(bindings, 0, scope,
            compileSequence(body, scope, tail,
-           new PopEnv(next)))));
+           new PopEnv(next))));
+  }
+  
+  private Inst compileRecursiveBindings(List bindings, int offset, Scope scope, Inst next) throws CompileError
+  {
+    if (bindings.empty())
+      return next;
+    
+    var binding = (List) bindings.car();
+    var symb = (Symbol) binding.car();
+    var init = binding.cadr();
+    
+    return compile(init, scope, false,
+                   new StoreLocal(0, offset,
+                   compileRecursiveBindings(bindings.cdr(), offset + 1, scope,
+                   next)));
   }
   
   /* Compiles the "let*" special form
@@ -344,18 +352,18 @@ public class Compiler
     var bindings = (List) exp.cadr();
     var body = exp.cddr();
     
-    if (!checkLetBindings(bindings))
+    if (!checkBindingsForm(bindings))
       throw malformedExp(exp);
     
     int numBindings = bindings.length();
     
     return new PushEnv(numBindings,
-           bindLocalsSequential(bindings, 0, new Scope(scope),
+           compileBindingsSequential(bindings, 0, new Scope(scope),
            compileSequence(body, extendLetScope(bindings, scope), tail,
            new PopEnv(next))));
   }
   
-  private Inst bindLocalsSequential(List bindings, int offset, Scope scope, Inst next) throws CompileError
+  private Inst compileBindingsSequential(List bindings, int offset, Scope scope, Inst next) throws CompileError
   {
     if (bindings.empty())
       return next;
@@ -366,7 +374,7 @@ public class Compiler
     
     return compile(init, scope, false,
                    new StoreLocal(0, offset,
-                   bindLocalsSequential(bindings.cdr(), offset + 1, bindLocal(symb, scope),
+                   compileBindingsSequential(bindings.cdr(), offset + 1, bindLocal(symb, scope),
                    next)));
   }
   
@@ -378,7 +386,7 @@ public class Compiler
     return scope;
   }
   
-  private boolean checkLetBindings(List bindings)
+  private boolean checkBindingsForm(List bindings)
   {
     if (bindings == List.Empty)
       return false;
@@ -431,14 +439,14 @@ public class Compiler
            new PushArg(next)));
   }
   
-  private Inst performBindings(int offset, int numBindings, Inst next)
+  private Inst bindLocals(int offset, int numBindings, Inst next)
   {
     if (offset >= numBindings)
       return next;
 
     return new PopArg(
            new StoreLocal(0, offset,
-           performBindings(offset + 1, numBindings, next)));
+           bindLocals(offset + 1, numBindings, next)));
   }
   
   /* Transforms the "defun" special form
@@ -460,30 +468,7 @@ public class Compiler
     positionMap.put(result, positionMap.get(exp));
     return result;
   }
-  
-  /* Transforms the "let*" special form
-  
-       (let* ((symb1 init1)
-              ...
-              (symbN initN))
-         body...)
-     
-     into the equivalent nested "let" form
-     
-       (let ((symb1 init1))
-         ...
-           (let ((symbN initN))
-             body...))
-  */
-  
-  private List transformLetStar(List bindings, List body)
-  {
-    return List.cons(Symbol.get("let"),
-           List.cons(List.of(bindings.car()),
-           bindings.cdr() == List.Empty ? body
-                                        : List.of(transformLetStar(bindings.cdr(), body))));
-  }
-  
+    
   /* Compiles a function application.
 
      Syntax: (f arg1 arg2 ... argN)
@@ -564,12 +549,12 @@ public class Compiler
     var requiredArgs = isVariadic ? numParams - 1 : numParams;
     
     var code = !isVariadic ? new PushEnv(numParams,
-                             performBindings(0, numParams,
+                             bindLocals(0, numParams,
                              compileSequence(body, extendFunScope(params, scope), true,
                              new PopFrame())))
                            
                            : new PushEnv(numParams,
-                             performBindings(0, numParams - 1,                             
+                             bindLocals(0, numParams - 1,                             
                              new PopRestArgs(
                              new StoreLocal(0, numParams - 1,
                              compileSequence(body, extendFunScope(params, scope), true,
