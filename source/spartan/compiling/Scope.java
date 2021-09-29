@@ -6,18 +6,18 @@ import spartan.data.Symbol;
 class Scope
 {
   private final Scope parent;
-  private final List bindings;
+  private final List symbols;
   
   Scope(Scope parent)
   {
     this.parent = parent;
-    this.bindings = List.Empty;
+    this.symbols = List.Empty;
   }
   
-  Scope(Scope parent, List bindings)
+  Scope(Scope parent, List symbols)
   {
     this.parent = parent;
-    this.bindings = bindings;
+    this.symbols = symbols;
   }
   
   DeBruijnIndex lookup(Symbol s)
@@ -27,15 +27,15 @@ class Scope
   
   Scope bind(Symbol s)
   {
-    return new Scope(parent, bindings.append(s));
+    return new Scope(parent, symbols.append(s));
   }
-  
+    
   private int offsetOf(Symbol s)
   {
-    int i = 0;
-    for (List bindings = this.bindings; !bindings.empty(); bindings = bindings.cdr(), ++i)
-      if (bindings.car() == s)
-        return i;
+    int offset = 0;
+    for (List symbols = this.symbols; !symbols.empty(); symbols = symbols.cdr(), ++offset)
+      if (symbols.car() == s)
+        return offset;
     return -1;
   }
   

@@ -265,11 +265,12 @@ public class Compiler
       throw malformedExp(bindings);
     
     int numBindings = bindings.length();
-
+    var extendedScope = new Scope(scope, extractSymbols(bindings));
+    
     return evalBindings(bindings, scope,
            new PushEnv(numBindings,
            bindLocals(0, numBindings,
-           compileSequence(body, extendLetScope(bindings, scope), tail,
+           compileSequence(body, extendedScope, tail,
            new PopEnv(next)))));
   }
   
@@ -302,12 +303,12 @@ public class Compiler
     if (!checkBindingsForm(bindings))
       throw malformedExp(exp);
     
-    scope = extendLetScope(bindings, scope);    
     int numBindings = bindings.length();
+    var extendedScope = new Scope(scope, extractSymbols(bindings));
     
     return new PushEnv(numBindings,
-           compileRecursiveBindings(bindings, 0, scope,
-           compileSequence(body, scope, tail,
+           compileRecursiveBindings(bindings, 0, extendedScope,
+           compileSequence(body, extendedScope, tail,
            new PopEnv(next))));
   }
   
@@ -356,10 +357,11 @@ public class Compiler
       throw malformedExp(exp);
     
     int numBindings = bindings.length();
+    var extendedScope = new Scope(scope, extractSymbols(bindings));
     
     return new PushEnv(numBindings,
            compileBindingsSequential(bindings, 0, new Scope(scope),
-           compileSequence(body, extendLetScope(bindings, scope), tail,
+           compileSequence(body, extendedScope, tail,
            new PopEnv(next))));
   }
   
@@ -409,17 +411,14 @@ public class Compiler
     return List.of(cars.build(), cadrs.build());
   }
   
-  private Scope extendLetScope(List bindings, Scope parent) throws MultipleDefinition
+  private List extractSymbols(List bindings)
   {
-    Scope scope = new Scope(parent);
+    var symbols = new List.Builder();
     
-    for (; bindings != List.Empty; bindings = bindings.cdr()) {
-      var binding = (List) bindings.car();
-      var symb = (Symbol) binding.car();
-      scope = scope.bind(symb);
-    }
+    for (; !bindings.empty(); bindings = bindings.cdr())
+      symbols.add(((List)bindings.car()).car());
     
-    return scope;
+    return symbols.build();
   }
   
   private Inst evalBindings(List bindings, Scope scope, Inst next) throws CompileError
@@ -552,17 +551,18 @@ public class Compiler
     var numParams = params.length();
     var isVariadic = numParams != 0 && isRestParam((Symbol) params.at(numParams - 1));
     var requiredArgs = isVariadic ? numParams - 1 : numParams;
+    var extendedScope = new Scope(scope, params);
     
     var code = !isVariadic ? new PushEnv(numParams,
                              bindLocals(0, numParams,
-                             compileSequence(body, extendFunScope(params, scope), true,
+                             compileSequence(body, extendedScope, true,
                              new PopFrame())))
                            
                            : new PushEnv(numParams,
                              bindLocals(0, numParams - 1,                             
                              new PopRestArgs(
                              new StoreLocal(0, numParams - 1,
-                             compileSequence(body, extendFunScope(params, scope), true,
+                             compileSequence(body, extendedScope, true,
                              new PopFrame())))));
    
     return new MakeClosure(code, requiredArgs, isVariadic, next);
@@ -584,18 +584,6 @@ public class Compiler
     return true;
   }
   
-  private Scope extendFunScope(List params, Scope parent) throws MultipleDefinition
-  {
-    var scope = new Scope(parent);
-    
-    for (; params != List.Empty; params = params.cdr()) {
-      var symb = (Symbol) params.car();
-      scope = scope.bind(symb);
-    }
-    
-    return scope;
-  }
-
   /* Compiles the "or" special form, a logical disjunction.
      
      Syntax: (or exp1 ... expN)
