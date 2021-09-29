@@ -374,18 +374,10 @@ public class Compiler
     
     return compile(init, scope, false,
                    new StoreLocal(0, offset,
-                   compileBindingsSequential(bindings.cdr(), offset + 1, bindLocal(symb, scope),
+                   compileBindingsSequential(bindings.cdr(), offset + 1, scope.bind(symb),
                    next)));
   }
-  
-  private Scope bindLocal(Symbol symb, Scope scope) throws CompileError
-  {
-    if (!scope.bind(symb))
-      throw multipleDef(symb);
     
-    return scope;
-  }
-  
   private boolean checkBindingsForm(List bindings)
   {
     if (bindings == List.Empty)
@@ -403,6 +395,20 @@ public class Compiler
     return binding.length() == 2 && binding.car().type() == Type.Symbol;
   }
   
+  private List splitBindingPairList(List pairs)
+  {
+    List.Builder cars = new List.Builder();
+    List.Builder cadrs = new List.Builder();
+    
+    for (; !pairs.empty(); pairs = pairs.cdr()) {    
+      var pair = (List) pairs.car();
+      cars.add(pair.car());
+      cadrs.add(pair.cadr());
+    }
+    
+    return List.of(cars.build(), cadrs.build());
+  }
+  
   private Scope extendLetScope(List bindings, Scope parent) throws MultipleDefinition
   {
     Scope scope = new Scope(parent);
@@ -410,8 +416,7 @@ public class Compiler
     for (; bindings != List.Empty; bindings = bindings.cdr()) {
       var binding = (List) bindings.car();
       var symb = (Symbol) binding.car();
-      if (!scope.bind(symb))
-        throw multipleDef(symb);
+      scope = scope.bind(symb);
     }
     
     return scope;
@@ -585,8 +590,7 @@ public class Compiler
     
     for (; params != List.Empty; params = params.cdr()) {
       var symb = (Symbol) params.car();
-      if (!scope.bind(symb))
-        throw multipleDef(symb);
+      scope = scope.bind(symb);
     }
     
     return scope;

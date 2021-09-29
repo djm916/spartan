@@ -110,6 +110,11 @@ public final class List extends Datum
     return concat(this, that);
   }
   
+  public List append(Datum x)
+  {
+    return append(this, x);
+  }
+  
   private static int length(List list)
   {
     int length = 0;
@@ -139,6 +144,13 @@ public final class List extends Datum
     if (x == Empty)
       return y;
     return List.cons(x.car(), concat(x.cdr(), y));
+  }
+  
+  private static List append(List x, Datum y)
+  {
+    if (x == Empty)
+      return List.of(y);
+    return List.cons(x.car(), append(x.cdr(), y));
   }
   
   private static String repr(List self)
