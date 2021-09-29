@@ -132,6 +132,30 @@ public class Compiler
                            : new LoadLocal(index.depth, index.offset, next);
   }
   
+  /* Compiles a variable assignment.
+
+     Syntax: (set! symbol init)
+     
+     If the symbol is a bound local variable, look up its DeBruijn index (depth, offset),
+     and generate a store-local(depth, offset) instruction.
+     
+     Otherwise, assume the symbol is a global variable, and generate a store-global(symbol) instruction.
+  */
+  
+  private Inst compileSet(List exp, Scope scope, boolean tail, Inst next) throws CompileError
+  {
+    if (exp.length() != 3 || exp.cdr().car().type() != Type.Symbol)
+      throw malformedExp(exp);
+    
+    var symb = (Symbol) exp.cadr();
+    var init = exp.caddr();
+    var index = (scope == null) ? null : scope.lookup(symb);
+    
+    return compile(init, scope, false,
+                   index == null ? new StoreGlobal(symb, next)
+                                 : new StoreLocal(index.depth, index.offset, next));
+  }
+  
   /* Compiles a top-level definition. Creates a new global variable or mutates an existing one.
 
      Syntax: (def symb init)
@@ -695,32 +719,17 @@ public class Compiler
            compileSequence(exp.cdr(), scope, tail, next));
   }
   
-  // (set! symbol init)
+  /* Compiles a "while" loop.
   
-  private Inst compileSet(List exp, Scope scope, boolean tail, Inst next) throws CompileError
-  {
-    if (exp.length() != 3 || exp.cdr().car().type() != Type.Symbol)
-      throw malformedExp(exp);
-    
-    var symb = (Symbol) exp.cadr();
-    var init = exp.caddr();
-    var index = (scope == null) ? null : scope.lookup(symb);
-    
-    return (index == null)
-      ? compile(init, scope, false,
-        new StoreGlobal(symb, next))
-      : compile(init, scope, false,
-        new StoreLocal(index.depth, index.offset, next));
-  }
+     Syntax: (while pred body...)
   
-  /* (while predicate body...)
-  
-     loop:     <<predicate>>
-               branch continue done
-     continue: <<body>>
-               jump loop
-     done:     ...
-           
+     Compilation:
+     
+     loop: <<pred>>
+           branch body next
+     body: <<body>>
+           jump loop
+     next: ...
   */
   
   private Inst compileWhile(List exp, Scope scope, boolean tail, Inst next) throws CompileError
@@ -728,11 +737,12 @@ public class Compiler
     if (exp.length() < 3)
       throw malformedExp(exp);
     
+    var pred = exp.cadr();
+    var body = exp.cddr();
     var jump = new Jump();
-    var loop = compile(exp.cadr(), scope, false,
-               new Branch(
-                 compileSequence(exp.cddr(), scope, tail, jump),
-                 next));
+    var loop = compile(pred, scope, false,
+               new Branch(compileSequence(body, scope, tail, jump),
+                          next));
     jump.setTarget(loop);
     return loop;
   }
