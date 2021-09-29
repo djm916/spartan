@@ -20,33 +20,31 @@ class Scope
     this.symbols = symbols;
   }
   
-  DeBruijnIndex lookup(Symbol s)
-  {
-    return lookup(s, 0);
-  }
-  
   Scope bind(Symbol s)
   {
     return new Scope(parent, symbols.append(s));
   }
-    
+  
+  DeBruijnIndex lookup(Symbol s)
+  {
+    int depth = 0;
+    var scope = this;    
+    for (; scope != null; ++depth) {
+      int offset = scope.offsetOf(s);
+      if (offset >= 0)
+        return new DeBruijnIndex(depth, offset);
+      scope = scope.parent;
+    }
+    return null;
+  }
+  
   private int offsetOf(Symbol s)
   {
     int offset = 0;
-    for (List symbols = this.symbols; !symbols.empty(); symbols = symbols.cdr(), ++offset)
+    var symbols = this.symbols;
+    for (; !symbols.empty(); symbols = symbols.cdr(), ++offset)
       if (symbols.car() == s)
         return offset;
     return -1;
-  }
-  
-  private DeBruijnIndex lookup(Symbol s, int depth)
-  {
-    int offset = offsetOf(s);
-    if (offset >= 0)
-      return new DeBruijnIndex(depth, offset);
-    else if (parent != null)
-      return parent.lookup(s, depth + 1);
-    else
-      return null;
   }
 }

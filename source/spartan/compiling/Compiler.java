@@ -116,6 +116,14 @@ public class Compiler
            List.Empty)));
   }
   
+  /* Compiles a variable reference.
+  
+     If the symbol is a bound local variable, look up its DeBruijn index (depth, offset),
+     and generate a load-local(depth, offset) instruction.
+     
+     Otherwise, assume the symbol is a global variable, and generate a load-global(symbol) instruction.
+  */
+  
   private Inst compileVarRef(Symbol symb, Scope scope, Inst next)
   {
     var index = (scope == null) ? null : scope.lookup(symb);
@@ -124,8 +132,17 @@ public class Compiler
                            : new LoadLocal(index.depth, index.offset, next);
   }
   
-  // (def symb init)
-  
+  /* Compiles a top-level definition. Creates a new global variable or mutates an existing one.
+
+     Syntax: (def symb init)
+          
+     Compilation:
+     
+       <<init>>
+       store-global(symb)
+       next: ...
+  */
+
   private Inst compileDef(List exp, Scope scope, Inst next) throws CompileError
   {
     if (exp.length() != 3 || exp.cadr().type() != Type.Symbol)
@@ -135,17 +152,38 @@ public class Compiler
     var init = exp.caddr();
     
     return compile(init, scope, false,
-           new StoreGlobal(symb, next));
+           new StoreGlobal(symb,
+           next));
   }
   
-  // (defun f (param...) body...)
-  
+  /* Compile a top-level function definition. */
+ 
   private Inst compileDefun(List exp, Scope scope, Inst next) throws CompileError
   {
     if (exp.length() < 4)
       throw malformedExp(exp);
     
-    return compile(transformDefun(exp), scope, false, next);
+    var xform = transformDefun(exp);
+    positionMap.put(xform, positionMap.get(exp));
+    return compile(xform, scope, false, next);
+  }
+  
+  /* Transforms the "defun" special form
+  
+       (defun f (params...) body...)
+     
+     into the equivalent
+       
+       (def f (fun (params...) body...))
+  */
+  
+  private List transformDefun(List exp)
+  {
+    var symbol = exp.cadr();
+    var params = exp.caddr();
+    var body = exp.cdddr();
+    
+    return List.of(Symbol.get("def"), symbol, List.cons(Symbol.get("fun"), List.cons(params, body)));
   }
   
   /* Compile an "if" special form.
@@ -449,26 +487,6 @@ public class Compiler
     return new PopArg(
            new StoreLocal(0, offset,
            bindLocals(offset + 1, numBindings, next)));
-  }
-  
-  /* Transforms the "defun" special form
-  
-       (defun f (params...) body...)
-     
-     into the equivalent
-       
-       (def f (fun (params...) body...))
-  */
-  
-  private List transformDefun(List exp)
-  {
-    var symbol = exp.cadr();
-    var params = exp.caddr();
-    var body = exp.cdddr();
-    
-    var result = List.of(Symbol.get("def"), symbol, List.cons(Symbol.get("fun"), List.cons(params, body)));
-    positionMap.put(result, positionMap.get(exp));
-    return result;
   }
     
   /* Compiles a function application.
