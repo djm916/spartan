@@ -200,13 +200,13 @@ public class Compiler
   */
   private Inst compileCond(List exp, Scope scope, boolean tail, Inst next) throws CompileError
   {
-    if (exp.length() < 2 || !checkCondClauses(exp.cdr()))
+    if (exp.length() < 2 || !checkClauseListForm(exp.cdr()))
       throw malformedExp(exp);
     
     return compileCondClauses(exp.cdr(), scope, tail, next);
   }
   
-  private boolean checkCondClauses(List clauses)
+  private boolean checkClauseListForm(List clauses)
   {
     for (; clauses != List.Empty; clauses = clauses.cdr())
       if (clauses.car().type() != Type.List || ((List) clauses.car()).length() < 2)
@@ -261,13 +261,15 @@ public class Compiler
     var bindings = (List) exp.cadr();
     var body = exp.cddr();
     
-    if (!checkBindingsForm(bindings))
+    if (!checkBindingListForm(bindings))
       throw malformedExp(bindings);
     
     int numBindings = bindings.length();
-    var extendedScope = new Scope(scope, extractSymbols(bindings));
+    var vars = extractFirst(bindings);
+    var inits = extractSecond(bindings);
+    var extendedScope = new Scope(scope, vars);
     
-    return evalBindings(bindings, scope,
+    return evalArgs(inits, scope,
            new PushEnv(numBindings,
            bindLocals(0, numBindings,
            compileSequence(body, extendedScope, tail,
@@ -300,30 +302,28 @@ public class Compiler
     var bindings = (List) exp.cadr();
     var body = exp.cddr();
     
-    if (!checkBindingsForm(bindings))
+    if (!checkBindingListForm(bindings))
       throw malformedExp(exp);
     
     int numBindings = bindings.length();
-    var extendedScope = new Scope(scope, extractSymbols(bindings));
+    var vars = extractFirst(bindings);
+    var inits = extractSecond(bindings);
+    var extendedScope = new Scope(scope, vars);
     
     return new PushEnv(numBindings,
-           compileRecursiveBindings(bindings, 0, extendedScope,
+           compileRecursiveBindings(inits, 0, extendedScope,
            compileSequence(body, extendedScope, tail,
            new PopEnv(next))));
   }
   
-  private Inst compileRecursiveBindings(List bindings, int offset, Scope scope, Inst next) throws CompileError
+  private Inst compileRecursiveBindings(List inits, int offset, Scope scope, Inst next) throws CompileError
   {
-    if (bindings.empty())
+    if (inits.empty())
       return next;
     
-    var binding = (List) bindings.car();
-    var symb = (Symbol) binding.car();
-    var init = binding.cadr();
-    
-    return compile(init, scope, false,
+    return compile(inits.car(), scope, false,
                    new StoreLocal(0, offset,
-                   compileRecursiveBindings(bindings.cdr(), offset + 1, scope,
+                   compileRecursiveBindings(inits.cdr(), offset + 1, scope,
                    next)));
   }
   
@@ -353,11 +353,11 @@ public class Compiler
     var bindings = (List) exp.cadr();
     var body = exp.cddr();
     
-    if (!checkBindingsForm(bindings))
+    if (!checkBindingListForm(bindings))
       throw malformedExp(exp);
     
     int numBindings = bindings.length();
-    var extendedScope = new Scope(scope, extractSymbols(bindings));
+    var extendedScope = new Scope(scope, extractFirst(bindings));
     
     return new PushEnv(numBindings,
            compileBindingsSequential(bindings, 0, new Scope(scope),
@@ -380,19 +380,19 @@ public class Compiler
                    next)));
   }
     
-  private boolean checkBindingsForm(List bindings)
+  private boolean checkBindingListForm(List bindings)
   {
     if (bindings == List.Empty)
       return false;
     
     for (; bindings != List.Empty; bindings = bindings.cdr())
-      if (bindings.car().type() != Type.List || !checkBinding((List) bindings.car()))
+      if (bindings.car().type() != Type.List || !checkBindingPairForm((List) bindings.car()))
         return false;
     
     return true;
   }
   
-  private boolean checkBinding(List binding)
+  private boolean checkBindingPairForm(List binding)
   {
     return binding.length() == 2 && binding.car().type() == Type.Symbol;
   }
@@ -411,26 +411,24 @@ public class Compiler
     return List.of(cars.build(), cadrs.build());
   }
   
-  private List extractSymbols(List bindings)
+  private List extractFirst(List pairs)
   {
-    var symbols = new List.Builder();
+    var result = new List.Builder();
     
-    for (; !bindings.empty(); bindings = bindings.cdr())
-      symbols.add(((List)bindings.car()).car());
+    for (; !pairs.empty(); pairs = pairs.cdr())
+      result.add(((List)pairs.car()).car());
     
-    return symbols.build();
+    return result.build();
   }
   
-  private Inst evalBindings(List bindings, Scope scope, Inst next) throws CompileError
+  private List extractSecond(List pairs)
   {
-    if (bindings == List.Empty)
-      return next;
-
-    var binding = (List) bindings.car();
+    var result = new List.Builder();
     
-    return evalBindings(bindings.cdr(), scope,
-           compile(binding.cadr(), scope, false,
-           new PushArg(next)));
+    for (; !pairs.empty(); pairs = pairs.cdr())
+      result.add(((List)pairs.car()).cadr());
+    
+    return result.build();
   }
   
   private Inst evalArgs(List args, Scope scope, Inst next) throws CompileError
@@ -545,7 +543,7 @@ public class Compiler
     var params = (List) exp.cadr();
     var body = exp.cddr();
     
-    if (!checkParams(params))
+    if (!checkParamListForm(params))
       throw malformedExp(exp);
     
     var numParams = params.length();
@@ -573,7 +571,7 @@ public class Compiler
     return s.repr().charAt(0) == '&';
   }
   
-  private boolean checkParams(List params)
+  private boolean checkParamListForm(List params)
   {
     for (; params != List.Empty; params = params.cdr()) {
       if (params.car().type() != Type.Symbol)
@@ -793,7 +791,7 @@ public class Compiler
     var params = (List) exp.caddr();
     var body = exp.cdddr();
     
-    if (!checkParams(params))
+    if (!checkParamListForm(params))
       throw malformedExp(exp);
     
     var numParams = params.length();
