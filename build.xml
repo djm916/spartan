@@ -2,7 +2,6 @@
   <property name="classpath" value="C:/JUnit/junit.jar"/>
   
   <target name="clean">
-    <delete dir="bin"/>
     <delete dir="build"/>
     <delete dir="javadoc"/>
     <delete dir="test-results"/>
@@ -10,7 +9,6 @@
 
   <target name="compile">
     <mkdir dir="build"/>
-    <mkdir dir="bin"/>
     <javac srcdir="source"
            destdir="build"
            debug="true"
@@ -19,7 +17,7 @@
            nativeheaderdir="native">
       <!-- <compilerarg value="-Xlint"/> -->
     </javac>
-    <jar destfile="bin/Spartan.jar"
+    <jar destfile="Spartan.jar"
          basedir="build"
          excludes="spartan/tests/">
       <manifest>
@@ -30,7 +28,7 @@
           dir="native"
           failonerror="true">
     </exec>
-    <copy file="native/libspartan.dll" tofile="bin/libspartan.dll"/>
+    <copy file="native/libspartan.dll" tofile="libspartan.dll"/>
   </target>
 
   <target name="javadoc">
