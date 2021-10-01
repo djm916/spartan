@@ -3,15 +3,7 @@ package spartan;
 import spartan.data.List;
 import spartan.data.Text;
 import spartan.data.Symbol;
-import spartan.parsing.Reader;
-import spartan.compiling.Compiler;
-import spartan.runtime.GlobalEnv;
 import spartan.runtime.BaseEnv;
-import spartan.runtime.VirtualMachine;
-import spartan.errors.SyntaxError;
-import spartan.errors.CompileError;
-import spartan.errors.RuntimeError;
-import java.io.IOException;
 
 public class Main
 {
@@ -36,62 +28,19 @@ Enter Control-D (on Linux) or Control-Z (on Windows) to exit.""";
     System.loadLibrary("libspartan");
   }
   
-  public static void main(String[] args) throws IOException
+  public static void main(String[] args)
   {
     parseCommandLine(args);
     
     var globals = new BaseEnv();
     globals.bind(Symbol.get("sys/args"), sysArgs);
     
-    if (inputFile == null)
-      evalInteractive(globals);
+    if (inputFile == null) {
+      System.out.println(IntroMessage);
+      Evaluator.evalInteractive(globals);
+    }
     else
-      evalFile(inputFile, globals);
-  }
-  
-  private static void evalInteractive(GlobalEnv globals) throws IOException
-  {
-    System.out.println(IntroMessage);
-    
-    try (Reader reader = Reader.forConsole()) {
-      var compiler = new Compiler();
-      var vm = new VirtualMachine(globals);
-      
-      while (true) {
-        try {
-          var exp = reader.read();
-          if (exp == null)
-            System.exit(0);
-          System.out.println("reader = " + exp.datum.repr());
-          var result = vm.eval(compiler.compile(exp));
-          System.out.println("eval = " + result.repr());
-        }
-        catch (SyntaxError | CompileError | RuntimeError ex) {
-          System.err.println(ex);
-        }
-      }
-    }
-  }
-  
-  private static void evalFile(String fileName, GlobalEnv globals) throws IOException
-  {
-    try (Reader reader = Reader.forFile(fileName)) {
-      var compiler = new Compiler();
-      var vm = new VirtualMachine(globals);
-
-      while (true) {
-        try {
-          var exp = reader.read();
-          if (exp == null)
-            System.exit(0);
-          vm.eval(compiler.compile(exp));
-        }
-        catch (SyntaxError | CompileError | RuntimeError ex) {
-          System.err.println(ex);
-          System.exit(-1);
-        }
-      }
-    }
+      Evaluator.evalFile(inputFile, globals);
   }
   
   private static void parseCommandLine(String[] args)
