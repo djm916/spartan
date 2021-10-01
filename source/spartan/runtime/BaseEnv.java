@@ -2,7 +2,7 @@ package spartan.runtime;
 
 import static spartan.builtins.Core.*;
 import static spartan.builtins.Math.*;
-import static spartan.builtins.Lists.*;
+import static spartan.builtins.ListFuncs.*;
 import spartan.data.*;
 
 public final class BaseEnv extends GlobalEnv
@@ -52,8 +52,7 @@ public final class BaseEnv extends GlobalEnv
     bind(Symbol.get("record"), MakeRecord);
     bind(Symbol.get("complex"), MakeComplex);
     
-    bind(Symbol.get("apply"), Apply);
-    
+    bind(Symbol.get("apply"), Apply);    
     bind(Symbol.get("print"), Print);
     bind(Symbol.get("type"), TypeOf);
     bind(Symbol.get("length"), Length);
