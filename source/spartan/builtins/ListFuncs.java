@@ -16,13 +16,6 @@ public final class ListFuncs
     return ((List)x).car();
   }
   
-  public static final Primitive Car = new Primitive(1, false) {
-    public void apply(VirtualMachine vm) throws TypeMismatch {
-      vm.result = car(vm.popArg());
-      vm.popFrame();
-    }
-  };
-  
   public static List cdr(Datum x) throws TypeMismatch
   {
     if (x.type() != Type.List || x == List.Empty)
@@ -30,9 +23,23 @@ public final class ListFuncs
     return ((List)x).cdr();
   }
   
-  public static final Primitive Cdr = new Primitive(1, false) {
+  public static List cons(Datum first, Datum rest) throws TypeMismatch
+  {
+    if (rest.type() != Type.List)
+      throw new TypeMismatch();
+    return List.cons(first, (List)rest);
+  }
+
+  public static List append(Datum x, Datum y) throws TypeMismatch
+  {
+    if (x.type() != Type.List || y.type() != Type.List)
+      throw new TypeMismatch();
+    return ((List)x).append((List)y);
+  }
+    
+  public static final Primitive Car = new Primitive(1, false) {
     public void apply(VirtualMachine vm) throws TypeMismatch {
-      vm.result = cdr(vm.popArg());
+      vm.result = car(vm.popArg());
       vm.popFrame();
     }
   };
@@ -44,12 +51,33 @@ public final class ListFuncs
     }
   };
   
-  public static List cons(Datum first, Datum rest) throws TypeMismatch
-  {
-    if (rest.type() != Type.List)
-      throw new TypeMismatch();
-    return List.cons(first, (List)rest);
-  }
+  public static final Primitive Caddr = new Primitive(1, false) {
+    public void apply(VirtualMachine vm) throws TypeMismatch {
+      vm.result = car(cdr(cdr(vm.popArg())));
+      vm.popFrame();
+    }
+  };
+  
+  public static final Primitive Cdr = new Primitive(1, false) {
+    public void apply(VirtualMachine vm) throws TypeMismatch {
+      vm.result = cdr(vm.popArg());
+      vm.popFrame();
+    }
+  };
+  
+  public static final Primitive Cddr = new Primitive(1, false) {
+    public void apply(VirtualMachine vm) throws TypeMismatch {
+      vm.result = cdr(cdr(vm.popArg()));
+      vm.popFrame();
+    }
+  };
+  
+  public static final Primitive Cdddr = new Primitive(1, false) {
+    public void apply(VirtualMachine vm) throws TypeMismatch {
+      vm.result = cdr(cdr(cdr(vm.popArg())));
+      vm.popFrame();
+    }
+  };
   
   public static final Primitive Cons = new Primitive(2, false) {
     public void apply(VirtualMachine vm) throws TypeMismatch {
@@ -58,16 +86,9 @@ public final class ListFuncs
     }
   };
   
-  public static final List concat(Datum x, Datum y) throws TypeMismatch
-  {
-    if (x.type() != Type.List || y.type() != Type.List)
-      throw new TypeMismatch();
-    return ((List)x).concat((List)y);
-  }
-  
-  public static final Primitive Concat = new Primitive(2, false) {
+  public static final Primitive Append = new Primitive(2, false) {
     public void apply(VirtualMachine vm) throws TypeMismatch {
-      vm.result = concat(vm.popArg(), vm.popArg());
+      vm.result = append(vm.popArg(), vm.popArg());
       vm.popFrame();
     }
   };

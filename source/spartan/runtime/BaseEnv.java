@@ -35,17 +35,19 @@ public final class BaseEnv extends GlobalEnv
     bind(Symbol.get("tan"), Tan);
     bind(Symbol.get("asin"), Sin);
     bind(Symbol.get("acos"), Cos);
-    bind(Symbol.get("atan"), Tan);
-    
+    bind(Symbol.get("atan"), Tan);    
     bind(Symbol.get("E"), Real.E);
     bind(Symbol.get("PI"), Real.PI);
     bind(Symbol.get("I"), Complex.I);
     
     bind(Symbol.get("cons"), Cons);
     bind(Symbol.get("car"), Car);
-    bind(Symbol.get("cdr"), Cdr);
     bind(Symbol.get("cadr"), Cadr);
-    bind(Symbol.get("concat"), Concat);
+    bind(Symbol.get("caddr"), Caddr);
+    bind(Symbol.get("cdr"), Cdr);
+    bind(Symbol.get("cddr"), Cddr);
+    bind(Symbol.get("cdddr"), Cdddr);
+    bind(Symbol.get("append"), Append);
     
     bind(Symbol.get("list"), MakeList);
     bind(Symbol.get("vector"), MakeVector);
