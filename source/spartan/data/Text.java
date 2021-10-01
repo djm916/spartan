@@ -32,5 +32,5 @@ public final class Text extends Datum
     return this.value.compareTo(that.value);
   }
   
-  private final String value;
+  public final String value;
 }

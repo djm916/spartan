@@ -2,8 +2,15 @@ package spartan.builtins;
 
 import spartan.data.*;
 import spartan.errors.Error;
-import spartan.runtime.VirtualMachine;
+import spartan.errors.SyntaxError;
+import spartan.errors.CompileError;
+import spartan.errors.RuntimeError;
 import spartan.errors.TypeMismatch;
+import spartan.runtime.VirtualMachine;
+import spartan.runtime.GlobalEnv;
+import spartan.parsing.Reader;
+import spartan.compiling.Compiler;
+import java.io.IOException;
 
 public final class Core
 {
@@ -218,4 +225,39 @@ public final class Core
       vm.popFrame();
     }
   };
+  
+  public static void loadFile(String fileName, GlobalEnv globals)
+  {
+    try (Reader reader = Reader.forFile(fileName)) {
+      var compiler = new Compiler();
+      var vm = new VirtualMachine(globals);
+
+      while (true) {
+        try {
+          var exp = reader.read();
+          if (exp == null)
+            return;
+          vm.eval(compiler.compile(exp));
+        }
+        catch (SyntaxError | CompileError | RuntimeError ex) {
+          System.err.println(ex);
+          return;
+        }
+      }
+    }
+    catch (IOException ex) {
+      System.err.println(ex.getMessage());
+      return;
+    }
+  }
+  
+  public static final Primitive Load = new Primitive(1, false) {
+    public void apply(VirtualMachine vm) {
+      var fileName = ((Text)vm.popArg()).value;
+      loadFile(fileName, vm.globals);
+      vm.result = Nil.Instance;
+      vm.popFrame();
+    }
+  };
+  
 }

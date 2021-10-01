@@ -909,7 +909,7 @@ public class Compiler
     else
       return compileList((List)exp, scope, tail, next);
   }
-
+  
   private PositionMap positionMap;
   private final java.util.Map<Symbol, Macro> macros = new java.util.IdentityHashMap<>();
   private final VirtualMachine vm = new VirtualMachine(new BaseEnv());

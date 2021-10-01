@@ -57,5 +57,6 @@ public final class BaseEnv extends GlobalEnv
     bind(Symbol.get("print"), Print);
     bind(Symbol.get("type"), TypeOf);
     bind(Symbol.get("length"), Length);
+    bind(Symbol.get("load"), Load);
   }
 }
