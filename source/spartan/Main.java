@@ -57,6 +57,7 @@ Enter Control-D (on Linux) or Control-Z (on Windows) to exit.""";
         }
         script = args[i + 1];
         gatherScriptArgs(args, i + 2);
+        return;
       }
     }
   }

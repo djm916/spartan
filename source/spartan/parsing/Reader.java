@@ -277,14 +277,20 @@ public class Reader implements AutoCloseable
     positionMap.put(symbol, position);
     return symbol;
   }
-
+   
   private Datum readText() throws SyntaxError, IOException
   {
     var text = new StringBuilder();
 
     while (!isStringEnd(peekChar())) {
       getChar();
-      text.append((char)lastChar);
+      if (lastChar == '\\') {
+        getChar();
+        text.append(readEscapedChar());
+      }
+      else {
+        text.append((char) lastChar);
+      }
     }
 
     getChar();
@@ -295,6 +301,18 @@ public class Reader implements AutoCloseable
     return new Text(text.toString());
   }
 
+  private char readEscapedChar() throws SyntaxError, IOException
+  {
+    switch (lastChar) {      
+      case 'n': return '\n';
+      case 'r': return '\r';
+      case 't': return '\t';
+      case '"': return '"';
+      case '\\': return '\\';
+      default: return (char) lastChar;
+    }
+  }
+  
   private Datum readList() throws SyntaxError, IOException
   {
     var builder = new List.Builder();
