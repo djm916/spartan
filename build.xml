@@ -5,6 +5,8 @@
     <delete dir="build"/>
     <delete dir="javadoc"/>
     <delete dir="test-results"/>
+    <delete file="Spartan.jar"/>
+    <delete file="libspartan.dll"/>
   </target>
 
   <target name="compile">

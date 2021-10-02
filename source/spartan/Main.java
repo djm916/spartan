@@ -19,8 +19,8 @@ Welcome to the Spartan interpreter!
 Enter an expression. It will be evaluated and the result shown.
 Enter Control-D (on Linux) or Control-Z (on Windows) to exit.""";
 
-  private static String inputFile;
-  private static List sysArgs = List.Empty;
+  private static String script;
+  private static List scriptArgs = List.Empty;
   
   static
   {
@@ -33,14 +33,14 @@ Enter Control-D (on Linux) or Control-Z (on Windows) to exit.""";
     parseCommandLine(args);
     
     var globals = new BaseEnv();
-    globals.bind(Symbol.get("sys/args"), sysArgs);
+    globals.bind(Symbol.get("sys/args"), scriptArgs);
     
-    if (inputFile == null) {
+    if (script == null) {
       System.out.println(IntroMessage);
       Evaluator.evalInteractive(globals);
     }
     else
-      Evaluator.evalFile(inputFile, globals);
+      Evaluator.evalFile(script, globals);
   }
   
   private static void parseCommandLine(String[] args)
@@ -52,16 +52,18 @@ Enter Control-D (on Linux) or Control-Z (on Windows) to exit.""";
       }
       else if (args[i].equals("--file")) {
         if (i >= args.length) {
-          System.err.println("--file requires argument");
+          System.err.println("error: --file option requires argument");
           System.exit(-1);
         }
-        inputFile = args[i + 1];
-      }
-      else {
-        for (int j = args.length - 1; j >= i; --j)
-          sysArgs = List.cons(new Text(args[j]), sysArgs);
-        break;
+        script = args[i + 1];
+        gatherScriptArgs(args, i + 2);
       }
     }
+  }
+  
+  private static void gatherScriptArgs(String[] args, int start)
+  {
+    for (int i = args.length - 1; i >= start; --i)
+      scriptArgs = List.cons(new Text(args[i]), scriptArgs);
   }
 }

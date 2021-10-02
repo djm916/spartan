@@ -1,4 +1,4 @@
-(load "../stdlib/list.txt")
+(load "stdlib/list.txt")
 
 (defun power-set (set)
   (if (= () set)
