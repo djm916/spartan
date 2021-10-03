@@ -141,16 +141,27 @@ public final class List extends Datum
   
   private static List concat(List x, List y)
   {
-    if (x == Empty)
-      return y;
-    return List.cons(x.car(), concat(x.cdr(), y));
+    //if (x == Empty)
+      //return y;
+    //return List.cons(x.car(), concat(x.cdr(), y));
+    var result = new Builder();
+    for (; x != Empty; x = x.rest)
+      result.add(x.first);
+    for (; y != Empty; y = y.rest)
+      result.add(y.first);
+    return result.build();
   }
   
   private static List append(List x, Datum y)
   {
-    if (x == Empty)
-      return List.of(y);
-    return List.cons(x.car(), append(x.cdr(), y));
+    //if (x == Empty)
+    //  return List.of(y);
+    //return List.cons(x.car(), append(x.cdr(), y));
+    var result = new Builder();
+    for (; x != Empty; x = x.rest)
+      result.add(x.first);
+    result.add(y);
+    return result.build();
   }
   
   private static String repr(List self)

@@ -686,7 +686,10 @@ public class Compiler
                       next));
   }
   
-  /* (do exp...) */
+  /* Compiles the "do" special form.
+  
+     Syntax: (do exp...)     
+  */
   
   private Inst compileDo(List exp, Scope scope, boolean tail, Inst next) throws CompileError
   {
@@ -696,9 +699,10 @@ public class Compiler
     return compileSequence(exp.cdr(), scope, tail, next);
   }
   
-  /* Evaluates a list of expressions in sequence.
-     Returns the value of the last expression.
-     The last expression is in tail context.
+  /* Compiles a sequence of expressions.
+     The sequence elements are evaluated in order.
+     The value of the last element is the value of the sequence.
+     The last expression occurs in tail context.
      
      Syntax: exp1 exp2 ... expN
      
@@ -719,7 +723,7 @@ public class Compiler
            compileSequence(exp.cdr(), scope, tail, next));
   }
   
-  /* Compiles a "while" loop.
+  /* Compiles the "while" special form.
   
      Syntax: (while pred body...)
   
@@ -747,15 +751,22 @@ public class Compiler
     return loop;
   }
   
-  /* (delay exp...)
-          
+  /* Compiles the "delay" special form.
+  
+     Syntax: (delay exp...)
+     
+     Equivalent to:
+     
      (let ((thunk (fn () exp...))
            (value-ready? false)
            (cached-value nil))
        (fn () (if (not value-ready?)
                 (do (set! cached-value (thunk))
                     (set! value-ready? true))
-              cached-value))
+              cached-value)))
+     
+     
+     Compilation:
      
      push-env 2
      load-const false

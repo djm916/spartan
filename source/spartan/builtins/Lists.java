@@ -4,6 +4,7 @@ import spartan.data.Datum;
 import spartan.data.Type;
 import spartan.data.Primitive;
 import spartan.data.List;
+import spartan.data.Bool;
 import spartan.runtime.VirtualMachine;
 import spartan.errors.TypeMismatch;
 
@@ -32,11 +33,18 @@ public final class Lists
 
   public static List append(Datum x, Datum y) throws TypeMismatch
   {
+    if (x.type() != Type.List)
+      throw new TypeMismatch();
+    return ((List)x).append(y);
+  }
+  
+  public static List concat(Datum x, Datum y) throws TypeMismatch
+  {
     if (x.type() != Type.List || y.type() != Type.List)
       throw new TypeMismatch();
-    return ((List)x).append((List)y);
+    return ((List)x).concat((List)y);
   }
-    
+  
   public static final Primitive Car = new Primitive(1, false) {
     public void apply(VirtualMachine vm) throws TypeMismatch {
       vm.result = car(vm.popArg());
@@ -89,6 +97,22 @@ public final class Lists
   public static final Primitive Append = new Primitive(2, false) {
     public void apply(VirtualMachine vm) throws TypeMismatch {
       vm.result = append(vm.popArg(), vm.popArg());
+      vm.popFrame();
+    }
+  };
+    
+  public static final Primitive Concat = new Primitive(2, false) {
+    public void apply(VirtualMachine vm) throws TypeMismatch {
+      vm.result = concat(vm.popArg(), vm.popArg());
+      vm.popFrame();
+    }
+  };
+  
+  public static final Primitive IsEmpty = new Primitive(1, false) {
+    public void apply(VirtualMachine vm) throws TypeMismatch {
+      if (vm.peekArg().type() != Type.List)
+        throw new TypeMismatch();
+      vm.result = ((List)vm.popArg()).empty() ? Bool.True : Bool.False;
       vm.popFrame();
     }
   };

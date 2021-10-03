@@ -40,6 +40,7 @@ public final class BaseEnv extends GlobalEnv
     bind(Symbol.get("PI"), Real.PI);
     bind(Symbol.get("I"), Complex.I);
     
+    bind(Symbol.get("empty?"), IsEmpty);
     bind(Symbol.get("cons"), Cons);
     bind(Symbol.get("car"), Car);
     bind(Symbol.get("cadr"), Cadr);
@@ -47,6 +48,7 @@ public final class BaseEnv extends GlobalEnv
     bind(Symbol.get("cdr"), Cdr);
     bind(Symbol.get("cddr"), Cddr);
     bind(Symbol.get("cdddr"), Cdddr);
+    bind(Symbol.get("concat"), Concat);
     bind(Symbol.get("append"), Append);
     
     bind(Symbol.get("list"), MakeList);

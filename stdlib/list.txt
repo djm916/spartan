@@ -1,35 +1,32 @@
 
-(defun list/map (transformer list)
-  (if (= list ())
-    ()
-    (cons (transformer (car list)) (list/map transformer (cdr list)))))
+(defun list/map (f xs)
+  (if (empty? xs) () 
+    (cons (f (car xs)) (list/map f (cdr xs)))))
 
-(defun list/filter (predicate list)
-  (if (= list ())
-    ()
-    (if (predicate (car list))
-      (cons (car list) (list/filter predicate (cdr list)))
-      (list/filter predicate (cdr list)))))
+(defun list/filter (f xs)
+  (if (empty? xs) ()
+    (if (f (car xs))
+      (cons (car xs) (list/filter f (cdr xs)))
+      (list/filter f (cdr xs)))))
 
-(defun list/fold (combiner list initial-value)
-  (if (= list ())
-    initial-value
-    (list/fold combiner
-               (cdr list)
-               (combiner initial-value (car list)))))
+(defun list/fold (f xs i)
+  (if (empty? xs) i
+    (list/fold f (cdr xs) (f (car xs) i))))
 
-(defun list/range (from to)
-  (if (> from to)
-    ()
-    (cons from (list/range (+ 1 from) to))))
+(defun list/range (i j)
+  (if (> i j) ()
+    (cons i (list/range (+ 1 i) j))))
 
-(defun list/reverse (list)
-  (letrec ((loop (fun (list result)
-                   (if (= list ())
-                     result
-                     (loop (cdr list) (cons (car list) result))))))
-    (loop list ())))
+(defun list/reverse (xs)
+  (letrec ((loop (fun (xs sx)
+                   (if (empty? xs) sx
+                     (loop (cdr xs) (cons (car xs) sx))))))
+    (loop xs ())))
 
+(defun list/enum (xs i)
+  (if (empty? xs) ()
+    (cons (list i (car xs)) (list/enum (cdr xs) (+ 1 i)))))
+    
 ; ---
 
 (defun square (x) (* x x))
@@ -49,3 +46,5 @@
 ; !6 = 720
 (list/fold * (list/range 1 6) 1)
 
+; (10, 9, 8, ... 1)
+(list/reverse (list/range 1 10))
