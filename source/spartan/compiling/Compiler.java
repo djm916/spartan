@@ -188,6 +188,7 @@ public class Compiler
       throw malformedExp(exp);
     
     var xform = transformDefun(exp);
+    System.out.println("defun transform = " + xform.repr());
     positionMap.put(xform, positionMap.get(exp));
     return compile(xform, scope, false, next);
   }
@@ -595,17 +596,53 @@ public class Compiler
     
     var code = !isVariadic ? new PushEnv(numParams,
                              bindLocals(0, numParams,
-                             compileSequence(body, extendedScope, true,
+                             compileFunBody(body, extendedScope,
                              new PopFrame())))
                            
                            : new PushEnv(numParams,
                              bindLocals(0, numParams - 1,                             
                              new PopRestArgs(
                              new StoreLocal(0, numParams - 1,
-                             compileSequence(body, extendedScope, true,
+                             compileFunBody(body, extendedScope,
                              new PopFrame())))));
    
     return new MakeClosure(code, requiredArgs, isVariadic, next);
+  }
+  
+  private Inst compileFunBody(List body, Scope scope, Inst next) throws CompileError
+  {
+    if (isInnerDefun(body.car())) {
+      var xform = transformInnerDefuns(body);
+      System.out.println("inner defun xform = " + xform.repr());
+      return compile(xform, scope, false, next);
+    }
+    
+    return compileSequence(body, scope, true, next);
+  }
+  
+  private boolean isInnerDefun(Datum exp)
+  {
+    return exp.type() == Type.List && ((List)exp).car() == Symbol.get("defun");
+  }
+  
+  private List transformInnerDefun(List exp)
+  {
+    var symb = exp.cadr();
+    var params = exp.caddr();
+    var body = exp.cdddr();
+    return List.of(symb, List.cons(Symbol.get("fun"), List.cons(params, body)));
+  }
+  
+  private List transformInnerDefuns(List body)
+  {
+    List.Builder bindings = new List.Builder();
+    
+    for (; isInnerDefun(body.car()); body = body.cdr())
+      bindings.add(transformInnerDefun((List) body.car()));
+    
+    return List.cons(Symbol.get("letrec"),
+           List.cons(bindings.build(),
+                     body));
   }
   
   private boolean isRestParam(Symbol s)
