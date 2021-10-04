@@ -17,15 +17,22 @@
   (if (> i j) ()
     (cons i (list/range (+ 1 i) j))))
 
+;(defun list/reverse (xs)
+;  (letrec ((loop (fun (xs sx)
+;                   (if (empty? xs) sx
+;                     (loop (cdr xs) (cons (car xs) sx))))))
+;    (loop xs ())))
+
 (defun list/reverse (xs)
-  (letrec ((loop (fun (xs sx)
-                   (if (empty? xs) sx
-                     (loop (cdr xs) (cons (car xs) sx))))))
-    (loop xs ())))
+  (defun loop (xs sx)
+    (if (empty? xs) sx
+      (loop (cdr xs) (cons (car xs) sx))))
+  (loop xs ()))
 
 (defun list/enum (xs i)
   (if (empty? xs) ()
-    (cons (list i (car xs)) (list/enum (cdr xs) (+ 1 i)))))
+    (cons (list i (car xs))
+          (list/enum (cdr xs) (+ 1 i)))))
     
 ; ---
 

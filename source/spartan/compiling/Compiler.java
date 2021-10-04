@@ -188,27 +188,25 @@ public class Compiler
       throw malformedExp(exp);
     
     var xform = transformDefun(exp);
-    System.out.println("defun transform = " + xform.repr());
-    positionMap.put(xform, positionMap.get(exp));
+    System.out.println("defun transform = " + xform.repr());    
     return compile(xform, scope, false, next);
   }
   
   /* Transforms the "defun" special form
   
-       (defun f (params...) body...)
+       (defun symbol (params...) body...)
      
      into the equivalent
        
-       (def f (fun (params...) body...))
+       (def symbol (fun (params...) body...))
   */
   
   private List transformDefun(List exp)
   {
-    var symbol = exp.cadr();
+    var symb = exp.cadr();
     var params = exp.caddr();
     var body = exp.cdddr();
-    
-    return List.of(Symbol.get("def"), symbol, List.cons(Symbol.get("fun"), List.cons(params, body)));
+    return List.of(Symbol.get("def"), symb, List.cons(Symbol.get("fun"), List.cons(params, body)));
   }
   
   /* Compile an "if" special form.
@@ -460,20 +458,6 @@ public class Compiler
     return binding.length() == 2 && binding.car().type() == Type.Symbol;
   }
   
-  private List splitBindingPairList(List pairs)
-  {
-    List.Builder cars = new List.Builder();
-    List.Builder cadrs = new List.Builder();
-    
-    for (; !pairs.empty(); pairs = pairs.cdr()) {    
-      var pair = (List) pairs.car();
-      cars.add(pair.car());
-      cadrs.add(pair.cadr());
-    }
-    
-    return List.of(cars.build(), cadrs.build());
-  }
-  
   private List extractFirst(List pairs)
   {
     var result = new List.Builder();
@@ -548,32 +532,32 @@ public class Compiler
      
      Case 1: Fixed number of arguments
      
-       Syntax: (fun (param1 ... paramN) body...)
+       Syntax: (fun (param...) body...)
     
        Compilation:
        
-       push-env N
-       pop-arg
+       push-env N          // extend environment for N parameters
+       pop-arg             // bind arguments to parameters
        store-local 0 0
        ...
        pop-arg
        store-local 0 N-1
-       <<body>>
-       pop-frame
+       <<body>>            // Evaluate body
+       pop-frame           // Return
      
-     Case 2: Variadic
+     Case 2: Variable number of arguments
      
-       Syntax: (fun (param1 ... paramN-1 &paramN) body...)
+       Syntax: (fun (param... &rest) body...)
     
        Compilation:
        
-       push-env N
-       pop-arg
+       push-env N          // extend environment for N parameters
+       pop-arg             // bind all but last argument to parameters
        store-local 0 0
        ...
        pop-arg
        store-local 0 N-2
-       pop-rest-args
+       pop-rest-args       // bind rest argument to 
        store-local 0 N-1
        <<body>>
        pop-frame
@@ -596,53 +580,77 @@ public class Compiler
     
     var code = !isVariadic ? new PushEnv(numParams,
                              bindLocals(0, numParams,
-                             compileFunBody(body, extendedScope,
+                             compileBody(body, extendedScope,
                              new PopFrame())))
                            
                            : new PushEnv(numParams,
                              bindLocals(0, numParams - 1,                             
                              new PopRestArgs(
                              new StoreLocal(0, numParams - 1,
-                             compileFunBody(body, extendedScope,
+                             compileBody(body, extendedScope,
                              new PopFrame())))));
    
     return new MakeClosure(code, requiredArgs, isVariadic, next);
   }
   
-  private Inst compileFunBody(List body, Scope scope, Inst next) throws CompileError
+  /* Compiles a function body. A function body consists of a sequence
+     of expressions, optionally preceeded by a list of inner definitions.
+     
+     Inner definitions are transformed into an equivalent form using a
+     nested letrec form, shown below.
+  */
+  private Inst compileBody(List body, Scope scope, Inst next) throws CompileError
   {
-    if (isInnerDefun(body.car())) {
-      var xform = transformInnerDefuns(body);
-      System.out.println("inner defun xform = " + xform.repr());
-      return compile(xform, scope, false, next);
+    if (isInnerDef(body.car())) {
+      var xform = transformInnerDefs(body);
+      System.out.println("inner defs xform = " + xform.repr());
+      return compile(xform, scope, true, next);
     }
     
     return compileSequence(body, scope, true, next);
   }
-  
-  private boolean isInnerDefun(Datum exp)
-  {
-    return exp.type() == Type.List && ((List)exp).car() == Symbol.get("defun");
-  }
-  
-  private List transformInnerDefun(List exp)
-  {
-    var symb = exp.cadr();
-    var params = exp.caddr();
-    var body = exp.cdddr();
-    return List.of(symb, List.cons(Symbol.get("fun"), List.cons(params, body)));
-  }
-  
-  private List transformInnerDefuns(List body)
+    
+  /* Transforms a sequence of inner definitions at the beginning
+     of a function body:
+     
+     (fun f params
+       (def symb1 init1)
+       ...
+       (def symbN initN)
+       body...)
+     
+     into an equivalent nested letrec form:
+     
+     (fun f params
+       (letrec ((symb1 init1)
+                ...
+                (symbN initN))
+         body...))
+         
+     Inner "defun" forms are first transformed:
+     
+     (defun symb params body) => (def symb (fun params body))
+  */
+  private List transformInnerDefs(List body)
   {
     List.Builder bindings = new List.Builder();
     
-    for (; isInnerDefun(body.car()); body = body.cdr())
-      bindings.add(transformInnerDefun((List) body.car()));
+    while (isInnerDef(body.car())) {
+      var exp = (List) body.car();
+      if (exp.car() == Symbol.get("defun"))
+        exp = transformDefun(exp);
+      bindings.add(exp.cdr());
+      body = body.cdr();
+    }
     
-    return List.cons(Symbol.get("letrec"),
-           List.cons(bindings.build(),
-                     body));
+    return List.cons(Symbol.get("letrec"), List.cons(bindings.build(), body));
+  }
+  
+  private boolean isInnerDef(Datum exp)
+  {
+    return exp.type() == Type.List &&
+      (((List)exp).car() == Symbol.get("def") ||
+       ((List)exp).car() == Symbol.get("defun"));
   }
   
   private boolean isRestParam(Symbol s)
