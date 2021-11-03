@@ -62,5 +62,5 @@ public final class Int extends Datum
     return Integer.compare(x.value, y.value);
   }
 
-  final int value;
+  public final int value;
 }

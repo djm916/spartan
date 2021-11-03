@@ -4,7 +4,7 @@ import spartan.data.*;
 import spartan.errors.TypeMismatch;
 import spartan.runtime.VirtualMachine;
 
-public final class Math
+public final class MathLib
 {
   public static Datum add(Datum x, Datum y) throws TypeMismatch
   {
@@ -292,6 +292,13 @@ public final class Math
   public static final Primitive Atan = new Primitive(1, false) {
     public void apply(VirtualMachine vm) throws TypeMismatch {
       vm.result = atan(vm.popArg());
+      vm.popFrame();
+    }
+  };
+  
+  public static final Primitive Rand = new Primitive(0, false) {
+    public void apply(VirtualMachine vm) {
+      vm.result = new Real(Math.random());
       vm.popFrame();
     }
   };

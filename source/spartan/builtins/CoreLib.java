@@ -5,7 +5,7 @@ import spartan.errors.Error;
 import spartan.errors.TypeMismatch;
 import spartan.runtime.VirtualMachine;
 
-public final class Core
+public final class CoreLib
 {
   public static Bool truth(boolean x)
   {
@@ -186,9 +186,19 @@ public final class Core
     }
   };
   
-  public static final Primitive Print = new Primitive(1, false) {
+  public static final Primitive Print = new Primitive(1, true) {
     public void apply(VirtualMachine vm) {
-      System.out.println(vm.popArg().repr());
+      while (!vm.args.empty())
+        System.out.print(vm.popArg().repr());
+      vm.result = Nil.Instance;
+      vm.popFrame();
+    }
+  };
+  
+  public static final Primitive PrintLine = new Primitive(1, true) {
+    public void apply(VirtualMachine vm) {
+      while (!vm.args.empty())
+        System.out.println(vm.popArg().repr());
       vm.result = Nil.Instance;
       vm.popFrame();
     }

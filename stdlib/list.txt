@@ -9,19 +9,39 @@
       (cons (car xs) (list/filter f (cdr xs)))
       (list/filter f (cdr xs)))))
 
-(defun list/fold (f xs i)
-  (if (empty? xs) i
-    (list/fold f (cdr xs) (f (car xs) i))))
+; Reduce a list to a single value
 
+; Inputs:
+;   f     a binary function
+;   xs:   a list of elements x1 x2 ... xN
+;   i:    an inital value
+    
+; For example, a 3 element list reduces as:
+;
+;   (f (f (f i x1) x2) x3)
+
+(defun list/fold-left (f i xs)
+  (if (empty? xs) i
+    (list/fold-left f (f i (car xs)) (cdr xs))))
+
+; Reduce a list to a single value
+
+; Inputs:
+;   f     a binary function
+;   xs:   a list of elements x1 x2 ... xN
+;   i:    an inital value
+    
+; For example, a 3 element list reduces as:
+;
+;   (f x1 (f x2 (f x3 i)))
+
+(defun list/fold-right (f i xs)
+  (if (empty? xs) i
+    (f (car xs) (list/fold-right f i (cdr xs)))))
+  
 (defun list/range (i j)
   (if (> i j) ()
     (cons i (list/range (+ 1 i) j))))
-
-;(defun list/reverse (xs)
-;  (letrec ((loop (fun (xs sx)
-;                   (if (empty? xs) sx
-;                     (loop (cdr xs) (cons (car xs) sx))))))
-;    (loop xs ())))
 
 (defun list/reverse (xs)
   (defun loop (xs sx)
@@ -29,29 +49,32 @@
       (loop (cdr xs) (cons (car xs) sx))))
   (loop xs ()))
 
-(defun list/enum (xs i)
+(defun list/enumerate (xs i)
   (if (empty? xs) ()
     (cons (list i (car xs))
-          (list/enum (cdr xs) (+ 1 i)))))
-    
-; ---
+          (list/enumerate (cdr xs) (+ 1 i)))))
 
-(defun square (x) (* x x))
+(defun list/take (n xs)
+  (if (= 0 n) ()
+    (cons (car xs) (list/take (- n 1) (cdr xs)))))
 
-(list/map square (list/range 1 10))
+(defun list/take-while (f xs)
+  (if (empty? xs) ()
+    (if (f (car xs))
+      (cons (car xs) (list/take-while f (cdr xs)))
+      ())))
 
-(defun even? (x) (= 0 (% x 2)))
+(defun list/drop (n xs)
+  (if (= 0 n) xs
+    (list/drop (- n 1) (cdr xs))))
 
-(list/filter even? (list/range 1 10))
+(defun list/drop-while (f xs)
+  (if (empty? xs) xs
+    (if (f (car xs))
+      (list/drop-while f (cdr xs))
+      xs)))
 
-; 0 + 1 + ... + 10 = 55
-(list/fold + (list/range 1 10) 0)
-
-; 0 - 1 - 2 - ... - 10
-(list/fold - (list/range 1 10) 0)
-
-; !6 = 720
-(list/fold * (list/range 1 6) 1)
-
-; (10, 9, 8, ... 1)
-(list/reverse (list/range 1 10))
+(defun list/zip (f xs ys)
+  (if (or (empty? xs) (empty? ys)) ()
+    (cons (f (car xs) (car ys))
+          (list/zip f (cdr xs) (cdr ys)))))

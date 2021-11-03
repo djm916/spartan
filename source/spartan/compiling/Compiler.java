@@ -156,14 +156,16 @@ public class Compiler
                                  : new StoreLocal(index.depth, index.offset, next));
   }
   
-  /* Compiles a top-level definition. Creates a new global variable or mutates an existing one.
+  /* A top-level definition either binds a new global variable or
+     mutates an existing one.
 
      Syntax: (def symb init)
           
      Compilation:
      
        <<init>>
-       store-global(symb)
+       store-global symb
+       load-const nil
        next: ...
   */
 
@@ -177,7 +179,8 @@ public class Compiler
     
     return compile(init, scope, false,
            new StoreGlobal(symb,
-           next));
+           new LoadConst(Nil.Instance,
+           next)));
   }
   
   /* Compile a top-level function definition. */
@@ -458,6 +461,10 @@ public class Compiler
     return binding.length() == 2 && binding.car().type() == Type.Symbol;
   }
   
+  /* Extract the 1st of each element in a list of pairs:
+     
+     ((x1 y1) (x2 y2)...) => (x1 x2...)
+  */
   private List extractFirst(List pairs)
   {
     var result = new List.Builder();
@@ -468,6 +475,10 @@ public class Compiler
     return result.build();
   }
   
+  /* Extract the 2nd of each element in a list of pairs:
+     
+     ((x1 y1) (x2 y2)...) => (y1 y2...)
+  */
   private List extractSecond(List pairs)
   {
     var result = new List.Builder();

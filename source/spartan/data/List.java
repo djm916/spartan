@@ -1,6 +1,6 @@
 package spartan.data;
 
-import spartan.builtins.Core;
+import spartan.builtins.CoreLib;
 import spartan.errors.TypeMismatch;
 
 public final class List extends Datum
@@ -133,7 +133,7 @@ public final class List extends Datum
   private static boolean eq(List x, List y) throws TypeMismatch
   {
     for (; x != Empty && y != Empty; x = x.rest, y = y.rest)
-      if (!Core.eq(x.first, y.first))
+      if (!CoreLib.eq(x.first, y.first))
         return false;
     
     return x == Empty && y == Empty;
@@ -141,9 +141,6 @@ public final class List extends Datum
   
   private static List concat(List x, List y)
   {
-    //if (x == Empty)
-      //return y;
-    //return List.cons(x.car(), concat(x.cdr(), y));
     var result = new Builder();
     for (; x != Empty; x = x.rest)
       result.add(x.first);
@@ -154,9 +151,6 @@ public final class List extends Datum
   
   private static List append(List x, Datum y)
   {
-    //if (x == Empty)
-    //  return List.of(y);
-    //return List.cons(x.car(), append(x.cdr(), y));
     var result = new Builder();
     for (; x != Empty; x = x.rest)
       result.add(x.first);

@@ -8,7 +8,7 @@ import spartan.data.Bool;
 import spartan.runtime.VirtualMachine;
 import spartan.errors.TypeMismatch;
 
-public final class Lists
+public final class ListLib
 {
   public static Datum car(Datum x) throws TypeMismatch
   {
