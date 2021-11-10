@@ -264,7 +264,6 @@ public class Reader implements AutoCloseable
   private Datum readSymbol() throws IOException
   {
     var text = new StringBuilder();
-    var position = new Position(source, tokenStart.line, tokenStart.column);
 
     text.append((char)lastChar);
 
@@ -273,11 +272,9 @@ public class Reader implements AutoCloseable
       text.append((char)lastChar);
     }
 
-    var symbol = Symbol.get(text.toString());
-    positionMap.put(symbol, position);
-    return symbol;
+    return Symbol.get(text.toString());
   }
-   
+  
   private Datum readText() throws SyntaxError, IOException
   {
     var text = new StringBuilder();

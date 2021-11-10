@@ -24,12 +24,7 @@ public class Compiler
   {
     return new MalformedExpression(positionMap.get(exp));
   }
-  
-  private MultipleDefinition multipleDef(Symbol var)
-  {
-    return new MultipleDefinition(var, positionMap.get(var));
-  }
-  
+    
   private static boolean isSelfEval(Datum exp)
   {
     return exp.type() == Type.Int
@@ -128,7 +123,7 @@ public class Compiler
   {
     var index = (scope == null) ? null : scope.lookup(symb);
     
-    return (index == null) ? new LoadGlobal(symb, positionMap.get(symb), next)
+    return (index == null) ? new LoadGlobal(symb, next)
                            : new LoadLocal(index.depth, index.offset, next);
   }
   

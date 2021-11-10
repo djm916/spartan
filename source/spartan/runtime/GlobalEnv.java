@@ -2,6 +2,7 @@ package spartan.runtime;
 
 import spartan.data.Datum;
 import spartan.data.Symbol;
+import spartan.data.Nil;
 import java.util.Map;
 import java.util.IdentityHashMap;
 
@@ -16,6 +17,6 @@ public class GlobalEnv
   
   public Datum lookup(Symbol s)
   {
-    return globals.get(s);
+    return globals.getOrDefault(s, Nil.Instance);
   }
 }
