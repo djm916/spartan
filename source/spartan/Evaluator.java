@@ -14,9 +14,9 @@ public final class Evaluator
   public static void evalInteractive(GlobalEnv globals)
   {
     try (Reader reader = Reader.forConsole()) {
-      var compiler = new Compiler();
       var vm = new VirtualMachine(globals);
-      
+      var compiler = new Compiler(vm);
+            
       while (true) {
         try {
           var exp = reader.read();
@@ -42,9 +42,9 @@ public final class Evaluator
   public static void evalFile(String fileName, GlobalEnv globals)
   {
     try (Reader reader = Reader.forFile(fileName)) {
-      var compiler = new Compiler();
       var vm = new VirtualMachine(globals);
-
+      var compiler = new Compiler(vm);
+      
       while (true) {
         try {
           var exp = reader.read();
