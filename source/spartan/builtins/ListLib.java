@@ -38,11 +38,16 @@ public final class ListLib
     return ((List)x).append(y);
   }
   
-  public static List concat(Datum x, Datum y) throws TypeMismatch
+  public static List concat(List args) throws TypeMismatch
   {
-    if (x.type() != Type.List || y.type() != Type.List)
-      throw new TypeMismatch();
-    return ((List)x).concat((List)y);
+    var builder = new List.Builder();
+    for (; args != List.Empty; args = args.cdr()) {
+      if (args.car().type() != Type.List)
+        throw new TypeMismatch();
+      for (var list = (List)args.car(); list != List.Empty; list = list.cdr())
+        builder.add(list.car());
+    }
+    return builder.build();
   }
   
   public static final Primitive Car = new Primitive(1, false) {
@@ -101,9 +106,9 @@ public final class ListLib
     }
   };
     
-  public static final Primitive Concat = new Primitive(2, false) {
+  public static final Primitive Concat = new Primitive(0, true) {
     public void apply(VirtualMachine vm) throws TypeMismatch {
-      vm.result = concat(vm.popArg(), vm.popArg());
+      vm.result = concat(vm.popRestArgs());
       vm.popFrame();
     }
   };

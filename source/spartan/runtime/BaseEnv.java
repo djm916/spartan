@@ -4,6 +4,7 @@ import spartan.builtins.CoreLib;
 import spartan.builtins.MathLib;
 import spartan.builtins.ListLib;
 import spartan.builtins.VectorLib;
+import spartan.builtins.TextLib;
 import spartan.data.*;
 
 public final class BaseEnv extends GlobalEnv
@@ -16,28 +17,28 @@ public final class BaseEnv extends GlobalEnv
     bind(Symbol.get("list"), CoreLib.MakeList);
     bind(Symbol.get("vector"), CoreLib.MakeVector);
     bind(Symbol.get("record"), CoreLib.MakeRecord);
-    bind(Symbol.get("complex"), CoreLib.MakeComplex);
-    
+    bind(Symbol.get("complex"), CoreLib.MakeComplex);    
     bind(Symbol.get("apply"), CoreLib.Apply);    
     bind(Symbol.get("print"), CoreLib.Print);
     bind(Symbol.get("printnl"), CoreLib.PrintLine);
     bind(Symbol.get("type"), CoreLib.TypeOf);
     bind(Symbol.get("length"), CoreLib.Length);
     bind(Symbol.get("load"), CoreLib.Load);
-    
-    bind(Symbol.get("+"), MathLib.Add);
-    bind(Symbol.get("-"), MathLib.Sub);
-    bind(Symbol.get("*"), MathLib.Mul);
-    bind(Symbol.get("/"), MathLib.Div);
-    bind(Symbol.get("%"), MathLib.Mod);
     bind(Symbol.get("="), CoreLib.Eq);
     bind(Symbol.get("/="), CoreLib.Ne);
     bind(Symbol.get("<"), CoreLib.Lt);
     bind(Symbol.get(">"), CoreLib.Gt);
     bind(Symbol.get("<="), CoreLib.Le);
     bind(Symbol.get(">="), CoreLib.Ge);
-    bind(Symbol.get("~"), MathLib.Neg);
     bind(Symbol.get("not"), CoreLib.Not);
+    
+    bind(Symbol.get("+"), MathLib.Add);
+    bind(Symbol.get("-"), MathLib.Sub);
+    bind(Symbol.get("*"), MathLib.Mul);
+    bind(Symbol.get("/"), MathLib.Div);
+    bind(Symbol.get("%"), MathLib.Mod);
+    
+    bind(Symbol.get("~"), MathLib.Neg);
     bind(Symbol.get("abs"), MathLib.Abs);
     bind(Symbol.get("floor"), MathLib.Floor);
     bind(Symbol.get("ceil"), MathLib.Ceil);
@@ -68,5 +69,8 @@ public final class BaseEnv extends GlobalEnv
     bind(Symbol.get("vector/new"), VectorLib.New);
     bind(Symbol.get("vector/copy"), VectorLib.Copy);
     bind(Symbol.get("vector/set!"), VectorLib.Set);
+    
+    bind(Symbol.get("text/concat"), TextLib.Concat);
+    bind(Symbol.get("text->symbol"), TextLib.ToSymbol);
   }
 }

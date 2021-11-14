@@ -979,5 +979,5 @@ public class Compiler
 
   private PositionMap positionMap;
   private final java.util.Map<Symbol, Macro> macros = new java.util.IdentityHashMap<>();
-  private final VirtualMachine vm;// = new VirtualMachine(new BaseEnv());
+  private final VirtualMachine vm;
 }

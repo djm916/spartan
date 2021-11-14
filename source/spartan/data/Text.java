@@ -31,6 +31,11 @@ public final class Text extends Datum
   {
     return this.value.compareTo(that.value);
   }
+    
+  public String toString()
+  {
+    return value;
+  }
   
-  public final String value;
+  private final String value;
 }

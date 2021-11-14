@@ -233,7 +233,7 @@ public final class CoreLib
     public void apply(VirtualMachine vm) throws TypeMismatch {
       if (vm.peekArg().type() != Type.Text)
         throw new TypeMismatch();
-      var fileName = ((Text) vm.popArg()).value;
+      var fileName = ((Text) vm.popArg()).toString();
       spartan.Evaluator.evalFile(fileName, vm.globals);
       vm.result = Nil.Instance;
       vm.popFrame();

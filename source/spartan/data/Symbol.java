@@ -26,7 +26,12 @@ public final class Symbol extends Datum
   {
     return this.id.equals(that.id);
   }
-
+  
+  public String toString()
+  {
+    return id;
+  }
+  
   private Symbol(String id)
   {
     this.id = id;
