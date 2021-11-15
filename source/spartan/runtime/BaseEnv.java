@@ -31,6 +31,8 @@ public final class BaseEnv extends GlobalEnv
     bind(Symbol.get("<="), CoreLib.Le);
     bind(Symbol.get(">="), CoreLib.Ge);
     bind(Symbol.get("not"), CoreLib.Not);
+    bind(Symbol.get("text->symbol"), CoreLib.TextToSymbol);
+    bind(Symbol.get("symbol->text"), CoreLib.SymbolToText);
     
     bind(Symbol.get("+"), MathLib.Add);
     bind(Symbol.get("-"), MathLib.Sub);
@@ -70,7 +72,6 @@ public final class BaseEnv extends GlobalEnv
     bind(Symbol.get("vector/copy"), VectorLib.Copy);
     bind(Symbol.get("vector/set!"), VectorLib.Set);
     
-    bind(Symbol.get("text/concat"), TextLib.Concat);
-    bind(Symbol.get("text->symbol"), TextLib.ToSymbol);
+    bind(Symbol.get("text/concat"), TextLib.Concat);    
   }
 }

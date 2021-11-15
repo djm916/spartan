@@ -21,16 +21,7 @@ public final class TextLib
     }
     return new Text(buffer.toString());
   }
-  
-  public static final Primitive ToSymbol = new Primitive(1, false) {
-    public void apply(VirtualMachine vm) throws TypeMismatch {
-      if (vm.peekArg().type() != Type.Text)
-        throw new TypeMismatch();
-      vm.result = Symbol.get(((Text)vm.popArg()).toString());
-      vm.popFrame();
-    }
-  };
-  
+    
   public static final Primitive Concat = new Primitive(0, true) {
     public void apply(VirtualMachine vm) throws TypeMismatch {
       vm.result = concat(vm.popRestArgs());

@@ -240,4 +240,21 @@ public final class CoreLib
     }
   };
   
+  public static final Primitive SymbolToText = new Primitive(1, false) {
+    public void apply(VirtualMachine vm) throws TypeMismatch {
+      if (vm.peekArg().type() != Type.Symbol)
+        throw new TypeMismatch();
+      vm.result = new Text(((Symbol)vm.popArg()).toString());
+      vm.popFrame();
+    }
+  };
+    
+  public static final Primitive TextToSymbol = new Primitive(1, false) {
+    public void apply(VirtualMachine vm) throws TypeMismatch {
+      if (vm.peekArg().type() != Type.Text)
+        throw new TypeMismatch();
+      vm.result = Symbol.get(((Text)vm.popArg()).toString());
+      vm.popFrame();
+    }
+  };
 }
