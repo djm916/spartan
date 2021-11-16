@@ -56,7 +56,7 @@ public final class Vector extends Callable
     return Nil.Instance;
   }
   
-  public boolean eq(Vector that) throws TypeMismatch
+  public boolean eq(Vector that)
   {
     if (this.length() != that.length())
       return false;

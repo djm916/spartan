@@ -8,7 +8,7 @@
   (defun generate-constructor ()
     `(defun ,(generate-constructor-name)
             ,fields
-            (vector ,@fields)))
+            (vector ',name ,@fields)))
 
   (defun generate-getter-name (field)
     (text->symbol (text/concat (symbol->text name) "-" (symbol->text field))))
@@ -28,12 +28,15 @@
     (text->symbol (text/concat (symbol->text name) "?")))
   
   (defun generate-predicate ()
-    `(defun ,(generate-predicate-name) (self) true))
+    `(defun ,(generate-predicate-name) (self)
+       (and (= (type self) 'type/vector)
+            (= (length self) ,(+ 1 (length fields)))
+            (= (vector/get self 0) ',name))))
   
   `(do
      ,(generate-constructor)
-     ,@(list/map-with-index generate-getter 0 fields)
-     ,@(list/map-with-index generate-setter 0 fields)
+     ,@(list/map-with-index generate-getter 1 fields)
+     ,@(list/map-with-index generate-setter 1 fields)
      ,(generate-predicate)
    ))
 
@@ -43,3 +46,4 @@
 (point-y p)
 (set-point-x! p 2)
 (set-point-y! p 1)
+(point? p)

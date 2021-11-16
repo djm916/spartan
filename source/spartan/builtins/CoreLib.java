@@ -29,7 +29,7 @@ public final class CoreLib
     }
   };
 
-  public static boolean eq(Datum x, Datum y) throws TypeMismatch
+  public static boolean eq(Datum x, Datum y)
   {
     if (x.type() == y.type()) {
       switch (x.type()) {
@@ -43,11 +43,11 @@ public final class CoreLib
         case Symbol: return x == y;
       }
     }
-    throw new TypeMismatch();
+    return false;
   }
   
   public static final Primitive Eq = new Primitive(2, false) {
-    public void apply(VirtualMachine vm) throws TypeMismatch {
+    public void apply(VirtualMachine vm) {
       vm.result = truth(eq(vm.popArg(), vm.popArg()));
       vm.popFrame();
     }
