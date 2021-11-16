@@ -94,15 +94,15 @@ public class Compiler
       }
     }
 
-    // (quasiquote (unquote-splicing x) xs...) => (concat (quote x) (quasiquote xs...))
+    // (quasiquote (unquote-splicing x) xs...) => (concat x (quasiquote xs...))
 
     if (list.car().type() == Type.List) {
       List list2 = (List) list.car();
       if (list2.car() == Symbol.get("unquote-splicing")) {
         if (list2.length() != 2)
           throw malformedExp(exp);
-        return List.cons(Symbol.get("concat"),
-               List.cons(List.of(Symbol.get("quote"), list2.cadr()),
+        return List.cons(Symbol.get("list/concat"),
+               List.cons(list2.cadr(),
                List.cons(transformQuasiquote(list.cdr()),
                List.Empty)));
       }

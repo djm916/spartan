@@ -3,6 +3,10 @@
   (if (empty? xs) () 
     (cons (f (car xs)) (list/map f (cdr xs)))))
 
+(defun list/map-with-index (f i xs)
+  (if (empty? xs) () 
+    (cons (f (car xs) i) (list/map-with-index f (+ 1 i) (cdr xs)))))
+
 (defun list/filter (f xs)
   (if (empty? xs) ()
     (if (f (car xs))

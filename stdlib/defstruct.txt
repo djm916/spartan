@@ -1,9 +1,45 @@
+(load "stdlib/list.txt")
 
-(defun generate-constructor-name (struct-name)
-  (text->symbol (text/concat "make-" (symbol->text struct-name))))
+(defmacro defstruct (name fields)
 
-(defmacro defstruct (name attrs)
-  `(defun ,(generate-constructor-name name)
-          ,attrs
-          (vector/new ,(length attrs) nil)))
-          
+  (defun generate-constructor-name ()
+    (text->symbol (text/concat "make-" (symbol->text name))))
+
+  (defun generate-constructor ()
+    `(defun ,(generate-constructor-name)
+            ,fields
+            (vector ,@fields)))
+
+  (defun generate-getter-name (field)
+    (text->symbol (text/concat (symbol->text name) "-" (symbol->text field))))
+
+  (defun generate-getter (field index)
+    `(defun ,(generate-getter-name field) (self)
+            (vector/get self ,index)))
+
+  (defun generate-setter-name (field)
+    (text->symbol (text/concat "set-" (symbol->text name) "-" (symbol->text field) "!")))
+
+  (defun generate-setter (field index)
+    `(defun ,(generate-setter-name field) (self value)
+            (vector/set! self ,index value)))
+  
+  (defun generate-predicate-name ()
+    (text->symbol (text/concat (symbol->text name) "?")))
+  
+  (defun generate-predicate ()
+    `(defun ,(generate-predicate-name) (self) true))
+  
+  `(do
+     ,(generate-constructor)
+     ,@(list/map-with-index generate-getter 0 fields)
+     ,@(list/map-with-index generate-setter 0 fields)
+     ,(generate-predicate)
+   ))
+
+(defstruct point (x y))
+(def p (make-point 1 2))
+(point-x p)
+(point-y p)
+(set-point-x! p 2)
+(set-point-y! p 1)

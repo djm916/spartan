@@ -27,6 +27,19 @@ public final class VectorLib
     }
   };
   
+  public static final Primitive Get = new Primitive(2, false) {
+    public void apply(VirtualMachine vm) throws TypeMismatch, NoSuchElement {
+      if (vm.peekArg().type() != Type.Vector)
+        throw new TypeMismatch();
+      var vector = (Vector) vm.popArg();
+      if (vm.peekArg().type() != Type.Int)
+        throw new TypeMismatch();
+      var index = (Int) vm.popArg();
+      vm.result = vector.get(index);
+      vm.popFrame();
+    }
+  };
+  
   public static final Primitive Set = new Primitive(3, false) {
     public void apply(VirtualMachine vm) throws TypeMismatch, NoSuchElement {
       if (vm.peekArg().type() != Type.Vector)
