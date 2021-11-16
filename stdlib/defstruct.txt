@@ -40,6 +40,8 @@
      ,(generate-predicate)
    ))
 
+; Example
+
 (defstruct point (x y))
 (def p (make-point 1 2))
 (point-x p)
