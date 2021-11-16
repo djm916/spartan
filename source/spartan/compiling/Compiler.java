@@ -111,7 +111,8 @@ public class Compiler
     // (quasiquote x xs...) => (cons (quote x) (quasiquote xs))
 
     return List.cons(Symbol.get("cons"),
-           List.cons(List.of(Symbol.get("quote"), list.car()),
+           //List.cons(List.of(Symbol.get("quote"), list.car()),
+           List.cons(transformQuasiquote(list.car()),
            List.cons(transformQuasiquote(list.cdr()),
            List.Empty)));
   }
@@ -190,9 +191,7 @@ public class Compiler
     if (exp.length() < 4)
       throw malformedExp(exp);
 
-    var xform = transformDefun(exp);
-    System.out.println("defun transform = " + xform.repr());
-    return compile(xform, scope, false, next);
+    return compile(transformDefun(exp), scope, false, next);
   }
 
   /* Transforms the "defun" special form

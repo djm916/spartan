@@ -1,0 +1,9 @@
+
+(defun generate-constructor-name (struct-name)
+  (text->symbol (text/concat "make-" (symbol->text struct-name))))
+
+(defmacro defstruct (name attrs)
+  `(defun ,(generate-constructor-name name)
+          ,attrs
+          (vector/new ,(length attrs) nil)))
+          
