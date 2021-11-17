@@ -100,7 +100,7 @@ public final class List extends Datum
     return at(this, index);
   }
   
-  public boolean eq(List that)
+  public boolean eq(List that) throws TypeMismatch
   {
     return eq(this, that);
   }
@@ -130,7 +130,7 @@ public final class List extends Datum
     return list.first;
   }
   
-  private static boolean eq(List x, List y)
+  private static boolean eq(List x, List y) throws TypeMismatch
   {
     for (; x != Empty && y != Empty; x = x.rest, y = y.rest)
       if (!CoreLib.eq(x.first, y.first))
