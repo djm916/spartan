@@ -30,6 +30,8 @@ public class Compiler
     return new MalformedExpression(positionMap.get(exp));
   }
 
+  // Determine if an expression is self-evaluating.
+  
   private static boolean isSelfEval(Datum exp)
   {
     return exp.type() == Type.Int
@@ -39,7 +41,9 @@ public class Compiler
         || exp == List.Empty
         || exp == Nil.Instance;
   }
-
+  
+  // A self-evaluating expression evalutes to itself.
+  
   private Inst compileSelfEval(Datum exp, Inst next)
   {
     return new LoadConst(exp, next);
@@ -64,9 +68,7 @@ public class Compiler
       throw malformedExp(exp);
 
     var transformed = transformQuasiquote(exp.cadr());
-
-    System.out.println("quasiquote transformation = " + transformed.repr());
-
+    //System.out.println("quasiquote transformation = " + transformed.repr());
     return compile(transformed, scope, false, next);
   }
 
@@ -79,13 +81,15 @@ public class Compiler
     if (exp == List.Empty)
       return List.Empty;
     
-    // (quasiquote x) => (quote x) for non-list x
+    // (quasiquote x) => (quote x) for atomic (non-list) x
     
     if (exp.type() != Type.List)
       return List.of(Symbol.get("quote"), exp);
 
     var list = (List) exp;
-
+    
+    // Check for the unquote and unquote-splicing forms
+    
     if (list.car().type() == Type.List) {
       
       var car = (List) list.car();
@@ -112,7 +116,9 @@ public class Compiler
                List.Empty)));
       }
     }
-
+    
+    // General case: recursively transform the list
+    
     // (quasiquote x xs...) => (cons (quasiquote x) (quasiquote xs...))
 
     return List.cons(Symbol.get("cons"),
