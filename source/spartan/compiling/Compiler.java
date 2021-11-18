@@ -121,12 +121,14 @@ public class Compiler
            List.Empty)));
   }
 
-  /* Compiles a variable reference.
+  /* Compiles a variable reference
+     
+     Syntax: an unquoted symbol
+     
+     If the symbol is a bound local variable, look up its DeBruijn index (a 
+     depth, offset pair), and generate a load-local instruction.
 
-     If the symbol is a bound local variable, look up its DeBruijn index (depth, offset),
-     and generate a load-local(depth, offset) instruction.
-
-     Otherwise, assume the symbol is a global variable, and generate a load-global(symbol) instruction.
+     Otherwise, assume the symbol is a global variable, and generate a load-global instruction.
   */
 
   private Inst compileVarRef(Symbol symb, Scope scope, Inst next)
@@ -141,15 +143,15 @@ public class Compiler
 
      Syntax: (set! symbol init)
 
-     If the symbol is a bound local variable, look up its DeBruijn index (depth, offset),
-     and generate a store-local(depth, offset) instruction.
+     If the symbol is a bound local variable, look up its DeBruijn index (a depth, offset
+     pair), and generate a store-local(depth, offset) instruction.
 
-     Otherwise, assume the symbol is a global variable, and generate a store-global(symbol) instruction.
+     Otherwise, assume the symbol is a global variable, and generate a store-global instruction.
   */
 
-  private Inst compileSet(List exp, Scope scope, boolean tail, Inst next) throws CompileError
+  private Inst compileSet(List exp, Scope scope, Inst next) throws CompileError
   {
-    if (exp.length() != 3 || exp.cdr().car().type() != Type.Symbol)
+    if (exp.length() != 3 || exp.cadr().type() != Type.Symbol)
       throw malformedExp(exp);
 
     var symb = (Symbol) exp.cadr();
@@ -161,8 +163,7 @@ public class Compiler
                                  : new StoreLocal(index.depth, index.offset, next));
   }
 
-  /* A top-level definition either binds a new global variable or
-     mutates an existing one.
+  /* A top-level definition either binds a new global variable or modifies an existing one.
 
      Syntax: (def symb init)
 
@@ -188,8 +189,10 @@ public class Compiler
            next)));
   }
 
-  /* Compile a top-level function definition. */
-
+  /* Compile the "defun" special form for defining functions by transforming to
+     the equivalent "def" form.
+  */
+  
   private Inst compileDefun(List exp, Scope scope, Inst next) throws CompileError
   {
     if (exp.length() < 4)
@@ -197,16 +200,9 @@ public class Compiler
 
     return compile(transformDefun(exp), scope, false, next);
   }
-
-  /* Transforms the "defun" special form
-
-       (defun symbol (params...) body...)
-
-     into the equivalent
-
-       (def symbol (fun (params...) body...))
-  */
-
+  
+  // (defun symbol (params...) body...) => (def symbol (fun (params...) body...))
+  
   private List transformDefun(List exp)
   {
     var symb = exp.cadr();
@@ -617,7 +613,7 @@ public class Compiler
   {
     if (isInnerDef(body.car())) {
       var xform = transformInnerDefs(body);
-      System.out.println("inner defs xform = " + xform.repr());
+      //System.out.println("inner defs xform = " + xform.repr());
       return compile(xform, scope, true, next);
     }
 
@@ -959,7 +955,7 @@ public class Compiler
     else if (exp.car() == Symbol.get("do"))
       return compileDo(exp, scope, tail, next);
     else if (exp.car() == Symbol.get("set!"))
-      return compileSet(exp, scope, tail, next);
+      return compileSet(exp, scope, next);
     else if (exp.car() == Symbol.get("while"))
       return compileWhile(exp, scope, tail, next);
     else if (exp.car() == Symbol.get("delay"))
