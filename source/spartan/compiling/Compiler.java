@@ -55,7 +55,8 @@ public class Compiler
     return new LoadConst(exp.cadr(), next);
   }
 
-  // (quasiquote x)
+  // Compile a (quasiquote x) form by reducing it to an equivalent
+  // list form and compiling the result.
 
   private Inst compileQuasiquote(List exp, Scope scope, Inst next) throws CompileError
   {
@@ -69,49 +70,52 @@ public class Compiler
     return compile(transformed, scope, false, next);
   }
 
-  // Reduce a quasiquote form (quasiquote x)
+  // Reduce a quasiquote form (quasiquote x) to equivalent list form.
 
   private List transformQuasiquote(Datum exp) throws CompileError
   {
+    // (quasiquote ()) => ()
+    
+    if (exp == List.Empty)
+      return List.Empty;
+    
     // (quasiquote x) => (quote x) for non-list x
-
-    if (exp.type() != Type.List || exp == List.Empty)
+    
+    if (exp.type() != Type.List)
       return List.of(Symbol.get("quote"), exp);
 
-    List list = (List) exp;
-
-    // (quasiquote (unquote x) xs...) => (cons x (quasiquote xs...))
+    var list = (List) exp;
 
     if (list.car().type() == Type.List) {
-      List list2 = (List) list.car();
-      if (list2.car() == Symbol.get("unquote")) {
-        if (list2.length() != 2)
+      
+      var car = (List) list.car();
+      
+      // (quasiquote (unquote x) xs...) => (cons x (quasiquote xs...))
+      
+      if (car.car() == Symbol.get("unquote")) {
+        if (car.length() != 2)
           throw malformedExp(exp);
         return List.cons(Symbol.get("cons"),
-               List.cons(list2.cadr(),
+               List.cons(car.cadr(),
                List.cons(transformQuasiquote(list.cdr()),
                List.Empty)));
       }
-    }
 
-    // (quasiquote (unquote-splicing x) xs...) => (concat x (quasiquote xs...))
-
-    if (list.car().type() == Type.List) {
-      List list2 = (List) list.car();
-      if (list2.car() == Symbol.get("unquote-splicing")) {
-        if (list2.length() != 2)
+      // (quasiquote (unquote-splicing x) xs...) => (list/concat x (quasiquote xs...))    
+      
+      if (car.car() == Symbol.get("unquote-splicing")) {
+        if (car.length() != 2)
           throw malformedExp(exp);
         return List.cons(Symbol.get("list/concat"),
-               List.cons(list2.cadr(),
+               List.cons(car.cadr(),
                List.cons(transformQuasiquote(list.cdr()),
                List.Empty)));
       }
     }
 
-    // (quasiquote x xs...) => (cons (quote x) (quasiquote xs))
+    // (quasiquote x xs...) => (cons (quasiquote x) (quasiquote xs...))
 
     return List.cons(Symbol.get("cons"),
-           //List.cons(List.of(Symbol.get("quote"), list.car()),
            List.cons(transformQuasiquote(list.car()),
            List.cons(transformQuasiquote(list.cdr()),
            List.Empty)));
