@@ -881,7 +881,7 @@ public class Compiler
 
     var symb = (Symbol) exp.cadr();
     var macro = makeMacro(exp);
-    macros.put(symb, macro);
+    vm.globals.bind(symb, macro);
     return new LoadConst(Nil.Instance, next);
   }
 
@@ -915,21 +915,30 @@ public class Compiler
 
   private Inst compileApplyMacro(List exp, Scope scope, boolean tail, Inst next) throws CompileError
   {
-    var macro = macros.get(exp.car());
+    var macro = vm.globals.lookup((Symbol)exp.car());
     var args = exp.cdr();
     Datum expansion = null;
 
     try {
-      expansion = macro.apply(vm, args);
+      vm.pushFrame(null);
+      vm.result = macro;
+      vm.args = args;
+      expansion = vm.eval(new Apply(args.length(), positionMap.get(exp)));
     }
-    catch (WrongNumberArgs | RuntimeError err) {
-      throw new CompileError(err.getMessage(), positionMap.get(exp));
+    catch (RuntimeError err) {
+      throw new CompileError(err.getMessage(), err.position);
     }
 
     System.out.println("macro expansion: " + expansion.repr());
     return compile(expansion, scope, tail, next);
   }
-
+  
+  public boolean isMacro(Datum exp)
+  {
+    return exp.type() == Type.Symbol &&
+           vm.globals.lookup((Symbol)exp).type() == Type.Macro;
+  }
+  
   private Inst compileList(List exp, Scope scope, boolean tail, Inst next) throws CompileError
   {
     if (exp.car() == Symbol.get("if"))
@@ -966,7 +975,7 @@ public class Compiler
       return compileWhile(exp, scope, tail, next);
     else if (exp.car() == Symbol.get("delay"))
       return compileDelay(exp, scope, tail, next);
-    else if (macros.containsKey(exp.car()))
+    else if (isMacro(exp.car()))
       return compileApplyMacro(exp, scope, tail, next);
     else
       return compileApply(exp, scope, tail, next);
@@ -983,6 +992,5 @@ public class Compiler
   }
 
   private PositionMap positionMap;
-  private final java.util.Map<Symbol, Macro> macros = new java.util.IdentityHashMap<>();
   private final VirtualMachine vm;
 }

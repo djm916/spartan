@@ -14,6 +14,7 @@ public enum Type
   Map("type/map"),
   Primitive("type/function"),
   Closure("type/function"),
+  Macro("type/macro"),
   Promise("type/promise"),
   Port("type/port");
   
