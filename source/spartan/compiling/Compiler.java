@@ -7,10 +7,8 @@ import spartan.parsing.PositionMap;
 import spartan.errors.CompileError;
 import spartan.errors.MalformedExpression;
 import spartan.errors.MultipleDefinition;
-import spartan.errors.WrongNumberArgs;
 import spartan.errors.RuntimeError;
 import spartan.runtime.VirtualMachine;
-import spartan.runtime.BaseEnv;
 
 public class Compiler
 {
@@ -872,7 +870,13 @@ public class Compiler
            new PopEnv(next)))))));
   }
 
-  // (defmacro f (param...) body...)
+  /* Compile the "defmacro" special form.
+     
+     Syntax: (defmacro f (param...) body...)
+     
+     Creates a macro, which is essentially just a regular procedure,
+     but is intended to transform code at compile time.
+  */
 
   private Inst compileDefMacro(List exp, Scope scope, Inst next) throws CompileError
   {
@@ -884,7 +888,9 @@ public class Compiler
     vm.globals.bind(symb, macro);
     return new LoadConst(Nil.Instance, next);
   }
-
+  
+  /* Create a macro instance given its definition.
+  */
   private Macro makeMacro(List exp) throws CompileError
   {
     var params = (List) exp.caddr();
@@ -912,7 +918,15 @@ public class Compiler
 
     return new Macro(code, requiredArgs, isVariadic);
   }
-
+  
+  /* Compile a macro application.
+  
+     Syntax: (f args...), where f was previously defined with defmacro.
+     
+     First lookup the macro procedure bound to f, apply this procedure to
+     the list of (unevaluated) arguments, and finally compile the code produced
+     by the macro procedure.
+  */
   private Inst compileApplyMacro(List exp, Scope scope, boolean tail, Inst next) throws CompileError
   {
     var macro = vm.globals.lookup((Symbol)exp.car());
@@ -933,52 +947,58 @@ public class Compiler
     return compile(expansion, scope, tail, next);
   }
   
-  public boolean isMacro(Datum exp)
+  // Determine if a symbol is bound to a macro in the global environment.
+  
+  public boolean isMacro(Symbol symb)
   {
-    return exp.type() == Type.Symbol &&
-           vm.globals.lookup((Symbol)exp).type() == Type.Macro;
+    return vm.globals.lookup(symb).type() == Type.Macro;
   }
+  
+  // Compile a list, including special forms, function applications, and macro applications.
   
   private Inst compileList(List exp, Scope scope, boolean tail, Inst next) throws CompileError
   {
-    if (exp.car() == Symbol.get("if"))
-      return compileIf(exp, scope, tail, next);
-    else if (exp.car() == Symbol.get("let"))
-      return compileLet(exp, scope, tail, next);
-    else if (exp.car() == Symbol.get("let*"))
-      return compileLetStar(exp, scope, tail, next);
-    else if (exp.car() == Symbol.get("letrec"))
-      return compileLetRec(exp, scope, tail, next);
-    else if (exp.car() == Symbol.get("def"))
-      return compileDef(exp, scope, next);
-    else if (exp.car() == Symbol.get("defun"))
-      return compileDefun(exp, scope, next);
-    else if (exp.car() == Symbol.get("defmacro"))
-      return compileDefMacro(exp, scope, next);
-    else if (exp.car() == Symbol.get("fun"))
-      return compileFun(exp, scope, next);
-    else if (exp.car() == Symbol.get("quote"))
-      return compileQuote(exp, next);
-    else if (exp.car() == Symbol.get("quasiquote"))
-      return compileQuasiquote(exp, scope, next);
-    else if (exp.car() == Symbol.get("or"))
-      return compileOr(exp, scope, tail, next);
-    else if (exp.car() == Symbol.get("and"))
-      return compileAnd(exp, scope, tail, next);
-    else if (exp.car() == Symbol.get("cond"))
-      return compileCond(exp, scope, tail, next);
-    else if (exp.car() == Symbol.get("do"))
-      return compileDo(exp, scope, tail, next);
-    else if (exp.car() == Symbol.get("set!"))
-      return compileSet(exp, scope, next);
-    else if (exp.car() == Symbol.get("while"))
-      return compileWhile(exp, scope, tail, next);
-    else if (exp.car() == Symbol.get("delay"))
-      return compileDelay(exp, scope, tail, next);
-    else if (isMacro(exp.car()))
-      return compileApplyMacro(exp, scope, tail, next);
-    else
-      return compileApply(exp, scope, tail, next);
+    if (exp.car().type() == Type.Symbol) {
+      var car = (Symbol) exp.car();
+      if (car == Symbol.get("if"))
+        return compileIf(exp, scope, tail, next);
+      if (car == Symbol.get("let"))
+        return compileLet(exp, scope, tail, next);
+      if (car == Symbol.get("let*"))
+        return compileLetStar(exp, scope, tail, next);
+      if (car == Symbol.get("letrec"))
+        return compileLetRec(exp, scope, tail, next);
+      if (car == Symbol.get("def"))
+        return compileDef(exp, scope, next);
+      if (car == Symbol.get("defun"))
+        return compileDefun(exp, scope, next);
+      if (car == Symbol.get("defmacro"))
+        return compileDefMacro(exp, scope, next);
+      if (car == Symbol.get("fun"))
+        return compileFun(exp, scope, next);
+      if (car == Symbol.get("quote"))
+        return compileQuote(exp, next);
+      if (car == Symbol.get("quasiquote"))
+        return compileQuasiquote(exp, scope, next);
+      if (car == Symbol.get("or"))
+        return compileOr(exp, scope, tail, next);
+      if (car == Symbol.get("and"))
+        return compileAnd(exp, scope, tail, next);
+      if (car == Symbol.get("cond"))
+        return compileCond(exp, scope, tail, next);
+      if (car == Symbol.get("do"))
+        return compileDo(exp, scope, tail, next);
+      if (car == Symbol.get("set!"))
+        return compileSet(exp, scope, next);
+      if (car == Symbol.get("while"))
+        return compileWhile(exp, scope, tail, next);
+      if (car == Symbol.get("delay"))
+        return compileDelay(exp, scope, tail, next);
+      if (isMacro(car))
+        return compileApplyMacro(exp, scope, tail, next);
+    }
+    
+    return compileApply(exp, scope, tail, next);
   }
 
   private Inst compile(Datum exp, Scope scope, boolean tail, Inst next) throws CompileError
