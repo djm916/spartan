@@ -33,6 +33,7 @@ public final class BaseEnv extends GlobalEnv
     bind(Symbol.get("not"), CoreLib.Not);
     bind(Symbol.get("text->symbol"), CoreLib.TextToSymbol);
     bind(Symbol.get("symbol->text"), CoreLib.SymbolToText);
+    bind(Symbol.get("gensym"), CoreLib.GenSym);
     
     bind(Symbol.get("+"), MathLib.Add);
     bind(Symbol.get("-"), MathLib.Sub);

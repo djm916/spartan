@@ -12,6 +12,11 @@ public final class Symbol extends Datum
     return interned.get(id);
   }
   
+  public static Symbol gen()
+  {
+    return get(String.format("#%d", nextSymbolNum++));
+  }
+  
   public Type type()
   {
     return Type.Symbol;
@@ -38,5 +43,7 @@ public final class Symbol extends Datum
   }
   
   private static Map<String, Symbol> interned = new HashMap<>();
+  private static int nextSymbolNum;
+  
   private final String id;
 }

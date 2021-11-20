@@ -163,8 +163,10 @@ public class Compiler
     var index = (scope == null) ? null : scope.lookup(symb);
 
     return compile(init, scope, false,
-                   index == null ? new StoreGlobal(symb, next)
-                                 : new StoreLocal(index.depth, index.offset, next));
+                   index == null ? new StoreGlobal(symb,
+                                   new LoadConst(Nil.Instance, next))                                 
+                                 : new StoreLocal(index.depth, index.offset,
+                                   new LoadConst(Nil.Instance, next)));
   }
 
   /* A top-level definition either binds a new global variable or modifies an existing one.

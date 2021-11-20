@@ -257,4 +257,11 @@ public final class CoreLib
       vm.popFrame();
     }
   };
+  
+  public static final Primitive GenSym = new Primitive(0, false) {
+    public void apply(VirtualMachine vm) throws TypeMismatch {
+      vm.result = Symbol.gen();
+      vm.popFrame();
+    }
+  };
 }

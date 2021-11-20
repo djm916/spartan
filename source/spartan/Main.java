@@ -15,16 +15,24 @@ Options:
   --file <path>     Execute script at <path>""";
   
   private static final String IntroMessage = """
-Welcome to the Spartan interpreter!
-Enter an expression. It will be evaluated and the result shown.
+Welcome to the Spartan interactive interpreter!
+Enter expressions to be evaluated.
 Enter Control-D (on Linux) or Control-Z (on Windows) to exit.""";
-
-  private static String script;
-  private static List scriptArgs = List.Empty;
   
+  // Path to code file to be pre-loaded
+  private static final String BuiltinsFilePath = "./stdlib/builtins.txt";
+  
+  // Path to the script file to execute (or null if none given)
+  private static String scriptPath;
+  
+  // List of script arguments (as a List of Text values)
+  private static List scriptArgs = List.Empty;
+    
   static
   {
-    System.out.println("loading libspartan.dll...");
+    //System.out.println("loading libspartan.dll...");
+    
+    // Load "libspartan.dll", containing JNI native code
     System.loadLibrary("libspartan");
   }
   
@@ -33,14 +41,15 @@ Enter Control-D (on Linux) or Control-Z (on Windows) to exit.""";
     parseCommandLine(args);
     
     var globals = new BaseEnv();
-    globals.bind(Symbol.get("sys/args"), scriptArgs);
+    globals.bind(Symbol.get("sys/args"), scriptArgs);    
+    Evaluator.evalFile(BuiltinsFilePath, globals);
     
-    if (script == null) {
+    if (scriptPath == null) {
       System.out.println(IntroMessage);
       Evaluator.evalInteractive(globals);
     }
     else
-      Evaluator.evalFile(script, globals);
+      Evaluator.evalFile(scriptPath, globals);
   }
   
   private static void parseCommandLine(String[] args)
@@ -55,7 +64,7 @@ Enter Control-D (on Linux) or Control-Z (on Windows) to exit.""";
           System.err.println("error: --file option requires argument");
           System.exit(-1);
         }
-        script = args[i + 1];
+        scriptPath = args[i + 1];
         gatherScriptArgs(args, i + 2);
         return;
       }

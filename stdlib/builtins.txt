@@ -1,0 +1,6 @@
+
+(defmacro swap! (a b)
+  (let ((tmp (gensym)))
+    `(let ((,tmp ,a))
+       (set! ,a ,b)
+       (set! ,b ,tmp))))
