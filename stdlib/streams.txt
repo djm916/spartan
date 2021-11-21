@@ -1,39 +1,29 @@
+; Streams Library
 
-;; Create a new stream
-;; Parameters:
-;; gen   A generator function that produces succesive stream values
-;; init  The initial value passed to the generator
+; Create a new stream
+;
+; Parameters:
+;
+; gen   A generator function that produces succesive stream values
+; seed  The initial state value, passed to the generator
 
-(defun stream/new (gen init)
+(defun stream/new (gen seed)
   (delay
-    (let ((next-pair (gen init)))
-      (if (= () next-pair)
+    (let ((next-pair (gen seed)))
+      (if (empty? next-pair)
         ()
         (list (car next-pair)
               (stream/new gen (cadr next-pair)))))))
 
-;; Return the next element of a stream
+; Return the next element of a stream
 
-(defun stream/car (s) (car (s)))
+(defun stream/car (s) (car (force s)))
 
-;; Return the remainder of a stream
+; Return the remainder of a stream
 
-(defun stream/cdr (s) (cadr (s)))
+(defun stream/cdr (s) (cadr (force s)))
 
-;; Determine if a stream is empty
+; Determine if a stream is empty
 
-(defun stream/empty? (s) (= (s) ()))
+(defun stream/empty? (s) (empty? (force s)))
 
-;; Tests
-
-(defun generate-ints-up-to-3 (n)
-  (if (> n 3)
-    ()
-    (list n (+ n 1))))
-
-(def ints-up-to-3-stream (stream/new generate-ints-up-to-3 1))
-
-(let ((s ints-up-to-3-stream))
-  (while (not (stream/empty? s))
-    (print (stream/car s))
-    (set! s (stream/cdr s))))

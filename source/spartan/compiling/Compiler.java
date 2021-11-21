@@ -848,6 +848,8 @@ public class Compiler
 
   */
 
+  /* NOTE: Now implemented using macros
+  
   private Inst compileDelay(List exp, Scope scope, boolean tail, Inst next) throws CompileError
   {
     if (exp.length() < 2)
@@ -871,7 +873,8 @@ public class Compiler
            new MakePromise(body,
            new PopEnv(next)))))));
   }
-
+  */
+  
   /* Compile the "defmacro" special form.
      
      Syntax: (defmacro f (param...) body...)
@@ -994,8 +997,9 @@ public class Compiler
         return compileSet(exp, scope, next);
       if (car == Symbol.get("while"))
         return compileWhile(exp, scope, tail, next);
-      if (car == Symbol.get("delay"))
-        return compileDelay(exp, scope, tail, next);
+      // NOTE: Now implemented using macros
+      //if (car == Symbol.get("delay"))
+        //return compileDelay(exp, scope, tail, next);
       if (isMacro(car))
         return compileApplyMacro(exp, scope, tail, next);
     }

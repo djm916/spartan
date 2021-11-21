@@ -344,23 +344,6 @@ public class Reader implements AutoCloseable
     return result;
   }
 
-  private Datum readRecord() throws SyntaxError, IOException
-  {
-    var builder = new List.Builder();
-    var position = new Position(source, tokenStart.line, tokenStart.column);
-
-    skipSpace();
-
-    while (lastChar != -1 && lastChar != '}') {
-      builder.add(readDatum());
-      skipSpace();
-    }
-
-    var result = List.cons(Symbol.get("record"), builder.build());
-    positionMap.put(result, position);
-    return result;
-  }
-
   private Datum readQuote() throws SyntaxError, IOException
   {
     skipSpace();
@@ -396,8 +379,6 @@ public class Reader implements AutoCloseable
       return readList();
     if (lastChar == '[')
       return readVector();
-    if (lastChar == '{')
-      return readRecord();
     if (isSign(lastChar) && isDigit(peekChar()))
       return readNumber();
     if (isDigit(lastChar))

@@ -14,7 +14,7 @@ public abstract class Callable extends Datum
     this.isVariadic = isVariadic;
   }
   
-  public final boolean checkArity(int numArgs)
+  public final boolean matchArity(int numArgs)
   {
     return !isVariadic ? numArgs == requiredArgs
                        : numArgs >= requiredArgs;

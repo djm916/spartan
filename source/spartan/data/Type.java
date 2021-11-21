@@ -11,7 +11,6 @@ public enum Type
   Text("type/text"),
   List("type/list"),
   Vector("type/vector"),
-  Map("type/map"),
   Primitive("type/function"),
   Closure("type/function"),
   Macro("type/macro"),

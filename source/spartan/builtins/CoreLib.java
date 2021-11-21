@@ -38,7 +38,6 @@ public final class CoreLib
         case Text: return ((Text)x).eq((Text)y);
         case Vector: return ((Vector)x).eq((Vector)y);
         case List: return ((List)x).eq((List)y);
-        case Map: return ((Map)x).eq((Map)y);
         case Bool: 
         case Symbol: return x == y;
       }
@@ -155,13 +154,6 @@ public final class CoreLib
     }
   };
   
-  public static final Primitive MakeRecord = new Primitive(0, true) {
-    public void apply(VirtualMachine vm) throws TypeMismatch {
-      vm.result = Map.fromList(vm.popRestArgs());
-      vm.popFrame();
-    }
-  };
-  
   public static final Complex makeComplex(Datum x, Datum y) throws TypeMismatch
   {
     if (x.type() != Type.Real || y.type() != Type.Real)
@@ -209,7 +201,6 @@ public final class CoreLib
     switch (x.type()) {
       case List: return ((List)x).length();
       case Vector: return ((Vector)x).length();
-      case Map: return ((Map)x).length();
       case Text: return ((Text)x).length();
     }
     throw new TypeMismatch();

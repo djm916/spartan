@@ -4,3 +4,18 @@
     `(let ((,tmp ,a))
        (set! ,a ,b)
        (set! ,b ,tmp))))
+
+(defmacro delay (exp)
+  `(make-promise (fun () ,exp)))
+
+(defun make-promise (proc) 
+  (let ((value-ready? false)
+        (cached-value nil))
+    (fun ()
+      (if (not value-ready?)
+          (do (set! cached-value (proc))
+              (set! value-ready? true)))
+      cached-value)))
+
+(defun force (promise)
+  (promise))
