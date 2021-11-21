@@ -26,4 +26,3 @@
 ; Determine if a stream is empty
 
 (defun stream/empty? (s) (empty? (force s)))
-
