@@ -111,14 +111,5 @@ public final class ListLib
       vm.result = concat(vm.popRestArgs());
       vm.popFrame();
     }
-  };
-  
-  public static final Primitive IsEmpty = new Primitive(1, false) {
-    public void apply(VirtualMachine vm) throws TypeMismatch {
-      if (vm.peekArg().type() != Type.List)
-        throw new TypeMismatch();
-      vm.result = ((List)vm.popArg()).empty() ? Bool.True : Bool.False;
-      vm.popFrame();
-    }
-  };
+  };  
 }

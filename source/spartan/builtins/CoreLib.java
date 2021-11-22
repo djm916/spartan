@@ -250,9 +250,24 @@ public final class CoreLib
   };
   
   public static final Primitive GenSym = new Primitive(0, false) {
-    public void apply(VirtualMachine vm) throws TypeMismatch {
+    public void apply(VirtualMachine vm) {
       vm.result = Symbol.gen();
       vm.popFrame();
     }
   };
+  
+  public static final Primitive IsEmptyList = new Primitive(1, false) {
+    public void apply(VirtualMachine vm) {
+      vm.result = truth(vm.popArg() == List.Empty);
+      vm.popFrame();
+    }
+  };
+  
+  public static final Primitive IsNil = new Primitive(1, false) {
+    public void apply(VirtualMachine vm) {
+      vm.result = truth(vm.popArg() == Nil.Instance);
+      vm.popFrame();
+    }
+  };
+  
 }

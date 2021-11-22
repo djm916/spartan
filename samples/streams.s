@@ -2,23 +2,26 @@
 
 (load "stdlib/streams.txt")
 
-;(defun generate-ints-up-to-3 (n)
-;  (if (> n 3)
-;    ()
-;    (list n (+ n 1))))
+(defun int-range (from to)
+  (fun ()
+    (if (> from to)
+      nil
+      (let ((next from))
+        (set! from (+ 1 from))
+        next))))
 
-;(def ints-up-to-3-stream (stream/new generate-ints-up-to-3 1))
+(def s1 (stream/new (int-range 1 10)))
 
-;(let ((s ints-up-to-3-stream))
-;  (while (not (stream/empty? s))
-;    (print (stream/car s))
-;    (set! s (stream/cdr s))))
+(def s2 (stream/map (fun (x) (* x x)) s1))
 
-(defun int-generator (n)
-  (list n (+ n 1)))
+(def s3 (stream/filter (fun (x) (= (% x 2) 0)) s1))
 
-(def s (stream/new int-generator 1))
+(defun print-stream (s)
+  (while (not (stream/empty? s))
+    (printnl (stream/car s))
+    (set! s (stream/cdr s))))
 
-(while (not (stream/empty? s))
-  (print (stream/car s))
-  (set! s (stream/cdr s)))
+(print-stream s1)
+(print-stream s2)
+(print-stream s3)
+(printnl (stream/reduce + 0 s1))

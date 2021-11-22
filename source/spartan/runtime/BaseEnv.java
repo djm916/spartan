@@ -14,6 +14,9 @@ public final class BaseEnv extends GlobalEnv
     bind(Symbol.get("false"), Bool.False);
     bind(Symbol.get("nil"), Nil.Instance);
     
+    bind(Symbol.get("nil?"), CoreLib.IsNil);
+    bind(Symbol.get("empty?"), CoreLib.IsEmptyList);
+    
     bind(Symbol.get("list"), CoreLib.MakeList);
     bind(Symbol.get("vector"), CoreLib.MakeVector);
     bind(Symbol.get("complex"), CoreLib.MakeComplex);    
@@ -56,8 +59,7 @@ public final class BaseEnv extends GlobalEnv
     bind(Symbol.get("PI"), Real.PI);
     bind(Symbol.get("I"), Complex.I);
     bind(Symbol.get("math/rand"), MathLib.Rand);
-    
-    bind(Symbol.get("empty?"), ListLib.IsEmpty);
+        
     bind(Symbol.get("cons"), ListLib.Cons);
     bind(Symbol.get("car"), ListLib.Car);
     bind(Symbol.get("cadr"), ListLib.Cadr);

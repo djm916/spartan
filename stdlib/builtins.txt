@@ -5,9 +5,6 @@
        (set! ,a ,b)
        (set! ,b ,tmp))))
 
-(defmacro delay (exp)
-  `(make-promise (fun () ,exp)))
-
 (defun make-promise (proc) 
   (let ((value-ready? false)
         (cached-value nil))
@@ -17,5 +14,6 @@
               (set! value-ready? true)))
       cached-value)))
 
-(defun force (promise)
-  (promise))
+(defmacro delay (exp) `(make-promise (fun () ,exp)))
+
+(defun force (promise) (promise))

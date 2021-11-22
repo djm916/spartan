@@ -5,15 +5,13 @@
 ; Parameters:
 ;
 ; gen   A generator function that produces succesive stream values
-; seed  The initial state value, passed to the generator
 
-(defun stream/new (gen seed)
+(defun stream/new (gen)
   (delay
-    (let ((next-pair (gen seed)))
-      (if (empty? next-pair)
+    (let ((next (gen)))
+      (if (nil? next)
         ()
-        (list (car next-pair)
-              (stream/new gen (cadr next-pair)))))))
+        (list next (stream/new gen))))))
 
 ; Return the next element of a stream
 
@@ -26,3 +24,34 @@
 ; Determine if a stream is empty
 
 (defun stream/empty? (s) (empty? (force s)))
+
+(defun stream/map (f s)
+  (defun gen ()
+    (if (stream/empty? s)
+        nil
+        (let ((next (stream/car s)))
+          (set! s (stream/cdr s))
+          (f next))))
+  (stream/new gen))
+
+(defun stream/filter (f s)
+  (defun gen ()
+    (if (stream/empty? s)
+      nil
+      (let ((next (stream/car s)))
+        (set! s (stream/cdr s))
+        (if (f next)
+            next
+            (gen)))))
+  (stream/new gen))
+
+(defun stream->list (s)
+  (if (stream/empty? s)
+      ()
+      (cons (stream/car s)
+            (stream->list (stream/cdr s)))))
+
+(defun stream/reduce (f i s)
+  (if (stream/empty? s)
+    i
+    (stream/reduce f (f i (stream/car s)) (stream/cdr s))))
