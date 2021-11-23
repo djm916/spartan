@@ -4,13 +4,13 @@
 ;
 ; Parameters:
 ;
-; gen   A generator function that produces succesive stream values
+; gen   A generator procedure that produces succesive stream values
+;       each time it is called.
 
 (defun stream/new (gen)
   (delay
     (let ((next (gen)))
-      (if (nil? next)
-        ()
+      (if (nil? next) ()
         (list next (stream/new gen))))))
 
 ; Return the next element of a stream
@@ -27,31 +27,36 @@
 
 (defun stream/map (f s)
   (defun gen ()
-    (if (stream/empty? s)
-        nil
-        (let ((next (stream/car s)))
-          (set! s (stream/cdr s))
-          (f next))))
+    (if (stream/empty? s) nil
+      (let ((next (f (stream/car s))))
+        (set! s (stream/cdr s))
+        next)))
   (stream/new gen))
 
 (defun stream/filter (f s)
   (defun gen ()
-    (if (stream/empty? s)
-      nil
+    (if (stream/empty? s) nil
       (let ((next (stream/car s)))
         (set! s (stream/cdr s))
         (if (f next)
-            next
-            (gen)))))
+          next
+          (gen)))))
   (stream/new gen))
 
-(defun stream->list (s)
-  (if (stream/empty? s)
-      ()
-      (cons (stream/car s)
-            (stream->list (stream/cdr s)))))
-
 (defun stream/reduce (f i s)
-  (if (stream/empty? s)
-    i
+  (if (stream/empty? s) i
     (stream/reduce f (f i (stream/car s)) (stream/cdr s))))
+
+(defun stream->list (s)
+  (if (stream/empty? s) ()
+    (cons (stream/car s)
+          (stream->list (stream/cdr s)))))
+
+(defun stream/enumerate (i s)
+  (defun gen ()
+    (if (stream/empty? s) nil
+      (let ((next (list i (stream/car s))))
+        (set! s (stream/cdr s))
+        (set! i (+ 1 i))
+        next)))
+  (stream/new gen))
