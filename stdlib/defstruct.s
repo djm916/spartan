@@ -1,4 +1,4 @@
-(load "stdlib/list.txt")
+(load "stdlib/list.s")
 
 ; Generate the function name for a structure constructor
 ;

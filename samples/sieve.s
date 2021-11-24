@@ -1,4 +1,4 @@
-(load "stdlib/list.txt")
+(load "stdlib/list.s")
 
 (defun not-factor? (y) (fun (x) (not (= (% x y) 0))))
 
@@ -9,3 +9,5 @@
              (xs (list/filter (not-factor? x) xs)))
         (cons x (loop xs)))))
   (loop (list/range 2 n)))
+
+(prime-sieve 100)

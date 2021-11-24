@@ -1,6 +1,6 @@
-(load "stdlib/defstruct.txt")
+(load "stdlib/defstruct.s")
 
-; Example
+; Example of using defstruct macro
 
 (defstruct point (x y))
 (def p (make-point 1 2))

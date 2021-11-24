@@ -1,6 +1,6 @@
 ; Examples of stream usage
 
-(load "stdlib/streams.txt")
+(load "stdlib/streams.s")
 
 (defun int-range (from to)
   (fun ()
@@ -18,10 +18,10 @@
 
 (defun print-stream (s)
   (while (not (stream/empty? s))
-    (printnl (stream/car s))
+    (print-line (stream/car s))
     (set! s (stream/cdr s))))
 
 (print-stream s1)
 (print-stream s2)
 (print-stream s3)
-(printnl (stream/reduce + 0 s1))
+(print-line (stream/reduce + 0 s1))

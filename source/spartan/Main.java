@@ -20,7 +20,7 @@ Enter expressions to be evaluated.
 Enter Control-D (on Linux) or Control-Z (on Windows) to exit.""";
   
   // Path to code file to be pre-loaded
-  private static final String BuiltinsFilePath = "./stdlib/builtins.txt";
+  private static final String BuiltinsFilePath = "./stdlib/builtins.s";
   
   // Path to the script file to execute (or null if none given)
   private static String scriptPath;

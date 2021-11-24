@@ -1,5 +1,22 @@
 ; Streams Library
 
+; Streams implement lazy sequences (a.k.a "streams") with a
+; functional list-style interface.
+
+; A stream is essentially a procedure (called a "promise"), which
+; generates a series of values, calculated on demand. Each time
+; it is invoked, a promise returns a pair: the next value in
+; the stream, and another promise to compute the remaining values.
+
+; This implementation of streams relys on the "delay" macro and the
+; "force" procedure. The user defines a "generator" procedure,
+; which is called each time the stream is forced. It should
+; return nil to indicate an end of stream condition. Otherwise, it
+; should return the next value in the stream.
+
+; A stream may be either finite or infinite. Be warned that some
+; stream operations cannot be computed on infinite streams. 
+
 ; Create a new stream
 ;
 ; Parameters:

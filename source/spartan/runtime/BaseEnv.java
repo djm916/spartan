@@ -22,7 +22,7 @@ public final class BaseEnv extends GlobalEnv
     bind(Symbol.get("complex"), CoreLib.MakeComplex);    
     bind(Symbol.get("apply"), CoreLib.Apply);    
     bind(Symbol.get("print"), CoreLib.Print);
-    bind(Symbol.get("printnl"), CoreLib.PrintLine);
+    bind(Symbol.get("print-line"), CoreLib.PrintLine);
     bind(Symbol.get("type"), CoreLib.TypeOf);
     bind(Symbol.get("length"), CoreLib.Length);
     bind(Symbol.get("load"), CoreLib.Load);

@@ -1,4 +1,4 @@
-(load "stdlib/list.txt")
+(load "stdlib/list.s")
 
 ; (power-set ()) => (())
 ; (power-set '(1)) => ((1) ())
@@ -8,7 +8,11 @@
 (defun power-set (set)
   (if (= () set) '(())
     (let ((excludes (power-set (cdr set))))
-      (concat (list/map
-                (fun (subset) (cons (car set) subset))
-                excludes)
-              excludes))))
+      (list/concat
+        (list/map (fun (subset) (cons (car set) subset)) excludes)
+        excludes))))
+
+(power-set ())
+(power-set '(1))
+(power-set '(1 2))
+(power-set '(1 2 3))

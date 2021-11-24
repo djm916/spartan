@@ -22,13 +22,13 @@
       
       (while (< i mid)
         (vector/set! temp k (source i))
-          (set! i (+ 1 i))
-          (set! k (+ 1 k)))
+        (set! i (+ 1 i))
+        (set! k (+ 1 k)))
       
       (while (< j to)
         (vector/set! temp k (source j))
-          (set! j (+ 1 j))
-          (set! k (+ 1 k)))
+        (set! j (+ 1 j))
+        (set! k (+ 1 k)))
       
       (set! k from)
       (while (< k to)
@@ -47,6 +47,6 @@
       (set! i (+ 1 i)))
     v))
 
-(def v (create-random-vector 500000))
+(def v (create-random-vector 50))
 
 (vector/sort! < v)
