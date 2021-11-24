@@ -6,8 +6,8 @@
   (defun loop (xs)
     (if (= () xs) ()
       (let* ((x (car xs))
-             (xs (list/filter (not-factor? x) xs)))
+             (xs (filter (not-factor? x) xs)))
         (cons x (loop xs)))))
-  (loop (list/range 2 n)))
+  (loop (range 2 n)))
 
 (prime-sieve 100)

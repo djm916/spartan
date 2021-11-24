@@ -8,8 +8,8 @@
 (defun power-set (set)
   (if (= () set) '(())
     (let ((excludes (power-set (cdr set))))
-      (list/concat
-        (list/map (fun (subset) (cons (car set) subset)) excludes)
+      (concat 
+        (map (fun (subset) (cons (car set) subset)) excludes)
         excludes))))
 
 (power-set ())

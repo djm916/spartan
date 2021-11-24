@@ -1,23 +1,23 @@
 
-(defun list/map (f xs)
+(defun map (f xs)
   (if (empty? xs) ()
     (cons (f (car xs))
-          (list/map f (cdr xs)))))
+          (map f (cdr xs)))))
 
-(defun list/map-with-index (f i xs)
+(defun map-with-index (f i xs)
   (if (empty? xs) () 
     (cons (f (car xs) i)
-          (list/map-with-index f (+ 1 i) (cdr xs)))))
+          (map-with-index f (+ 1 i) (cdr xs)))))
 
-(defun list/flat-map (f xs)
-  (apply list/concat
-         (list/map (fun (x) (list/map f x)) xs)))
+(defun flat-map (f xs)
+  (apply concat
+         (map (fun (x) (map f x)) xs)))
 
-(defun list/filter (f xs)
+(defun filter (f xs)
   (if (empty? xs) ()
     (if (f (car xs))
-      (cons (car xs) (list/filter f (cdr xs)))
-      (list/filter f (cdr xs)))))
+      (cons (car xs) (filter f (cdr xs)))
+      (filter f (cdr xs)))))
 
 ; Reduce a list to a single value
 
@@ -30,9 +30,9 @@
 ;
 ;   (f (f (f i x1) x2) x3)
 
-(defun list/fold-left (f i xs)
+(defun fold-left (f i xs)
   (if (empty? xs) i
-    (list/fold-left f (f i (car xs)) (cdr xs))))
+    (fold-left f (f i (car xs)) (cdr xs))))
 
 ; Reduce a list to a single value
 
@@ -45,46 +45,46 @@
 ;
 ;   (f x1 (f x2 (f x3 i)))
 
-(defun list/fold-right (f i xs)
+(defun fold-right (f i xs)
   (if (empty? xs) i
-    (f (car xs) (list/fold-right f i (cdr xs)))))
+    (f (car xs) (fold-right f i (cdr xs)))))
   
-(defun list/range (i j)
+(defun range (i j)
   (if (> i j) ()
-    (cons i (list/range (+ 1 i) j))))
+    (cons i (range (+ 1 i) j))))
 
-(defun list/reverse (xs)
+(defun reverse (xs)
   (defun loop (xs sx)
     (if (empty? xs) sx
       (loop (cdr xs) (cons (car xs) sx))))
   (loop xs ()))
 
-(defun list/enumerate (xs i)
+(defun enumerate (xs i)
   (if (empty? xs) ()
     (cons (list i (car xs))
-          (list/enumerate (cdr xs) (+ 1 i)))))
+          (enumerate (cdr xs) (+ 1 i)))))
 
-(defun list/take (n xs)
+(defun take (n xs)
   (if (= 0 n) ()
-    (cons (car xs) (list/take (- n 1) (cdr xs)))))
+    (cons (car xs) (take (- n 1) (cdr xs)))))
 
-(defun list/take-while (f xs)
+(defun take-while (f xs)
   (if (empty? xs) ()
     (if (f (car xs))
-      (cons (car xs) (list/take-while f (cdr xs)))
+      (cons (car xs) (take-while f (cdr xs)))
       ())))
 
-(defun list/drop (n xs)
+(defun drop (n xs)
   (if (= 0 n) xs
-    (list/drop (- n 1) (cdr xs))))
+    (drop (- n 1) (cdr xs))))
 
-(defun list/drop-while (f xs)
+(defun drop-while (f xs)
   (if (empty? xs) xs
     (if (f (car xs))
-      (list/drop-while f (cdr xs))
+      (drop-while f (cdr xs))
       xs)))
 
-(defun list/zip (f xs ys)
+(defun zip (f xs ys)
   (if (or (empty? xs) (empty? ys)) ()
     (cons (f (car xs) (car ys))
-          (list/zip f (cdr xs) (cdr ys)))))
+          (zip f (cdr xs) (cdr ys)))))

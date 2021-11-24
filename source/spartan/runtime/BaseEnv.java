@@ -12,11 +12,9 @@ public final class BaseEnv extends GlobalEnv
   {
     bind(Symbol.get("true"), Bool.True);
     bind(Symbol.get("false"), Bool.False);
-    bind(Symbol.get("nil"), Nil.Instance);
-    
+    bind(Symbol.get("nil"), Nil.Instance);    
     bind(Symbol.get("nil?"), CoreLib.IsNil);
-    bind(Symbol.get("empty?"), CoreLib.IsEmptyList);
-    
+    bind(Symbol.get("empty?"), CoreLib.IsEmptyList);    
     bind(Symbol.get("list"), CoreLib.MakeList);
     bind(Symbol.get("vector"), CoreLib.MakeVector);
     bind(Symbol.get("complex"), CoreLib.MakeComplex);    
@@ -41,8 +39,7 @@ public final class BaseEnv extends GlobalEnv
     bind(Symbol.get("-"), MathLib.Sub);
     bind(Symbol.get("*"), MathLib.Mul);
     bind(Symbol.get("/"), MathLib.Div);
-    bind(Symbol.get("%"), MathLib.Mod);
-    
+    bind(Symbol.get("%"), MathLib.Mod);    
     bind(Symbol.get("~"), MathLib.Neg);
     bind(Symbol.get("abs"), MathLib.Abs);
     bind(Symbol.get("floor"), MathLib.Floor);
@@ -67,8 +64,8 @@ public final class BaseEnv extends GlobalEnv
     bind(Symbol.get("cdr"), ListLib.Cdr);
     bind(Symbol.get("cddr"), ListLib.Cddr);
     bind(Symbol.get("cdddr"), ListLib.Cdddr);
-    bind(Symbol.get("list/concat"), ListLib.Concat);
-    bind(Symbol.get("list/append"), ListLib.Append);
+    bind(Symbol.get("concat"), ListLib.Concat);
+    bind(Symbol.get("append"), ListLib.Append);
     
     bind(Symbol.get("vector/new"), VectorLib.New);
     bind(Symbol.get("vector/copy"), VectorLib.Copy);

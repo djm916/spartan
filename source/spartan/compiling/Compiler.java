@@ -103,12 +103,12 @@ public class Compiler
                List.Empty)));
       }
 
-      // (quasiquote (unquote-splicing x) xs...) => (list/concat x (quasiquote xs...))    
+      // (quasiquote (unquote-splicing x) xs...) => (concat x (quasiquote xs...))    
       
       if (car.car() == Symbol.get("unquote-splicing")) {
         if (car.length() != 2)
           throw malformedExp(exp);
-        return List.cons(Symbol.get("list/concat"),
+        return List.cons(Symbol.get("concat"),
                List.cons(car.cadr(),
                List.cons(transformQuasiquote(list.cdr()),
                List.Empty)));

@@ -1,3 +1,7 @@
+
+; Example of mutual recursion between functions;
+; both global definitions and within a local scope.
+
 (defun even (n)
   (if (= 0 n)
     true

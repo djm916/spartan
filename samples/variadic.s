@@ -1,11 +1,12 @@
-(defun sum (&xs)
-  (letrec ((loop (fun (result xs)
-                   (if (= xs ())
-                     result
-                     (loop (+ result (car xs)) (cdr xs))))))
-    (loop 0 &xs)))
+
+; Example of a "sum" function that computes the sum
+; of all its arguments, similar to "+". Makes use of
+; variadic procedures, as well as "apply".
 
 (defun sum (init &xs)
-  (if (= &xs ())
-    init
-    (apply sum (cons (+ init (car &xs)) (cdr &xs)))))
+  (if (= &xs ()) init
+    (apply sum (cons (+ init (car &xs))
+               (cdr &xs)))))
+
+(sum 0)
+(sum 1 2 3 4 5)

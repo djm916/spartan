@@ -59,7 +59,7 @@
             (vector/get self ,index))))
 
 (defun generate-getters (name fields)
-  (list/map-with-index (generate-getter name) 1 fields))
+  (map-with-index (generate-getter name) 1 fields))
 
 (defun generate-setter (name)
   (fun (field index)
@@ -68,7 +68,7 @@
             (vector/set! self ,index value))))
 
 (defun generate-setters (name fields)
-  (list/map-with-index (generate-setter name) 1 fields))
+  (map-with-index (generate-setter name) 1 fields))
 
 (defun generate-predicate (name)
   `(defun ,(generate-predicate-name name) (self)
