@@ -1,6 +1,7 @@
 (load "stdlib/defstruct.s")
 
-; Example of using defstruct macro
+; Example of using the defstruct macro to
+; create a simple data type
 
 (defstruct point (x y))
 (def p (make-point 1 2))

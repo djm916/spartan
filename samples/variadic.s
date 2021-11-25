@@ -5,8 +5,7 @@
 
 (defun sum (init &xs)
   (if (= &xs ()) init
-    (apply sum (cons (+ init (car &xs))
-               (cdr &xs)))))
+    (apply sum (cons (+ init (car &xs)) (cdr &xs)))))
 
 (sum 0)
 (sum 1 2 3 4 5)
