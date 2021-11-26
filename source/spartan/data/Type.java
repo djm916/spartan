@@ -14,7 +14,6 @@ public enum Type
   Primitive("type/function"),
   Closure("type/function"),
   Macro("type/macro"),
-  Promise("type/promise"),
   Port("type/port");
   
   public final String name;
