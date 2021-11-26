@@ -115,6 +115,11 @@ public final class List extends Datum
     return append(this, x);
   }
   
+  public List reverse()
+  {
+    return reverse(this);
+  }
+  
   private static int length(List list)
   {
     int length = 0;
@@ -156,6 +161,14 @@ public final class List extends Datum
       result.add(x.first);
     result.add(y);
     return result.build();
+  }
+  
+  private static List reverse(List x)
+  {
+    var result = List.Empty;
+    for (; x != Empty; x = x.rest)
+      result = cons(x.car(), result);
+    return result;
   }
   
   private static String repr(List self)

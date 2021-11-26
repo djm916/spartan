@@ -1,4 +1,3 @@
-(load "stdlib/list.s")
 
 (defun not-factor? (y) (fun (x) (not (= (% x y) 0))))
 

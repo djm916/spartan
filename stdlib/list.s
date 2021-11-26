@@ -53,11 +53,12 @@
   (if (> i j) ()
     (cons i (range (+ 1 i) j))))
 
-(defun reverse (xs)
-  (defun loop (xs sx)
-    (if (empty? xs) sx
-      (loop (cdr xs) (cons (car xs) sx))))
-  (loop xs ()))
+; Note: defined in core
+;(defun reverse (xs)
+;  (defun loop (xs sx)
+;    (if (empty? xs) sx
+;      (loop (cdr xs) (cons (car xs) sx))))
+;  (loop xs ()))
 
 (defun enumerate (xs i)
   (if (empty? xs) ()

@@ -112,4 +112,13 @@ public final class ListLib
       vm.popFrame();
     }
   };  
+  
+  public static final Primitive Reverse = new Primitive(1, false) {
+    public void apply(VirtualMachine vm) throws TypeMismatch {
+      if (vm.peekArg().type() != Type.List)
+        throw new TypeMismatch();
+      vm.result = ((List)vm.popArg()).reverse();
+      vm.popFrame();
+    }
+  };
 }

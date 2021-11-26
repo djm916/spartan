@@ -1,4 +1,8 @@
 
+; Spartan standard library of built-in procedures and macros
+
+; This file is pre-loaded when the interpreter starts.
+
 (load "stdlib/list.s")
 
 (defmacro swap! (a b)
