@@ -4,7 +4,7 @@ import spartan.data.Datum;
 import spartan.data.Type;
 import spartan.data.Primitive;
 import spartan.data.List;
-import spartan.data.Bool;
+import spartan.data.Nil;
 import spartan.runtime.VirtualMachine;
 import spartan.errors.TypeMismatch;
 
@@ -118,6 +118,32 @@ public final class ListLib
       if (vm.peekArg().type() != Type.List)
         throw new TypeMismatch();
       vm.result = ((List)vm.popArg()).reverse();
+      vm.popFrame();
+    }
+  };
+  
+  public static final Primitive SetCar = new Primitive(2, false) {
+    public void apply(VirtualMachine vm) throws TypeMismatch {
+      if (vm.peekArg().type() != Type.List)
+        throw new TypeMismatch();
+      var list = (List)vm.popArg();
+      var car = vm.popArg();
+      list.setCar(car);
+      vm.result = Nil.Instance;
+      vm.popFrame();
+    }
+  };
+  
+  public static final Primitive SetCdr = new Primitive(2, false) {
+    public void apply(VirtualMachine vm) throws TypeMismatch {
+      if (vm.peekArg().type() != Type.List)
+        throw new TypeMismatch();
+      var list = (List)vm.popArg();
+      if (vm.peekArg().type() != Type.List)
+        throw new TypeMismatch();
+      var cdr = (List)vm.popArg();
+      list.setCar(cdr);
+      vm.result = Nil.Instance;
       vm.popFrame();
     }
   };

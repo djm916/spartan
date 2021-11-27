@@ -11,8 +11,8 @@ public enum Type
   Text("type/text"),
   List("type/list"),
   Vector("type/vector"),
-  Primitive("type/function"),
-  Closure("type/function"),
+  Primitive("type/procedure"),
+  Closure("type/procedure"),
   Macro("type/macro"),
   Port("type/port");
   

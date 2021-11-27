@@ -67,6 +67,8 @@ public final class BaseEnv extends GlobalEnv
     bind(Symbol.get("concat"), ListLib.Concat);
     bind(Symbol.get("append"), ListLib.Append);
     bind(Symbol.get("reverse"), ListLib.Reverse);
+    bind(Symbol.get("set-car!"), ListLib.SetCar);
+    bind(Symbol.get("set-cdr!"), ListLib.SetCdr);
     
     bind(Symbol.get("vector/new"), VectorLib.New);
     bind(Symbol.get("vector/copy"), VectorLib.Copy);

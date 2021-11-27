@@ -60,9 +60,19 @@ public final class List extends Datum
     return first;
   }
   
+  public void setCar(Datum x)
+  {
+    first = x;
+  }
+  
   public List cdr()
   {
     return rest;
+  }
+  
+  public void setCdr(List x)
+  {
+    rest = x;
   }
   
   public Datum cadr()

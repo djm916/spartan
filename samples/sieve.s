@@ -9,4 +9,5 @@
         (cons x (loop xs)))))
   (loop (range 2 n)))
 
-(prime-sieve 100)
+(prime-sieve 10000)
+
