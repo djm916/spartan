@@ -142,7 +142,7 @@ public final class ListLib
       if (vm.peekArg().type() != Type.List)
         throw new TypeMismatch();
       var cdr = (List)vm.popArg();
-      list.setCar(cdr);
+      list.setCdr(cdr);
       vm.result = Nil.Instance;
       vm.popFrame();
     }
