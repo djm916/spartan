@@ -26,7 +26,7 @@
         (true
           (let ((node (queue-front q)))
             (set-queue-front! q (cdr node))
-            (if (empty? (cdr node))
+            (if (empty? (queue-front q))
               (set-queue-back! q ()))
             (car node)))))
 
