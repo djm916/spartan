@@ -17,6 +17,11 @@ public final class Int extends Datum
     return Integer.toString(value);
   }
   
+  public int value()
+  {
+    return value;
+  }
+  
   public Int neg()
   {
     return new Int(-value);
@@ -62,5 +67,5 @@ public final class Int extends Datum
     return Integer.compare(x.value, y.value);
   }
 
-  public final int value;
+  private final int value;
 }

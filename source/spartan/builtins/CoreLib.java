@@ -249,6 +249,15 @@ public final class CoreLib
     }
   };
   
+  public static final Primitive IntToReal = new Primitive(1, false) {
+    public void apply(VirtualMachine vm) throws TypeMismatch {
+      if (vm.peekArg().type() != Type.Int)
+        throw new TypeMismatch();
+      vm.result = new Real(((Int)vm.popArg()).value());
+      vm.popFrame();
+    }
+  };
+  
   public static final Primitive GenSym = new Primitive(0, false) {
     public void apply(VirtualMachine vm) {
       vm.result = Symbol.gen();

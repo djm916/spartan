@@ -12,8 +12,7 @@ public final class Complex extends Datum
   
   public Complex(Real x, Real y)  
   {
-    this.real = x.value;
-    this.imag = y.value;
+    this(x.value(), y.value());
   }
   
   public Type type()

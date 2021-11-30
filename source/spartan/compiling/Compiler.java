@@ -214,7 +214,9 @@ public class Compiler
     var symb = exp.cadr();
     var params = exp.caddr();
     var body = exp.cdddr();
-    return List.of(Symbol.get("def"), symb, List.cons(Symbol.get("fun"), List.cons(params, body)));
+    var result = List.of(Symbol.get("def"), symb, List.cons(Symbol.get("fun"), List.cons(params, body)));
+    System.out.println("defun xform: " + result.repr());
+    return result;
   }
 
   /* Compile an "if" special form.
@@ -619,7 +621,7 @@ public class Compiler
   {
     if (isInnerDef(body.car())) {
       var xform = transformInnerDefs(body);
-      //System.out.println("inner defs xform = " + xform.repr());
+      System.out.println("inner defs xform = " + xform.repr());
       return compile(xform, scope, true, next);
     }
 
@@ -651,6 +653,7 @@ public class Compiler
   {
     List.Builder bindings = new List.Builder();
 
+    // TODO: check for empty list after inner defs to prevent NPE
     while (isInnerDef(body.car())) {
       var exp = (List) body.car();
       if (exp.car() == Symbol.get("defun"))
@@ -780,7 +783,7 @@ public class Compiler
     if (exp == List.Empty)
       return next;
 
-    return compile(exp.car(), scope, (tail && !exp.cdr().empty()),
+    return compile(exp.car(), scope, (tail && exp.cdr().empty()),
            compileSequence(exp.cdr(), scope, tail, next));
   }
 

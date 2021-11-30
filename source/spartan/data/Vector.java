@@ -2,13 +2,11 @@ package spartan.data;
 
 import java.util.stream.Stream;
 import java.util.stream.Collectors;
-import spartan.runtime.VirtualMachine;
-import spartan.errors.Error;
-import spartan.errors.NoSuchElement;
 import spartan.errors.TypeMismatch;
+import spartan.errors.NoSuchElement;
 import spartan.builtins.CoreLib;
 
-public final class Vector extends Callable
+public final class Vector extends Datum
 {
   public static Vector fromList(List elems)
   {
@@ -38,22 +36,21 @@ public final class Vector extends Callable
   public Datum get(Int index) throws NoSuchElement
   {
     try {
-      return elems[index.value];
+      return elems[index.value()];
     }
     catch (ArrayIndexOutOfBoundsException ex) {
       throw new NoSuchElement();
     }
   }
   
-  public Datum set(Int index, Datum value) throws NoSuchElement
+  public void set(Int index, Datum value) throws NoSuchElement
   {
     try {
-      elems[index.value] = value;
+      elems[index.value()] = value;
     }
     catch (ArrayIndexOutOfBoundsException ex) {
       throw new NoSuchElement();
     }
-    return Nil.Instance;
   }
   
   public boolean eq(Vector that) throws TypeMismatch
@@ -72,33 +69,23 @@ public final class Vector extends Callable
   {
     return new Vector(this);
   }
-  
-  public void apply(VirtualMachine vm) throws TypeMismatch, NoSuchElement
-  {
-    if (vm.peekArg().type() != Type.Int)
-      throw new TypeMismatch();
-    var index = (Int) vm.popArg();
-    vm.result = get(index);
-    vm.popFrame();
-  }
-  
+    
   public static Vector create(Int numElems, Datum init)
   {
-    var result = new Vector(numElems.value);
-    for (int i = 0; i < numElems.value; ++i)
+    var n = numElems.value();
+    var result = new Vector(n);
+    for (int i = 0; i < n; ++i)
       result.elems[i] = init;
     return result;
   }
   
   private Vector(int numElems)
   {
-    super(1, false);
     this.elems = new Datum[numElems];
   }
   
   private Vector(Vector that)
   {
-    super(1, false);
     this.elems = new Datum[that.elems.length];
     System.arraycopy(that.elems, 0, this.elems, 0, elems.length);
   }

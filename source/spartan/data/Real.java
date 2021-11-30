@@ -20,6 +20,11 @@ public final class Real extends Datum
     return String.format("%g", value);
   }
   
+  public double value()
+  {
+    return value;
+  }
+  
   public Real neg()
   {
     return new Real(-value);
@@ -110,5 +115,5 @@ public final class Real extends Datum
     return Double.compare(this.value, that.value);
   }
   
-  final double value;
+  private final double value;
 }
