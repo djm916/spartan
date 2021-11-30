@@ -41,4 +41,19 @@
 ; (pipe x f g h) => (h (g (f x)))
 
 (defmacro pipe (x &fs)
-  `(,(apply compose &fs) ,x))
+  ;`(,(apply compose &fs) ,x)) <- NOT using apply on a macro
+  `((compose ,@&fs) ,x))
+
+; (curry () ...) => (fun () ...)
+; (curry (x) ...) => (fun (x) ...)
+; (curry (x y) ...) => (fun (x) (fun (y) ...))
+
+(defmacro curry (args &body)
+  (defun loop (args)
+    (cond ((empty? args)
+           `(fun () ,@&body))
+          ((empty? (cdr args))
+           `(fun (,(car args)) ,@&body))
+          (true
+           `(fun (,(car args)) ,(loop (cdr args))))))
+  (loop args))

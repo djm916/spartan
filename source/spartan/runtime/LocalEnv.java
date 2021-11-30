@@ -5,8 +5,8 @@ import spartan.data.Nil;
 
 public final class LocalEnv
 {
-  final Datum[] slots;
-  final LocalEnv parent;
+  private final Datum[] slots;
+  private final LocalEnv parent;
   
   LocalEnv(int numSlots, LocalEnv parent)
   {
@@ -16,7 +16,12 @@ public final class LocalEnv
     this.parent = parent;
   }
   
-  final Datum load(int depth, int offset)
+  LocalEnv parent()
+  {
+    return parent;
+  }
+  
+  Datum load(int depth, int offset)
   {
     LocalEnv self = this;
     for (; depth > 0; --depth)
@@ -24,7 +29,7 @@ public final class LocalEnv
     return self.slots[offset];
   }
   
-  final void store(Datum x, int depth, int offset)
+  void store(Datum x, int depth, int offset)
   {
     LocalEnv self = this;
     for (; depth > 0; --depth)

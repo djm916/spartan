@@ -9,7 +9,7 @@ public final class PopEnv extends Inst
   
   public final void eval(VirtualMachine vm)
   {
-    vm.locals = vm.locals.parent;
+    vm.locals = vm.locals.parent();
     vm.control = next;
   }
 }
