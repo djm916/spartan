@@ -215,7 +215,7 @@ public class Compiler
     var params = exp.caddr();
     var body = exp.cdddr();
     var result = List.of(Symbol.get("def"), symb, List.cons(Symbol.get("fun"), List.cons(params, body)));
-    System.out.println("defun xform: " + result.repr());
+    //System.out.println("defun xform: " + result.repr());
     return result;
   }
 
@@ -621,7 +621,7 @@ public class Compiler
   {
     if (isInnerDef(body.car())) {
       var xform = transformInnerDefs(body);
-      System.out.println("inner defs xform = " + xform.repr());
+      //System.out.println("inner defs xform = " + xform.repr());
       return compile(xform, scope, true, next);
     }
 

@@ -24,8 +24,7 @@
          (if (> (/ (int->real (hash-map-size self))
                    (int->real (length (hash-map-table self))))
                 0.75)
-           (do (print-line "reached 75% full")
-               (resize-to-capacity self)
+           (do (resize-to-capacity self)
                (hash-map/add self key value))))
         ; Replace existing value associated with key
         (true
@@ -51,23 +50,15 @@
   (def old-capacity (length old-table))
   (def new-capacity (* 2 old-capacity))
   (set-hash-map-table! self (vector/new new-capacity ()))
-  (print-line "re-mapping keys")
-  (list old-table old-capacity new-capacity))
-  
-
-  
-;  (let ((index 0))
-;    (while (< index old-capacity)
-;      (print "processing slot ")
-;      (print-line index)
-;      (let ((node-list (vector/get old-table index)))
-;        (while (not (empty? node-list))
-;          (let ((node (car node-list)))
-;            (print "processing node ")
-;            (print-line node)
-;            (hash-map/add self (car node) (cadr node)))
-;          (set! node-list (cdr node-list))))
-;      (set! index (+ 1 index)))))
+  (set-hash-map-size! self 0)
+  (let ((index 0))
+    (while (< index old-capacity)
+      (let ((node-list (vector/get old-table index)))
+        (while (not (empty? node-list))
+          (let ((node (car node-list)))
+            (hash-map/add self (car node) (cadr node)))
+          (set! node-list (cdr node-list))))
+      (set! index (+ 1 index)))))
   
 (defun hash-int (n) n)
 
@@ -77,3 +68,6 @@
 (hash-map/add h 2 "b")
 (hash-map/lookup h 2)
 (hash-map/add h 3 "c")
+(hash-map/lookup h 3)
+(hash-map/add h 4 "d")
+(hash-map/lookup h 4)
