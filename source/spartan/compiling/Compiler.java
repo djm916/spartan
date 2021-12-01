@@ -4,6 +4,7 @@ import spartan.runtime.*;
 import spartan.data.*;
 import spartan.parsing.SourceDatum;
 import spartan.parsing.PositionMap;
+import spartan.parsing.Position;
 import spartan.errors.CompileError;
 import spartan.errors.MalformedExpression;
 import spartan.errors.MultipleDefinition;
@@ -28,7 +29,8 @@ public class Compiler
     return new MalformedExpression(positionMap.get(exp));
   }
 
-  // Determine if an expression is self-evaluating.
+  // Determine if an expression is self-evaluating, should
+  // not be processed further, and returned directly.
   
   private static boolean isSelfEval(Datum exp)
   {
@@ -41,92 +43,14 @@ public class Compiler
         || exp == Nil.Instance;
   }
   
-  // A self-evaluating expression evalutes to itself.
+  // Compile a self-evaluating expression.
   
   private Inst compileSelfEval(Datum exp, Inst next)
   {
     return new LoadConst(exp, next);
   }
 
-  // (quote x)
-
-  private Inst compileQuote(List exp, Inst next) throws CompileError
-  {
-    if (exp.length() != 2)
-      throw malformedExp(exp);
-
-    return new LoadConst(exp.cadr(), next);
-  }
-
-  // Compile a (quasiquote x) form by reducing it to an equivalent
-  // list form and compiling the result.
-
-  private Inst compileQuasiquote(List exp, Scope scope, Inst next) throws CompileError
-  {
-    if (exp.length() != 2)
-      throw malformedExp(exp);
-
-    var transformed = transformQuasiquote(exp.cadr());
-    //System.out.println("quasiquote transformation = " + transformed.repr());
-    return compile(transformed, scope, false, next);
-  }
-
-  // Reduce a quasiquote form (quasiquote x) to equivalent list form.
-
-  private List transformQuasiquote(Datum exp) throws CompileError
-  {
-    // (quasiquote ()) => ()
-    
-    if (exp == List.Empty)
-      return List.Empty;
-    
-    // (quasiquote x) => (quote x) for atomic (non-list) x
-    
-    if (exp.type() != Type.List)
-      return List.of(Symbol.get("quote"), exp);
-
-    var list = (List) exp;
-    
-    // Check for the unquote and unquote-splicing forms
-    
-    if (list.car().type() == Type.List) {
-      
-      var car = (List) list.car();
-      
-      // (quasiquote (unquote x) xs...) => (cons x (quasiquote xs...))
-      
-      if (car.car() == Symbol.get("unquote")) {
-        if (car.length() != 2)
-          throw malformedExp(exp);
-        return List.cons(Symbol.get("cons"),
-               List.cons(car.cadr(),
-               List.cons(transformQuasiquote(list.cdr()),
-               List.Empty)));
-      }
-
-      // (quasiquote (unquote-splicing x) xs...) => (concat x (quasiquote xs...))    
-      
-      if (car.car() == Symbol.get("unquote-splicing")) {
-        if (car.length() != 2)
-          throw malformedExp(exp);
-        return List.cons(Symbol.get("concat"),
-               List.cons(car.cadr(),
-               List.cons(transformQuasiquote(list.cdr()),
-               List.Empty)));
-      }
-    }
-    
-    // General case: recursively transform the list
-    
-    // (quasiquote x xs...) => (cons (quasiquote x) (quasiquote xs...))
-
-    return List.cons(Symbol.get("cons"),
-           List.cons(transformQuasiquote(list.car()),
-           List.cons(transformQuasiquote(list.cdr()),
-           List.Empty)));
-  }
-
-  /* Compiles a variable reference
+  /* Compiles a variable reference.
      
      Syntax: an unquoted symbol
      
@@ -215,9 +139,9 @@ public class Compiler
     var symb = exp.cadr();
     var params = exp.caddr();
     var body = exp.cdddr();
-    var result = List.of(Symbol.get("def"), symb, List.cons(Symbol.get("fun"), List.cons(params, body)));
-    //System.out.println("defun xform: " + result.repr());
-    return result;
+    var xform = List.of(Symbol.get("def"), symb, List.cons(Symbol.get("fun"), List.cons(params, body)));
+    //System.out.println("defun xform: " + xform.repr());
+    return xform;
   }
 
   /* Compile an "if" special form.
@@ -276,15 +200,6 @@ public class Compiler
       throw malformedExp(exp);
 
     return compileCondClauses(exp.cdr(), scope, tail, next);
-  }
-
-  private boolean checkClauseListForm(List clauses)
-  {
-    for (; clauses != List.Empty; clauses = clauses.cdr())
-      if (clauses.car().type() != Type.List || ((List) clauses.car()).length() < 2)
-        return false;
-
-    return true;
   }
 
   private Inst compileCondClauses(List clauses, Scope scope, boolean tail, Inst next) throws CompileError
@@ -469,6 +384,29 @@ public class Compiler
     return binding.length() == 2 && binding.car().type() == Type.Symbol;
   }
 
+  private boolean checkParamListForm(List params)
+  {
+    for (; !params.empty(); params = params.cdr()) {
+      if (params.car().type() != Type.Symbol)
+        return false;
+      // The symbol & appearing in the parameters must
+      // occur immediately before the final parameter
+      if (params.car() == Symbol.get("&") &&
+           (params.cdr().empty() || !params.cddr().empty()))
+        return false;
+    }
+    return true;
+  }
+
+  private boolean checkClauseListForm(List clauses)
+  {
+    for (; clauses != List.Empty; clauses = clauses.cdr())
+      if (clauses.car().type() != Type.List || ((List) clauses.car()).length() < 2)
+        return false;
+
+    return true;
+  }
+
   /* Extract the 1st of each element in a list of pairs:
 
      ((x1 y1) (x2 y2)...) => (x1 x2...)
@@ -516,7 +454,7 @@ public class Compiler
            new StoreLocal(0, offset,
            bindLocals(offset + 1, numBindings, next)));
   }
-
+  
   /* Compiles a function application.
 
      Syntax: (f arg1 arg2 ... argN)
@@ -547,6 +485,47 @@ public class Compiler
                   new Apply(numArgs, positionMap.get(exp)))));
   }
 
+  /* Compiles a sequence of expressions.
+     The sequence elements are evaluated in order.
+     The value of the last element is the value of the sequence.
+     The last expression occurs in tail context.
+
+     Syntax: exp1 exp2 ... expN
+
+     Compilation:
+
+     <<exp1>>
+     <<exp2>>
+     ...
+     <<expN>>
+  */
+  
+  private Inst compileSequence(List exp, Scope scope, boolean tail, Inst next) throws CompileError
+  {
+    if (exp == List.Empty)
+      return next;
+
+    return compile(exp.car(), scope, (tail && exp.cdr().empty()),
+           compileSequence(exp.cdr(), scope, tail, next));
+  }
+
+  /* Compiles a function body. A function body consists of a sequence
+     of expressions, optionally preceeded by a list of inner definitions.
+
+     Inner definitions are transformed into an equivalent form using a
+     nested letrec form, shown below.
+  */
+  private Inst compileBody(List body, Scope scope, Inst next) throws CompileError
+  {
+    if (isInnerDef(body.car())) {
+      var xform = transformInnerDefs(body);
+      //System.out.println("inner defs xform = " + xform.repr());
+      return compile(xform, scope, true, next);
+    }
+
+    return compileSequence(body, scope, true, next);
+  }
+  
   /* Compiles a lambda expression (anonymous function)
 
      Case 1: Fixed number of arguments
@@ -598,7 +577,7 @@ public class Compiler
     if (isVariadic)
       params = params.remove(Symbol.get("&"));    
     var extendedScope = new Scope(scope, params);
-
+    
     var code = !isVariadic ? new PushEnv(requiredArgs,
                              bindLocals(0, requiredArgs,
                              compileBody(body, extendedScope,
@@ -612,23 +591,6 @@ public class Compiler
                              new PopFrame())))));
 
     return new MakeClosure(code, requiredArgs, isVariadic, next);
-  }
-
-  /* Compiles a function body. A function body consists of a sequence
-     of expressions, optionally preceeded by a list of inner definitions.
-
-     Inner definitions are transformed into an equivalent form using a
-     nested letrec form, shown below.
-  */
-  private Inst compileBody(List body, Scope scope, Inst next) throws CompileError
-  {
-    if (isInnerDef(body.car())) {
-      var xform = transformInnerDefs(body);
-      //System.out.println("inner defs xform = " + xform.repr());
-      return compile(xform, scope, true, next);
-    }
-
-    return compileSequence(body, scope, true, next);
   }
 
   /* Transforms a sequence of inner definitions at the beginning
@@ -656,8 +618,7 @@ public class Compiler
   {
     List.Builder bindings = new List.Builder();
 
-    // TODO: check for empty list after inner defs to prevent NPE
-    while (isInnerDef(body.car())) {
+    while (!body.empty() && isInnerDef(body.car())) {
       var exp = (List) body.car();
       if (exp.car() == Symbol.get("defun"))
         exp = transformDefun(exp);
@@ -670,21 +631,10 @@ public class Compiler
 
   private boolean isInnerDef(Datum exp)
   {
-    return exp.type() == Type.List &&
-      (((List)exp).car() == Symbol.get("def") ||
-       ((List)exp).car() == Symbol.get("defun"));
-  }
-
-  private boolean checkParamListForm(List params)
-  {
-    for (; !params.empty(); params = params.cdr()) {
-      if (params.car().type() != Type.Symbol)
-        return false;
-      if (params.car() == Symbol.get("&") &&
-           (params.cdr().empty() || !params.cddr().empty()))
-        return false;
-    }
-    return true;
+    if (exp.type() != Type.List || exp == List.Empty)
+      return false;
+    var car = ((List)exp).car();
+    return car == Symbol.get("def") || car == Symbol.get("defun");
   }
 
   /* Compiles the "or" special form, a logical disjunction.
@@ -762,30 +712,6 @@ public class Compiler
     return compileSequence(exp.cdr(), scope, tail, next);
   }
 
-  /* Compiles a sequence of expressions.
-     The sequence elements are evaluated in order.
-     The value of the last element is the value of the sequence.
-     The last expression occurs in tail context.
-
-     Syntax: exp1 exp2 ... expN
-
-     Compilation:
-
-     <<exp1>>
-     <<exp2>>
-     ...
-     <<expN>>
-  */
-
-  private Inst compileSequence(List exp, Scope scope, boolean tail, Inst next) throws CompileError
-  {
-    if (exp == List.Empty)
-      return next;
-
-    return compile(exp.car(), scope, (tail && exp.cdr().empty()),
-           compileSequence(exp.cdr(), scope, tail, next));
-  }
-
   /* Compiles the "while" special form.
 
      Syntax: (while pred body...)
@@ -813,69 +739,84 @@ public class Compiler
     jump.setTarget(loop);
     return loop;
   }
-
-  /* Compiles the "delay" special form.
-
-     Syntax: (delay exp...)
-
-     Equivalent to:
-
-     (let ((thunk (fn () exp...))
-           (value-ready? false)
-           (cached-value nil))
-       (fn () (if (not value-ready?)
-                (do (set! cached-value (thunk))
-                    (set! value-ready? true))
-              cached-value)))
-
-
-     Compilation:
-
-     push-env 2
-     load-const false
-     store-local 0 0
-     load-const nil
-     store-local 0 1
-     make-promise body
-     pop-env
-
-     body:   load-local 0 0
-             branch done
-             <<exp>>
-             store-local 0 1
-             load-const true
-             store-local 0 0
-     done:   load-local 0 1
-             pop-frame
-
-  */
-
-  /* NOTE: Now implemented using macros
   
-  private Inst compileDelay(List exp, Scope scope, boolean tail, Inst next) throws CompileError
+  // (quote x)
+
+  private Inst compileQuote(List exp, Inst next) throws CompileError
   {
-    if (exp.length() < 2)
+    if (exp.length() != 2)
       throw malformedExp(exp);
 
-    Inst done = new LoadLocal(0, 1,
-                new PopFrame());
-
-    Inst body = new LoadLocal(0, 0,
-                new Branch(done,
-                  compileSequence(exp.cdr(), new Scope(scope), false,
-                  new StoreLocal(0, 1,
-                  new LoadConst(Bool.True,
-                  done)))));
-
-    return new PushEnv(2,
-           new LoadConst(Bool.False,
-           new StoreLocal(0, 0,
-           new LoadConst(Nil.Instance,
-           new StoreLocal(0, 1,
-           new MakePromise(body,
-           new PopEnv(next)))))));
+    return new LoadConst(exp.cadr(), next);
   }
-  */
+
+  // Compile a (quasiquote x) form by reducing it to an equivalent
+  // list form and compiling the result.
+
+  private Inst compileQuasiquote(List exp, Scope scope, Inst next) throws CompileError
+  {
+    if (exp.length() != 2)
+      throw malformedExp(exp);
+
+    var transformed = transformQuasiquote(exp.cadr());
+    //System.out.println("quasiquote transformation = " + transformed.repr());
+    return compile(transformed, scope, false, next);
+  }
+
+  // Reduce a quasiquote form (quasiquote x) to equivalent list form.
+
+  private List transformQuasiquote(Datum exp) throws CompileError
+  {
+    // (quasiquote ()) => ()
+    
+    if (exp == List.Empty)
+      return List.Empty;
+    
+    // (quasiquote x) => (quote x) for atomic (non-list) x
+    
+    if (exp.type() != Type.List)
+      return List.of(Symbol.get("quote"), exp);
+
+    var list = (List) exp;
+    
+    // Check for the unquote and unquote-splicing forms
+    
+    if (list.car().type() == Type.List) {
+      
+      var car = (List) list.car();
+      
+      // (quasiquote (unquote x) xs...) => (cons x (quasiquote xs...))
+      
+      if (car.car() == Symbol.get("unquote")) {
+        if (car.length() != 2)
+          throw malformedExp(exp);
+        return List.cons(Symbol.get("cons"),
+               List.cons(car.cadr(),
+               List.cons(transformQuasiquote(list.cdr()),
+               List.Empty)));
+      }
+
+      // (quasiquote (unquote-splicing x) xs...) => (concat x (quasiquote xs...))    
+      
+      if (car.car() == Symbol.get("unquote-splicing")) {
+        if (car.length() != 2)
+          throw malformedExp(exp);
+        return List.cons(Symbol.get("concat"),
+               List.cons(car.cadr(),
+               List.cons(transformQuasiquote(list.cdr()),
+               List.Empty)));
+      }
+    }
+    
+    // General case: recursively transform the list
+    
+    // (quasiquote x xs...) => (cons (quasiquote x) (quasiquote xs...))
+
+    return List.cons(Symbol.get("cons"),
+           List.cons(transformQuasiquote(list.car()),
+           List.cons(transformQuasiquote(list.cdr()),
+           List.Empty)));
+  }
   
   /* Compile the "defmacro" special form.
      
@@ -912,7 +853,7 @@ public class Compiler
     if (isVariadic)
       params = params.remove(Symbol.get("&"));    
     var extendedScope = new Scope(null, params);
-
+    
     var code = !isVariadic ? new PushEnv(requiredArgs,
                              bindLocals(0, requiredArgs,
                              compileBody(body, extendedScope,
@@ -952,7 +893,7 @@ public class Compiler
       throw new CompileError(err.getMessage(), err.position);
     }
 
-    System.out.println("macro expansion: " + expansion.repr());
+    //System.out.println("macro expansion: " + expansion.repr());
     return compile(expansion, scope, tail, next);
   }
   
@@ -1001,9 +942,6 @@ public class Compiler
         return compileSet(exp, scope, next);
       if (car == Symbol.get("while"))
         return compileWhile(exp, scope, tail, next);
-      // NOTE: Now implemented using macros
-      //if (car == Symbol.get("delay"))
-        //return compileDelay(exp, scope, tail, next);
       if (isMacro(car))
         return compileApplyMacro(exp, scope, tail, next);
     }

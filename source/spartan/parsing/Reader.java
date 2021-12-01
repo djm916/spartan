@@ -404,7 +404,7 @@ public class Reader implements AutoCloseable
 
     throw error("unrecognized character " + (char)lastChar);
   }
-
+   
   private static final String DefaultEncoding = "UTF-8";
   
   private static final Map<String, Datum> keywords = Map.of(
