@@ -1,6 +1,7 @@
 package spartan.parsing;
 
 import java.io.*;
+import java.util.Map;
 import spartan.data.*;
 import spartan.errors.SyntaxError;
 
@@ -271,8 +272,13 @@ public class Reader implements AutoCloseable
       getChar();
       text.append((char)lastChar);
     }
-
-    return Symbol.get(text.toString());
+    
+    // Handle keyword symbols such as nil, true, false
+    var s = text.toString();
+    if (keywords.containsKey(s))
+      return keywords.get(s);
+    else
+      return Symbol.get(s);
   }
   
   private Datum readText() throws SyntaxError, IOException
@@ -400,6 +406,12 @@ public class Reader implements AutoCloseable
   }
 
   private static final String DefaultEncoding = "UTF-8";
+  
+  private static final Map<String, Datum> keywords = Map.of(
+    "nil", Nil.Instance,
+    "true", Bool.True,
+    "false", Bool.False);
+  
   private final PushbackReader input;
   private final String source;
   private int lastChar = -1;

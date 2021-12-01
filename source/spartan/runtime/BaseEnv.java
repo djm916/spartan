@@ -10,9 +10,6 @@ import spartan.data.*;
 public final class BaseEnv extends GlobalEnv
 {
   {
-    bind(Symbol.get("true"), Bool.True);
-    bind(Symbol.get("false"), Bool.False);
-    bind(Symbol.get("nil"), Nil.Instance);    
     bind(Symbol.get("nil?"), CoreLib.IsNil);
     bind(Symbol.get("empty?"), CoreLib.IsEmptyList);    
     bind(Symbol.get("list"), CoreLib.MakeList);

@@ -14,3 +14,7 @@
       false
       `(if ,(car xs) true (any ,@(cdr xs)))))
 
+(any) ; => false
+(any true) ; => true
+(any false) ; => false
+(any false true) ; => true
