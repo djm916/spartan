@@ -1,7 +1,6 @@
 package spartan.data;
 
 import spartan.builtins.CoreLib;
-import spartan.errors.TypeMismatch;
 
 public final class List extends Datum
 {
@@ -110,7 +109,7 @@ public final class List extends Datum
     return at(this, index);
   }
   
-  public boolean eq(List that) throws TypeMismatch
+  public boolean eq(List that)
   {
     return eq(this, that);
   }
@@ -130,6 +129,11 @@ public final class List extends Datum
     return reverse(this);
   }
   
+  public List remove(Datum x)
+  {
+    return remove(this, x);
+  }
+  
   private static int length(List list)
   {
     int length = 0;
@@ -145,7 +149,7 @@ public final class List extends Datum
     return list.first;
   }
   
-  private static boolean eq(List x, List y) throws TypeMismatch
+  private static boolean eq(List x, List y)
   {
     for (; x != Empty && y != Empty; x = x.rest, y = y.rest)
       if (!CoreLib.eq(x.first, y.first))
@@ -179,6 +183,16 @@ public final class List extends Datum
     for (; x != Empty; x = x.rest)
       result = cons(x.car(), result);
     return result;
+  }
+  
+  private static List remove(List self, Datum x)
+  {
+    var result = new Builder();
+    for (; self != Empty; self = self.rest) {
+      if (!CoreLib.eq(x, self.first))
+        result.add(self.first);
+    }
+    return result.build();
   }
   
   private static String repr(List self)

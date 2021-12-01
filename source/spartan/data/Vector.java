@@ -2,7 +2,6 @@ package spartan.data;
 
 import java.util.stream.Stream;
 import java.util.stream.Collectors;
-import spartan.errors.TypeMismatch;
 import spartan.errors.NoSuchElement;
 import spartan.builtins.CoreLib;
 
@@ -53,7 +52,7 @@ public final class Vector extends Datum
     }
   }
   
-  public boolean eq(Vector that) throws TypeMismatch
+  public boolean eq(Vector that)
   {
     if (this.length() != that.length())
       return false;

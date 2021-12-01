@@ -1,14 +1,16 @@
-; Example of a variadic, recursive macro "all".
+; Example of a variadic, recursive macro "any".
 ;
-; "all" implements a short-circuiting "and" operation by transforming
-; to an equivalent series of nested "if" forms.
+; "any" implements a short-circuiting "or" operation as
+; a macro, transforming it into an equivalent series of
+; nested "if"s.
 ; 
-; (all) => false
+; (any) => false
 ;
-; (all xs...) => (if (car xs) true (all (cdr xs)))
+; (any xs...) => (if (car xs) true (any (cdr xs)))
 ;
 
-(defmacro all (&xs)
-  (if (empty? &xs)
-      'false
-      `(if ,(car &xs) 'true (all ,@(cdr &xs)))))
+(defmacro any (& xs)
+  (if (empty? xs)
+      false
+      `(if ,(car xs) true (any ,@(cdr xs)))))
+

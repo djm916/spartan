@@ -34,6 +34,7 @@ public class Compiler
   {
     return exp.type() == Type.Int
         || exp.type() == Type.Real
+        || exp.type() == Type.Bool
         || exp.type() == Type.Complex
         || exp.type() == Type.Text
         || exp == List.Empty
@@ -592,19 +593,21 @@ public class Compiler
       throw malformedExp(exp);
 
     var numParams = params.length();
-    var isVariadic = numParams != 0 && isRestParam((Symbol) params.at(numParams - 1));
-    var requiredArgs = isVariadic ? numParams - 1 : numParams;
+    var isVariadic = numParams > 1 && params.at(numParams - 2) == Symbol.get("&");
+    var requiredArgs = isVariadic ? numParams - 2 : numParams;
+    if (isVariadic)
+      params = params.remove(Symbol.get("&"));    
     var extendedScope = new Scope(scope, params);
 
-    var code = !isVariadic ? new PushEnv(numParams,
-                             bindLocals(0, numParams,
+    var code = !isVariadic ? new PushEnv(requiredArgs,
+                             bindLocals(0, requiredArgs,
                              compileBody(body, extendedScope,
                              new PopFrame())))
 
-                           : new PushEnv(numParams,
-                             bindLocals(0, numParams - 1,
+                           : new PushEnv(requiredArgs + 1,
+                             bindLocals(0, requiredArgs,
                              new PopRestArgs(
-                             new StoreLocal(0, numParams - 1,
+                             new StoreLocal(0, requiredArgs,
                              compileBody(body, extendedScope,
                              new PopFrame())))));
 
@@ -672,17 +675,13 @@ public class Compiler
        ((List)exp).car() == Symbol.get("defun"));
   }
 
-  private boolean isRestParam(Symbol s)
-  {
-    return s.repr().charAt(0) == '&';
-  }
-
   private boolean checkParamListForm(List params)
   {
-    for (; params != List.Empty; params = params.cdr()) {
+    for (; !params.empty(); params = params.cdr()) {
       if (params.car().type() != Type.Symbol)
         return false;
-      if (isRestParam((Symbol) params.car()) && params.cdr() != List.Empty)
+      if (params.car() == Symbol.get("&") &&
+           (params.cdr().empty() || !params.cddr().empty()))
         return false;
     }
     return true;
@@ -896,7 +895,7 @@ public class Compiler
     vm.globals.bind(symb, macro);
     return new LoadConst(Nil.Instance, next);
   }
-  
+   
   /* Create a macro instance given its definition.
   */
   private Macro makeMacro(List exp) throws CompileError
@@ -908,19 +907,21 @@ public class Compiler
       throw malformedExp(exp);
 
     var numParams = params.length();
-    var isVariadic = numParams != 0 && isRestParam((Symbol) params.at(numParams - 1));
-    var requiredArgs = isVariadic ? numParams - 1 : numParams;
+    var isVariadic = numParams > 1 && params.at(numParams - 2) == Symbol.get("&");
+    var requiredArgs = isVariadic ? numParams - 2 : numParams;
+    if (isVariadic)
+      params = params.remove(Symbol.get("&"));    
     var extendedScope = new Scope(null, params);
 
-    var code = !isVariadic ? new PushEnv(numParams,
-                             bindLocals(0, numParams,
+    var code = !isVariadic ? new PushEnv(requiredArgs,
+                             bindLocals(0, requiredArgs,
                              compileBody(body, extendedScope,
                              new PopFrame())))
 
-                           : new PushEnv(numParams,
-                             bindLocals(0, numParams - 1,
+                           : new PushEnv(requiredArgs + 1,
+                             bindLocals(0, requiredArgs,
                              new PopRestArgs(
-                             new StoreLocal(0, numParams - 1,
+                             new StoreLocal(0, requiredArgs,
                              compileBody(body, extendedScope,
                              new PopFrame())))));
 
