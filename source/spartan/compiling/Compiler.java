@@ -29,9 +29,9 @@ public class Compiler
     return new MalformedExpression(positionMap.get(exp));
   }
 
-  // Determine if an expression is self-evaluating, should
-  // not be processed further, and returned directly.
-  
+  /* Determine if an expression is self-evaluating.
+     The expression should be returned directly as a value.
+  */
   private static boolean isSelfEval(Datum exp)
   {
     return exp.type() == Type.Int
@@ -43,14 +43,14 @@ public class Compiler
         || exp == Nil.Instance;
   }
   
-  // Compile a self-evaluating expression.
+  /* Compile a self-evaluating expression. */
   
   private Inst compileSelfEval(Datum exp, Inst next)
   {
     return new LoadConst(exp, next);
   }
 
-  /* Compiles a variable reference.
+  /* Compile a variable reference.
      
      Syntax: an unquoted symbol
      
@@ -68,7 +68,7 @@ public class Compiler
                            : new LoadLocal(index.depth, index.offset, next);
   }
 
-  /* Compiles a variable assignment.
+  /* Compile a variable assignment.
 
      Syntax: (set! symbol init)
 
@@ -78,7 +78,8 @@ public class Compiler
      Otherwise, assume the symbol is a global variable, and generate a store-global instruction.
   */
 
-  private Inst compileSet(List exp, Scope scope, Inst next) throws CompileError
+  private Inst compileSet(List exp, Scope scope, Inst next)
+  throws CompileError
   {
     if (exp.length() != 3 || exp.cadr().type() != Type.Symbol)
       throw malformedExp(exp);
@@ -94,19 +95,20 @@ public class Compiler
                                    new LoadConst(Nil.Instance, next)));
   }
 
-  /* A top-level definition either binds a new global variable or modifies an existing one.
-
+  /* Compile a definition. A definition either binds or mutates a global variable.
+  
      Syntax: (def symb init)
 
      Compilation:
 
-       <<init>>
-       store-global symb
-       load-const nil
-       next: ...
+     <<init>>
+     store-global symb
+     load-const nil
+     next: ...
   */
 
-  private Inst compileDef(List exp, Scope scope, Inst next) throws CompileError
+  private Inst compileDef(List exp, Scope scope, Inst next)
+  throws CompileError
   {
     if (exp.length() != 3 || exp.cadr().type() != Type.Symbol)
       throw malformedExp(exp);
@@ -120,19 +122,20 @@ public class Compiler
            next)));
   }
 
-  /* Compile the "defun" special form for defining functions by transforming to
-     the equivalent "def" form.
+  /* Compile the "defun" special form for defining procedures 
+     by transforming to the equivalent "def" form:
+     
+     (defun symbol (params...) body...) => (def symbol (fun (params...) body...))
   */
   
-  private Inst compileDefun(List exp, Scope scope, Inst next) throws CompileError
+  private Inst compileDefun(List exp, Scope scope, Inst next)
+  throws CompileError
   {
     if (exp.length() < 4)
       throw malformedExp(exp);
 
     return compile(transformDefun(exp), scope, false, next);
   }
-  
-  // (defun symbol (params...) body...) => (def symbol (fun (params...) body...))
   
   private List transformDefun(List exp)
   {
@@ -144,7 +147,7 @@ public class Compiler
     return xform;
   }
 
-  /* Compile an "if" special form.
+  /* Compile the "if" special form.
 
      Syntax: (if pred sub alt)
              (if pred sub) => (if pred sub nil)
@@ -158,7 +161,8 @@ public class Compiler
      alt:  <<alt>>
      next: ...
   */
-  private Inst compileIf(List exp, Scope scope, boolean tail, Inst next) throws CompileError
+  private Inst compileIf(List exp, Scope scope, boolean tail, Inst next)
+  throws CompileError
   {
     int length = exp.length();
 
@@ -174,7 +178,7 @@ public class Compiler
                       compile(alt, scope, tail, next)));
   }
 
-  /* Compiles a "cond" special form.
+  /* Compiles the "cond" special form.
 
      Syntax: (cond (pred1 body1)
                    ...
@@ -194,7 +198,8 @@ public class Compiler
      none:   load-const nil
      next:   ...
   */
-  private Inst compileCond(List exp, Scope scope, boolean tail, Inst next) throws CompileError
+  private Inst compileCond(List exp, Scope scope, boolean tail, Inst next)
+  throws CompileError
   {
     if (exp.length() < 2 || !checkClauseListForm(exp.cdr()))
       throw malformedExp(exp);
@@ -202,7 +207,8 @@ public class Compiler
     return compileCondClauses(exp.cdr(), scope, tail, next);
   }
 
-  private Inst compileCondClauses(List clauses, Scope scope, boolean tail, Inst next) throws CompileError
+  private Inst compileCondClauses(List clauses, Scope scope, boolean tail, Inst next)
+  throws CompileError
   {
     if (clauses == List.Empty)
       return new LoadConst(Nil.Instance, next);
@@ -240,7 +246,8 @@ public class Compiler
      pop-env
   */
 
-  private Inst compileLet(List exp, Scope scope, boolean tail, Inst next) throws CompileError
+  private Inst compileLet(List exp, Scope scope, boolean tail, Inst next)
+  throws CompileError
   {
     if (exp.length() < 3 || exp.cadr().type() != Type.List)
       throw malformedExp(exp);
@@ -281,7 +288,8 @@ public class Compiler
      <<body>>
      pop-env
   */
-  private Inst compileLetRec(List exp, Scope scope, boolean tail, Inst next) throws CompileError
+  private Inst compileLetRec(List exp, Scope scope, boolean tail, Inst next)
+  throws CompileError
   {
     if (exp.length() < 3 || exp.cadr().type() != Type.List)
       throw malformedExp(exp);
@@ -303,7 +311,8 @@ public class Compiler
            new PopEnv(next))));
   }
 
-  private Inst compileRecursiveBindings(List inits, int offset, Scope scope, Inst next) throws CompileError
+  private Inst compileRecursiveBindings(List inits, int offset, Scope scope, Inst next)
+  throws CompileError
   {
     if (inits.empty())
       return next;
@@ -332,7 +341,8 @@ public class Compiler
      <<body>>
      pop-env
   */
-  private Inst compileLetStar(List exp, Scope scope, boolean tail, Inst next) throws CompileError
+  private Inst compileLetStar(List exp, Scope scope, boolean tail, Inst next)
+  throws CompileError
   {
     if (exp.length() < 3 || exp.cadr().type() != Type.List)
       throw malformedExp(exp);
@@ -352,7 +362,8 @@ public class Compiler
            new PopEnv(next))));
   }
 
-  private Inst compileBindingsSequential(List bindings, int offset, Scope scope, Inst next) throws CompileError
+  private Inst compileBindingsSequential(List bindings, int offset, Scope scope, Inst next)
+  throws CompileError
   {
     if (bindings.empty())
       return next;
@@ -455,7 +466,7 @@ public class Compiler
            bindLocals(offset + 1, numBindings, next)));
   }
   
-  /* Compiles a function application.
+  /* Compiles a procedure application.
 
      Syntax: (f arg1 arg2 ... argN)
 
@@ -471,7 +482,8 @@ public class Compiler
      apply
   */
 
-  private Inst compileApply(List exp, Scope scope, boolean tail, Inst next) throws CompileError
+  private Inst compileApply(List exp, Scope scope, boolean tail, Inst next)
+  throws CompileError
   {
     int numArgs = exp.length() - 1;
 
@@ -500,7 +512,8 @@ public class Compiler
      <<expN>>
   */
   
-  private Inst compileSequence(List exp, Scope scope, boolean tail, Inst next) throws CompileError
+  private Inst compileSequence(List exp, Scope scope, boolean tail, Inst next)
+  throws CompileError
   {
     if (exp == List.Empty)
       return next;
@@ -509,13 +522,14 @@ public class Compiler
            compileSequence(exp.cdr(), scope, tail, next));
   }
 
-  /* Compiles a function body. A function body consists of a sequence
+  /* Compiles a procedure body. A procedure body consists of a sequence
      of expressions, optionally preceeded by a list of inner definitions.
 
      Inner definitions are transformed into an equivalent form using a
      nested letrec form, shown below.
   */
-  private Inst compileBody(List body, Scope scope, Inst next) throws CompileError
+  private Inst compileBody(List body, Scope scope, Inst next)
+  throws CompileError
   {
     if (isInnerDef(body.car())) {
       var xform = transformInnerDefs(body);
@@ -526,75 +540,27 @@ public class Compiler
     return compileSequence(body, scope, true, next);
   }
   
-  /* Compiles a lambda expression (anonymous function)
-
-     Case 1: Fixed number of arguments
-
-       Syntax: (fun (param...) body...)
-
-       Compilation:
-
-       push-env N          // extend environment for N parameters
-       pop-arg             // bind arguments to parameters
-       store-local 0 0
-       ...
-       pop-arg
-       store-local 0 N-1
-       <<body>>            // Evaluate body
-       pop-frame           // Return
-
-     Case 2: Variable number of arguments
-
-       Syntax: (fun (param... &rest) body...)
-
-       Compilation:
-
-       push-env N          // extend environment for N parameters
-       pop-arg             // bind all but last argument to parameters
-       store-local 0 0
-       ...
-       pop-arg
-       store-local 0 N-2
-       pop-rest-args       // bind rest argument to
-       store-local 0 N-1
-       <<body>>
-       pop-frame
+  /* Compiles a lambda expression (anonymous procedure)
   */
-  private Inst compileFun(List exp, Scope scope, Inst next) throws CompileError
+  private Inst compileFun(List exp, Scope scope, Inst next)
+  throws CompileError
   {
     if (exp.length() < 3 || exp.cadr().type() != Type.List)
       throw malformedExp(exp);
 
     var params = (List) exp.cadr();
     var body = exp.cddr();
-
+    
     if (!checkParamListForm(params))
       throw malformedExp(exp);
-
-    var numParams = params.length();
-    var isVariadic = numParams > 1 && params.at(numParams - 2) == Symbol.get("&");
-    var requiredArgs = isVariadic ? numParams - 2 : numParams;
-    if (isVariadic)
-      params = params.remove(Symbol.get("&"));    
-    var extendedScope = new Scope(scope, params);
     
-    var code = !isVariadic ? new PushEnv(requiredArgs,
-                             bindLocals(0, requiredArgs,
-                             compileBody(body, extendedScope,
-                             new PopFrame())))
-
-                           : new PushEnv(requiredArgs + 1,
-                             bindLocals(0, requiredArgs,
-                             new PopRestArgs(
-                             new StoreLocal(0, requiredArgs,
-                             compileBody(body, extendedScope,
-                             new PopFrame())))));
-
-    return new MakeClosure(code, requiredArgs, isVariadic, next);
+    var proc = makeProcedure(params, body, scope);
+    
+    return new MakeClosure(proc.code, proc.requiredArgs, proc.isVariadic, next);
   }
 
   /* Transforms a sequence of inner definitions at the beginning
-     of a function body:
+     of a procedure body:
 
      (fun f params
        (def symb1 init1)
@@ -629,6 +595,9 @@ public class Compiler
     return List.cons(Symbol.get("letrec"), List.cons(bindings.build(), body));
   }
 
+  /* Determine if an expression is an inner-define form, i.e. a list beginning
+     with the symbol "def" or "defun".
+  */
   private boolean isInnerDef(Datum exp)
   {
     if (exp.type() != Type.List || exp == List.Empty)
@@ -650,7 +619,8 @@ public class Compiler
      done:     ...
   */
 
-  private Inst compileOr(List exp, Scope scope, boolean tail, Inst next) throws CompileError
+  private Inst compileOr(List exp, Scope scope, boolean tail, Inst next)
+  throws CompileError
   {
     if (exp.length() < 2)
       throw malformedExp(exp);
@@ -658,7 +628,8 @@ public class Compiler
     return compileDisjunction(exp.cdr(), scope, tail, next);
   }
 
-  private Inst compileDisjunction(List exp, Scope scope, boolean tail, Inst next) throws CompileError
+  private Inst compileDisjunction(List exp, Scope scope, boolean tail, Inst next)
+  throws CompileError
   {
     if (exp.empty())
       return next;
@@ -681,7 +652,8 @@ public class Compiler
      done:     ...
   */
 
-  private Inst compileAnd(List exp, Scope scope, boolean tail, Inst next) throws CompileError
+  private Inst compileAnd(List exp, Scope scope, boolean tail, Inst next)
+  throws CompileError
   {
     if (exp.length() < 2)
       throw malformedExp(exp);
@@ -689,7 +661,8 @@ public class Compiler
     return compileConjuction(exp.cdr(), scope, tail, next);
   }
 
-  private Inst compileConjuction(List exp, Scope scope, boolean tail, Inst next) throws CompileError
+  private Inst compileConjuction(List exp, Scope scope, boolean tail, Inst next)
+  throws CompileError
   {
     if (exp.empty())
       return next;
@@ -704,7 +677,8 @@ public class Compiler
      Syntax: (do exp...)
   */
 
-  private Inst compileDo(List exp, Scope scope, boolean tail, Inst next) throws CompileError
+  private Inst compileDo(List exp, Scope scope, boolean tail, Inst next)
+  throws CompileError
   {
     if (exp.length() < 2)
       throw malformedExp(exp);
@@ -725,7 +699,8 @@ public class Compiler
      next: ...
   */
 
-  private Inst compileWhile(List exp, Scope scope, boolean tail, Inst next) throws CompileError
+  private Inst compileWhile(List exp, Scope scope, boolean tail, Inst next)
+  throws CompileError
   {
     if (exp.length() < 3)
       throw malformedExp(exp);
@@ -818,95 +793,152 @@ public class Compiler
            List.Empty)));
   }
   
+  private Procedure makeProcedure(List params, List body, Scope scope)
+  throws CompileError
+  {
+    var numParams = params.length();
+    var isVariadic = numParams > 1 && params.at(numParams - 2) == Symbol.get("&");
+    var requiredArgs = isVariadic ? numParams - 2 : numParams;
+    
+    if (isVariadic)
+      params = params.remove(Symbol.get("&"));    
+    
+    var extendedScope = new Scope(scope, params);
+    
+    var code = isVariadic ? compileVariadicProcedure(body, extendedScope, requiredArgs)
+                          : compileProcedure(body, extendedScope, requiredArgs);
+    
+    return new Procedure(code, requiredArgs, isVariadic);
+  }
+  
+  /* Compile the body of a procedure with a fixed number of arguments N
+
+     Syntax: (fun (param...) body...)
+
+     Compilation:
+
+     push-env N          // extend environment for N arguments
+     pop-arg             // bind arguments to parameters
+     store-local 0 0
+     ...
+     pop-arg
+     store-local 0 N-1
+     <<body>>            // evaluate body
+     pop-frame           // return to caller
+  */
+  
+  private Inst compileProcedure(List body, Scope scope, int requiredArgs)
+  throws CompileError
+  {
+    return new PushEnv(requiredArgs,
+           bindLocals(0, requiredArgs,
+           compileBody(body, scope,
+           new PopFrame())));
+  }
+  
+  /* Compile the body of a variadic procedure with at least N arguments
+     and optionally more
+
+     Syntax: (fun (param... & rest) body...)
+
+     Compilation:
+
+     push-env N+1        // extend environment for N+1 arguments
+     pop-arg             // bind all but last argument to parameters
+     store-local 0 0
+     ...
+     pop-arg
+     store-local 0 N-2
+     pop-rest-args       // bind all additional arguments to rest parameter
+     store-local 0 N-1
+     <<body>>            // evaluate body
+     pop-frame           // return to caller
+  */
+  
+  private Inst compileVariadicProcedure(List body, Scope scope, int requiredArgs)
+  throws CompileError
+  {
+    return new PushEnv(requiredArgs + 1,
+               bindLocals(0, requiredArgs,
+               new PopRestArgs(
+               new StoreLocal(0, requiredArgs,
+               compileBody(body, scope,
+               new PopFrame())))));
+  }
+
   /* Compile the "defmacro" special form.
      
      Syntax: (defmacro f (param...) body...)
+             (defmacro f (param... & rest) body...)
      
-     Creates a macro, which is essentially just a regular procedure,
-     but is intended to transform code at compile time.
+     Creates a macro, which is essentially a regular procedure, but
+     is intended to generate code rather than data. It receives
+     unevaluated expressions as arguments and returns an expression
+     which is then compiled and evaluated. 
   */
 
-  private Inst compileDefMacro(List exp, Scope scope, Inst next) throws CompileError
+  private Inst compileDefMacro(List exp, Scope scope, Inst next)
+  throws CompileError
   {
     if (exp.length() < 4 || exp.cadr().type() != Type.Symbol || exp.caddr().type() != Type.List)
       throw malformedExp(exp);
 
     var symb = (Symbol) exp.cadr();
-    var macro = makeMacro(exp);
+    var params = (List) exp.caddr();
+    var body = exp.cdddr();
+    
+    if (!checkParamListForm(params))
+      throw malformedExp(exp);
+    
+    var proc = makeProcedure(params, body, null);
+    var macro = new Macro(proc.code, proc.requiredArgs, proc.isVariadic);
+    
     vm.globals.bind(symb, macro);
     return new LoadConst(Nil.Instance, next);
   }
-   
-  /* Create a macro instance given its definition.
+  
+  /* Compile a macro application
+  
+     Syntax: (f args...), where f is a macro procedure
+     
+     Applies the macro procedure to the list of (unevaluated) arguments,
+     and compiles the code returned by the macro.
   */
-  private Macro makeMacro(List exp) throws CompileError
+  private Inst compileApplyMacro(List exp, Scope scope, boolean tail, Inst next)
+  throws CompileError
   {
-    var params = (List) exp.caddr();
-    var body = exp.cdddr();
-
-    if (!checkParamListForm(params))
-      throw malformedExp(exp);
-
-    var numParams = params.length();
-    var isVariadic = numParams > 1 && params.at(numParams - 2) == Symbol.get("&");
-    var requiredArgs = isVariadic ? numParams - 2 : numParams;
-    if (isVariadic)
-      params = params.remove(Symbol.get("&"));    
-    var extendedScope = new Scope(null, params);
-    
-    var code = !isVariadic ? new PushEnv(requiredArgs,
-                             bindLocals(0, requiredArgs,
-                             compileBody(body, extendedScope,
-                             new PopFrame())))
-
-                           : new PushEnv(requiredArgs + 1,
-                             bindLocals(0, requiredArgs,
-                             new PopRestArgs(
-                             new StoreLocal(0, requiredArgs,
-                             compileBody(body, extendedScope,
-                             new PopFrame())))));
-
-    return new Macro(code, requiredArgs, isVariadic);
+    var f = (Macro) vm.globals.lookup((Symbol) exp.car());
+    var args = exp.cdr();
+    var xform = applyMacroTransform(f, args, positionMap.get(exp));
+    System.out.println("macro xform: " + xform.repr());
+    return compile(xform, scope, tail, next);
   }
   
-  /* Compile a macro application.
-  
-     Syntax: (f args...), where f was previously defined with defmacro.
-     
-     First lookup the macro procedure bound to f, apply this procedure to
-     the list of (unevaluated) arguments, and finally compile the code produced
-     by the macro procedure.
-  */
-  private Inst compileApplyMacro(List exp, Scope scope, boolean tail, Inst next) throws CompileError
+  private Datum applyMacroTransform(Macro f, List args, Position pos)
+  throws CompileError
   {
-    var macro = vm.globals.lookup((Symbol)exp.car());
-    var args = exp.cdr();
-    Datum expansion = null;
-
     try {
       vm.pushFrame(null);
-      vm.result = macro;
+      vm.result = f;
       vm.args = args;
-      expansion = vm.eval(new Apply(args.length(), positionMap.get(exp)));
+      return vm.eval(new Apply(args.length(), pos));
     }
     catch (RuntimeError err) {
       throw new CompileError(err.getMessage(), err.position);
-    }
-
-    //System.out.println("macro expansion: " + expansion.repr());
-    return compile(expansion, scope, tail, next);
+    }    
   }
   
-  // Determine if a symbol is bound to a macro in the global environment.
+  /* Determine if a symbol is bound to a macro in the global environment. */
   
   public boolean isMacro(Symbol symb)
   {
     return vm.globals.lookup(symb).type() == Type.Macro;
   }
   
-  // Compile a list, including special forms, function applications, and macro applications.
+  /* Compile a generic list expression, handling special forms and procedure/macro applications. */
   
-  private Inst compileList(List exp, Scope scope, boolean tail, Inst next) throws CompileError
+  private Inst compileList(List exp, Scope scope, boolean tail, Inst next)
+  throws CompileError
   {
     if (exp.car().type() == Type.Symbol) {
       var car = (Symbol) exp.car();
@@ -949,7 +981,10 @@ public class Compiler
     return compileApply(exp, scope, tail, next);
   }
 
-  private Inst compile(Datum exp, Scope scope, boolean tail, Inst next) throws CompileError
+  /* This is the top-level compilation function that dispatches on the type of the expression. */
+  
+  private Inst compile(Datum exp, Scope scope, boolean tail, Inst next)
+  throws CompileError
   {
     if (isSelfEval(exp))
       return compileSelfEval(exp, next);
