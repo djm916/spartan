@@ -1,24 +1,24 @@
 package spartan.runtime;
 
 import spartan.data.Closure;
+import spartan.compiling.ProcTemplate;
 
 public final class MakeClosure extends Inst
 {
-  private final Inst code;
-  private final int requiredArgs;
-  private final boolean isVariadic;
+  private final ProcTemplate template;
   
-  public MakeClosure(Inst code, int requiredArgs, boolean isVariadic, Inst next)
+  public MakeClosure(ProcTemplate template, Inst next)
   {
     super(next);
-    this.code = code;
-    this.requiredArgs = requiredArgs;
-    this.isVariadic = isVariadic;
+    this.template = template;
   }
   
   public final void eval(VirtualMachine vm)
   {
-    vm.result = new Closure(code, vm.locals, requiredArgs, isVariadic);
+    vm.result = new Closure(template.code,
+                            vm.locals,
+                            template.requiredArgs,
+                            template.isVariadic);
     vm.control = next;
   }
 }

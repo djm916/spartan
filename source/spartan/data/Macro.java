@@ -2,15 +2,16 @@ package spartan.data;
 
 import spartan.runtime.Inst;
 import spartan.runtime.VirtualMachine;
+import spartan.compiling.ProcTemplate;
 
 public class Macro extends Callable
 {
   private final Inst code;
   
-  public Macro(Inst code, int requiredArgs, boolean isVariadic)
+  public Macro(ProcTemplate template)
   {
-    super(requiredArgs, isVariadic);
-    this.code = code;
+    super(template.requiredArgs, template.isVariadic);
+    this.code = template.code;
   }
   
   public Type type()

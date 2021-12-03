@@ -554,9 +554,7 @@ public class Compiler
     if (!checkParamListForm(params))
       throw malformedExp(exp);
     
-    var proc = makeProcedure(params, body, scope);
-    
-    return new MakeClosure(proc.code, proc.requiredArgs, proc.isVariadic, next);
+    return new MakeClosure(makeProcTemplate(params, body, scope), next);
   }
 
   /* Transforms a sequence of inner definitions at the beginning
@@ -793,7 +791,7 @@ public class Compiler
            List.Empty)));
   }
   
-  private Procedure makeProcedure(List params, List body, Scope scope)
+  private ProcTemplate makeProcTemplate(List params, List body, Scope scope)
   throws CompileError
   {
     var numParams = params.length();
@@ -805,10 +803,10 @@ public class Compiler
     
     var extendedScope = new Scope(scope, params);
     
-    var code = isVariadic ? compileVariadicProcedure(body, extendedScope, requiredArgs)
-                          : compileProcedure(body, extendedScope, requiredArgs);
+    var code = isVariadic ? compileVariadicProc(body, extendedScope, requiredArgs)
+                          : compileFixedProc(body, extendedScope, requiredArgs);
     
-    return new Procedure(code, requiredArgs, isVariadic);
+    return new ProcTemplate(code, requiredArgs, isVariadic);
   }
   
   /* Compile the body of a procedure with a fixed number of arguments N
@@ -827,7 +825,7 @@ public class Compiler
      pop-frame           // return to caller
   */
   
-  private Inst compileProcedure(List body, Scope scope, int requiredArgs)
+  private Inst compileFixedProc(List body, Scope scope, int requiredArgs)
   throws CompileError
   {
     return new PushEnv(requiredArgs,
@@ -855,7 +853,7 @@ public class Compiler
      pop-frame           // return to caller
   */
   
-  private Inst compileVariadicProcedure(List body, Scope scope, int requiredArgs)
+  private Inst compileVariadicProc(List body, Scope scope, int requiredArgs)
   throws CompileError
   {
     return new PushEnv(requiredArgs + 1,
@@ -890,10 +888,7 @@ public class Compiler
     if (!checkParamListForm(params))
       throw malformedExp(exp);
     
-    var proc = makeProcedure(params, body, null);
-    var macro = new Macro(proc.code, proc.requiredArgs, proc.isVariadic);
-    
-    vm.globals.bind(symb, macro);
+    vm.globals.bind(symb, new Macro(makeProcTemplate(params, body, null)));
     return new LoadConst(Nil.Instance, next);
   }
   
