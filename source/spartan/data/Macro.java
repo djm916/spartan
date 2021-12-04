@@ -4,7 +4,7 @@ import spartan.runtime.Inst;
 import spartan.runtime.VirtualMachine;
 import spartan.compiling.ProcTemplate;
 
-public class Macro extends Callable
+public final class Macro extends Callable
 {
   private final Inst code;
   

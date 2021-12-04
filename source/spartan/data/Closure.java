@@ -3,16 +3,17 @@ package spartan.data;
 import spartan.runtime.Inst;
 import spartan.runtime.LocalEnv;
 import spartan.runtime.VirtualMachine;
+import spartan.compiling.ProcTemplate;
 
 public final class Closure extends Callable
 {
   private final Inst code;
   private final LocalEnv locals;
   
-  public Closure(Inst code, LocalEnv locals, int requiredArgs, boolean isVariadic)
+  public Closure(ProcTemplate template, LocalEnv locals)
   {
-    super(requiredArgs, isVariadic);
-    this.code = code;
+    super(template.requiredArgs, template.isVariadic);
+    this.code = template.code;
     this.locals = locals;
   }
   

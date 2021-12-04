@@ -15,10 +15,7 @@ public final class MakeClosure extends Inst
   
   public final void eval(VirtualMachine vm)
   {
-    vm.result = new Closure(template.code,
-                            vm.locals,
-                            template.requiredArgs,
-                            template.isVariadic);
+    vm.result = new Closure(template, vm.locals);
     vm.control = next;
   }
 }
