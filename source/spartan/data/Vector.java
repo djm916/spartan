@@ -3,9 +3,11 @@ package spartan.data;
 import java.util.stream.Stream;
 import java.util.stream.Collectors;
 import spartan.errors.NoSuchElement;
+import spartan.errors.TypeMismatch;
 import spartan.builtins.CoreLib;
+import spartan.runtime.VirtualMachine;
 
-public final class Vector extends Datum
+public final class Vector extends Callable
 {
   public static Vector fromList(List elems)
   {
@@ -13,6 +15,20 @@ public final class Vector extends Datum
     for (int i = 0; elems != List.Empty; ++i, elems = elems.cdr())
       result.elems[i] = elems.car();
     return result;
+  }
+  
+  public static Vector create(Int numElems, Datum init)
+  {
+    var n = numElems.value();
+    var result = new Vector(n);
+    for (int i = 0; i < n; ++i)
+      result.elems[i] = init;
+    return result;
+  }
+  
+  public Vector copy()
+  {
+    return new Vector(this);
   }
   
   public Type type()
@@ -64,27 +80,24 @@ public final class Vector extends Datum
     return true;
   }
   
-  public Vector copy()
+  public void apply(VirtualMachine vm) throws NoSuchElement, TypeMismatch
   {
-    return new Vector(this);
-  }
-    
-  public static Vector create(Int numElems, Datum init)
-  {
-    var n = numElems.value();
-    var result = new Vector(n);
-    for (int i = 0; i < n; ++i)
-      result.elems[i] = init;
-    return result;
+    if (vm.peekArg().type() != Type.Int)
+      throw new TypeMismatch();
+    var index = (Int) vm.popArg();
+    vm.result = get(index);
+    vm.popFrame();
   }
   
   private Vector(int numElems)
   {
+    super(1, false);
     this.elems = new Datum[numElems];
   }
   
   private Vector(Vector that)
-  {
+  { 
+    super(1, false);  
     this.elems = new Datum[that.elems.length];
     System.arraycopy(that.elems, 0, this.elems, 0, elems.length);
   }
