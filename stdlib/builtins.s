@@ -4,7 +4,7 @@
 ; This file is pre-loaded when the interpreter starts and
 ; itself loads several other files.
 
-(load "stdlib/list.s")
+(load "stdlib/lists.s")
 
 (defmacro swap! (a b)
   (let ((tmp (gensym)))

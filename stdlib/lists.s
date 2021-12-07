@@ -19,6 +19,17 @@
       (cons (car xs) (filter f (cdr xs)))
       (filter f (cdr xs)))))
 
+(defun filter! (f xs)
+  (cond ((empty? xs)  ())
+        ((f (car xs)) (set-cdr! xs (filter! f (cdr xs))) xs)
+        (true         (filter! f (cdr xs)))))
+
+(defun remove (f xs)
+  (filter (fun (x) (not (f x))) xs))
+
+(defun remove! (f xs)
+  (filter! (fun (x) (not (f x))) xs))
+
 ; Reduce a list to a single value
 
 ; Inputs:
