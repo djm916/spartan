@@ -53,8 +53,8 @@ public final class BaseEnv extends GlobalEnv
     bind(Symbol.get("E"), Real.E);
     bind(Symbol.get("PI"), Real.PI);
     bind(Symbol.get("I"), Complex.I);
-    bind(Symbol.get("math/rand"), MathLib.Rand);
-        
+    bind(Symbol.get("rand"), MathLib.Rand);
+    
     bind(Symbol.get("cons"), ListLib.Cons);
     bind(Symbol.get("car"), ListLib.Car);
     bind(Symbol.get("cadr"), ListLib.Cadr);

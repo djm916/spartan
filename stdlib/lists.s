@@ -1,4 +1,6 @@
 
+; Standard list processing library
+
 (defun map (f xs)
   (if (empty? xs) ()
     (cons (f (car xs))
@@ -13,6 +15,11 @@
   (apply concat
          (map (fun (x) (map f x)) xs)))
 
+(defun for-each (f xs)
+  (if (not (empty? xs))
+    (do (f (car xs))
+        (for-each f (cdr xs)))))
+
 (defun filter (f xs)
   (if (empty? xs) ()
     (if (f (car xs))
@@ -23,6 +30,26 @@
   (cond ((empty? xs)  ())
         ((f (car xs)) (set-cdr! xs (filter! f (cdr xs))) xs)
         (true         (filter! f (cdr xs)))))
+
+(defun find-first (f xs)
+  (if (empty? xs) false
+    (if (f (car xs))
+      (car xs)
+      (find-first f (cdr xs)))))
+
+(defun find-index (f xs)
+  (defun loop (i xs)
+    (cond ((empty? xs)  false)
+          ((f (car xs)) i)
+          (true         (loop (+ 1 i) (cdr xs)))))
+  (loop 0 xs))
+
+(defun count (f xs)
+  (defun loop (n xs)
+    (cond ((empty? xs)  n)
+          ((f (car xs)) (loop (+ 1 n) (cdr xs)))
+          (true         (loop n (cdr xs)))))
+  (loop 0 xs))
 
 (defun remove (f xs)
   (filter (fun (x) (not (f x))) xs))
@@ -60,9 +87,9 @@
   (if (empty? xs) i
     (f (car xs) (fold-right f i (cdr xs)))))
   
-(defun range (i j)
+(defun iota (i j)
   (if (> i j) ()
-    (cons i (range (+ 1 i) j))))
+    (cons i (iota (+ 1 i) j))))
 
 ; Note: defined in core
 ;(defun reverse (xs)
@@ -100,3 +127,4 @@
   (if (or (empty? xs) (empty? ys)) ()
     (cons (f (car xs) (car ys))
           (zip f (cdr xs) (cdr ys)))))
+
