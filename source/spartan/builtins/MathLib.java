@@ -6,6 +6,15 @@ import spartan.runtime.VirtualMachine;
 
 public final class MathLib
 {
+  public static GenericBinaryOperator GenericAdd = new GenericBinaryOperator() {
+    {
+      addMethod(Type.Int, (x, y) -> Int.add((Int)x, (Int)y));
+      addMethod(Type.Real, (x, y) -> Real.add((Real)x, (Real)y));
+      addMethod(Type.Complex, (x, y) -> Complex.add((Complex)x, (Complex)y));
+    }
+  };
+  
+  /*
   public static Datum add(Datum x, Datum y) throws TypeMismatch
   {
     if (x.type() == y.type()) {
@@ -17,12 +26,21 @@ public final class MathLib
     }
     throw new TypeMismatch();
   }
-    
+  
   public static final Primitive Add = new Primitive(2, true) {
     public void apply(VirtualMachine vm) throws TypeMismatch {
       vm.result = add(vm.popArg(), vm.popArg());
       while (vm.args != List.Empty)
         vm.result = add(vm.result, vm.popArg());
+      vm.popFrame();
+    }
+  }; */
+  
+  public static final Primitive Add = new Primitive(2, true) {
+    public void apply(VirtualMachine vm) throws TypeMismatch {
+      vm.result = GenericAdd.apply(vm.popArg(), vm.popArg());
+      while (vm.args != List.Empty)
+        vm.result = GenericAdd.apply(vm.result, vm.popArg());
       vm.popFrame();
     }
   };
@@ -32,7 +50,7 @@ public final class MathLib
     if (x.type() == y.type()) {
       switch (x.type()) {
         case Int: return Int.sub((Int)x, (Int)y);
-        case Real: return ((Real)x).sub((Real)y);
+        case Real: return Real.sub((Real)x, (Real)y);
         case Complex: return Complex.sub((Complex)x, (Complex)y);
       }
     }
@@ -51,7 +69,7 @@ public final class MathLib
     if (x.type() == y.type()) {
       switch (x.type()) {
         case Int: return Int.mul((Int)x, (Int)y);
-        case Real: return ((Real)x).mul((Real)y);
+        case Real: return Real.mul((Real)x, (Real)y);
         case Complex: return Complex.mul((Complex)x, (Complex)y);
       }
     }
@@ -72,7 +90,7 @@ public final class MathLib
     if (x.type() == y.type()) {
       switch (x.type()) {
         case Int: return Int.div((Int)x, (Int)y);
-        case Real: return ((Real)x).div((Real)y);
+        case Real: return Real.div((Real)x, (Real)y);
         case Complex: return Complex.div((Complex)x, (Complex)y);
       }
     }
@@ -168,7 +186,7 @@ public final class MathLib
   {
     if (x.type() == y.type()) {
       switch (x.type()) {
-        case Real: return ((Real)x).exp((Real)y);
+        case Real: return Real.exp((Real)x, (Real)y);
         case Complex: return Complex.exp((Complex)x, (Complex)y);
       }
     }
@@ -186,7 +204,7 @@ public final class MathLib
   {
     if (x.type() == y.type()) {
       switch (x.type()) {
-        case Real: return ((Real)x).log((Real)y);
+        case Real: return Real.log((Real)x, (Real)y);
         case Complex: return Complex.log((Complex)x, (Complex)y);
       }
     }

@@ -7,7 +7,7 @@
       (let* ((x (car xs))
              (xs (filter (not-factor? x) xs)))
         (cons x (loop xs)))))
-  (loop (range 2 n)))
+  (loop (iota 2 n)))
 
 (prime-sieve 10000)
 

@@ -2,9 +2,9 @@ package spartan.data;
 
 import java.util.stream.Stream;
 import java.util.stream.Collectors;
+import java.util.function.BiPredicate;
 import spartan.errors.NoSuchElement;
 import spartan.errors.TypeMismatch;
-import spartan.builtins.CoreLib;
 import spartan.runtime.VirtualMachine;
 
 public final class Vector extends Callable
@@ -68,13 +68,13 @@ public final class Vector extends Callable
     }
   }
   
-  public boolean eq(Vector that)
+  public static boolean eq(Vector x, Vector y, BiPredicate<Datum, Datum> eq)
   {
-    if (this.length() != that.length())
+    if (x.length() != y.length())
       return false;
     
-    for (int i = 0; i < this.length(); ++i)
-      if (!CoreLib.eq(this.elems[i], that.elems[i]))
+    for (int i = 0; i < x.length(); ++i)
+      if (!eq.test(x.elems[i], y.elems[i]))
         return false;
     
     return true;

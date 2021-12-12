@@ -17,13 +17,13 @@ public final class CoreLib
     return !(x == Bool.False || x == Nil.Instance);
   }
   
-  public static Bool not(Datum x) throws TypeMismatch
+  public static Bool not(Datum x)
   {
     return truth(!truth(x));
   }
   
   public static final Primitive Not = new Primitive(1, false) {
-    public void apply(VirtualMachine vm) throws TypeMismatch {
+    public void apply(VirtualMachine vm) {
       vm.result = not(vm.popArg());
       vm.popFrame();
     }
@@ -31,20 +31,21 @@ public final class CoreLib
 
   public static boolean eq(Datum x, Datum y)
   {
-    if (x.type() == y.type()) {
+    if (x.type() == y.type())
       switch (x.type()) {
-        case Int: return Int.eq((Int)x, (Int)y);
-        case Real: return ((Real)x).eq((Real)y);
-        case Text: return ((Text)x).eq((Text)y);
-        case Vector: return ((Vector)x).eq((Vector)y);
-        case List: return ((List)x).eq((List)y);
-        case Bool: 
-        case Symbol: return x == y;
+        case Int   : return Int.eq((Int)x, (Int)y);
+        case Real  : return Real.eq((Real)x, (Real)y);
+        case Text  : return Text.eq((Text)x, (Text)y);
+        case Vector: return Vector.eq((Vector)x, (Vector)y, CoreLib::eq);
+        case List  : return List.eq((List)x, (List)y, CoreLib::eq);
+        case Bool  :
+        case Symbol:
+        case Nil   : return x == y;
       }
-    }
+
     return false;
   }
-  
+    
   public static final Primitive Eq = new Primitive(2, false) {
     public void apply(VirtualMachine vm) {
       vm.result = truth(eq(vm.popArg(), vm.popArg()));
@@ -52,30 +53,25 @@ public final class CoreLib
     }
   };
 
-  public static boolean ne(Datum x, Datum y) throws TypeMismatch
-  {
-    return !eq(x, y);
-  }
-  
   public static final Primitive Ne = new Primitive(2, false) {
-    public void apply(VirtualMachine vm) throws TypeMismatch {
-      vm.result = truth(ne(vm.popArg(), vm.popArg()));
+    public void apply(VirtualMachine vm) {
+      vm.result = truth(!eq(vm.popArg(), vm.popArg()));
       vm.popFrame();
     }
   };
 
   public static boolean lt(Datum x, Datum y) throws TypeMismatch
   {
-    if (x.type() == y.type()) {
+    if (x.type() == y.type())
       switch (x.type()) {
-        case Int: return Int.compare((Int)x, (Int)y) < 0;
-        case Real: return ((Real)x).compare((Real)y) < 0;
-        case Text: return ((Text)x).compare((Text)y) < 0;
+        case Int : return Int.compare ((Int)x,  (Int)y)  < 0;
+        case Real: return Real.compare((Real)x, (Real)y) < 0;
+        case Text: return Text.compare((Text)x, (Text)y) < 0;
       }
-    }
+    
     throw new TypeMismatch();
   }
-  
+    
   public static final Primitive Lt = new Primitive(2, false) {
     public void apply(VirtualMachine vm) throws TypeMismatch {
       vm.result = truth(lt(vm.popArg(), vm.popArg()));
@@ -85,13 +81,13 @@ public final class CoreLib
 
   public static boolean le(Datum x, Datum y) throws TypeMismatch
   {
-    if (x.type() == y.type()) {
+    if (x.type() == y.type())
       switch (x.type()) {
-        case Int: return Int.compare((Int)x, (Int)y) <= 0;
-        case Real: return ((Real)x).compare((Real)y) <= 0;
-        case Text: return ((Text)x).compare((Text)y) <= 0;
+        case Int : return Int.compare ((Int)x,  (Int)y)  <= 0;
+        case Real: return Real.compare((Real)x, (Real)y) <= 0;
+        case Text: return Text.compare((Text)x, (Text)y) <= 0;
       }
-    }
+    
     throw new TypeMismatch();
   }
   
@@ -104,13 +100,13 @@ public final class CoreLib
 
   public static boolean gt(Datum x, Datum y) throws TypeMismatch
   {
-    if (x.type() == y.type()) {
+    if (x.type() == y.type())
       switch (x.type()) {
-        case Int: return Int.compare((Int)x, (Int)y) > 0;
-        case Real: return ((Real)x).compare((Real)y) > 0;
-        case Text: return ((Text)x).compare((Text)y) > 0;
+        case Int : return Int.compare ((Int)x,  (Int)y)  > 0;
+        case Real: return Real.compare((Real)x, (Real)y) > 0;
+        case Text: return Text.compare((Text)x, (Text)y) > 0;
       }
-    }
+    
     throw new TypeMismatch();
   }
   
@@ -123,13 +119,13 @@ public final class CoreLib
 
   public static boolean ge(Datum x, Datum y) throws TypeMismatch
   {
-    if (x.type() == y.type()) {
+    if (x.type() == y.type())
       switch (x.type()) {
-        case Int: return Int.compare((Int)x, (Int)y) >= 0;
-        case Real: return ((Real)x).compare((Real)y) >= 0;
-        case Text: return ((Text)x).compare((Text)y) >= 0;
+        case Int : return Int.compare ((Int)x,  (Int)y)  >= 0;
+        case Real: return Real.compare((Real)x, (Real)y) >= 0;
+        case Text: return Text.compare((Text)x, (Text)y) >= 0;
       }
-    }
+    
     throw new TypeMismatch();
   }
   
@@ -224,7 +220,7 @@ public final class CoreLib
     public void apply(VirtualMachine vm) throws TypeMismatch {
       if (vm.peekArg().type() != Type.Text)
         throw new TypeMismatch();
-      var fileName = ((Text) vm.popArg()).toString();
+      var fileName = ((Text) vm.popArg()).value();
       spartan.Evaluator.evalFile(fileName, vm.globals);
       vm.result = Nil.Instance;
       vm.popFrame();
@@ -278,5 +274,4 @@ public final class CoreLib
       vm.popFrame();
     }
   };
-  
 }

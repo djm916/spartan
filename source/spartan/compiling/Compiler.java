@@ -799,7 +799,7 @@ public class Compiler
     var requiredArgs = isVariadic ? numParams - 2 : numParams;
     
     if (isVariadic)
-      params = params.remove(Symbol.get("&"));    
+      params = params.remove((x) -> x == Symbol.get("&"));
     
     var extendedScope = new Scope(scope, params);
     

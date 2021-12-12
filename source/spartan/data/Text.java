@@ -16,25 +16,25 @@ public final class Text extends Datum
   {
     return "\"" + value + "\"";
   }
-  
+   
+  public String value()
+  {
+    return value;
+  }
+ 
   public int length()
   {
     return value.length();
   }
   
-  public boolean eq(Text that)
+  public static boolean eq(Text x, Text y)
   {
-    return this.value.equals(that.value);
+    return x.value.equals(y.value);
   }
   
-  public int compare(Text that)
+  public static int compare(Text x, Text y)
   {
-    return this.value.compareTo(that.value);
-  }
-    
-  public String toString()
-  {
-    return value;
+    return x.value.compareTo(y.value);
   }
   
   private final String value;

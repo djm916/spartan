@@ -10,8 +10,8 @@ import spartan.data.*;
 public final class BaseEnv extends GlobalEnv
 {
   {
-    bind(Symbol.get("nil?"), CoreLib.IsNil);
-    bind(Symbol.get("empty?"), CoreLib.IsEmptyList);    
+    /* General procedures */
+    
     bind(Symbol.get("list"), CoreLib.MakeList);
     bind(Symbol.get("vector"), CoreLib.MakeVector);
     bind(Symbol.get("complex"), CoreLib.MakeComplex);    
@@ -27,12 +27,19 @@ public final class BaseEnv extends GlobalEnv
     bind(Symbol.get(">"), CoreLib.Gt);
     bind(Symbol.get("<="), CoreLib.Le);
     bind(Symbol.get(">="), CoreLib.Ge);
-    bind(Symbol.get("not"), CoreLib.Not);
-    bind(Symbol.get("text->symbol"), CoreLib.TextToSymbol);
-    bind(Symbol.get("symbol->text"), CoreLib.SymbolToText);
-    bind(Symbol.get("int->real"), CoreLib.IntToReal);
+    bind(Symbol.get("not"), CoreLib.Not);    
     bind(Symbol.get("gensym"), CoreLib.GenSym);
     
+    /* Type predicates */
+    
+    bind(Symbol.get("nil?"), CoreLib.IsNil);
+    bind(Symbol.get("empty?"), CoreLib.IsEmptyList);
+    
+    /* Math procedures */
+    
+    bind(Symbol.get("E"), Real.E);
+    bind(Symbol.get("PI"), Real.PI);
+    bind(Symbol.get("I"), Complex.I);
     bind(Symbol.get("+"), MathLib.Add);
     bind(Symbol.get("-"), MathLib.Sub);
     bind(Symbol.get("*"), MathLib.Mul);
@@ -50,10 +57,17 @@ public final class BaseEnv extends GlobalEnv
     bind(Symbol.get("asin"), MathLib.Sin);
     bind(Symbol.get("acos"), MathLib.Cos);
     bind(Symbol.get("atan"), MathLib.Tan);    
-    bind(Symbol.get("E"), Real.E);
-    bind(Symbol.get("PI"), Real.PI);
-    bind(Symbol.get("I"), Complex.I);
     bind(Symbol.get("rand"), MathLib.Rand);
+    
+    /* Conversion procedures */
+    
+    bind(Symbol.get("text->symbol"), CoreLib.TextToSymbol);
+    bind(Symbol.get("symbol->text"), CoreLib.SymbolToText);
+    bind(Symbol.get("int->real"), CoreLib.IntToReal);
+    //bind(Symbol.get("int->complex"), CoreLib.IntToComplex);
+    //bind(Symbol.get("real->complex"), CoreLib.RealToComplex);
+    
+    /* List procedures */
     
     bind(Symbol.get("cons"), ListLib.Cons);
     bind(Symbol.get("car"), ListLib.Car);
@@ -68,10 +82,14 @@ public final class BaseEnv extends GlobalEnv
     bind(Symbol.get("set-car!"), ListLib.SetCar);
     bind(Symbol.get("set-cdr!"), ListLib.SetCdr);
     
+    /* Vector procedures */
+    
     bind(Symbol.get("vector/new"), VectorLib.New);
     bind(Symbol.get("vector/copy"), VectorLib.Copy);
     bind(Symbol.get("vector/get"), VectorLib.Get);
     bind(Symbol.get("vector/set!"), VectorLib.Set);
+    
+    /* Text procedures */
     
     bind(Symbol.get("text/concat"), TextLib.Concat);    
   }

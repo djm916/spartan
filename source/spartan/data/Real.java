@@ -45,14 +45,14 @@ public final class Real extends Datum
     return new Real(Math.ceil(value));
   }
   
-  public Real exp(Real that)
+  public static Real exp(Real base, Real pow)
   {
-    return new Real(Math.pow(this.value, that.value));
+    return new Real(Math.pow(base.value, pow.value));
   }
   
-  public Real log(Real that)
+  public static Real log(Real base, Real arg)
   {
-    return new Real(Math.log(this.value) / Math.log(that.value));
+    return new Real(Math.log(arg.value) / Math.log(base.value));
   }
   
   public Real sin()
@@ -85,34 +85,34 @@ public final class Real extends Datum
     return new Real(Math.atan(value));
   }
   
-  public Real add(Real that)
+  public static Real add(Real x, Real y)
   {
-    return new Real(this.value + that.value);
+    return new Real(x.value + y.value);
   }
   
-  public Real sub(Real that)
+  public static Real sub(Real x, Real y)
   {
-    return new Real(this.value - that.value);
+    return new Real(x.value - y.value);
   }
   
-  public Real mul(Real that)
+  public static Real mul(Real x, Real y)
   {
-    return new Real(this.value * that.value);
+    return new Real(x.value * y.value);
   }
   
-  public Real div(Real that)
+  public static Real div(Real x, Real y)
   {
-    return new Real(this.value / that.value);
+    return new Real(x.value / y.value);
+  }
+    
+  public static boolean eq(Real x, Real y)
+  {
+    return x.value == y.value;
   }
   
-  public boolean eq(Real that)
+  public static int compare(Real x, Real y)
   {
-    return this.value == that.value;
-  }
-  
-  public int compare(Real that)
-  {
-    return Double.compare(this.value, that.value);
+    return Double.compare(x.value, y.value);
   }
   
   private final double value;

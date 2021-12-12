@@ -67,15 +67,18 @@ public final class Complex extends Datum
                        x.real * y.imag + x.imag * y.real);
   }
   
-  // x = a + b*i, y = c + d*i
-  // conj(y) = c - d*i
-  // y * conj(y) = (c + d*i) * (c - d*i) = c^2 + d^2
-  // x / y = (x / y) * (conj(y) / conj(y))
-  //       = (x * conj(y)) / (c^2 + d^2)
-  //       = ((a + b*i) * (c - d*i)) / (c^2 + d^2)
-  //       = ((a*c + b*d) + (b*c - a*d)*i) / (c^2 + d^2)
-  //       = ((a*c + b*d) / (c^2 + d^2)) + ((b*c - a*d) / (c^2 + d^2))*i
-  
+  /* Perform a complex division by multiplying by the conjugate.
+     
+     let x = a + b*i, y = c + d*i
+     
+     conj(y) = c - d*i
+     y * conj(y) = (c + d*i) * (c - d*i) = c^2 + d^2
+     x / y = (x / y) * (conj(y) / conj(y))
+           = (x * conj(y)) / (c^2 + d^2)
+           = ((a + b*i) * (c - d*i)) / (c^2 + d^2)
+           = ((a*c + b*d) + (b*c - a*d)*i) / (c^2 + d^2)
+           = ((a*c + b*d) / (c^2 + d^2)) + ((b*c - a*d) / (c^2 + d^2))*i
+  */
   public static Complex div(Complex x, Complex y)
   {
     double scale = 1.0 / (y.real * y.real + y.imag * y.imag);

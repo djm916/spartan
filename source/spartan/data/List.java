@@ -1,6 +1,7 @@
 package spartan.data;
 
-import spartan.builtins.CoreLib;
+import java.util.function.Predicate;
+import java.util.function.BiPredicate;
 
 public final class List extends Datum
 {
@@ -109,9 +110,13 @@ public final class List extends Datum
     return at(this, index);
   }
   
-  public boolean eq(List that)
+  public static boolean eq(List x, List y, BiPredicate<Datum, Datum> eq)
   {
-    return eq(this, that);
+    for (; x != Empty && y != Empty; x = x.rest, y = y.rest)
+      if (!eq.test(x.first, y.first))
+        return false;
+    
+    return x == Empty && y == Empty;
   }
   
   public List concat(List that)
@@ -129,9 +134,9 @@ public final class List extends Datum
     return reverse(this);
   }
   
-  public List remove(Datum x)
+  public List remove(Predicate<Datum> pred)
   {
-    return remove(this, x);
+    return remove(this, pred);
   }
   
   private static int length(List list)
@@ -147,15 +152,6 @@ public final class List extends Datum
     while (index-- > 0)
       list = list.rest;
     return list.first;
-  }
-  
-  private static boolean eq(List x, List y)
-  {
-    for (; x != Empty && y != Empty; x = x.rest, y = y.rest)
-      if (!CoreLib.eq(x.first, y.first))
-        return false;
-    
-    return x == Empty && y == Empty;
   }
   
   private static List concat(List x, List y)
@@ -185,11 +181,11 @@ public final class List extends Datum
     return result;
   }
   
-  private static List remove(List self, Datum x)
+  private static List remove(List self, Predicate<Datum> pred)
   {
     var result = new Builder();
     for (; self != Empty; self = self.rest) {
-      if (!CoreLib.eq(x, self.first))
+      if (!pred.test(self.first))
         result.add(self.first);
     }
     return result.build();
