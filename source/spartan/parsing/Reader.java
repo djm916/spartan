@@ -215,7 +215,7 @@ public class Reader implements AutoCloseable
     getChar();
     scanDigits(text);
   }
-  
+    
   private void readImag(StringBuilder text) throws IOException, SyntaxError
   {
     // add the sign character
@@ -250,7 +250,7 @@ public class Reader implements AutoCloseable
     <exp> -> "e" <sign>? <digits>
   
   */
-
+    
   private Datum readNumber() throws IOException, SyntaxError
   {
     var text = new StringBuilder();
@@ -271,21 +271,62 @@ public class Reader implements AutoCloseable
       var denom = text.toString();
       return new Ratio(numer, denom);
     }
-    else if (peekChar() == '.') {
+    
+    if (peekChar() == '.') {      
       scanFractionAndExp(text);
+      
       if (isSign(peekChar())) {
-        var real = Double.parseDouble(text.toString());
+        var real = text.toString();
         text = new StringBuilder();
         readImag(text);
-        var imag = Double.parseDouble(text.toString());
+        var imag = text.toString();
         return new Complex(real, imag);
       }
-      return new Real(Double.parseDouble(text.toString()));
+      return new Real(text.toString());
     }
-    //return new Int(Integer.parseInt(text.toString()));
     return new Int(text.toString());
   }
 
+  private Int makeInt(String text) throws SyntaxError
+  {
+    try {
+      return new Int(text);
+    }
+    catch (NumberFormatException ex) {
+      throw error("malformed numeric literal");
+    }
+  }
+  
+  private Ratio makeRatio(String numer, String denom) throws SyntaxError
+  {
+    try {
+      return new Ratio(numer, denom);
+    }
+    catch (NumberFormatException ex) {
+      throw error("malformed numeric literal");
+    }
+  }
+  
+  private Real makeReal(String text) throws SyntaxError
+  {
+    try {
+      return new Real(text);
+    }
+    catch (NumberFormatException ex) {
+      throw error("malformed numeric literal");
+    }
+  }
+  
+  private Complex makeComplex(String real, String imag) throws SyntaxError
+  {
+    try {
+      return new Complex(real, imag);
+    }
+    catch (NumberFormatException ex) {
+      throw error("malformed numeric literal");
+    }
+  }
+  
   private Datum readSymbol() throws IOException
   {
     var text = new StringBuilder();

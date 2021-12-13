@@ -15,6 +15,11 @@ public final class Complex extends Datum
     this(x.value(), y.value());
   }
   
+  public Complex(String real, String imag)
+  {
+    this(Double.parseDouble(real), Double.parseDouble(imag));
+  }
+  
   public Type type()
   {
     return Type.Complex;

@@ -10,6 +10,11 @@ public final class Real extends Datum
     this.value = value;
   }
   
+  public Real(String val)
+  {
+    this(Double.parseDouble(val));
+  }
+  
   public Type type()
   {
     return Type.Real;

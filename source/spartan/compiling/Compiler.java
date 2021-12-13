@@ -37,8 +37,8 @@ public class Compiler
     return exp.type() == Type.Int
         || exp.type() == Type.Ratio
         || exp.type() == Type.Real
-        || exp.type() == Type.Bool
         || exp.type() == Type.Complex
+        || exp.type() == Type.Bool
         || exp.type() == Type.Text
         || exp == List.Empty
         || exp == Nil.Instance;

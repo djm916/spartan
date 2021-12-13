@@ -34,6 +34,7 @@ public final class CoreLib
     if (x.type() == y.type())
       switch (x.type()) {
         case Int   : return Int.eq((Int)x, (Int)y);
+        case Ratio : return Ratio.eq((Ratio)x, (Ratio)y);
         case Real  : return Real.eq((Real)x, (Real)y);
         case Text  : return Text.eq((Text)x, (Text)y);
         case Vector: return Vector.eq((Vector)x, (Vector)y, CoreLib::eq);
@@ -64,9 +65,10 @@ public final class CoreLib
   {
     if (x.type() == y.type())
       switch (x.type()) {
-        case Int : return Int.compare ((Int)x,  (Int)y)  < 0;
-        case Real: return Real.compare((Real)x, (Real)y) < 0;
-        case Text: return Text.compare((Text)x, (Text)y) < 0;
+        case Int  : return Int.compare((Int)x,  (Int)y)  < 0;
+        case Ratio: return Ratio.compare((Ratio)x, (Ratio)y) < 0;
+        case Real : return Real.compare((Real)x, (Real)y) < 0;
+        case Text : return Text.compare((Text)x, (Text)y) < 0;
       }
     
     throw new TypeMismatch();
@@ -83,9 +85,10 @@ public final class CoreLib
   {
     if (x.type() == y.type())
       switch (x.type()) {
-        case Int : return Int.compare ((Int)x,  (Int)y)  <= 0;
-        case Real: return Real.compare((Real)x, (Real)y) <= 0;
-        case Text: return Text.compare((Text)x, (Text)y) <= 0;
+        case Int  : return Int.compare ((Int)x,  (Int)y)  <= 0;
+        case Ratio: return Ratio.compare((Ratio)x, (Ratio)y) <= 0;
+        case Real : return Real.compare((Real)x, (Real)y) <= 0;
+        case Text : return Text.compare((Text)x, (Text)y) <= 0;
       }
     
     throw new TypeMismatch();
@@ -102,9 +105,10 @@ public final class CoreLib
   {
     if (x.type() == y.type())
       switch (x.type()) {
-        case Int : return Int.compare ((Int)x,  (Int)y)  > 0;
-        case Real: return Real.compare((Real)x, (Real)y) > 0;
-        case Text: return Text.compare((Text)x, (Text)y) > 0;
+        case Int  : return Int.compare ((Int)x,  (Int)y)  > 0;
+        case Ratio: return Ratio.compare((Ratio)x, (Ratio)y) > 0;
+        case Real : return Real.compare((Real)x, (Real)y) > 0;
+        case Text : return Text.compare((Text)x, (Text)y) > 0;
       }
     
     throw new TypeMismatch();
@@ -121,9 +125,10 @@ public final class CoreLib
   {
     if (x.type() == y.type())
       switch (x.type()) {
-        case Int : return Int.compare ((Int)x,  (Int)y)  >= 0;
-        case Real: return Real.compare((Real)x, (Real)y) >= 0;
-        case Text: return Text.compare((Text)x, (Text)y) >= 0;
+        case Int  : return Int.compare ((Int)x,  (Int)y)  >= 0;
+        case Ratio: return Ratio.compare((Ratio)x, (Ratio)y) >= 0;
+        case Real : return Real.compare((Real)x, (Real)y) >= 0;
+        case Text : return Text.compare((Text)x, (Text)y) >= 0;
       }
     
     throw new TypeMismatch();
