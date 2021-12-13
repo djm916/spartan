@@ -14,7 +14,8 @@ public final class BaseEnv extends GlobalEnv
     
     bind(Symbol.get("list"), CoreLib.MakeList);
     bind(Symbol.get("vector"), CoreLib.MakeVector);
-    bind(Symbol.get("complex"), CoreLib.MakeComplex);    
+    bind(Symbol.get("complex"), CoreLib.MakeComplex);
+    bind(Symbol.get("ratio"), CoreLib.MakeRatio);
     bind(Symbol.get("apply"), CoreLib.Apply);    
     bind(Symbol.get("print"), CoreLib.Print);
     bind(Symbol.get("print-line"), CoreLib.PrintLine);

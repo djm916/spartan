@@ -224,12 +224,13 @@ public class Reader implements AutoCloseable
     getChar();
   }
   
-  /*
+  /* Read a number
     
-    <number> -> <sign>? <int> | <real> | <complex>
+    <number> -> <sign>? (<int> | <ratio> | <real> | <complex>)
     <int> -> <digits>
+    <ratio> -> <digits> "/" <digits>
     <real> -> <digits> "." <digits> <exp>?
-    <complex> -> <real> <sign>? <real> "i"
+    <complex> -> <real> <sign> <real> "i"
     <sign> -> "-" | "+"
     <digit> -> "0" | "1" | ... | "9"
     <digits> -> <digit>+
@@ -248,7 +249,16 @@ public class Reader implements AutoCloseable
 
     readUnsignedInt(text);
 
-    if (peekChar() == '.') {
+    if (peekChar() == '/') {
+      var numer = text.toString();
+      text = new StringBuilder();
+      getChar(); // skip /
+      getChar();
+      readUnsignedInt(text);
+      var denom = text.toString();
+      return new Ratio(numer, denom);
+    }
+    else if (peekChar() == '.') {
       readReal(text);      
       if (isSign(peekChar())) {
         var real = Double.parseDouble(text.toString());
@@ -259,7 +269,8 @@ public class Reader implements AutoCloseable
       }
       return new Real(Double.parseDouble(text.toString()));
     }
-    return new Int(Integer.parseInt(text.toString()));
+    //return new Int(Integer.parseInt(text.toString()));
+    return new Int(text.toString());
   }
 
   private Datum readSymbol() throws IOException

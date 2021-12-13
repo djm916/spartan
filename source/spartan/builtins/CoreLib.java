@@ -164,6 +164,20 @@ public final class CoreLib
     }
   };
   
+  public static final Ratio makeRatio(Datum x, Datum y) throws TypeMismatch
+  {
+    if (x.type() != Type.Int || y.type() != Type.Int)
+      throw new TypeMismatch();
+    return new Ratio((Int)x, (Int)y);
+  }
+  
+  public static final Primitive MakeRatio = new Primitive(2, false) {
+    public void apply(VirtualMachine vm) throws TypeMismatch {
+      vm.result = makeRatio(vm.popArg(), vm.popArg());
+      vm.popFrame();
+    }
+  };
+  
   public static final Primitive Apply = new Primitive(2, false) {
     public void apply(VirtualMachine vm) throws Error {
       vm.result = vm.popArg();
@@ -249,7 +263,7 @@ public final class CoreLib
     public void apply(VirtualMachine vm) throws TypeMismatch {
       if (vm.peekArg().type() != Type.Int)
         throw new TypeMismatch();
-      vm.result = new Real(((Int)vm.popArg()).value());
+      vm.result = new Real(((Int)vm.popArg()).doubleValue());
       vm.popFrame();
     }
   };

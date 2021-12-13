@@ -19,7 +19,7 @@ public final class Vector extends Callable
   
   public static Vector create(Int numElems, Datum init)
   {
-    var n = numElems.value();
+    var n = numElems.intValue();
     var result = new Vector(n);
     for (int i = 0; i < n; ++i)
       result.elems[i] = init;
@@ -51,7 +51,7 @@ public final class Vector extends Callable
   public Datum get(Int index) throws NoSuchElement
   {
     try {
-      return elems[index.value()];
+      return elems[index.intValue()];
     }
     catch (ArrayIndexOutOfBoundsException ex) {
       throw new NoSuchElement();
@@ -61,7 +61,7 @@ public final class Vector extends Callable
   public void set(Int index, Datum value) throws NoSuchElement
   {
     try {
-      elems[index.value()] = value;
+      elems[index.intValue()] = value;
     }
     catch (ArrayIndexOutOfBoundsException ex) {
       throw new NoSuchElement();
