@@ -171,7 +171,7 @@ public class Reader implements AutoCloseable
     }
   }
   
-  private void readUnsignedInt(StringBuilder text) throws IOException, SyntaxError
+  private void scanDigits(StringBuilder text) throws IOException, SyntaxError
   {
     if (!isDigit(lastChar))
       throw error("malformed numeric literal");
@@ -183,45 +183,58 @@ public class Reader implements AutoCloseable
       text.append((char)lastChar);
     }
   }
-
-  private void readSignedInt(StringBuilder text) throws IOException, SyntaxError
+  
+  private void scanFractionAndExp(StringBuilder text) throws IOException, SyntaxError
   {
+    // add the "." character
+    getChar();
+    text.append((char)lastChar);    
+    
+    // add fraction digits
+    getChar();
+    scanDigits(text);
+    
+    // scan optional exponent
+    if (isExponent(peekChar()))
+      scanExponent(text);
+  }
+  
+  private void scanExponent(StringBuilder text) throws IOException, SyntaxError
+  {
+    // add the "e" or "E" character
     getChar();
     text.append((char)lastChar);
     
+    // scan the optional sign
     if (isSign(peekChar())) {
       getChar();
       text.append((char)lastChar);
     }
     
+    // add digits of the exponent
     getChar();
-    readUnsignedInt(text);
-  }
-  
-  private void readReal(StringBuilder text) throws IOException, SyntaxError
-  {
-    getChar();
-    text.append((char)lastChar);    
-    
-    getChar();
-    readUnsignedInt(text);
-    
-    if (isExponent(peekChar()))
-      readSignedInt(text);
+    scanDigits(text);
   }
   
   private void readImag(StringBuilder text) throws IOException, SyntaxError
   {
+    // add the sign character
     getChar();
     text.append((char)lastChar);
+    
+    // add digits before "."
     getChar();
-    readUnsignedInt(text);
+    scanDigits(text);
+    
     if (peekChar() != '.')
       throw error("malformed numeric literal");
-    readReal(text);
+    
+    scanFractionAndExp(text);
+    
     if (peekChar() != 'i')
       throw error("malformed numeric literal");
-    getChar();
+    
+    getChar(); // eat "i"
   }
   
   /* Read a number
@@ -247,19 +260,19 @@ public class Reader implements AutoCloseable
       getChar();
     }
 
-    readUnsignedInt(text);
+    scanDigits(text);
 
     if (peekChar() == '/') {
       var numer = text.toString();
       text = new StringBuilder();
       getChar(); // skip /
       getChar();
-      readUnsignedInt(text);
+      scanDigits(text);
       var denom = text.toString();
       return new Ratio(numer, denom);
     }
     else if (peekChar() == '.') {
-      readReal(text);      
+      scanFractionAndExp(text);
       if (isSign(peekChar())) {
         var real = Double.parseDouble(text.toString());
         text = new StringBuilder();
