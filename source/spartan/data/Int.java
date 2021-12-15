@@ -4,14 +4,19 @@ import java.math.BigInteger;
 
 public final class Int extends Datum
 {
-  public Int(int value)
+  public Int(long value)
   {
-    this.value = BigInteger.valueOf(value);
+    this(BigInteger.valueOf(value));
   }
   
-  public Int(String val)
+  public Int(BigInteger value)
   {
-    this.value = new BigInteger(val);
+    this.value = value;
+  }
+  
+  public Int(String value)
+  {
+    this(new BigInteger(value));
   }
   
   public Type type()
@@ -32,6 +37,11 @@ public final class Int extends Datum
   public int intValue()
   {
     return value.intValue();
+  }
+  
+  public long longValue()
+  {
+    return value.longValue();
   }
   
   public double doubleValue()
@@ -82,11 +92,6 @@ public final class Int extends Datum
   public static int compare(Int x, Int y)
   {
     return x.value.compareTo(y.value);
-  }
-  
-  private Int(BigInteger value)
-  {
-    this.value = value;
   }
   
   private final BigInteger value;

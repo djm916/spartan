@@ -47,6 +47,16 @@ public final class Ratio extends Datum
     return String.format("%s/%s", numer, denom);
   }
   
+  public Int numerator()
+  {
+    return new Int(numer);
+  }
+  
+  public Int denominator()
+  {
+    return new Int(denom);
+  }
+  
   /* Take the absolute value of a fraction */
   
   public Ratio abs()

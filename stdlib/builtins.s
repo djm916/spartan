@@ -5,6 +5,12 @@
 ; itself loads several other files.
 
 (load "stdlib/lists.s")
+(load "stdlib/vectors.s")
+(load "stdlib/streams.s")
+(load "stdlib/defstruct.s")
+
+(defun even? (x) (= 0 (% x 2)))
+(defun odd?  (x) (not (even? x)))
 
 (defmacro swap! (a b)
   (let ((tmp (gensym)))

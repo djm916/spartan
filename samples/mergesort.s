@@ -43,7 +43,7 @@
   (let ((v (vector/new n 0.0))
         (i 0))
     (while (< i n)
-      (vector/set! v i (math/rand))
+      (vector/set! v i (rand))
       (set! i (+ 1 i)))
     v))
 

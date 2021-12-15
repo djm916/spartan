@@ -418,26 +418,26 @@ public class Reader implements AutoCloseable
   private Datum readQuote() throws SyntaxError, IOException
   {
     skipSpace();
-    return List.of(Symbol.get("quote"), readDatum());
+    return List.of(Symbols.Quote, readDatum());
   }
   
   private Datum readUnquote() throws SyntaxError, IOException
   {
     skipSpace();
-    return List.of(Symbol.get("unquote"), readDatum());
+    return List.of(Symbols.Unquote, readDatum());
   }
 
   private Datum readUnquoteSplicing() throws SyntaxError, IOException
   {
     getChar();
     skipSpace();
-    return List.of(Symbol.get("unquote-splicing"), readDatum());
+    return List.of(Symbols.UnquoteSplicing, readDatum());
   }
 
   private Datum readQuasiQuote() throws SyntaxError, IOException
   {
     skipSpace();
-    return List.of(Symbol.get("quasiquote"), readDatum());
+    return List.of(Symbols.Quasiquote, readDatum());
   }
   
   private Datum readDatum() throws SyntaxError, IOException

@@ -30,6 +30,11 @@ public final class Real extends Datum
     return value;
   }
   
+  public long longValue()
+  {
+    return (long) value;
+  }
+  
   public Real neg()
   {
     return new Real(-value);
@@ -49,7 +54,7 @@ public final class Real extends Datum
   {
     return new Real(Math.ceil(value));
   }
-  
+    
   public static Real exp(Real base, Real pow)
   {
     return new Real(Math.pow(base.value, pow.value));

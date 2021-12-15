@@ -11,9 +11,9 @@ public final class VectorLib
     public void apply(VirtualMachine vm) throws TypeMismatch {
       if (vm.peekArg().type() != Type.Int)
         throw new TypeMismatch();
-      var size = (Int) vm.popArg();
+      var length = ((Int) vm.popArg()).intValue();
       var init = vm.popArg();
-      vm.result = Vector.create(size, init);
+      vm.result = Vector.create(length, init);
       vm.popFrame();
     }
   };
@@ -34,7 +34,7 @@ public final class VectorLib
       var vector = (Vector) vm.popArg();
       if (vm.peekArg().type() != Type.Int)
         throw new TypeMismatch();
-      var index = (Int) vm.popArg();
+      var index = ((Int) vm.popArg()).intValue();
       vm.result = vector.get(index);
       vm.popFrame();
     }
@@ -47,11 +47,22 @@ public final class VectorLib
       var vector = (Vector) vm.popArg();
       if (vm.peekArg().type() != Type.Int)
         throw new TypeMismatch();
-      var index = (Int) vm.popArg();
+      var index = ((Int) vm.popArg()).intValue();
       var value = vm.popArg();
       vector.set(index, value);
       vm.result = Nil.Instance;
       vm.popFrame();
     }
   };
+  
+  public static final Primitive Append = new Primitive(2, false) {
+    public void apply(VirtualMachine vm) throws TypeMismatch {
+      if (vm.peekArg().type() != Type.Vector)
+        throw new TypeMismatch();
+      ((Vector) vm.popArg()).append(vm.popArg());
+      vm.result = Nil.Instance;
+      vm.popFrame();
+    }
+  };
+
 }

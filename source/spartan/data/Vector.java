@@ -3,6 +3,7 @@ package spartan.data;
 import java.util.stream.Stream;
 import java.util.stream.Collectors;
 import java.util.function.BiPredicate;
+import java.util.ArrayList;
 import spartan.errors.NoSuchElement;
 import spartan.errors.TypeMismatch;
 import spartan.runtime.VirtualMachine;
@@ -11,19 +12,30 @@ public final class Vector extends Callable
 {
   public static Vector fromList(List elems)
   {
-    Vector result = new Vector(elems.length());
-    for (int i = 0; elems != List.Empty; ++i, elems = elems.cdr())
-      result.elems[i] = elems.car();
+    var result = new Vector(elems.length());
+    for (; !elems.empty(); elems = elems.cdr())
+      result.elems.add(elems.car());
     return result;
   }
   
-  public static Vector create(Int numElems, Datum init)
+  public static Vector create(int length, Datum init)
   {
-    var n = numElems.intValue();
-    var result = new Vector(n);
-    for (int i = 0; i < n; ++i)
-      result.elems[i] = init;
+    var result = new Vector(length);
+    for (int i = 0; i < length; ++i)
+      result.elems.add(init);
     return result;
+  }
+  
+  public Vector(int length)
+  {
+    super(1, false);
+    elems = new ArrayList<Datum>(length);
+  }
+  
+  public Vector(Vector that)
+  { 
+    this(that.length());
+    elems.addAll(that.elems);
   }
   
   public Vector copy()
@@ -38,34 +50,39 @@ public final class Vector extends Callable
   
   public String repr()
   {
-    return Stream.of(elems)
+    return elems.stream()
       .map(e -> e.repr())
       .collect(Collectors.joining(" ", "[", "]"));
   }
   
   public int length()
   {
-    return elems.length;
+    return elems.size();
   }
   
-  public Datum get(Int index) throws NoSuchElement
+  public Datum get(int index) throws NoSuchElement
   {
     try {
-      return elems[index.intValue()];
+      return elems.get(index);
     }
-    catch (ArrayIndexOutOfBoundsException ex) {
+    catch (IndexOutOfBoundsException ex) {
       throw new NoSuchElement();
     }
   }
   
-  public void set(Int index, Datum value) throws NoSuchElement
+  public void set(int index, Datum value) throws NoSuchElement
   {
     try {
-      elems[index.intValue()] = value;
+      elems.set(index, value);
     }
-    catch (ArrayIndexOutOfBoundsException ex) {
+    catch (IndexOutOfBoundsException ex) {
       throw new NoSuchElement();
     }
+  }
+  
+  public void append(Datum x)
+  {
+    elems.add(x);
   }
   
   public static boolean eq(Vector x, Vector y, BiPredicate<Datum, Datum> eq)
@@ -73,8 +90,9 @@ public final class Vector extends Callable
     if (x.length() != y.length())
       return false;
     
-    for (int i = 0; i < x.length(); ++i)
-      if (!eq.test(x.elems[i], y.elems[i]))
+    var n = x.length();
+    for (int i = 0; i < n; ++i)
+      if (!eq.test(x.elems.get(i), y.elems.get(i)))
         return false;
     
     return true;
@@ -84,23 +102,10 @@ public final class Vector extends Callable
   {
     if (vm.peekArg().type() != Type.Int)
       throw new TypeMismatch();
-    var index = (Int) vm.popArg();
+    var index = ((Int) vm.popArg()).intValue();
     vm.result = get(index);
     vm.popFrame();
   }
   
-  private Vector(int numElems)
-  {
-    super(1, false);
-    this.elems = new Datum[numElems];
-  }
-  
-  private Vector(Vector that)
-  { 
-    super(1, false);  
-    this.elems = new Datum[that.elems.length];
-    System.arraycopy(that.elems, 0, this.elems, 0, elems.length);
-  }
-  
-  private final Datum[] elems;
+  private final ArrayList<Datum> elems;
 }

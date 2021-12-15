@@ -1,5 +1,3 @@
-(load "stdlib/list.s")
-
 ; (power-set ()) => (())
 ; (power-set '(1)) => ((1) ())
 ; (power-set '(1 2)) => ((1 2) (1) (2) ())

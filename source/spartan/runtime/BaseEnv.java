@@ -49,7 +49,7 @@ public final class BaseEnv extends GlobalEnv
     bind(Symbol.get("~"), MathLib.Neg);
     bind(Symbol.get("abs"), MathLib.Abs);
     bind(Symbol.get("floor"), MathLib.Floor);
-    bind(Symbol.get("ceil"), MathLib.Ceil);
+    bind(Symbol.get("ceiling"), MathLib.Ceiling);
     bind(Symbol.get("exp"), MathLib.Exp);
     bind(Symbol.get("log"), MathLib.Log);
     bind(Symbol.get("sin"), MathLib.Sin);
@@ -59,15 +59,18 @@ public final class BaseEnv extends GlobalEnv
     bind(Symbol.get("acos"), MathLib.Cos);
     bind(Symbol.get("atan"), MathLib.Tan);    
     bind(Symbol.get("rand"), MathLib.Rand);
+    bind(Symbol.get("numerator"), MathLib.Numerator);
+    bind(Symbol.get("denominator"), MathLib.Denominator);
+    bind(Symbol.get("real-part"), MathLib.RealPart);
+    bind(Symbol.get("imag-part"), MathLib.ImagPart);
     
     /* Conversion procedures */
     
     bind(Symbol.get("text->symbol"), CoreLib.TextToSymbol);
     bind(Symbol.get("symbol->text"), CoreLib.SymbolToText);
-    bind(Symbol.get("int->real"), CoreLib.IntToReal);
-    //bind(Symbol.get("int->complex"), CoreLib.IntToComplex);
-    //bind(Symbol.get("real->complex"), CoreLib.RealToComplex);
-    
+    bind(Symbol.get("int->real"), CoreLib.IntToReal);   
+    bind(Symbol.get("real->int"), CoreLib.RealToInt);
+        
     /* List procedures */
     
     bind(Symbol.get("cons"), ListLib.Cons);
@@ -89,7 +92,8 @@ public final class BaseEnv extends GlobalEnv
     bind(Symbol.get("vector/copy"), VectorLib.Copy);
     bind(Symbol.get("vector/get"), VectorLib.Get);
     bind(Symbol.get("vector/set!"), VectorLib.Set);
-    
+    bind(Symbol.get("vector/append!"), VectorLib.Append);
+       
     /* Text procedures */
     
     bind(Symbol.get("text/concat"), TextLib.Concat);    

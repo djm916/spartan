@@ -175,7 +175,7 @@ public final class MathLib
     }
   };
   
-  public static Datum ceil(Datum x) throws TypeMismatch
+  public static Datum ceiling(Datum x) throws TypeMismatch
   {
     switch (x.type()) {
       case Real: return ((Real)x).ceil();
@@ -183,9 +183,9 @@ public final class MathLib
     throw new TypeMismatch();
   }
   
-  public static final Primitive Ceil = new Primitive(1, false) {
+  public static final Primitive Ceiling = new Primitive(1, false) {
     public void apply(VirtualMachine vm) throws TypeMismatch {
-      vm.result = ceil(vm.popArg());
+      vm.result = ceiling(vm.popArg());
       vm.popFrame();
     }
   };
@@ -325,6 +325,42 @@ public final class MathLib
   public static final Primitive Rand = new Primitive(0, false) {
     public void apply(VirtualMachine vm) {
       vm.result = new Real(Math.random());
+      vm.popFrame();
+    }
+  };
+  
+  public static final Primitive Numerator = new Primitive(1, false) {
+    public void apply(VirtualMachine vm) throws TypeMismatch {
+      if (vm.peekArg().type() != Type.Ratio)
+        throw new TypeMismatch();
+      vm.result = ((Ratio)vm.popArg()).numerator();
+      vm.popFrame();
+    }
+  };
+  
+  public static final Primitive Denominator = new Primitive(1, false) {
+    public void apply(VirtualMachine vm) throws TypeMismatch  {
+      if (vm.peekArg().type() != Type.Ratio)
+        throw new TypeMismatch();
+      vm.result = ((Ratio)vm.popArg()).denominator();
+      vm.popFrame();
+    }
+  };
+  
+  public static final Primitive RealPart = new Primitive(1, false) {
+    public void apply(VirtualMachine vm) throws TypeMismatch {
+      if (vm.peekArg().type() != Type.Complex)
+        throw new TypeMismatch();
+      vm.result = ((Complex)vm.popArg()).real();
+      vm.popFrame();
+    }
+  };
+  
+  public static final Primitive ImagPart = new Primitive(1, false) {
+    public void apply(VirtualMachine vm) throws TypeMismatch  {
+      if (vm.peekArg().type() != Type.Complex)
+        throw new TypeMismatch();
+      vm.result = ((Complex)vm.popArg()).imag();
       vm.popFrame();
     }
   };

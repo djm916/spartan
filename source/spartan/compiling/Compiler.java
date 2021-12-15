@@ -143,7 +143,7 @@ public class Compiler
     var symb = exp.cadr();
     var params = exp.caddr();
     var body = exp.cdddr();
-    var xform = List.of(Symbol.get("def"), symb, List.cons(Symbol.get("fun"), List.cons(params, body)));
+    var xform = List.of(Symbols.Def, symb, List.cons(Symbols.Fun, List.cons(params, body)));
     //System.out.println("defun xform: " + xform.repr());
     return xform;
   }
@@ -403,7 +403,7 @@ public class Compiler
         return false;
       // The symbol & appearing in the parameters must
       // occur immediately before the final parameter
-      if (params.car() == Symbol.get("&") &&
+      if (params.car() == Symbols.Ampersand &&
            (params.cdr().empty() || !params.cddr().empty()))
         return false;
     }
@@ -534,7 +534,7 @@ public class Compiler
   {
     if (isInnerDef(body.car())) {
       var xform = transformInnerDefs(body);
-      //System.out.println("inner defs xform = " + xform.repr());
+      System.out.println("inner defs xform = " + xform.repr());
       return compile(xform, scope, true, next);
     }
 
@@ -585,13 +585,13 @@ public class Compiler
 
     while (!body.empty() && isInnerDef(body.car())) {
       var exp = (List) body.car();
-      if (exp.car() == Symbol.get("defun"))
+      if (exp.car() == Symbols.Defun)
         exp = transformDefun(exp);
       bindings.add(exp.cdr());
       body = body.cdr();
     }
 
-    return List.cons(Symbol.get("letrec"), List.cons(bindings.build(), body));
+    return List.cons(Symbols.LetRec, List.cons(bindings.build(), body));
   }
 
   /* Determine if an expression is an inner-define form, i.e. a list beginning
@@ -602,7 +602,7 @@ public class Compiler
     if (exp.type() != Type.List || exp == List.Empty)
       return false;
     var car = ((List)exp).car();
-    return car == Symbol.get("def") || car == Symbol.get("defun");
+    return car == Symbols.Def || car == Symbols.Defun;
   }
 
   /* Compiles the "or" special form, a logical disjunction.
@@ -695,7 +695,8 @@ public class Compiler
            branch body next
      body: <<body>>
            jump loop
-     next: ...
+     next: load-const nil
+           ...
   */
 
   private Inst compileWhile(List exp, Scope scope, boolean tail, Inst next)
@@ -709,7 +710,7 @@ public class Compiler
     var jump = new Jump();
     var loop = compile(pred, scope, false,
                new Branch(compileSequence(body, scope, tail, jump),
-                          next));
+                          new LoadConst(Nil.Instance, next)));
     jump.setTarget(loop);
     return loop;
   }
@@ -749,7 +750,7 @@ public class Compiler
     // (quasiquote x) => (quote x) for atomic (non-list) x
     
     if (exp.type() != Type.List)
-      return List.of(Symbol.get("quote"), exp);
+      return List.of(Symbols.Quote, exp);
 
     var list = (List) exp;
     
@@ -761,10 +762,10 @@ public class Compiler
       
       // (quasiquote (unquote x) xs...) => (cons x (quasiquote xs...))
       
-      if (car.car() == Symbol.get("unquote")) {
+      if (car.car() == Symbols.Unquote) {
         if (car.length() != 2)
           throw malformedExp(exp);
-        return List.cons(Symbol.get("cons"),
+        return List.cons(Symbols.Cons,
                List.cons(car.cadr(),
                List.cons(transformQuasiquote(list.cdr()),
                List.Empty)));
@@ -772,10 +773,10 @@ public class Compiler
 
       // (quasiquote (unquote-splicing x) xs...) => (concat x (quasiquote xs...))    
       
-      if (car.car() == Symbol.get("unquote-splicing")) {
+      if (car.car() == Symbols.UnquoteSplicing) {
         if (car.length() != 2)
           throw malformedExp(exp);
-        return List.cons(Symbol.get("concat"),
+        return List.cons(Symbols.Concat,
                List.cons(car.cadr(),
                List.cons(transformQuasiquote(list.cdr()),
                List.Empty)));
@@ -786,7 +787,7 @@ public class Compiler
     
     // (quasiquote x xs...) => (cons (quasiquote x) (quasiquote xs...))
 
-    return List.cons(Symbol.get("cons"),
+    return List.cons(Symbols.Cons,
            List.cons(transformQuasiquote(list.car()),
            List.cons(transformQuasiquote(list.cdr()),
            List.Empty)));
@@ -796,11 +797,11 @@ public class Compiler
   throws CompileError
   {
     var numParams = params.length();
-    var isVariadic = numParams > 1 && params.at(numParams - 2) == Symbol.get("&");
+    var isVariadic = numParams > 1 && params.at(numParams - 2) == Symbols.Ampersand;
     var requiredArgs = isVariadic ? numParams - 2 : numParams;
     
     if (isVariadic)
-      params = params.remove((x) -> x == Symbol.get("&"));
+      params = params.remove((x) -> x == Symbols.Ampersand);
     
     var extendedScope = new Scope(scope, params);
     
@@ -926,7 +927,7 @@ public class Compiler
   
   /* Determine if a symbol is bound to a macro in the global environment. */
   
-  public boolean isMacro(Symbol symb)
+  private boolean isMacro(Symbol symb)
   {
     return vm.globals.lookup(symb).type() == Type.Macro;
   }
@@ -938,37 +939,37 @@ public class Compiler
   {
     if (exp.car().type() == Type.Symbol) {
       var car = (Symbol) exp.car();
-      if (car == Symbol.get("if"))
+      if (car == Symbols.If)
         return compileIf(exp, scope, tail, next);
-      if (car == Symbol.get("let"))
+      if (car == Symbols.Let)
         return compileLet(exp, scope, tail, next);
-      if (car == Symbol.get("let*"))
+      if (car == Symbols.LetStar)
         return compileLetStar(exp, scope, tail, next);
-      if (car == Symbol.get("letrec"))
+      if (car == Symbols.LetRec)
         return compileLetRec(exp, scope, tail, next);
-      if (car == Symbol.get("def"))
+      if (car == Symbols.Def)
         return compileDef(exp, scope, next);
-      if (car == Symbol.get("defun"))
+      if (car == Symbols.Defun)
         return compileDefun(exp, scope, next);
-      if (car == Symbol.get("defmacro"))
+      if (car == Symbols.Defmacro)
         return compileDefMacro(exp, scope, next);
-      if (car == Symbol.get("fun"))
+      if (car == Symbols.Fun)
         return compileFun(exp, scope, next);
-      if (car == Symbol.get("quote"))
+      if (car == Symbols.Quote)
         return compileQuote(exp, next);
-      if (car == Symbol.get("quasiquote"))
+      if (car == Symbols.Quasiquote)
         return compileQuasiquote(exp, scope, next);
-      if (car == Symbol.get("or"))
+      if (car == Symbols.Or)
         return compileOr(exp, scope, tail, next);
-      if (car == Symbol.get("and"))
+      if (car == Symbols.And)
         return compileAnd(exp, scope, tail, next);
-      if (car == Symbol.get("cond"))
+      if (car == Symbols.Cond)
         return compileCond(exp, scope, tail, next);
-      if (car == Symbol.get("do"))
+      if (car == Symbols.Do)
         return compileDo(exp, scope, tail, next);
-      if (car == Symbol.get("set!"))
+      if (car == Symbols.Set)
         return compileSet(exp, scope, next);
-      if (car == Symbol.get("while"))
+      if (car == Symbols.While)
         return compileWhile(exp, scope, tail, next);
       if (isMacro(car))
         return compileApplyMacro(exp, scope, tail, next);

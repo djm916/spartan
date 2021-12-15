@@ -250,7 +250,7 @@ public final class CoreLib
     public void apply(VirtualMachine vm) throws TypeMismatch {
       if (vm.peekArg().type() != Type.Symbol)
         throw new TypeMismatch();
-      vm.result = new Text(((Symbol)vm.popArg()).toString());
+      vm.result = new Text(((Symbol)vm.popArg()).value());
       vm.popFrame();
     }
   };
@@ -259,7 +259,7 @@ public final class CoreLib
     public void apply(VirtualMachine vm) throws TypeMismatch {
       if (vm.peekArg().type() != Type.Text)
         throw new TypeMismatch();
-      vm.result = Symbol.get(((Text)vm.popArg()).toString());
+      vm.result = Symbol.get(((Text)vm.popArg()).value());
       vm.popFrame();
     }
   };
@@ -269,6 +269,15 @@ public final class CoreLib
       if (vm.peekArg().type() != Type.Int)
         throw new TypeMismatch();
       vm.result = new Real(((Int)vm.popArg()).doubleValue());
+      vm.popFrame();
+    }
+  };
+  
+  public static final Primitive RealToInt = new Primitive(1, false) {
+    public void apply(VirtualMachine vm) throws TypeMismatch {
+      if (vm.peekArg().type() != Type.Real)
+        throw new TypeMismatch();
+      vm.result = new Int(((Real)vm.popArg()).longValue());
       vm.popFrame();
     }
   };

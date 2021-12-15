@@ -27,12 +27,7 @@ public final class Symbol extends Datum
     return id;
   }
   
-  public boolean eq(Symbol that)
-  {
-    return this.id.equals(that.id);
-  }
-  
-  public String toString()
+  public String value()
   {
     return id;
   }

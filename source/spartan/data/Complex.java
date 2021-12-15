@@ -30,6 +30,26 @@ public final class Complex extends Datum
     return String.format("%g%+gi", real, imag);
   }
 
+  public Real real()
+  {
+    return new Real(real);
+  }
+  
+  public Real imag()
+  {
+    return new Real(imag);
+  }
+  
+  public Real magnitude()
+  {
+    return abs();
+  }
+  
+  public Real angle()
+  {
+    return new Real(Math.atan2(imag, real));
+  }
+  
   public List toRect()
   {
     return List.of(new Real(real), new Real(imag));
@@ -72,7 +92,8 @@ public final class Complex extends Datum
                        x.real * y.imag + x.imag * y.real);
   }
   
-  /* Perform a complex division by multiplying by the conjugate.
+  /* Perform a complex division by multiplying by the conjugate
+     of the divisor.
      
      let x = a + b*i, y = c + d*i
      

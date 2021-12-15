@@ -1,5 +1,3 @@
-(load "stdlib/defstruct.s")
-
 ; Example of using the defstruct macro to
 ; create a simple data type
 
