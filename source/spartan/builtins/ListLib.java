@@ -57,6 +57,13 @@ public final class ListLib
     }
   };
   
+  public static final Primitive Caar = new Primitive(1, false) {
+    public void apply(VirtualMachine vm) throws TypeMismatch {
+      vm.result = car(car(vm.popArg()));
+      vm.popFrame();
+    }
+  };
+  
   public static final Primitive Cadr = new Primitive(1, false) {
     public void apply(VirtualMachine vm) throws TypeMismatch {
       vm.result = car(cdr(vm.popArg()));

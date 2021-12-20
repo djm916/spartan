@@ -302,4 +302,11 @@ public final class CoreLib
       vm.popFrame();
     }
   };
+  
+  public static final Primitive IdentityHash = new Primitive(1, false) {
+    public void apply(VirtualMachine vm) {
+      vm.result = new Int(System.identityHashCode(vm.popArg()));
+      vm.popFrame();
+    }
+  };  
 }

@@ -30,6 +30,7 @@ public final class BaseEnv extends GlobalEnv
     bind(Symbol.get(">="), CoreLib.Ge);
     bind(Symbol.get("not"), CoreLib.Not);    
     bind(Symbol.get("gensym"), CoreLib.GenSym);
+    bind(Symbol.get("identity-hash"), CoreLib.IdentityHash);
     
     /* Type predicates */
     
@@ -75,6 +76,7 @@ public final class BaseEnv extends GlobalEnv
     
     bind(Symbol.get("cons"), ListLib.Cons);
     bind(Symbol.get("car"), ListLib.Car);
+    bind(Symbol.get("caar"), ListLib.Caar);
     bind(Symbol.get("cadr"), ListLib.Cadr);
     bind(Symbol.get("caddr"), ListLib.Caddr);
     bind(Symbol.get("cdr"), ListLib.Cdr);
@@ -96,6 +98,7 @@ public final class BaseEnv extends GlobalEnv
        
     /* Text procedures */
     
-    bind(Symbol.get("text/concat"), TextLib.Concat);    
+    bind(Symbol.get("text/concat"), TextLib.Concat);
+    bind(Symbol.get("text/hash"), TextLib.Hash);
   }
 }

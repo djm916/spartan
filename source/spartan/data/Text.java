@@ -16,7 +16,7 @@ public final class Text extends Datum
   {
     return "\"" + value + "\"";
   }
-   
+  
   public String value()
   {
     return value;
@@ -25,6 +25,11 @@ public final class Text extends Datum
   public int length()
   {
     return value.length();
+  }
+  
+  public int hash()
+  {
+    return value.hashCode();
   }
   
   public static boolean eq(Text x, Text y)
