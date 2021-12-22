@@ -7,6 +7,7 @@ import spartan.errors.RuntimeError;
 import spartan.errors.Error;
 import spartan.errors.WrongNumberArgs;
 import spartan.errors.TypeMismatch;
+import spartan.parsing.Position;
 
 public final class VirtualMachine
 {
@@ -32,10 +33,12 @@ public final class VirtualMachine
     }
     catch (RuntimeError ex) {
       // TODO: Add code here to generate stack trace
+      ex.setBackTrace(generateBackTrace());
       reset();
       throw ex;
     }
     
+    // Assert VM returns to its default state
     assert control == null;
     assert args == List.Empty;
     assert locals == null;
@@ -68,9 +71,9 @@ public final class VirtualMachine
     return x;
   }
   
-  public final void pushFrame(Inst returnTo)
+  public final void pushFrame(Inst returnTo, Position position)
   {
-    frame = new Frame(frame, locals, args, returnTo);
+    frame = new Frame(frame, locals, args, returnTo, position);
     args = List.Empty;
   }
   
@@ -98,5 +101,14 @@ public final class VirtualMachine
     args = List.Empty;
     locals = null;
     frame = null;
+  }
+  
+  private java.util.List<Position> generateBackTrace()
+  {
+    var backTrace = new java.util.ArrayList<Position>();
+    for (; frame != null; frame = frame.parent)
+      if (frame.position != null)
+        backTrace.add(frame.position);
+    return backTrace;
   }
 }

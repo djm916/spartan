@@ -38,10 +38,3 @@
       (set! result (f result (xs i)))
       (set! i (+ 1 i)))
     result))
-
-(def v (apply vector (iota 1 20)))
-
-(vector/filter even? v)
-
-(vector/reduce + 0 v)
-

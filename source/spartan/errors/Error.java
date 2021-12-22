@@ -7,9 +7,9 @@ public class Error extends Exception
     super(message);
   }
   
+  // Do not generate a stack trace  
   public Throwable fillInStackTrace()
   {
-    // Do not generate a stack trace
     return this;
   }
   

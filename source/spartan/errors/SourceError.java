@@ -12,19 +12,9 @@ public class SourceError extends Exception
     this.position = position;
   }
   
+  // Do not have Java generate a stack trace
   public Throwable fillInStackTrace()
   {
-    // Do not have Java generate a stack trace
     return this;
-  }
-  
-  public String toString()
-  {
-    return String.format(
-        "%s: %s: %s: error: %s",
-        position.source,
-        position.line,
-        position.column,
-        getMessage());
   }
 }

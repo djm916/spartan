@@ -12,9 +12,9 @@ public class Position
     this.line = line;
     this.column = column;
   }
-  
+
   public String toString()
   {
-    return "(" + line + ", " + column + ")";
+    return String.format("%s: %d: %d", source, line, column);
   }
 }

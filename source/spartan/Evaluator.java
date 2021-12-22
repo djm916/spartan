@@ -22,9 +22,8 @@ public final class Evaluator
           var exp = reader.read();
           if (exp == null)
             return;
-          System.out.println("reader = " + exp.datum.repr());
           var result = vm.eval(compiler.compile(exp));
-          System.out.println("eval = " + result.repr());
+          System.out.println(result.repr());
         }
         catch (SyntaxError | CompileError | RuntimeError ex) {
           System.err.println(ex);

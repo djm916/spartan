@@ -143,8 +143,9 @@ public class Compiler
     var symb = exp.cadr();
     var params = exp.caddr();
     var body = exp.cdddr();
-    var xform = List.of(Symbols.Def, symb, List.cons(Symbols.Fun, List.cons(params, body)));
-    //System.out.println("defun xform: " + xform.repr());
+    var xform = List.of(Symbols.Def, symb, List.cons(Symbols.Fun, List.cons(params, body)));    
+    if (debug)
+      System.err.println("defun xform => " + xform.repr());
     return xform;
   }
 
@@ -487,12 +488,12 @@ public class Compiler
   throws CompileError
   {
     int numArgs = exp.length() - 1;
-
+    
     return tail ? evalArgs(exp.cdr(), scope,
                   compile(exp.car(), scope, false,
                   new Apply(numArgs, positionMap.get(exp))))
 
-                : new PushFrame(next,
+                : new PushFrame(next, positionMap.get(exp),
                   evalArgs(exp.cdr(), scope,
                   compile(exp.car(), scope, false,
                   new Apply(numArgs, positionMap.get(exp)))));
@@ -534,7 +535,8 @@ public class Compiler
   {
     if (isInnerDef(body.car())) {
       var xform = transformInnerDefs(body);
-      System.out.println("inner defs xform = " + xform.repr());
+      if (debug)
+        System.err.println("inner defs xform => " + xform.repr());
       return compile(xform, scope, true, next);
     }
 
@@ -734,7 +736,8 @@ public class Compiler
       throw malformedExp(exp);
 
     var transformed = transformQuasiquote(exp.cadr());
-    //System.out.println("quasiquote transformation = " + transformed.repr());
+    if (debug)
+      System.err.println("quasiquote xform => " + transformed.repr());
     return compile(transformed, scope, false, next);
   }
 
@@ -907,7 +910,8 @@ public class Compiler
     var f = (Macro) vm.globals.lookup((Symbol) exp.car());
     var args = exp.cdr();
     var xform = applyMacroTransform(f, args, positionMap.get(exp));
-    System.out.println("macro xform: " + xform.repr());
+    if (debug)
+      System.err.println("macro xform => " + xform.repr());
     return compile(xform, scope, tail, next);
   }
   
@@ -915,7 +919,7 @@ public class Compiler
   throws CompileError
   {
     try {
-      vm.pushFrame(null);
+      vm.pushFrame(null, null);
       vm.result = f;
       vm.args = args;
       return vm.eval(new Apply(args.length(), pos));
@@ -993,4 +997,6 @@ public class Compiler
 
   private PositionMap positionMap;
   private final VirtualMachine vm;
+  private static final boolean debug = 
+    Boolean.valueOf(System.getProperty("spartan.debug", "false"));
 }
