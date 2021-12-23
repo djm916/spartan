@@ -7,3 +7,5 @@
 ((compose double square) 2)
 
 (pipe 2 double square)
+(pipe 2 double double square)
+(pipe 2 double square square)

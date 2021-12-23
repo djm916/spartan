@@ -18,13 +18,10 @@ public class RuntimeError extends SourceError
   {
     var message = new StringBuilder();
     
-    if (position == null)
-      message.append(String.format("error: unknown source: %s\n", getMessage()));
-    else
-      message.append(String.format("error: %s: %s\n", position, getMessage()));
+    message.append(super.toString());    
     
     for (Position position : backTrace)
-      message.append(String.format("\tfrom %s\n", position));
+      message.append(String.format("\n\tfrom %s", position));
     
     return message.toString();
   }

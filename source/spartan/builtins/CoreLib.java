@@ -236,13 +236,20 @@ public final class CoreLib
   };
   
   public static final Primitive Load = new Primitive(1, false) {
-    public void apply(VirtualMachine vm) throws TypeMismatch {
+    public void apply(VirtualMachine vm) throws Error {
       if (vm.peekArg().type() != Type.Text)
         throw new TypeMismatch();
       var fileName = ((Text) vm.popArg()).value();
-      spartan.Evaluator.evalFile(fileName, vm.globals);
-      vm.result = Nil.Instance;
-      vm.popFrame();
+      try {
+        spartan.Evaluator.loadFile(fileName, vm.globals);
+      }
+      catch (java.io.IOException ex) {
+        throw new Error(ex.getMessage());
+      }
+      finally {
+        vm.result = Nil.Instance;
+        vm.popFrame();
+      }
     }
   };
   

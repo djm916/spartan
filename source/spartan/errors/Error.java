@@ -11,10 +11,5 @@ public class Error extends Exception
   public Throwable fillInStackTrace()
   {
     return this;
-  }
-  
-  public String toString()
-  {
-    return String.format("error: %s", getMessage());
-  }
+  }  
 }

@@ -32,7 +32,6 @@ public final class VirtualMachine
         control.eval(this);
     }
     catch (RuntimeError ex) {
-      // TODO: Add code here to generate stack trace
       ex.setBackTrace(generateBackTrace());
       reset();
       throw ex;

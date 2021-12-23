@@ -3,7 +3,7 @@ package spartan;
 import spartan.data.List;
 import spartan.data.Text;
 import spartan.data.Symbol;
-import spartan.runtime.BaseEnv;
+import spartan.runtime.GlobalEnv;
 
 public class Main
 {
@@ -32,24 +32,25 @@ Enter Control-D (on Linux) or Control-Z (on Windows) to exit.""";
   {
     //System.out.println("loading libspartan.dll...");
     
-    // Load "libspartan.dll", containing JNI native code
+    // Load "libspartan.dll", containing JNI native code dependencies
     System.loadLibrary("libspartan");
   }
   
   public static void main(String[] args)
+  throws java.io.IOException
   {
     parseCommandLine(args);
     
-    var globals = new BaseEnv();
+    var globals = GlobalEnv.createBasis();
     globals.bind(Symbol.get("sys/args"), scriptArgs);    
-    Evaluator.evalFile(BuiltinsFilePath, globals);
+    Evaluator.loadFile(BuiltinsFilePath, globals);
     
     if (scriptPath == null) {
       System.out.println(IntroMessage);
-      Evaluator.evalInteractive(globals);
+      Evaluator.startRepl(globals);
     }
     else
-      Evaluator.evalFile(scriptPath, globals);
+      Evaluator.loadFile(scriptPath, globals);
   }
   
   private static void parseCommandLine(String[] args)

@@ -17,4 +17,12 @@ public class SourceError extends Exception
   {
     return this;
   }
+  
+  public String toString()
+  {
+    if (position == null)
+      return String.format("error: unknown source: %s", getMessage());
+    else
+      return String.format("error: %s: %s", position, getMessage());
+  }
 }
