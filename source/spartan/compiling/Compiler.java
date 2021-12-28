@@ -10,6 +10,7 @@ import spartan.errors.MalformedExpression;
 import spartan.errors.MultipleDefinition;
 import spartan.errors.RuntimeError;
 import spartan.runtime.VirtualMachine;
+import java.util.logging.Logger;
 
 public class Compiler
 {
@@ -145,7 +146,7 @@ public class Compiler
     var body = exp.cdddr();
     var xform = List.of(Symbols.Def, symb, List.cons(Symbols.Fun, List.cons(params, body)));    
     if (debug)
-      System.err.println("defun xform => " + xform.repr());
+      log.info("defun xform => " + xform.repr());
     return xform;
   }
 
@@ -536,7 +537,7 @@ public class Compiler
     if (isInnerDef(body.car())) {
       var xform = transformInnerDefs(body);
       if (debug)
-        System.err.println("inner defs xform => " + xform.repr());
+        log.info("inner defs xform => " + xform.repr());
       return compile(xform, scope, true, next);
     }
 
@@ -737,7 +738,7 @@ public class Compiler
 
     var transformed = transformQuasiquote(exp.cadr());
     if (debug)
-      System.err.println("quasiquote xform => " + transformed.repr());
+      log.info("quasiquote xform => " + transformed.repr());
     return compile(transformed, scope, false, next);
   }
 
@@ -911,7 +912,7 @@ public class Compiler
     var args = exp.cdr();
     var xform = applyMacroTransform(f, args, positionMap.get(exp));
     if (debug)
-      System.err.println("macro xform => " + xform.repr());
+      log.info("macro xform => " + xform.repr());
     return compile(xform, scope, tail, next);
   }
   
@@ -919,7 +920,7 @@ public class Compiler
   throws CompileError
   {
     try {
-      vm.pushFrame(null, null);
+      vm.pushFrame(null, pos);
       vm.result = f;
       vm.args = args;
       return vm.eval(new Apply(args.length(), pos));
@@ -999,4 +1000,6 @@ public class Compiler
   private final VirtualMachine vm;
   private static final boolean debug = 
     Boolean.valueOf(System.getProperty("spartan.debug", "false"));
+  private static final Logger log = 
+    Logger.getLogger("spartan.Compiler");
 }
