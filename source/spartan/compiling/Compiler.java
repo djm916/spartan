@@ -19,7 +19,8 @@ public class Compiler
     this.vm = vm;
   }
   
-  public Inst compile(SourceDatum sourceDatum) throws CompileError
+  public Inst compile(SourceDatum sourceDatum)
+  throws CompileError
   {
     positionMap = sourceDatum.positionMap;
     return compile(sourceDatum.datum, null, false, null);
@@ -124,10 +125,9 @@ public class Compiler
            next)));
   }
 
-  /* Compile the "defun" special form for defining procedures 
-     by transforming to the equivalent "def" form:
-     
-     (defun symbol (params...) body...) => (def symbol (fun (params...) body...))
+  /* Compile "defun" special form
+  
+     Syntax: (defun symbol (params...) body...)
   */
   
   private Inst compileDefun(List exp, Scope scope, Inst next)
@@ -135,19 +135,30 @@ public class Compiler
   {
     if (exp.length() < 4)
       throw malformedExp(exp);
-
-    return compile(transformDefun(exp), scope, false, next);
+    
+    var xform = transformDefun(exp);
+    
+    if (debug)
+      log.info(() -> String.format("defun transform: %s => %s", exp.repr(), xform.repr()));
+    
+    try {
+      return compile(xform, scope, false, next);
+    }
+    catch (CompileError err) {
+      throw new CompileError(err.getMessage(), positionMap.get(exp));
+    }
   }
   
+  /* Transform "defun" form to equivalent "def" form:
+     
+     (defun symbol (params...) body...) => (def symbol (fun (params...) body...))
+  */
   private List transformDefun(List exp)
   {
     var symb = exp.cadr();
     var params = exp.caddr();
     var body = exp.cdddr();
-    var xform = List.of(Symbols.Def, symb, List.cons(Symbols.Fun, List.cons(params, body)));    
-    if (debug)
-      log.info("defun xform => " + xform.repr());
-    return xform;
+    return List.of(Symbols.Def, symb, List.cons(Symbols.Fun, List.cons(params, body)));
   }
 
   /* Compile the "if" special form.
@@ -449,7 +460,8 @@ public class Compiler
     return result.build();
   }
 
-  private Inst evalArgs(List args, Scope scope, Inst next) throws CompileError
+  private Inst evalArgs(List args, Scope scope, Inst next)
+  throws CompileError
   {
     if (args == List.Empty)
       return next;
@@ -537,7 +549,7 @@ public class Compiler
     if (isInnerDef(body.car())) {
       var xform = transformInnerDefs(body);
       if (debug)
-        log.info("inner defs xform => " + xform.repr());
+        log.info(() -> String.format("inner defs transform: %s => %s", body.repr(), xform.repr()));
       return compile(xform, scope, true, next);
     }
 
@@ -720,7 +732,8 @@ public class Compiler
   
   // (quote x)
 
-  private Inst compileQuote(List exp, Inst next) throws CompileError
+  private Inst compileQuote(List exp, Inst next)
+  throws CompileError
   {
     if (exp.length() != 2)
       throw malformedExp(exp);
@@ -731,20 +744,29 @@ public class Compiler
   // Compile a (quasiquote x) form by reducing it to an equivalent
   // list form and compiling the result.
 
-  private Inst compileQuasiquote(List exp, Scope scope, Inst next) throws CompileError
+  private Inst compileQuasiquote(List exp, Scope scope, Inst next)
+  throws CompileError
   {
     if (exp.length() != 2)
       throw malformedExp(exp);
 
-    var transformed = transformQuasiquote(exp.cadr());
+    var xform = transformQuasiquote(exp.cadr());
+    
     if (debug)
-      log.info("quasiquote xform => " + transformed.repr());
-    return compile(transformed, scope, false, next);
+      log.info(() -> String.format("quasiquote transform: %s => %s", exp.repr(), xform.repr()));
+    
+    try {
+      return compile(xform, scope, false, next);
+    }
+    catch (CompileError err) {
+      throw new CompileError(err.getMessage(), positionMap.get(exp));
+    }
   }
 
   // Reduce a quasiquote form (quasiquote x) to equivalent list form.
 
-  private List transformQuasiquote(Datum exp) throws CompileError
+  private List transformQuasiquote(Datum exp)
+  throws CompileError
   {
     // (quasiquote ()) => ()
     
@@ -900,7 +922,9 @@ public class Compiler
   
   /* Compile a macro application
   
-     Syntax: (f args...), where f is a macro procedure
+     Syntax: (f args...)
+     
+       where f is a macro procedure
      
      Applies the macro procedure to the list of (unevaluated) arguments,
      and compiles the code returned by the macro.
@@ -910,24 +934,27 @@ public class Compiler
   {
     var f = (Macro) vm.globals.lookup((Symbol) exp.car());
     var args = exp.cdr();
-    var xform = applyMacroTransform(f, args, positionMap.get(exp));
-    if (debug)
-      log.info("macro xform => " + xform.repr());
-    return compile(xform, scope, tail, next);
+    
+    try {
+      var xform = applyMacroTransform(f, args);
+       
+      if (debug)
+        log.info(() -> String.format("macro transform: %s => %s", exp.repr(), xform.repr()));
+    
+      return compile(xform, scope, tail, next);
+    }
+    catch (CompileError | RuntimeError err) {      
+      throw new CompileError(err.getMessage(), positionMap.get(exp));
+    }
   }
   
-  private Datum applyMacroTransform(Macro f, List args, Position pos)
-  throws CompileError
+  private Datum applyMacroTransform(Macro f, List args)
+  throws RuntimeError
   {
-    try {
-      vm.pushFrame(null, pos);
-      vm.result = f;
-      vm.args = args;
-      return vm.eval(new Apply(args.length(), pos));
-    }
-    catch (RuntimeError err) {
-      throw new CompileError(err.getMessage(), err.position);
-    }    
+    vm.pushFrame(null, null);
+    vm.result = f;
+    vm.args = args;
+    return vm.eval(new Apply(args.length(), null));
   }
   
   /* Determine if a symbol is bound to a macro in the global environment. */
@@ -1001,5 +1028,5 @@ public class Compiler
   private static final boolean debug = 
     Boolean.valueOf(System.getProperty("spartan.debug", "false"));
   private static final Logger log = 
-    Logger.getLogger("spartan.Compiler");
+    Logger.getLogger(Compiler.class.getName());
 }
