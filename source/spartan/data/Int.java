@@ -1,6 +1,8 @@
 package spartan.data;
 
 import java.math.BigInteger;
+import spartan.errors.DivisionByZero;
+import spartan.errors.IntegerOverflow;
 
 public final class Int extends Datum
 {
@@ -34,14 +36,24 @@ public final class Int extends Datum
     return value;
   }
   
-  public int intValue()
+  public int intValue() throws IntegerOverflow
   {
-    return value.intValue();
+    try {
+      return value.intValueExact();
+    }
+    catch (ArithmeticException ex) {
+      throw new IntegerOverflow();
+    }
   }
   
-  public long longValue()
+  public long longValue() throws IntegerOverflow
   {
-    return value.longValue();
+    try {
+      return value.longValueExact();
+    }
+    catch (ArithmeticException ex) {
+      throw new IntegerOverflow();
+    }
   }
   
   public double doubleValue()
@@ -74,14 +86,24 @@ public final class Int extends Datum
     return new Int(x.value.multiply(y.value));
   }
   
-  public static Int div(Int x, Int y)
+  public static Int div(Int x, Int y) throws DivisionByZero
   {
-    return new Int(x.value.divide(y.value));
+    try {
+      return new Int(x.value.divide(y.value));
+    }
+    catch (ArithmeticException ex) {
+      throw new DivisionByZero();
+    }
   }
   
-  public static Int mod(Int x, Int y)
+  public static Int mod(Int x, Int y) throws DivisionByZero
   {
-    return new Int(x.value.mod(y.value));
+    try {
+      return new Int(x.value.remainder(y.value));
+    }
+    catch (ArithmeticException ex) {
+      throw new DivisionByZero();
+    }
   }
   
   public static boolean eq(Int x, Int y)

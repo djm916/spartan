@@ -6,6 +6,7 @@ import java.util.function.BiPredicate;
 import java.util.ArrayList;
 import spartan.errors.NoSuchElement;
 import spartan.errors.TypeMismatch;
+import spartan.errors.IntegerOverflow;
 import spartan.runtime.VirtualMachine;
 
 public final class Vector extends Callable
@@ -26,10 +27,20 @@ public final class Vector extends Callable
     return result;
   }
   
+  public static Vector create(Int length, Datum init) throws IntegerOverflow
+  {
+    return create(length.intValue(), init);
+  }
+  
   public Vector(int length)
   {
     super(1, false);
     elems = new ArrayList<Datum>(length);
+  }
+  
+  public Vector(Int length) throws IntegerOverflow
+  {
+    this(length.intValue());
   }
   
   public Vector(Vector that)
@@ -60,7 +71,12 @@ public final class Vector extends Callable
     return elems.size();
   }
   
-  public Datum get(int index) throws NoSuchElement
+  public Datum get(Int index) throws NoSuchElement, IntegerOverflow
+  {
+    return get(index.intValue());
+  }
+  
+  private Datum get(int index) throws NoSuchElement
   {
     try {
       return elems.get(index);
@@ -78,6 +94,11 @@ public final class Vector extends Callable
     catch (IndexOutOfBoundsException ex) {
       throw new NoSuchElement();
     }
+  }
+  
+  public void set(Int index, Datum value) throws NoSuchElement, IntegerOverflow
+  {
+    set(index.intValue(), value);
   }
   
   public void append(Datum x)
@@ -98,7 +119,7 @@ public final class Vector extends Callable
     return true;
   }
   
-  public void apply(VirtualMachine vm) throws NoSuchElement, TypeMismatch
+  public void apply(VirtualMachine vm) throws NoSuchElement, TypeMismatch, IntegerOverflow
   {
     if (vm.peekArg().type() != Type.Int)
       throw new TypeMismatch();

@@ -2,30 +2,11 @@ package spartan.builtins;
 
 import spartan.data.*;
 import spartan.errors.TypeMismatch;
+import spartan.errors.DivisionByZero;
 import spartan.runtime.VirtualMachine;
 
 public final class MathLib
 {
-  /*
-  public static GenericBinaryOperator GenericAdd = new GenericBinaryOperator() {
-    {
-      addMethod(Type.Int, (x, y) -> Int.add((Int)x, (Int)y));
-      addMethod(Type.Real, (x, y) -> Real.add((Real)x, (Real)y));
-      addMethod(Type.Ratio, (x, y) -> Ratio.add((Ratio)x, (Ratio)y));
-      addMethod(Type.Complex, (x, y) -> Complex.add((Complex)x, (Complex)y));
-    }
-  };
-  */
-  /*
-  public static final Primitive Add = new Primitive(2, true) {
-    public void apply(VirtualMachine vm) throws TypeMismatch {
-      vm.result = GenericAdd.apply(vm.popArg(), vm.popArg());
-      while (vm.args != List.Empty)
-        vm.result = GenericAdd.apply(vm.result, vm.popArg());
-      vm.popFrame();
-    }
-  };
-  */
   public static Datum add(Datum x, Datum y) throws TypeMismatch
   {
     if (x.type() == y.type()) {
@@ -90,7 +71,7 @@ public final class MathLib
     }
   };
 
-  public static Datum div(Datum x, Datum y) throws TypeMismatch
+  public static Datum div(Datum x, Datum y) throws TypeMismatch, DivisionByZero
   {
     if (x.type() == y.type()) {
       switch (x.type()) {
@@ -104,13 +85,13 @@ public final class MathLib
   }
   
   public static final Primitive Div = new Primitive(2, false) {
-    public void apply(VirtualMachine vm) throws TypeMismatch {
+    public void apply(VirtualMachine vm) throws TypeMismatch, DivisionByZero {
       vm.result = div(vm.popArg(), vm.popArg());
       vm.popFrame();
     }
   };
 
-  public static Datum mod(Datum x, Datum y) throws TypeMismatch
+  public static Datum mod(Datum x, Datum y) throws TypeMismatch, DivisionByZero
   {
     if (x.type() == Type.Int && y.type() == Type.Int)
       return Int.mod((Int)x, (Int)y);
@@ -118,7 +99,7 @@ public final class MathLib
   }
   
   public static final Primitive Mod = new Primitive(2, false) {
-    public void apply(VirtualMachine vm) throws TypeMismatch {
+    public void apply(VirtualMachine vm) throws TypeMismatch, DivisionByZero {
       vm.result = mod(vm.popArg(), vm.popArg());
       vm.popFrame();
     }

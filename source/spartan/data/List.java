@@ -2,6 +2,7 @@ package spartan.data;
 
 import java.util.function.Predicate;
 import java.util.function.BiPredicate;
+import java.util.function.Consumer;
 
 public final class List extends Datum
 {
@@ -139,6 +140,12 @@ public final class List extends Datum
     return remove(this, pred);
   }
   
+  public void forEach(Consumer<Datum> f)
+  {
+    for (var list = this; list != Empty; list = list.rest)
+      f.accept(list.first);
+  }
+  
   private static int length(List list)
   {
     int length = 0;
@@ -201,7 +208,7 @@ public final class List extends Datum
     
     return String.format("%s %s", self.first.repr(), repr(self.rest));
   }
-
+  
   private List(Datum first, List rest)
   {
     this.first = first;

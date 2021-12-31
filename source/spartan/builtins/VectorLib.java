@@ -3,15 +3,16 @@ package spartan.builtins;
 import spartan.data.*;
 import spartan.errors.TypeMismatch;
 import spartan.errors.NoSuchElement;
+import spartan.errors.IntegerOverflow;
 import spartan.runtime.VirtualMachine;
 
 public final class VectorLib
 {
   public static final Primitive New = new Primitive(2, false) {
-    public void apply(VirtualMachine vm) throws TypeMismatch {
+    public void apply(VirtualMachine vm) throws TypeMismatch, IntegerOverflow {
       if (vm.peekArg().type() != Type.Int)
         throw new TypeMismatch();
-      var length = ((Int) vm.popArg()).intValue();
+      var length = (Int) vm.popArg();
       var init = vm.popArg();
       vm.result = Vector.create(length, init);
       vm.popFrame();
@@ -28,26 +29,26 @@ public final class VectorLib
   };
   
   public static final Primitive Get = new Primitive(2, false) {
-    public void apply(VirtualMachine vm) throws TypeMismatch, NoSuchElement {
+    public void apply(VirtualMachine vm) throws TypeMismatch, NoSuchElement, IntegerOverflow {
       if (vm.peekArg().type() != Type.Vector)
         throw new TypeMismatch();
       var vector = (Vector) vm.popArg();
       if (vm.peekArg().type() != Type.Int)
         throw new TypeMismatch();
-      var index = ((Int) vm.popArg()).intValue();
+      var index = (Int) vm.popArg();
       vm.result = vector.get(index);
       vm.popFrame();
     }
   };
   
   public static final Primitive Set = new Primitive(3, false) {
-    public void apply(VirtualMachine vm) throws TypeMismatch, NoSuchElement {
+    public void apply(VirtualMachine vm) throws TypeMismatch, NoSuchElement, IntegerOverflow {
       if (vm.peekArg().type() != Type.Vector)
         throw new TypeMismatch();
       var vector = (Vector) vm.popArg();
       if (vm.peekArg().type() != Type.Int)
         throw new TypeMismatch();
-      var index = ((Int) vm.popArg()).intValue();
+      var index = (Int) vm.popArg();
       var value = vm.popArg();
       vector.set(index, value);
       vm.result = Nil.Instance;
@@ -59,10 +60,10 @@ public final class VectorLib
     public void apply(VirtualMachine vm) throws TypeMismatch {
       if (vm.peekArg().type() != Type.Vector)
         throw new TypeMismatch();
-      ((Vector) vm.popArg()).append(vm.popArg());
+      var vector = (Vector) vm.popArg();
+      vector.append(vm.popArg());
       vm.result = Nil.Instance;
       vm.popFrame();
     }
   };
-
 }

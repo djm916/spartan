@@ -19,11 +19,11 @@ public class Compiler
     this.vm = vm;
   }
   
-  public Inst compile(SourceDatum sourceDatum)
+  public Inst compile(SourceDatum sourceExp)
   throws CompileError
   {
-    positionMap = sourceDatum.positionMap;
-    return compile(sourceDatum.datum, null, false, null);
+    positionMap = sourceExp.positionMap;
+    return compile(sourceExp.datum, null, false, null);
   }
 
   private MalformedExpression malformedExp(Datum exp)
