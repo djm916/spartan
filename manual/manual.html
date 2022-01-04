@@ -7,6 +7,8 @@
 </head>
 <body>
 
+<h1>Spartan Language Reference Manual</h1>
+
 <h2>Table of Contents</h2>
 <ol>
   <li><a href="#intro">Introduction</a></li>
@@ -22,213 +24,104 @@
 
 <a id="intro"><h2>Introduction</h2></a>
 
-<p>This document presents Spartan, a minimal, yet expressive, programming
-language. Spartan is primarily a functional language, but it supports both
-functional and imperative programming styles. 
-<ul>
-  <li>Primarily functional: immutable variables, high-order functions</li>
-  <li>Imperative features: mutable variables, loops</li>
-  <li>Statically scoped</li>
-  <li>Dynamically typed</li>
-  <li>Strict evaluation</li>
-</ul>
+<p>Spartan is a minimal programming language and virtual machine,
+developed primarily for education and experimentation. It was designed
+to be minimalistic, yet expressive. The language itself is essentially
+a dialect of Scheme, while the virtual machine is based on a variant of
+the SECD abstract machine.
 </p>
-
-It 
-was designed to be minimalistic yet expressive. 
-in an interactive environment.</p> 
 
 <a id="chapter_1"><h2>Basic Concepts</h2></a>
 
-<h3>Programs and Modules</h3>
-
-<p>
-</p>
-
-<h3>Expressions and Evaluation</h3>
-
-<p>A program written in a functional language is conceptually similar to a set
-of mathematical expressions, of we are to find the value. The program is executed
-by evaluating these expressions according to the rules defined by the language,
-whether that be mathematics or a programming language. Expressions in a functional
-programming language have essentially the same structure and meaning as do mathematical
-expressions, and are evaluated similarly: variables are
-replaced with their values and sub-expressions are evaluated until the expression reduces to a
-single irreducible value.</p>
-
-<p>While the mathematical </p>
-There is one important 
-difference. In mathematics, the order in which 
-sub-expressions are evaluated does not affect the result. In 
-Spartan, however, evaluation may induce side-effects, so the 
-order of evaluation can affect the result. Since there is no 
-"best" evaluation order, Spartan's order of evaluation is 
-undefined unless explicitly specified otherwise.</p>
-
-<h3>Variables, Scope, and Environments</h3>
-
-<p>In mathematics, variables enable generalized (i.e., 
-parameterized) expressions. To evaluate an expression that 
-includes variables, the variables must first be bound to some 
-known values. Those values may vary with each distinct 
-evaluation of a given expression, but they are fixed<a href="#footnote_1"><sup>1</sup></a>
-and may
-not be rebound during evaluation.</p>
- 
-<p>A variable's scope refers to the extent of its 
-visibility, i.e., the set of expressions in which that 
-particular variable is bound. In Spartan, there are two 
-kinds of variables: global and local. A global variable has 
-global scope, so it is bound throughout the program. A local 
-variable has limited scope, restricted to a defined set of 
-expressions. It is always an error to refer to an unbound 
-variable.</p>
-
-<p>Spartan needs to keep account of the current value of 
-each variable at each point during evaluation. This mapping 
-of variables to values is known as an environment. Thus, 
-evaluation takes place in the context of an 
-environment which includes the values of all variables 
-in the scope of the expression currently being evaluated.</p> 
+<p>This section is intended for those that may not be familiar with the
+technical jargon used in Scheme. It provides a brief introduction to the
+essential terminology, which is used throughout.</p>
 
 <h3>Values and Types</h3>
 
-<p>When an expression has been completely evaluated, a value
-is produced. Values have types. In mathematics, for instance,
-the type of value may be numeric, set, matrix, etc. Similarly,
-Spartan values have types, including numeric, string, list, etc.
-Additionally, there is a set of type rules that determines which
-types of values to which an operation can be legally applied.
-These type rules are important because they prevent one from
-invoking undefined behavior.</p>
+<p>A <i>value</i> is the basic unit of data in Spartan. Each value has a specific
+<i>type</i>. Examples of value types include: number, text, list, function, etc. In
+general, operations will have restrictions on what types are acceptable as input
+parameters, depending upon the specific operation involved. It is an error to invoke
+any operation on value types which the operation does not accept.</p>
 
-<p>Spartan is dynamically and strongly typed. Dynamic typing
-means the type rules are enforced as the program runs
-rather than before. This frees the programmer from 
-writing type declarations, making the language simpler
-and more expressive. Of course, the downside is that 
-it increases the potential of running more programs that fail to 
-obey the type rules. Strongly typed simply means that the 
-types <i>are</i> checked, and that no implicit invalid type 
-conversions will be performed in order to avoid a type error.
-Instead, an error is raised at runtime when a violation of the
-type rules occurs.</p> 
+<h3>Expressions and Evaluation</h3>
+
+<p>Spartan programs are composed of expressions. Expressions are written
+(as they are in Scheme) using <i>s-expressions</i>, a simple, unambiguous syntax
+for representing code as well as data. Expressions that represent code can
+be <i>evaluated</i>, producing a <i>value</i>. The program is executed by
+evaluating these expressions according to language's semantics: the set of
+rules that determines how each form of expression is reduced to a value.</p>
+
+<h3>Variables, Scope, and Environments</h3>
+
+<p>A <i>variable</i> is a name that refers to a value. Variables are mutable,
+meaning that they may be updated to refer to a different value at any time.
+Mutability of variables is distinct from mutability of values: while variables
+are always mutable, the values they refer to may or may not be. Variables do
+not have a specific type, and may refer to values of any type.</p>
+
+<p>The <i>scope</i> of a variable refers to the extent of its visibility in
+the code, i.e., a set of expressions where the variable is <i>bound</i>
+(initialized to a value). In Spartan, there are two types of variables: global
+and local. Global variables have global scope, so are bound throughout the
+program. Local variables have limited scope, restricted to a specific subset of
+expressions.</p>
+
+<p>An <i>environment</i> is a mapping from variables to their values. During
+evaluation of an expression, the current environment stores the values of all
+variables in scope (i.e., are bound) within that expression. Variables in an
+expression (variable references) evaluate to the value associated with the
+variable in the current environment. It is an error to refer to an unbound variable.</p> 
+
+
 
 <a id="chapter_2"><h2>Types</h2></a>
 
-<p>Every value has a type. The expression <code>type </i><i>x</i></code>
-returns the type of value <i>x</i>, one of the following symbols:</p>
+<h3>Nil</h3>
 
-<table title="type table" border=1>
-  <tr><td>$unit</td>  <td>$complex</td>  <td>$func</td>    <td/>$bytes</td></tr>
-  <tr><td>$bool</td>  <td>$tuple</td>    <td>$string</td>  <td/>$port</td></tr>
-  <tr><td>$int</td>   <td>$list</td>     <td>$symbol</td>  <td/>$promise</td></tr>
-  <tr><td>$real</td>  <td>$record</td>   <td>$ref</td>     <td/></tr>
-</table>
-
-<p>Each of these types is described in this section.</p>
-
-<h3>Unit</h3>
-
-<p>The <i>unit</i> value, denoted <code>()</code>, signifies the absence of a meaningful
-value. It is the only value of type <b>unit</b>.</p>
+<p>The <i>nil</i> value, denoted <code>nil</code> is the only value of type <i>nil</i>.
+It signifies the absence of any meaningful value.</p>
 
 <h3>Boolean</h3>
 
-<p>A <i>boolean</i> represents a true or false value, denoted <code>true</code> and
-<code>false</code>, respectively. Any non-<code>false</code> value is
-considered equivalent to <code>true</code>.</p>
+<p>The boolean values, denoted <code>true</code> and <code>false</code> are the basic
+units of logical operations.</p>
+
+<h3>Symbols</h3>
+
+<p>A <i>symbol</i> is a unique value denoted by a name (i.e., a string of characters).
+All identical names denote the same unique symbol. unique named constant value. Unlike a variable, whose
+value usually changes with each evaluation of an expression, a symbol's value
+never changes -- it always denotes itself.</p>
+
+<p>Symbols are denoted <code>$<i>x</i></code>, where <code><i>x</i></code> is an identifier.<p>
 
 <h3>Numeric</h3>
 
-<p>The numeric types (<i>integer</i>, <i>real</i>, and <i>complex</i>) are arranged
-in the standard mathematical heirarchy. That is, every integer is a real
-number (with zero fractional part), and every real number is a complex number
-(with a zero imaginary part). Thus numeric values may safely be converted to
-any type higher in the heirarchy; this is known as type promotion.</p>
-
-<p>The actual underlying representations and ranges are as follows:</p>
-
-<ul>
-  <li>Integers use signed 32 bit 2's complement representation</li>
-  <li>Reals use the IEEE 754 double-precision representation</li>
-  <li>A complex number uses 2 real components</li>
-</ul>
-
-<h3>Tuples</h3>
-
-<p>An <i>N-tuple</i> an ordered set of <i>N > 1</i> values, denoted<p>
-
-<div class="codeblock"><pre>
-(<i>x<sub>1</sub></i>, <i>x<sub>2</sub></i>, ..., <i>x<sub>N</sub></i>)
-</pre></div>
-
-<p>Note that there are no 0-tuples or 1-tuples: <code>(x)</code> denotes a
-single parenthesized expression, while <code>()</code> denotes unit.</p>
-
-<p>The selector expression <code><i>t</i>.<i>i</i></code> denotes the value <code><i>x<sub>i</sub></i></code> in tuple <code><i>t</i></code>.</p>
+<p>The numeric types include <i>integer</i>, <i>real</i>, <i>rational</i> and <i>complex</i>.</p>
 
 <h3>Lists</h3>
 
 <p>A <i>list</i> is an ordered sequence of zero or more values, denoted<p>
 
 <div class = "codeblock"><pre>
-[<i>x<sub>1</sub></i>, ..., <i>x<sub>N</sub></i>]
+(<i>x<sub>1</sub></i> ... <i>x<sub>N</sub></i>)
 </pre></div>
 
-<p>The empty list is denoted <code>[]</code>.</p>
-
-<p>The <code>:</code> operator constructs lists, so the above form is equivalent to</p>
-
-<div class = "codeblock">
-<i>x<sub>1</sub></i> : ... : <i>x<sub>N</sub></i> : []
-<pre></pre></div>
-
-<h3>Records</h3>
-
-<p>A <i>record</i> is a set of labeled values, denoted<p>
-
-<div class="codeblock"><pre>
-{<i>id<sub>1</sub></i> = <i>x<sub>1</sub></i>, ..., <i>id<sub>N</sub></i> = <i>x<sub>N</sub></i>}
-</pre></div>
-
-<p>Labels must be unique within a record.</p>
-
-<p>The expression <code><i>r</i>.<i>id<sub>i</sub></i></code> denotes the
-labeled value <code><i>id<sub>i</sub></i></code> in record <code><i>r</i></code>.</p>
+<p>The empty list is denoted <code>()</code>.</p>
 
 <h3>Functions</h3>
 
-<p>The <i>function</i> is fundamental in any functional language.
-They are the primary means of abstraction and composition. They represent
-mathematical (i.e., pure) functions as well as effectful procedures. They
-are first-class closures, so may be freely passed to and returned
-from other functions, as well as nested within other functions. Finally,
-all functions are automatically curried, enabling partial function application.<p>
+<p><i>Function</i>s are fundamental in any language. They are one of the primary
+means of abstraction and composition. They may be pure or effectful. Functions are
+first-class, and may be passed to and returned from other functions. Functions are
+closures, meaning they can refer to variables in their enclosing scope at any
+time.<p>
 
-<h3>References</h3>
 
-<p>Immutability is desirable, but mutable state is often required in some
-algorithms. For this reason references are provided. A <i>reference</i>
-value points to (i.e., stores the location of) another value. They model a
-single-value mutable memory cell, enabling stateful programming techniques.<p>
-
-<p>The primary operations on a reference are:</p>
-
-<ul>
-  <li>Construct a new reference with the <code>ref</code> operator.</li>
-  <li>Retrieve the current value stored in a reference.</li>
-  <li>Assign a new value to (i.e., mutate) the reference.</li>
-</ul>
-
-<h3>Symbols</h3>
-
-<p>Symbols are denoted <code>$<i>x</i></code>, where <code><i>x</i></code> is an identifier.<p>
-
-<p>A <i>symbol</i> is a unique named constant value. Unlike a variable, whose
-value usually changes with each evaluation of an expression, a symbol's value
-never changes -- it always denotes itself.</p>
-
+<
 <h3>Strings</h3>
 
 <p>A <i>string</i> is a sequence of zero or more Unicode characters. A <i>string

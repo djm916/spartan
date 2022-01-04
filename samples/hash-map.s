@@ -1,14 +1,12 @@
 
 (load "stdlib/defstruct.s")
 
-(defstruct hash-map (hash-fun
-                     eq-fun
-                     table
-                     size))
+(defstruct hash-map (hash-fun equal-fun table size))
 
-(defun hash-map/new (hash-fun eq-fun)
+(defun hash-map/new (hash-fun equal-fun)
   (def initial-capacity 4)
-  (make-hash-map hash-fun eq-fun (vector/new initial-capacity ()) 0))
+  (def table (vector/new initial-capacity ()))
+  (make-hash-map hash-fun equal-fun table 0))
 
 (defun hash-map/empty? (self) (= 0 (hash-map-size self)))
 
@@ -22,8 +20,9 @@
   (def node (find-node-with-key self index key))
   (if (empty? node)
     ; No key exists, add a new key, value pair
-    (let ((node-list (vector/get table index)))
-      (vector/set! table index (cons (list key value) node-list))
+    (let ((node-list (vector/get table index))
+          (new-node (list key value)))
+      (vector/set! table index (cons new-node node-list))
       (set-hash-map-size! self (+ 1 size))
       ; Automatically expand table when load factor exceeded
       (if (> (/ (int->real size) (int->real capacity)) 0.75)
@@ -43,7 +42,7 @@
   (def capacity (length table))
   (def index (% ((hash-map-hash-fun self) key) capacity))
   (def node-list (vector/get table index))
-  (defun node-has-key? (node) ((hash-map-eq-fun self) key (car node)))
+  (defun node-has-key? (node) ((hash-map-equal-fun self) key (car node)))
   (vector/set! table index (remove! node-has-key? node-list)))
   
 (defun hash-map/find (self key)
@@ -83,7 +82,7 @@
   (def node-list (vector/get (hash-map-table self) index))
   (def found false)
   (while (and (not found) (not (empty? node-list)))
-    (if ((hash-map-eq-fun self) (caar node-list) key)
+    (if ((hash-map-equal-fun self) (caar node-list) key)
       (set! found true)
       (set! node-list (cdr node-list))))
   (if found (car node-list) ()))
