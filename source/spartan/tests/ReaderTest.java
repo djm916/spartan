@@ -3,7 +3,7 @@ package spartan.tests;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import spartan.parsing.Reader;
-import spartan.errors.SyntaxError;
+import spartan.errors.Error;
 import java.io.IOException;
 
 public class ReaderTest
@@ -14,7 +14,7 @@ public class ReaderTest
     try (Reader r = Reader.forString("")) {
       assertNull(r.read());
     }
-    catch (IOException | SyntaxError ex) {
+    catch (IOException | Error ex) {
       fail(ex.getMessage());
     }
   }
@@ -25,7 +25,7 @@ public class ReaderTest
     try (Reader r = Reader.forString(null)) {
       r.read();
     }
-    catch (IOException | SyntaxError ex) {
+    catch (IOException | Error ex) {
       fail(ex.getMessage());
     }
   }

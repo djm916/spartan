@@ -1,7 +1,5 @@
 package spartan.runtime;
 
-import spartan.errors.RuntimeError;
-
 public abstract class Inst
 {
   protected final Inst next;
@@ -11,5 +9,5 @@ public abstract class Inst
     this.next = next;
   }
   
-  public abstract void eval(VirtualMachine vm) throws RuntimeError;
+  public abstract void eval(VirtualMachine vm);
 }

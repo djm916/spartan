@@ -36,7 +36,7 @@ public final class Int extends Datum
     return value;
   }
   
-  public int intValue() throws IntegerOverflow
+  public int intValue()
   {
     try {
       return value.intValueExact();
@@ -46,7 +46,7 @@ public final class Int extends Datum
     }
   }
   
-  public long longValue() throws IntegerOverflow
+  public long longValue()
   {
     try {
       return value.longValueExact();
@@ -86,7 +86,7 @@ public final class Int extends Datum
     return new Int(x.value.multiply(y.value));
   }
   
-  public static Int div(Int x, Int y) throws DivisionByZero
+  public static Int div(Int x, Int y)
   {
     try {
       return new Int(x.value.divide(y.value));
@@ -96,7 +96,7 @@ public final class Int extends Datum
     }
   }
   
-  public static Int mod(Int x, Int y) throws DivisionByZero
+  public static Int mod(Int x, Int y)
   {
     try {
       return new Int(x.value.remainder(y.value));

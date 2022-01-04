@@ -3,7 +3,7 @@ package spartan.errors;
 import spartan.parsing.Position;
 import spartan.data.Symbol;
 
-public class UnboundVariable extends RuntimeError
+public class UnboundVariable extends Error
 {
   public UnboundVariable(Symbol s, Position p)
   {

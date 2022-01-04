@@ -1,7 +1,6 @@
 package spartan.runtime;
 
 import spartan.parsing.Position;
-import spartan.errors.RuntimeError;
 import spartan.errors.Error;
 
 public final class Apply extends Inst
@@ -16,13 +15,14 @@ public final class Apply extends Inst
     this.position = position;
   }
   
-  public void eval(VirtualMachine vm) throws RuntimeError
+  public void eval(VirtualMachine vm)
   {
     try {
       vm.apply(numArgs);
     }
     catch (Error err) {
-      throw new RuntimeError(err.getMessage(), position);
+      err.setPosition(position);
+      throw err;
     }
   }
 }

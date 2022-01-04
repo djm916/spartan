@@ -5,10 +5,9 @@ import spartan.data.*;
 import spartan.parsing.SourceDatum;
 import spartan.parsing.PositionMap;
 import spartan.parsing.Position;
-import spartan.errors.CompileError;
+import spartan.errors.Error;
 import spartan.errors.MalformedExpression;
 import spartan.errors.MultipleDefinition;
-import spartan.errors.RuntimeError;
 import spartan.runtime.VirtualMachine;
 import java.util.logging.Logger;
 
@@ -20,7 +19,6 @@ public class Compiler
   }
   
   public Inst compile(SourceDatum sourceExp)
-  throws CompileError
   {
     positionMap = sourceExp.positionMap;
     return compile(sourceExp.datum, null, false, null);
@@ -82,7 +80,6 @@ public class Compiler
   */
 
   private Inst compileSet(List exp, Scope scope, Inst next)
-  throws CompileError
   {
     if (exp.length() != 3 || exp.cadr().type() != Type.Symbol)
       throw malformedExp(exp);
@@ -111,7 +108,6 @@ public class Compiler
   */
 
   private Inst compileDef(List exp, Scope scope, Inst next)
-  throws CompileError
   {
     if (exp.length() != 3 || exp.cadr().type() != Type.Symbol)
       throw malformedExp(exp);
@@ -131,7 +127,6 @@ public class Compiler
   */
   
   private Inst compileDefun(List exp, Scope scope, Inst next)
-  throws CompileError
   {
     if (exp.length() < 4)
       throw malformedExp(exp);
@@ -144,8 +139,9 @@ public class Compiler
     try {
       return compile(xform, scope, false, next);
     }
-    catch (CompileError err) {
-      throw new CompileError(err.getMessage(), positionMap.get(exp));
+    catch (Error err) {
+      err.setPosition(positionMap.get(exp));
+      throw err;
     }
   }
   
@@ -176,7 +172,6 @@ public class Compiler
      next: ...
   */
   private Inst compileIf(List exp, Scope scope, boolean tail, Inst next)
-  throws CompileError
   {
     int length = exp.length();
 
@@ -213,7 +208,6 @@ public class Compiler
      next:   ...
   */
   private Inst compileCond(List exp, Scope scope, boolean tail, Inst next)
-  throws CompileError
   {
     if (exp.length() < 2 || !checkClauseListForm(exp.cdr()))
       throw malformedExp(exp);
@@ -222,7 +216,6 @@ public class Compiler
   }
 
   private Inst compileCondClauses(List clauses, Scope scope, boolean tail, Inst next)
-  throws CompileError
   {
     if (clauses == List.Empty)
       return new LoadConst(Nil.Instance, next);
@@ -261,7 +254,6 @@ public class Compiler
   */
 
   private Inst compileLet(List exp, Scope scope, boolean tail, Inst next)
-  throws CompileError
   {
     if (exp.length() < 3 || exp.cadr().type() != Type.List)
       throw malformedExp(exp);
@@ -303,7 +295,6 @@ public class Compiler
      pop-env
   */
   private Inst compileLetRec(List exp, Scope scope, boolean tail, Inst next)
-  throws CompileError
   {
     if (exp.length() < 3 || exp.cadr().type() != Type.List)
       throw malformedExp(exp);
@@ -326,7 +317,6 @@ public class Compiler
   }
 
   private Inst compileRecursiveBindings(List inits, int offset, Scope scope, Inst next)
-  throws CompileError
   {
     if (inits.empty())
       return next;
@@ -356,7 +346,6 @@ public class Compiler
      pop-env
   */
   private Inst compileLetStar(List exp, Scope scope, boolean tail, Inst next)
-  throws CompileError
   {
     if (exp.length() < 3 || exp.cadr().type() != Type.List)
       throw malformedExp(exp);
@@ -377,7 +366,6 @@ public class Compiler
   }
 
   private Inst compileBindingsSequential(List bindings, int offset, Scope scope, Inst next)
-  throws CompileError
   {
     if (bindings.empty())
       return next;
@@ -461,7 +449,6 @@ public class Compiler
   }
 
   private Inst evalArgs(List args, Scope scope, Inst next)
-  throws CompileError
   {
     if (args == List.Empty)
       return next;
@@ -498,7 +485,6 @@ public class Compiler
   */
 
   private Inst compileApply(List exp, Scope scope, boolean tail, Inst next)
-  throws CompileError
   {
     int numArgs = exp.length() - 1;
     
@@ -528,7 +514,6 @@ public class Compiler
   */
   
   private Inst compileSequence(List exp, Scope scope, boolean tail, Inst next)
-  throws CompileError
   {
     if (exp == List.Empty)
       return next;
@@ -544,7 +529,6 @@ public class Compiler
      nested letrec form, shown below.
   */
   private Inst compileBody(List body, Scope scope, Inst next)
-  throws CompileError
   {
     if (isInnerDef(body.car())) {
       var xform = transformInnerDefs(body);
@@ -559,7 +543,6 @@ public class Compiler
   /* Compiles a lambda expression (anonymous procedure)
   */
   private Inst compileFun(List exp, Scope scope, Inst next)
-  throws CompileError
   {
     if (exp.length() < 3 || exp.cadr().type() != Type.List)
       throw malformedExp(exp);
@@ -634,7 +617,6 @@ public class Compiler
   */
 
   private Inst compileOr(List exp, Scope scope, boolean tail, Inst next)
-  throws CompileError
   {
     if (exp.length() < 2)
       throw malformedExp(exp);
@@ -643,7 +625,6 @@ public class Compiler
   }
 
   private Inst compileDisjunction(List exp, Scope scope, boolean tail, Inst next)
-  throws CompileError
   {
     if (exp.empty())
       return next;
@@ -667,7 +648,6 @@ public class Compiler
   */
 
   private Inst compileAnd(List exp, Scope scope, boolean tail, Inst next)
-  throws CompileError
   {
     if (exp.length() < 2)
       throw malformedExp(exp);
@@ -676,7 +656,6 @@ public class Compiler
   }
 
   private Inst compileConjuction(List exp, Scope scope, boolean tail, Inst next)
-  throws CompileError
   {
     if (exp.empty())
       return next;
@@ -692,7 +671,6 @@ public class Compiler
   */
 
   private Inst compileDo(List exp, Scope scope, boolean tail, Inst next)
-  throws CompileError
   {
     if (exp.length() < 2)
       throw malformedExp(exp);
@@ -715,7 +693,6 @@ public class Compiler
   */
 
   private Inst compileWhile(List exp, Scope scope, boolean tail, Inst next)
-  throws CompileError
   {
     if (exp.length() < 3)
       throw malformedExp(exp);
@@ -733,7 +710,6 @@ public class Compiler
   // (quote x)
 
   private Inst compileQuote(List exp, Inst next)
-  throws CompileError
   {
     if (exp.length() != 2)
       throw malformedExp(exp);
@@ -745,7 +721,6 @@ public class Compiler
   // list form and compiling the result.
 
   private Inst compileQuasiquote(List exp, Scope scope, Inst next)
-  throws CompileError
   {
     if (exp.length() != 2)
       throw malformedExp(exp);
@@ -758,15 +733,15 @@ public class Compiler
     try {
       return compile(xform, scope, false, next);
     }
-    catch (CompileError err) {
-      throw new CompileError(err.getMessage(), positionMap.get(exp));
+    catch (Error err) {
+      err.setPosition(positionMap.get(exp));
+      throw err;
     }
   }
 
   // Reduce a quasiquote form (quasiquote x) to equivalent list form.
 
   private List transformQuasiquote(Datum exp)
-  throws CompileError
   {
     // (quasiquote ()) => ()
     
@@ -820,7 +795,6 @@ public class Compiler
   }
   
   private ProcTemplate makeProcTemplate(List params, List body, Scope scope)
-  throws CompileError
   {
     var numParams = params.length();
     var isVariadic = numParams > 1 && params.at(numParams - 2) == Symbols.Ampersand;
@@ -854,7 +828,6 @@ public class Compiler
   */
   
   private Inst compileFixedProc(List body, Scope scope, int requiredArgs)
-  throws CompileError
   {
     return new PushEnv(requiredArgs,
            bindLocals(0, requiredArgs,
@@ -882,7 +855,6 @@ public class Compiler
   */
   
   private Inst compileVariadicProc(List body, Scope scope, int requiredArgs)
-  throws CompileError
   {
     return new PushEnv(requiredArgs + 1,
                bindLocals(0, requiredArgs,
@@ -904,7 +876,6 @@ public class Compiler
   */
 
   private Inst compileDefMacro(List exp, Scope scope, Inst next)
-  throws CompileError
   {
     if (exp.length() < 4 || exp.cadr().type() != Type.Symbol || exp.caddr().type() != Type.List)
       throw malformedExp(exp);
@@ -930,7 +901,6 @@ public class Compiler
      and compiles the code returned by the macro.
   */
   private Inst compileApplyMacro(List exp, Scope scope, boolean tail, Inst next)
-  throws CompileError
   {
     var f = (Macro) vm.globals.lookup((Symbol) exp.car());
     var args = exp.cdr();
@@ -943,13 +913,13 @@ public class Compiler
     
       return compile(xform, scope, tail, next);
     }
-    catch (CompileError | RuntimeError err) {      
-      throw new CompileError(err.getMessage(), positionMap.get(exp));
+    catch (Error err) {
+      err.setPosition(positionMap.get(exp));
+      throw err;
     }
   }
   
   private Datum applyMacroTransform(Macro f, List args)
-  throws RuntimeError
   {
     vm.pushFrame(null, null);
     vm.result = f;
@@ -967,7 +937,6 @@ public class Compiler
   /* Compile a generic list expression, handling special forms and procedure/macro applications. */
   
   private Inst compileList(List exp, Scope scope, boolean tail, Inst next)
-  throws CompileError
   {
     if (exp.car().type() == Type.Symbol) {
       var car = (Symbol) exp.car();
@@ -1013,7 +982,6 @@ public class Compiler
   /* This is the top-level compilation function that dispatches on the type of the expression. */
   
   private Inst compile(Datum exp, Scope scope, boolean tail, Inst next)
-  throws CompileError
   {
     if (isSelfEval(exp))
       return compileSelfEval(exp, next);

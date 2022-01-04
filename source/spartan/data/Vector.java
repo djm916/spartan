@@ -27,7 +27,7 @@ public final class Vector extends Callable
     return result;
   }
   
-  public static Vector create(Int length, Datum init) throws IntegerOverflow
+  public static Vector create(Int length, Datum init)
   {
     return create(length.intValue(), init);
   }
@@ -38,7 +38,7 @@ public final class Vector extends Callable
     elems = new ArrayList<Datum>(length);
   }
   
-  public Vector(Int length) throws IntegerOverflow
+  public Vector(Int length)
   {
     this(length.intValue());
   }
@@ -71,12 +71,12 @@ public final class Vector extends Callable
     return elems.size();
   }
   
-  public Datum get(Int index) throws NoSuchElement, IntegerOverflow
+  public Datum get(Int index)
   {
     return get(index.intValue());
   }
   
-  private Datum get(int index) throws NoSuchElement
+  private Datum get(int index)
   {
     try {
       return elems.get(index);
@@ -86,7 +86,7 @@ public final class Vector extends Callable
     }
   }
   
-  public void set(int index, Datum value) throws NoSuchElement
+  public void set(int index, Datum value)
   {
     try {
       elems.set(index, value);
@@ -96,7 +96,7 @@ public final class Vector extends Callable
     }
   }
   
-  public void set(Int index, Datum value) throws NoSuchElement, IntegerOverflow
+  public void set(Int index, Datum value)
   {
     set(index.intValue(), value);
   }
@@ -119,7 +119,7 @@ public final class Vector extends Callable
     return true;
   }
   
-  public void apply(VirtualMachine vm) throws NoSuchElement, TypeMismatch, IntegerOverflow
+  public void apply(VirtualMachine vm)
   {
     if (vm.peekArg().type() != Type.Int)
       throw new TypeMismatch();

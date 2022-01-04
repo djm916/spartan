@@ -4,9 +4,7 @@ import spartan.parsing.Reader;
 import spartan.compiling.Compiler;
 import spartan.runtime.VirtualMachine;
 import spartan.runtime.GlobalEnv;
-import spartan.errors.SyntaxError;
-import spartan.errors.CompileError;
-import spartan.errors.RuntimeError;
+import spartan.errors.Error;
 import java.io.IOException;
 
 public final class Evaluator
@@ -26,8 +24,8 @@ public final class Evaluator
           var result = vm.eval(compiler.compile(exp));
           System.out.println(result.repr());
         }
-        catch (SyntaxError | CompileError | RuntimeError ex) {
-          System.err.println(ex);
+        catch (Error err) {
+          System.err.println(err);
         }
       }
     }
@@ -48,9 +46,8 @@ public final class Evaluator
           vm.eval(compiler.compile(exp));
         }
       }
-      catch (SyntaxError | CompileError | RuntimeError ex) {
-        System.err.println(ex);
-        return;
+      catch (Error err) {
+        System.err.println(err);
       }
     }
   }

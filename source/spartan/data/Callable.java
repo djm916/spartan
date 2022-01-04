@@ -20,5 +20,5 @@ public abstract class Callable extends Datum
                        : numArgs >= requiredArgs;
   }
   
-  public abstract void apply(VirtualMachine vm) throws Error;
+  public abstract void apply(VirtualMachine vm);
 }

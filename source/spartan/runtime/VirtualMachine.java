@@ -3,7 +3,6 @@ package spartan.runtime;
 import spartan.data.Datum;
 import spartan.data.List;
 import spartan.data.Callable;
-import spartan.errors.RuntimeError;
 import spartan.errors.Error;
 import spartan.errors.WrongNumberArgs;
 import spartan.errors.TypeMismatch;
@@ -23,7 +22,7 @@ public final class VirtualMachine
     this.globals = globals;
   }
   
-  public final Datum eval(Inst code) throws RuntimeError
+  public final Datum eval(Inst code)
   {
     control = code;
     
@@ -31,10 +30,10 @@ public final class VirtualMachine
       while (control != null)
         control.eval(this);
     }
-    catch (RuntimeError ex) {
-      ex.setBackTrace(generateBackTrace());
+    catch (Error err) {
+      err.setBackTrace(generateBackTrace());
       reset();
-      throw ex;
+      throw err;
     }
     
     // Assert VM returns to its default state
@@ -84,7 +83,7 @@ public final class VirtualMachine
     frame = frame.parent;
   }
   
-  public final void apply(int numArgs) throws Error
+  public final void apply(int numArgs)
   {
     if (! (result instanceof Callable))
       throw new TypeMismatch();

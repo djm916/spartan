@@ -61,7 +61,7 @@ public final class CoreLib
     }
   };
 
-  public static boolean lt(Datum x, Datum y) throws TypeMismatch
+  public static boolean lt(Datum x, Datum y)
   {
     if (x.type() == y.type())
       switch (x.type()) {
@@ -75,13 +75,13 @@ public final class CoreLib
   }
     
   public static final Primitive Lt = new Primitive(2, false) {
-    public void apply(VirtualMachine vm) throws TypeMismatch {
+    public void apply(VirtualMachine vm) {
       vm.result = truth(lt(vm.popArg(), vm.popArg()));
       vm.popFrame();
     }
   };
 
-  public static boolean le(Datum x, Datum y) throws TypeMismatch
+  public static boolean le(Datum x, Datum y)
   {
     if (x.type() == y.type())
       switch (x.type()) {
@@ -95,13 +95,13 @@ public final class CoreLib
   }
   
   public static final Primitive Le = new Primitive(2, false) {
-    public void apply(VirtualMachine vm) throws TypeMismatch {
+    public void apply(VirtualMachine vm) {
       vm.result = truth(le(vm.popArg(), vm.popArg()));
       vm.popFrame();
     }
   };
 
-  public static boolean gt(Datum x, Datum y) throws TypeMismatch
+  public static boolean gt(Datum x, Datum y)
   {
     if (x.type() == y.type())
       switch (x.type()) {
@@ -115,13 +115,13 @@ public final class CoreLib
   }
   
   public static final Primitive Gt = new Primitive(2, false) {
-    public void apply(VirtualMachine vm) throws TypeMismatch {
+    public void apply(VirtualMachine vm) {
       vm.result = truth(gt(vm.popArg(), vm.popArg()));
       vm.popFrame();
     }
   };
 
-  public static boolean ge(Datum x, Datum y) throws TypeMismatch
+  public static boolean ge(Datum x, Datum y)
   {
     if (x.type() == y.type())
       switch (x.type()) {
@@ -135,7 +135,7 @@ public final class CoreLib
   }
   
   public static final Primitive Ge = new Primitive(2, false) {
-    public void apply(VirtualMachine vm) throws TypeMismatch {
+    public void apply(VirtualMachine vm) {
       vm.result = truth(ge(vm.popArg(), vm.popArg()));
       vm.popFrame();
     }
@@ -155,7 +155,7 @@ public final class CoreLib
     }
   };
   
-  public static final Complex makeComplex(Datum x, Datum y) throws TypeMismatch
+  public static final Complex makeComplex(Datum x, Datum y)
   {
     if (x.type() != Type.Real || y.type() != Type.Real)
       throw new TypeMismatch();
@@ -163,13 +163,13 @@ public final class CoreLib
   }
   
   public static final Primitive MakeComplex = new Primitive(2, false) {
-    public void apply(VirtualMachine vm) throws TypeMismatch {
+    public void apply(VirtualMachine vm) {
       vm.result = makeComplex(vm.popArg(), vm.popArg());
       vm.popFrame();
     }
   };
   
-  public static final Ratio makeRatio(Datum x, Datum y) throws TypeMismatch
+  public static final Ratio makeRatio(Datum x, Datum y)
   {
     if (x.type() != Type.Int || y.type() != Type.Int)
       throw new TypeMismatch();
@@ -177,14 +177,14 @@ public final class CoreLib
   }
   
   public static final Primitive MakeRatio = new Primitive(2, false) {
-    public void apply(VirtualMachine vm) throws TypeMismatch {
+    public void apply(VirtualMachine vm) {
       vm.result = makeRatio(vm.popArg(), vm.popArg());
       vm.popFrame();
     }
   };
   
   public static final Primitive Apply = new Primitive(2, false) {
-    public void apply(VirtualMachine vm) throws Error {
+    public void apply(VirtualMachine vm) {
       vm.result = vm.popArg();
       if (vm.peekArg().type() != Type.List)
         throw new TypeMismatch();
@@ -211,7 +211,7 @@ public final class CoreLib
     }
   };
   
-  public static int length(Datum x) throws TypeMismatch
+  public static int length(Datum x)
   {
     switch (x.type()) {
       case List: return ((List)x).length();
@@ -222,21 +222,21 @@ public final class CoreLib
   }
   
   public static final Primitive Length = new Primitive(1, false) {
-    public void apply(VirtualMachine vm) throws TypeMismatch {
+    public void apply(VirtualMachine vm) {
       vm.result = new Int(length(vm.popArg()));
       vm.popFrame();
     }
   };
   
   public static final Primitive TypeOf = new Primitive(1, false) {
-    public void apply(VirtualMachine vm) throws TypeMismatch {
+    public void apply(VirtualMachine vm) {
       vm.result = Symbol.get(vm.popArg().type().name);
       vm.popFrame();
     }
   };
   
   public static final Primitive Load = new Primitive(1, false) {
-    public void apply(VirtualMachine vm) throws Error {
+    public void apply(VirtualMachine vm) {
       if (vm.peekArg().type() != Type.Text)
         throw new TypeMismatch();
       var fileName = ((Text) vm.popArg()).value();
@@ -254,7 +254,7 @@ public final class CoreLib
   };
   
   public static final Primitive SymbolToText = new Primitive(1, false) {
-    public void apply(VirtualMachine vm) throws TypeMismatch {
+    public void apply(VirtualMachine vm) {
       if (vm.peekArg().type() != Type.Symbol)
         throw new TypeMismatch();
       vm.result = new Text(((Symbol)vm.popArg()).value());
@@ -263,7 +263,7 @@ public final class CoreLib
   };
     
   public static final Primitive TextToSymbol = new Primitive(1, false) {
-    public void apply(VirtualMachine vm) throws TypeMismatch {
+    public void apply(VirtualMachine vm) {
       if (vm.peekArg().type() != Type.Text)
         throw new TypeMismatch();
       vm.result = Symbol.get(((Text)vm.popArg()).value());
@@ -272,7 +272,7 @@ public final class CoreLib
   };
   
   public static final Primitive IntToReal = new Primitive(1, false) {
-    public void apply(VirtualMachine vm) throws TypeMismatch {
+    public void apply(VirtualMachine vm) {
       if (vm.peekArg().type() != Type.Int)
         throw new TypeMismatch();
       vm.result = new Real(((Int)vm.popArg()).doubleValue());
@@ -281,7 +281,7 @@ public final class CoreLib
   };
   
   public static final Primitive RealToInt = new Primitive(1, false) {
-    public void apply(VirtualMachine vm) throws TypeMismatch {
+    public void apply(VirtualMachine vm) {
       if (vm.peekArg().type() != Type.Real)
         throw new TypeMismatch();
       vm.result = new Int(((Real)vm.popArg()).longValue());

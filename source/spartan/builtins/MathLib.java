@@ -7,7 +7,7 @@ import spartan.runtime.VirtualMachine;
 
 public final class MathLib
 {
-  public static Datum add(Datum x, Datum y) throws TypeMismatch
+  public static Datum add(Datum x, Datum y)
   {
     if (x.type() == y.type()) {
       switch (x.type()) {
@@ -21,7 +21,7 @@ public final class MathLib
   }
   
   public static final Primitive Add = new Primitive(2, true) {
-    public void apply(VirtualMachine vm) throws TypeMismatch {
+    public void apply(VirtualMachine vm) {
       vm.result = add(vm.popArg(), vm.popArg());
       while (vm.args != List.Empty)
         vm.result = add(vm.result, vm.popArg());
@@ -29,7 +29,7 @@ public final class MathLib
     }
   };
   
-  public static Datum sub(Datum x, Datum y) throws TypeMismatch
+  public static Datum sub(Datum x, Datum y)
   {
     if (x.type() == y.type()) {
       switch (x.type()) {
@@ -43,13 +43,13 @@ public final class MathLib
   }
   
   public static final Primitive Sub = new Primitive(2, false) {
-    public void apply(VirtualMachine vm) throws TypeMismatch {
+    public void apply(VirtualMachine vm) {
       vm.result = sub(vm.popArg(), vm.popArg());
       vm.popFrame();
     }
   };
 
-  public static Datum mul(Datum x, Datum y) throws TypeMismatch
+  public static Datum mul(Datum x, Datum y)
   {
     if (x.type() == y.type()) {
       switch (x.type()) {
@@ -63,7 +63,7 @@ public final class MathLib
   }
     
   public static final Primitive Mul = new Primitive(2, true) {
-    public void apply(VirtualMachine vm) throws TypeMismatch {
+    public void apply(VirtualMachine vm) {
       vm.result = mul(vm.popArg(), vm.popArg());
       while (vm.args != List.Empty)
         vm.result = mul(vm.result, vm.popArg());
@@ -71,7 +71,7 @@ public final class MathLib
     }
   };
 
-  public static Datum div(Datum x, Datum y) throws TypeMismatch, DivisionByZero
+  public static Datum div(Datum x, Datum y)
   {
     if (x.type() == y.type()) {
       switch (x.type()) {
@@ -85,13 +85,13 @@ public final class MathLib
   }
   
   public static final Primitive Div = new Primitive(2, false) {
-    public void apply(VirtualMachine vm) throws TypeMismatch, DivisionByZero {
+    public void apply(VirtualMachine vm) {
       vm.result = div(vm.popArg(), vm.popArg());
       vm.popFrame();
     }
   };
 
-  public static Datum mod(Datum x, Datum y) throws TypeMismatch, DivisionByZero
+  public static Datum mod(Datum x, Datum y)
   {
     if (x.type() == Type.Int && y.type() == Type.Int)
       return Int.mod((Int)x, (Int)y);
@@ -99,13 +99,13 @@ public final class MathLib
   }
   
   public static final Primitive Mod = new Primitive(2, false) {
-    public void apply(VirtualMachine vm) throws TypeMismatch, DivisionByZero {
+    public void apply(VirtualMachine vm) {
       vm.result = mod(vm.popArg(), vm.popArg());
       vm.popFrame();
     }
   };
 
-  public static Datum neg(Datum x) throws TypeMismatch
+  public static Datum neg(Datum x)
   {
     switch (x.type()) {
       case Int: return ((Int)x).neg();
@@ -117,13 +117,13 @@ public final class MathLib
   }
   
   public static final Primitive Neg = new Primitive(1, false) {
-    public void apply(VirtualMachine vm) throws TypeMismatch {
+    public void apply(VirtualMachine vm) {
       vm.result = neg(vm.popArg());
       vm.popFrame();
     }
   };
 
-  public static Datum abs(Datum x) throws TypeMismatch
+  public static Datum abs(Datum x)
   {
     switch (x.type()) {
       case Int: return ((Int)x).abs();
@@ -135,13 +135,13 @@ public final class MathLib
   }
   
   public static final Primitive Abs = new Primitive(1, false) {
-    public void apply(VirtualMachine vm) throws TypeMismatch {
+    public void apply(VirtualMachine vm) {
       vm.result = abs(vm.popArg());
       vm.popFrame();
     }
   };
   
-  public static Datum floor(Datum x) throws TypeMismatch
+  public static Datum floor(Datum x)
   {
     switch (x.type()) {
       case Real: return ((Real)x).floor();
@@ -150,13 +150,13 @@ public final class MathLib
   }
   
   public static final Primitive Floor = new Primitive(1, false) {
-    public void apply(VirtualMachine vm) throws TypeMismatch {
+    public void apply(VirtualMachine vm) {
       vm.result = floor(vm.popArg());
       vm.popFrame();
     }
   };
   
-  public static Datum ceiling(Datum x) throws TypeMismatch
+  public static Datum ceiling(Datum x)
   {
     switch (x.type()) {
       case Real: return ((Real)x).ceil();
@@ -165,13 +165,13 @@ public final class MathLib
   }
   
   public static final Primitive Ceiling = new Primitive(1, false) {
-    public void apply(VirtualMachine vm) throws TypeMismatch {
+    public void apply(VirtualMachine vm) {
       vm.result = ceiling(vm.popArg());
       vm.popFrame();
     }
   };
   
-  public static Datum exp(Datum x, Datum y) throws TypeMismatch
+  public static Datum exp(Datum x, Datum y)
   {
     if (x.type() == y.type()) {
       switch (x.type()) {
@@ -183,13 +183,13 @@ public final class MathLib
   }
   
   public static final Primitive Exp = new Primitive(2, false) {
-    public void apply(VirtualMachine vm) throws TypeMismatch {
+    public void apply(VirtualMachine vm) {
       vm.result = exp(vm.popArg(), vm.popArg());
       vm.popFrame();
     }
   };
   
-  public static Datum log(Datum x, Datum y) throws TypeMismatch
+  public static Datum log(Datum x, Datum y)
   {
     if (x.type() == y.type()) {
       switch (x.type()) {
@@ -201,13 +201,13 @@ public final class MathLib
   }
   
   public static final Primitive Log = new Primitive(2, false) {
-    public void apply(VirtualMachine vm) throws TypeMismatch {
+    public void apply(VirtualMachine vm) {
       vm.result = log(vm.popArg(), vm.popArg());
       vm.popFrame();
     }
   };
   
-  public static Datum sin(Datum x) throws TypeMismatch
+  public static Datum sin(Datum x)
   {
     switch (x.type()) {
       case Real: return ((Real)x).sin();
@@ -217,13 +217,13 @@ public final class MathLib
   }
   
   public static final Primitive Sin = new Primitive(1, false) {
-    public void apply(VirtualMachine vm) throws TypeMismatch {
+    public void apply(VirtualMachine vm) {
       vm.result = sin(vm.popArg());
       vm.popFrame();
     }
   };
   
-  public static Datum cos(Datum x) throws TypeMismatch
+  public static Datum cos(Datum x)
   {
     switch (x.type()) {
       case Real: return ((Real)x).cos();
@@ -233,13 +233,13 @@ public final class MathLib
   }
   
   public static final Primitive Cos = new Primitive(1, false) {
-    public void apply(VirtualMachine vm) throws TypeMismatch {
+    public void apply(VirtualMachine vm) {
       vm.result = cos(vm.popArg());
       vm.popFrame();
     }
   };
   
-  public static Datum tan(Datum x) throws TypeMismatch
+  public static Datum tan(Datum x)
   {
     switch (x.type()) {
       case Real: return ((Real)x).tan();
@@ -249,13 +249,13 @@ public final class MathLib
   }
   
   public static final Primitive Tan = new Primitive(1, false) {
-    public void apply(VirtualMachine vm) throws TypeMismatch {
+    public void apply(VirtualMachine vm) {
       vm.result = tan(vm.popArg());
       vm.popFrame();
     }
   };
   
-  public static Datum asin(Datum x) throws TypeMismatch
+  public static Datum asin(Datum x)
   {
     switch (x.type()) {
       case Real: return ((Real)x).asin();
@@ -265,13 +265,13 @@ public final class MathLib
   }
   
   public static final Primitive Asin = new Primitive(1, false) {
-    public void apply(VirtualMachine vm) throws TypeMismatch {
+    public void apply(VirtualMachine vm) {
       vm.result = asin(vm.popArg());
       vm.popFrame();
     }
   };
   
-  public static Datum acos(Datum x) throws TypeMismatch
+  public static Datum acos(Datum x)
   {
     switch (x.type()) {
       case Real: return ((Real)x).acos();
@@ -281,13 +281,13 @@ public final class MathLib
   }
   
   public static final Primitive Acos = new Primitive(1, false) {
-    public void apply(VirtualMachine vm) throws TypeMismatch {
+    public void apply(VirtualMachine vm) {
       vm.result = acos(vm.popArg());
       vm.popFrame();
     }
   };
   
-  public static Datum atan(Datum x) throws TypeMismatch
+  public static Datum atan(Datum x)
   {
     switch (x.type()) {
       case Real: return ((Real)x).atan();
@@ -297,7 +297,7 @@ public final class MathLib
   }
   
   public static final Primitive Atan = new Primitive(1, false) {
-    public void apply(VirtualMachine vm) throws TypeMismatch {
+    public void apply(VirtualMachine vm) {
       vm.result = atan(vm.popArg());
       vm.popFrame();
     }
@@ -311,7 +311,7 @@ public final class MathLib
   };
   
   public static final Primitive Numerator = new Primitive(1, false) {
-    public void apply(VirtualMachine vm) throws TypeMismatch {
+    public void apply(VirtualMachine vm) {
       if (vm.peekArg().type() != Type.Ratio)
         throw new TypeMismatch();
       vm.result = ((Ratio)vm.popArg()).numerator();
@@ -320,7 +320,7 @@ public final class MathLib
   };
   
   public static final Primitive Denominator = new Primitive(1, false) {
-    public void apply(VirtualMachine vm) throws TypeMismatch  {
+    public void apply(VirtualMachine vm) {
       if (vm.peekArg().type() != Type.Ratio)
         throw new TypeMismatch();
       vm.result = ((Ratio)vm.popArg()).denominator();
@@ -329,7 +329,7 @@ public final class MathLib
   };
   
   public static final Primitive RealPart = new Primitive(1, false) {
-    public void apply(VirtualMachine vm) throws TypeMismatch {
+    public void apply(VirtualMachine vm) {
       if (vm.peekArg().type() != Type.Complex)
         throw new TypeMismatch();
       vm.result = ((Complex)vm.popArg()).real();
@@ -338,7 +338,7 @@ public final class MathLib
   };
   
   public static final Primitive ImagPart = new Primitive(1, false) {
-    public void apply(VirtualMachine vm) throws TypeMismatch  {
+    public void apply(VirtualMachine vm) {
       if (vm.peekArg().type() != Type.Complex)
         throw new TypeMismatch();
       vm.result = ((Complex)vm.popArg()).imag();

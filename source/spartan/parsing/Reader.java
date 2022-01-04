@@ -3,7 +3,7 @@ package spartan.parsing;
 import java.io.*;
 import java.util.Map;
 import spartan.data.*;
-import spartan.errors.SyntaxError;
+import spartan.errors.Error;
 
 class MutablePosition
 {
@@ -33,7 +33,7 @@ public class Reader implements AutoCloseable
     return new Reader("unknown source", new ByteArrayInputStream(s.getBytes()));
   }
 
-  public SourceDatum read() throws SyntaxError, IOException
+  public SourceDatum read() throws IOException
   {
     positionMap.clear();
     skipSpace();
@@ -154,10 +154,10 @@ public class Reader implements AutoCloseable
     tokenStart.column = currentPos.column;
   }
 
-  private SyntaxError error(String message)
+  private Error syntaxError(String message)
   {
-    flush();
-    return new SyntaxError(message, new Position(source, tokenStart.line, tokenStart.column));
+    flush();    
+    return new Error(message, new Position(source, tokenStart.line, tokenStart.column));
   }
 
   private void flush()
@@ -171,10 +171,10 @@ public class Reader implements AutoCloseable
     }
   }
   
-  private void scanDigits(StringBuilder text) throws IOException, SyntaxError
+  private void scanDigits(StringBuilder text) throws IOException
   {
     if (!isDigit(lastChar))
-      throw error("malformed numeric literal");
+      throw syntaxError("malformed numeric literal");
 
     text.append((char)lastChar);
 
@@ -184,7 +184,7 @@ public class Reader implements AutoCloseable
     }
   }
   
-  private void scanFractionAndExp(StringBuilder text) throws IOException, SyntaxError
+  private void scanFractionAndExp(StringBuilder text) throws IOException
   {
     // add the "." character
     getChar();
@@ -199,7 +199,7 @@ public class Reader implements AutoCloseable
       scanExponent(text);
   }
   
-  private void scanExponent(StringBuilder text) throws IOException, SyntaxError
+  private void scanExponent(StringBuilder text) throws IOException
   {
     // add the "e" or "E" character
     getChar();
@@ -216,7 +216,7 @@ public class Reader implements AutoCloseable
     scanDigits(text);
   }
     
-  private void readImag(StringBuilder text) throws IOException, SyntaxError
+  private void readImag(StringBuilder text) throws IOException
   {
     // add the sign character
     getChar();
@@ -227,12 +227,12 @@ public class Reader implements AutoCloseable
     scanDigits(text);
     
     if (peekChar() != '.')
-      throw error("malformed numeric literal");
+      throw syntaxError("malformed numeric literal");
     
     scanFractionAndExp(text);
     
     if (peekChar() != 'i')
-      throw error("malformed numeric literal");
+      throw syntaxError("malformed numeric literal");
     
     getChar(); // eat "i"
   }
@@ -251,7 +251,7 @@ public class Reader implements AutoCloseable
   
   */
     
-  private Datum readNumber() throws IOException, SyntaxError
+  private Datum readNumber() throws IOException
   {
     var text = new StringBuilder();
 
@@ -287,43 +287,43 @@ public class Reader implements AutoCloseable
     return new Int(text.toString());
   }
 
-  private Int makeInt(String text) throws SyntaxError
+  private Int makeInt(String text)
   {
     try {
       return new Int(text);
     }
     catch (NumberFormatException ex) {
-      throw error("malformed numeric literal");
+      throw syntaxError("malformed numeric literal");
     }
   }
   
-  private Ratio makeRatio(String numer, String denom) throws SyntaxError
+  private Ratio makeRatio(String numer, String denom)
   {
     try {
       return new Ratio(numer, denom);
     }
     catch (NumberFormatException ex) {
-      throw error("malformed numeric literal");
+      throw syntaxError("malformed numeric literal");
     }
   }
   
-  private Real makeReal(String text) throws SyntaxError
+  private Real makeReal(String text)
   {
     try {
       return new Real(text);
     }
     catch (NumberFormatException ex) {
-      throw error("malformed numeric literal");
+      throw syntaxError("malformed numeric literal");
     }
   }
   
-  private Complex makeComplex(String real, String imag) throws SyntaxError
+  private Complex makeComplex(String real, String imag)
   {
     try {
       return new Complex(real, imag);
     }
     catch (NumberFormatException ex) {
-      throw error("malformed numeric literal");
+      throw syntaxError("malformed numeric literal");
     }
   }
   
@@ -346,7 +346,7 @@ public class Reader implements AutoCloseable
       return Symbol.get(s);
   }
   
-  private Datum readText() throws SyntaxError, IOException
+  private Datum readText() throws IOException
   {
     var text = new StringBuilder();
 
@@ -364,12 +364,12 @@ public class Reader implements AutoCloseable
     getChar();
 
     if (lastChar != '\"')
-      throw error("undelimited string literal");
+      throw syntaxError("undelimited string literal");
 
     return new Text(text.toString());
   }
 
-  private char readEscapedChar() throws SyntaxError, IOException
+  private char readEscapedChar() throws IOException
   {
     switch (lastChar) {      
       case 'n': return '\n';
@@ -381,7 +381,7 @@ public class Reader implements AutoCloseable
     }
   }
   
-  private Datum readList() throws SyntaxError, IOException
+  private Datum readList() throws IOException
   {
     var builder = new List.Builder();
     var position = new Position(source, tokenStart.line, tokenStart.column);
@@ -398,7 +398,7 @@ public class Reader implements AutoCloseable
     return result;
   }
 
-  private Datum readVector() throws SyntaxError, IOException
+  private Datum readVector() throws IOException
   {
     var builder = new List.Builder();
     var position = new Position(source, tokenStart.line, tokenStart.column);
@@ -415,32 +415,32 @@ public class Reader implements AutoCloseable
     return result;
   }
 
-  private Datum readQuote() throws SyntaxError, IOException
+  private Datum readQuote() throws IOException
   {
     skipSpace();
     return List.of(Symbols.Quote, readDatum());
   }
   
-  private Datum readUnquote() throws SyntaxError, IOException
+  private Datum readUnquote() throws IOException
   {
     skipSpace();
     return List.of(Symbols.Unquote, readDatum());
   }
 
-  private Datum readUnquoteSplicing() throws SyntaxError, IOException
+  private Datum readUnquoteSplicing() throws IOException
   {
     getChar();
     skipSpace();
     return List.of(Symbols.UnquoteSplicing, readDatum());
   }
 
-  private Datum readQuasiQuote() throws SyntaxError, IOException
+  private Datum readQuasiQuote() throws IOException
   {
     skipSpace();
     return List.of(Symbols.Quasiquote, readDatum());
   }
   
-  private Datum readDatum() throws SyntaxError, IOException
+  private Datum readDatum() throws IOException
   {
     markTokenStart();
 
@@ -467,7 +467,7 @@ public class Reader implements AutoCloseable
     if (lastChar == '`')
       return readQuasiQuote();
 
-    throw error("unrecognized character " + (char)lastChar);
+    throw syntaxError("unrecognized character " + (char)lastChar);
   }
    
   private static final String DefaultEncoding = "UTF-8";
