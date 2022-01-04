@@ -6,7 +6,6 @@ import java.util.function.BiPredicate;
 import java.util.ArrayList;
 import spartan.errors.NoSuchElement;
 import spartan.errors.TypeMismatch;
-import spartan.errors.IntegerOverflow;
 import spartan.runtime.VirtualMachine;
 
 public final class Vector extends Callable

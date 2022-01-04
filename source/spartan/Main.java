@@ -4,6 +4,7 @@ import spartan.data.List;
 import spartan.data.Text;
 import spartan.data.Symbol;
 import spartan.runtime.GlobalEnv;
+import spartan.errors.Error;
 
 public class Main
 {
@@ -49,8 +50,9 @@ Enter Control-D (on Linux) or Control-Z (on Windows) to exit.""";
       System.out.println(IntroMessage);
       Evaluator.startRepl(globals);
     }
-    else
+    else {
       Evaluator.loadFile(scriptPath, globals);
+    }
   }
   
   private static void parseCommandLine(String[] args)

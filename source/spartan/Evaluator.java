@@ -38,6 +38,7 @@ public final class Evaluator
       var vm = new VirtualMachine(globals);
       var compiler = new Compiler(vm);
       
+      //TODO: Better handling of errors bubbling up from loaded file
       try {
         while (true) {
           var exp = reader.read();

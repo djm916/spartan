@@ -240,6 +240,9 @@ public final class CoreLib
       if (vm.peekArg().type() != Type.Text)
         throw new TypeMismatch();
       var fileName = ((Text) vm.popArg()).value();
+      
+      //TODO: Better handling of errors bubbling up from loaded file
+      
       try {
         spartan.Evaluator.loadFile(fileName, vm.globals);
       }
