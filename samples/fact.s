@@ -24,5 +24,5 @@
         (set! n (- n 1)))
       p)))
 
-(fact-rec 6)
-(fact-loop 6)
+(print-line (text/format "6! = %" (fact-rec 6)))
+(print-line (text/format "6! = %" (fact-loop 6)))

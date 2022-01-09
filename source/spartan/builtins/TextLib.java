@@ -21,16 +21,27 @@ public final class TextLib
     return new Text(buffer.toString());
   }
   
-  public static final Primitive Concat = new Primitive(0, true) {
+  public static final Primitive Concat = new Primitive(2, true) {
     public void apply(VirtualMachine vm) {
       vm.result = concat(vm.popRestArgs());
       vm.popFrame();
     }
   };
   
-  public static final Primitive Hash = new Primitive(1, true) {
+  public static final Primitive Hash = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
+      if (vm.peekArg().type() != Type.Text)
+        throw new TypeMismatch();
       vm.result = new Int(((Text)vm.popArg()).hash());
+      vm.popFrame();
+    }
+  };
+  
+  public static final Primitive Format = new Primitive(1, true) {
+    public void apply(VirtualMachine vm) {
+      if (vm.peekArg().type() != Type.Text)
+        throw new TypeMismatch();
+      vm.result = Text.format((Text) vm.popArg(), vm.popRestArgs());
       vm.popFrame();
     }
   };

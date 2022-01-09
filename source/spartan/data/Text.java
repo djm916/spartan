@@ -1,5 +1,7 @@
 package spartan.data;
 
+import spartan.errors.Error;
+
 public final class Text extends Datum
 {
   public Text(String value)
@@ -40,6 +42,38 @@ public final class Text extends Datum
   public static int compare(Text x, Text y)
   {
     return x.value.compareTo(y.value);
+  }
+  
+  public static Text format(Text template, List args)
+  {
+    return new Text(format(template.value, args));
+  }
+  
+  private static String format(String template, List args)
+  {
+    var result = new StringBuilder();
+    int n = template.length();
+    
+    for (int i = 0; i < n; ++i) {
+      char c = template.charAt(i);
+      if (c == '%') {
+        if (i + 1 < n && template.charAt(i + 1) == '%') {
+          result.append('%');
+          ++i;
+        }
+        else {
+          if (args.empty())
+            throw new Error("too few arguments supplied in text format template");
+          result.append(args.car().repr());
+          args = args.cdr();
+        }
+      }
+      else {
+        result.append(c);
+      }
+    }
+    
+    return result.toString();
   }
   
   private final String value;

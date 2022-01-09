@@ -9,5 +9,4 @@
         (cons x (loop xs)))))
   (loop (iota 2 n)))
 
-(prime-sieve 100)
-
+(print-line (prime-sieve 100))

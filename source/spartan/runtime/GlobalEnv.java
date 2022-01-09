@@ -104,6 +104,7 @@ public final class GlobalEnv
     
     bind(Symbol.get("text/concat"), TextLib.Concat);
     bind(Symbol.get("text/hash"), TextLib.Hash);
+    bind(Symbol.get("text/format"), TextLib.Format);
   }
   
   public static GlobalEnv createBasis()
