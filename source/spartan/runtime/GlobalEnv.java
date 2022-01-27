@@ -119,7 +119,7 @@ public final class GlobalEnv
   
   public Datum lookup(Symbol s)
   {
-    return globals.getOrDefault(s, Nil.Instance);
+    return globals.getOrDefault(s, Nil.Value);
   }
   
   private GlobalEnv() {}

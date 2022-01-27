@@ -136,7 +136,7 @@ public final class ListLib
       var list = (List)vm.popArg();
       var car = vm.popArg();
       list.setCar(car);
-      vm.result = Nil.Instance;
+      vm.result = Nil.Value;
       vm.popFrame();
     }
   };
@@ -150,7 +150,7 @@ public final class ListLib
         throw new TypeMismatch();
       var cdr = (List)vm.popArg();
       list.setCdr(cdr);
-      vm.result = Nil.Instance;
+      vm.result = Nil.Value;
       vm.popFrame();
     }
   };

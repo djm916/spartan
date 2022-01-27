@@ -14,7 +14,7 @@ public final class CoreLib
   
   public static boolean truth(Datum x)
   {
-    return !(x == Bool.False || x == Nil.Instance);
+    return !(x == Bool.False || x == Nil.Value);
   }
   
   public static Bool not(Datum x)
@@ -197,7 +197,7 @@ public final class CoreLib
     public void apply(VirtualMachine vm) {
       while (!vm.args.empty())
         System.out.print(vm.popArg().repr());
-      vm.result = Nil.Instance;
+      vm.result = Nil.Value;
       vm.popFrame();
     }
   };
@@ -206,7 +206,7 @@ public final class CoreLib
     public void apply(VirtualMachine vm) {
       while (!vm.args.empty())
         System.out.println(vm.popArg().repr());
-      vm.result = Nil.Instance;
+      vm.result = Nil.Value;
       vm.popFrame();
     }
   };
@@ -230,7 +230,7 @@ public final class CoreLib
   
   public static final Primitive TypeOf = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
-      vm.result = Symbol.get(vm.popArg().type().name);
+      vm.result = Symbol.get(vm.popArg().type().getName());
       vm.popFrame();
     }
   };
@@ -250,7 +250,7 @@ public final class CoreLib
         throw new Error(ex.getMessage());
       }
       finally {
-        vm.result = Nil.Instance;
+        vm.result = Nil.Value;
         vm.popFrame();
       }
     }
@@ -308,7 +308,7 @@ public final class CoreLib
   
   public static final Primitive IsNil = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
-      vm.result = truth(vm.popArg() == Nil.Instance);
+      vm.result = truth(vm.popArg() == Nil.Value);
       vm.popFrame();
     }
   };

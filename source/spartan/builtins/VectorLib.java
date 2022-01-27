@@ -49,7 +49,7 @@ public final class VectorLib
       var index = (Int) vm.popArg();
       var value = vm.popArg();
       vector.set(index, value);
-      vm.result = Nil.Instance;
+      vm.result = Nil.Value;
       vm.popFrame();
     }
   };
@@ -60,7 +60,7 @@ public final class VectorLib
         throw new TypeMismatch();
       var vector = (Vector) vm.popArg();
       vector.append(vm.popArg());
-      vm.result = Nil.Instance;
+      vm.result = Nil.Value;
       vm.popFrame();
     }
   };

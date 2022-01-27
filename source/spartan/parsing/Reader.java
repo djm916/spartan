@@ -1,7 +1,6 @@
 package spartan.parsing;
 
 import java.io.*;
-import java.util.Map;
 import spartan.data.*;
 import spartan.errors.Error;
 
@@ -148,19 +147,24 @@ public class Reader implements AutoCloseable
     } while (isSpace(lastChar));
   }
 
-  private void markTokenStart()
+  private void setTokenPosition()
   {
     tokenStart.line = currentPos.line;
     tokenStart.column = currentPos.column;
   }
-
+  
+  private Position getTokenPosition()
+  {
+    return new Position(source, tokenStart.line, tokenStart.column);
+  }
+  
   private Error syntaxError(String message)
   {
-    flush();    
-    return new Error(message, new Position(source, tokenStart.line, tokenStart.column));
+    discardRemainingInput();    
+    return new Error(message, getTokenPosition());
   }
 
-  private void flush()
+  private void discardRemainingInput()
   {
     try {
       while (input.ready())
@@ -184,7 +188,7 @@ public class Reader implements AutoCloseable
     }
   }
   
-  private void scanFractionAndExp(StringBuilder text) throws IOException
+  private void scanFractionAndExponent(StringBuilder text) throws IOException
   {
     // add the "." character
     getChar();
@@ -216,7 +220,7 @@ public class Reader implements AutoCloseable
     scanDigits(text);
   }
     
-  private void readImag(StringBuilder text) throws IOException
+  private void scanImaginaryPart(StringBuilder text) throws IOException
   {
     // add the sign character
     getChar();
@@ -229,7 +233,7 @@ public class Reader implements AutoCloseable
     if (peekChar() != '.')
       throw syntaxError("malformed numeric literal");
     
-    scanFractionAndExp(text);
+    scanFractionAndExponent(text);
     
     if (peekChar() != 'i')
       throw syntaxError("malformed numeric literal");
@@ -237,18 +241,18 @@ public class Reader implements AutoCloseable
     getChar(); // eat "i"
   }
   
-  /* Read a number
+  /* Read a number (integer, rational, real, or complex)
+     according to the following grammar:
     
-    <number> -> <sign>? (<int> | <ratio> | <real> | <complex>)
-    <int> -> <digits>
-    <ratio> -> <digits> "/" <digits>
-    <real> -> <digits> "." <digits> <exp>?
+    <number> -> <sign>? (<integer> | <rational> | <real> | <complex>)
+    <integer> -> <digit>+
+    <rational> -> <integer> "/" <integer>
+    <real> -> <integer> "." <integer> <exponent>?
     <complex> -> <real> <sign> <real> "i"
+    <exponent> -> ("e" | "E") <sign>? <integer>
     <sign> -> "-" | "+"
     <digit> -> "0" | "1" | ... | "9"
-    <digits> -> <digit>+
-    <exp> -> "e" <sign>? <digits>
-  
+    
   */
     
   private Datum readNumber() throws IOException
@@ -273,17 +277,19 @@ public class Reader implements AutoCloseable
     }
     
     if (peekChar() == '.') {      
-      scanFractionAndExp(text);
+      scanFractionAndExponent(text);
       
       if (isSign(peekChar())) {
         var real = text.toString();
         text = new StringBuilder();
-        readImag(text);
+        scanImaginaryPart(text);
         var imag = text.toString();
         return new Complex(real, imag);
       }
+      
       return new Real(text.toString());
     }
+    
     return new Int(text.toString());
   }
 
@@ -340,10 +346,13 @@ public class Reader implements AutoCloseable
     
     // Handle keyword symbols such as nil, true, false
     var s = text.toString();
-    if (keywords.containsKey(s))
-      return keywords.get(s);
-    else
-      return Symbol.get(s);
+    if ("nil".equals(s))
+      return Nil.Value;
+    if ("true".equals(s))
+      return Bool.True;
+    if ("false".equals(s))
+      return Bool.False;
+    return Symbol.get(s);
   }
   
   private Datum readText() throws IOException
@@ -354,7 +363,7 @@ public class Reader implements AutoCloseable
       getChar();
       if (lastChar == '\\') {
         getChar();
-        text.append(readEscapedChar());
+        text.append(interpolateEscapeChar((char)lastChar));
       }
       else {
         text.append((char) lastChar);
@@ -369,22 +378,22 @@ public class Reader implements AutoCloseable
     return new Text(text.toString());
   }
 
-  private char readEscapedChar() throws IOException
+  private char interpolateEscapeChar(char ch)
   {
-    switch (lastChar) {      
-      case 'n': return '\n';
-      case 'r': return '\r';
-      case 't': return '\t';
-      case '"': return '"';
-      case '\\': return '\\';
-      default: return (char) lastChar;
-    }
+    return switch (lastChar) {      
+      case 'n' -> '\n';
+      case 'r' -> '\r';
+      case 't' -> '\t';
+      case '"' -> '"';
+      case '\\' -> '\\';
+      default -> ch;
+    };
   }
   
   private Datum readList() throws IOException
   {
     var builder = new List.Builder();
-    var position = new Position(source, tokenStart.line, tokenStart.column);
+    var position = getTokenPosition();
 
     skipSpace();
 
@@ -401,7 +410,7 @@ public class Reader implements AutoCloseable
   private Datum readVector() throws IOException
   {
     var builder = new List.Builder();
-    var position = new Position(source, tokenStart.line, tokenStart.column);
+    var position = getTokenPosition();
 
     skipSpace();
 
@@ -442,7 +451,7 @@ public class Reader implements AutoCloseable
   
   private Datum readDatum() throws IOException
   {
-    markTokenStart();
+    setTokenPosition();
 
     if (lastChar == -1)
       return null;
@@ -471,12 +480,7 @@ public class Reader implements AutoCloseable
   }
    
   private static final String DefaultEncoding = "UTF-8";
-  
-  private static final Map<String, Datum> keywords = Map.of(
-    "nil", Nil.Instance,
-    "true", Bool.True,
-    "false", Bool.False);
-  
+    
   private final PushbackReader input;
   private final String source;
   private int lastChar = -1;

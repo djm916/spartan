@@ -17,10 +17,15 @@ public enum Type
   Macro("type/macro"),
   Port("type/port");
   
-  public final String name;
+  public String getName()
+  {
+    return name;
+  }
   
   private Type(String name)
   {
     this.name = name;
   }
+  
+  private final String name;
 }

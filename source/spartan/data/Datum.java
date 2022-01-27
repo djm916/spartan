@@ -6,6 +6,6 @@ public abstract class Datum
   
   public String repr()
   {
-    return String.format("%s@0x%x", type().name, System.identityHashCode(this));
+    return String.format("#<%s @ 0x%x>", type().getName(), System.identityHashCode(this));
   }
 }

@@ -2,7 +2,7 @@ package spartan.data;
 
 public final class Nil extends Datum
 {
-  public static final Nil Instance = new Nil();
+  public static final Nil Value = new Nil();
   
   public Type type()
   {

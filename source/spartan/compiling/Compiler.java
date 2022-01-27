@@ -41,7 +41,7 @@ public class Compiler
         || exp.type() == Type.Bool
         || exp.type() == Type.Text
         || exp == List.Empty
-        || exp == Nil.Instance;
+        || exp == Nil.Value;
   }
   
   /* Compile a self-evaluating expression. */
@@ -90,9 +90,9 @@ public class Compiler
 
     return compile(init, scope, false,
                    index == null ? new StoreGlobal(symb,
-                                   new LoadConst(Nil.Instance, next))                                 
+                                   new LoadConst(Nil.Value, next))                                 
                                  : new StoreLocal(index.depth, index.offset,
-                                   new LoadConst(Nil.Instance, next)));
+                                   new LoadConst(Nil.Value, next)));
   }
 
   /* Compile a definition. A definition either binds or mutates a global variable.
@@ -117,7 +117,7 @@ public class Compiler
 
     return compile(init, scope, false,
            new StoreGlobal(symb,
-           new LoadConst(Nil.Instance,
+           new LoadConst(Nil.Value,
            next)));
   }
 
@@ -180,7 +180,7 @@ public class Compiler
 
     var pred = exp.cadr();
     var sub = exp.caddr();
-    var alt = length == 4 ? exp.cadddr() : Nil.Instance;
+    var alt = length == 4 ? exp.cadddr() : Nil.Value;
 
     return compile(pred, scope, false,
            new Branch(compile(sub, scope, tail, next),
@@ -218,7 +218,7 @@ public class Compiler
   private Inst compileCondClauses(List clauses, Scope scope, boolean tail, Inst next)
   {
     if (clauses == List.Empty)
-      return new LoadConst(Nil.Instance, next);
+      return new LoadConst(Nil.Value, next);
 
     var clause = (List) clauses.car();
     var test = clause.car();
@@ -702,7 +702,7 @@ public class Compiler
     var jump = new Jump();
     var loop = compile(pred, scope, false,
                new Branch(compileSequence(body, scope, tail, jump),
-                          new LoadConst(Nil.Instance, next)));
+                          new LoadConst(Nil.Value, next)));
     jump.setTarget(loop);
     return loop;
   }
@@ -888,7 +888,7 @@ public class Compiler
       throw malformedExp(exp);
     
     vm.globals.bind(symb, new Macro(makeProcTemplate(params, body, null)));
-    return new LoadConst(Nil.Instance, next);
+    return new LoadConst(Nil.Value, next);
   }
   
   /* Compile a macro application
