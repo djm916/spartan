@@ -318,5 +318,23 @@ public final class CoreLib
       vm.result = new Int(System.identityHashCode(vm.popArg()));
       vm.popFrame();
     }
-  };  
+  };
+
+  public static final Primitive TextToBytes = new Primitive(1, false) {
+    public void apply(VirtualMachine vm) {
+      if (vm.peekArg().type() != Type.Text)
+        throw new TypeMismatch();
+      vm.result = ((Text)vm.popArg()).encode("UTF-8");
+      vm.popFrame();
+    }
+  };
+  
+  public static final Primitive BytesToText = new Primitive(1, false) {
+    public void apply(VirtualMachine vm) {
+      if (vm.peekArg().type() != Type.ByteVector)
+        throw new TypeMismatch();
+      vm.result = ((ByteVector)vm.popArg()).decode("UTF-8");
+      vm.popFrame();
+    }
+  };
 }

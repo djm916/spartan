@@ -15,7 +15,8 @@ public enum Type
   Primitive("type/procedure"),
   Closure("type/procedure"),
   Macro("type/macro"),
-  Port("type/port");
+  Port("type/port"),
+  ByteVector("type/byte-vector");
   
   public String getName()
   {

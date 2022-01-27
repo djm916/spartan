@@ -6,6 +6,7 @@ import spartan.builtins.MathLib;
 import spartan.builtins.ListLib;
 import spartan.builtins.VectorLib;
 import spartan.builtins.TextLib;
+import spartan.builtins.PortLib;
 import java.util.Map;
 import java.util.IdentityHashMap;
 
@@ -75,7 +76,9 @@ public final class GlobalEnv
     bind(Symbol.get("symbol->text"), CoreLib.SymbolToText);
     bind(Symbol.get("int->real"), CoreLib.IntToReal);   
     bind(Symbol.get("real->int"), CoreLib.RealToInt);
-        
+    bind(Symbol.get("text->bytes"), CoreLib.TextToBytes); // encode
+    bind(Symbol.get("bytes->text"), CoreLib.BytesToText); // decode
+    
     /* List procedures */
     
     bind(Symbol.get("cons"), ListLib.Cons);
@@ -105,6 +108,12 @@ public final class GlobalEnv
     bind(Symbol.get("text/concat"), TextLib.Concat);
     bind(Symbol.get("text/hash"), TextLib.Hash);
     bind(Symbol.get("text/format"), TextLib.Format);
+    
+    /* Port procedures */
+    
+    bind(Symbol.get("port/open"), PortLib.Open);
+    bind(Symbol.get("port/read"), PortLib.Read);
+    bind(Symbol.get("port/write"), PortLib.Write);
   }
   
   public static GlobalEnv createBasis()

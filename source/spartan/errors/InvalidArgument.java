@@ -6,4 +6,9 @@ public class InvalidArgument extends Error
   {
     super("invalid argument");
   }
+  
+  public InvalidArgument(String message)
+  {
+    super("invalid argument: " + message);
+  }
 }

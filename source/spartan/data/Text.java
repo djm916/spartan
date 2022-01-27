@@ -49,6 +49,16 @@ public final class Text extends Datum
     return new Text(format(template.value, args));
   }
   
+  public ByteVector encode(String encoding)
+  {
+    try {
+      return new ByteVector(value.getBytes(encoding));
+    }
+    catch (java.io.UnsupportedEncodingException ex) {
+      throw new Error("unsupported encoding " + encoding);
+    }
+  }
+  
   private static String format(String template, List args)
   {
     var result = new StringBuilder();
