@@ -22,6 +22,17 @@ public final class PortLib
     }
   };
   
+  public static final Primitive Close = new Primitive(1, false) {
+    public void apply(VirtualMachine vm) {
+      if (vm.peekArg().type() != Type.Port)
+        throw new TypeMismatch();
+      var port = (Port) vm.popArg();      
+      port.close();
+      vm.result = Nil.Value;
+      vm.popFrame();
+    }
+  };
+  
   public static final Primitive Read = new Primitive(2, false) {
     public void apply(VirtualMachine vm) {
       if (vm.peekArg().type() != Type.Port)

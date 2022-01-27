@@ -24,6 +24,11 @@ public abstract class Port extends Datum
     throw new InvalidArgument("invalid file open flags");
   }
   
+  public void close()
+  {
+    throw new IOError("unsupported I/O operation");
+  }
+  
   public ByteVector read(int numBytes)
   {
     throw new IOError("unsupported I/O operation");

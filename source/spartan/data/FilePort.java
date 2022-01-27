@@ -38,6 +38,16 @@ public class FilePort extends Port
       throw new IOError(ex.getMessage());
     }
   }
-    
+  
+  public void close()
+  {
+    try {
+      file.close();
+    }
+    catch (IOException ex) {
+      throw new IOError(ex.getMessage());
+    }
+  }
+  
   private final RandomAccessFile file;
 }

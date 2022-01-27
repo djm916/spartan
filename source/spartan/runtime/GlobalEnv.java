@@ -112,8 +112,11 @@ public final class GlobalEnv
     /* Port procedures */
     
     bind(Symbol.get("port/open"), PortLib.Open);
+    bind(Symbol.get("port/close"), PortLib.Close);
     bind(Symbol.get("port/read"), PortLib.Read);
     bind(Symbol.get("port/write"), PortLib.Write);
+    bind(Symbol.get("port/stdin"), InputPort.Stdin);
+    bind(Symbol.get("port/stdout"), OutputPort.Stdout);
   }
   
   public static GlobalEnv createBasis()

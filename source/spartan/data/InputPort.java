@@ -32,7 +32,17 @@ public class InputPort extends Port
     }
     return new ByteVector(bytes);
   }
-    
+  
+  public void close()
+  {
+    try {
+      stream.close();
+    }
+    catch (IOException ex) {
+      throw new IOError(ex.getMessage());
+    }
+  }
+  
   private InputPort(InputStream stream)
   {
     this.stream = stream;

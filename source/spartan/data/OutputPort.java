@@ -30,7 +30,17 @@ public class OutputPort extends Port
       throw new IOError(ex.getMessage());
     }
   }
-    
+  
+  public void close()
+  {
+    try {
+      stream.close();
+    }
+    catch (IOException ex) {
+      throw new IOError(ex.getMessage());
+    }
+  }
+  
   private OutputPort(OutputStream stream)
   {
     this.stream = stream;

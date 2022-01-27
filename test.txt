@@ -1,1 +1,1 @@
-hello
+(port/write port/stdout (text->bytes "hello, world!"))
