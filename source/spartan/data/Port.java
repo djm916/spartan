@@ -29,12 +29,12 @@ public abstract class Port extends Datum
     throw new IOError("unsupported I/O operation");
   }
   
-  public ByteVector read(int numBytes)
+  public Bytes read(int numBytes)
   {
     throw new IOError("unsupported I/O operation");
   }
   
-  public void write(ByteVector bytes)
+  public void write(Bytes bytes)
   {
     throw new IOError("unsupported I/O operation");
   }

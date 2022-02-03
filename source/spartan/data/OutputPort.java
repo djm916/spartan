@@ -21,7 +21,7 @@ public class OutputPort extends Port
     }
   }
 
-  public void write(ByteVector bytes)
+  public void write(Bytes bytes)
   {
     try {
       stream.write(bytes.getBytes());

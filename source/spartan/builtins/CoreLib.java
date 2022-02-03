@@ -331,9 +331,9 @@ public final class CoreLib
   
   public static final Primitive BytesToText = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
-      if (vm.peekArg().type() != Type.ByteVector)
+      if (vm.peekArg().type() != Type.Bytes)
         throw new TypeMismatch();
-      vm.result = ((ByteVector)vm.popArg()).decode("UTF-8");
+      vm.result = ((Bytes)vm.popArg()).decode("UTF-8");
       vm.popFrame();
     }
   };

@@ -17,7 +17,7 @@ public class FilePort extends Port
     }
   }
   
-  public ByteVector read(int numBytes)
+  public Bytes read(int numBytes)
   {
     var bytes = new byte[numBytes];
     try {
@@ -26,10 +26,10 @@ public class FilePort extends Port
     catch (IOException ex) {
       throw new IOError(ex.getMessage());
     }
-    return new ByteVector(bytes);
+    return new Bytes(bytes);
   }
   
-  public void write(ByteVector bytes)
+  public void write(Bytes bytes)
   {
     try {
       file.write(bytes.getBytes());

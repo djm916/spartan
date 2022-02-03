@@ -16,7 +16,7 @@ public enum Type
   Closure("type/procedure"),
   Macro("type/macro"),
   Port("type/port"),
-  ByteVector("type/byte-vector");
+  Bytes("type/bytes");
   
   public String getName()
   {

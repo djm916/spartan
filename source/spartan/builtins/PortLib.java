@@ -54,9 +54,9 @@ public final class PortLib
         throw new TypeMismatch();
       var port = (Port) vm.popArg();
       
-      if (vm.peekArg().type() != Type.ByteVector)
+      if (vm.peekArg().type() != Type.Bytes)
         throw new TypeMismatch();
-      var bytes = (ByteVector) vm.popArg();
+      var bytes = (Bytes) vm.popArg();
       
       port.write(bytes);
       vm.result = Nil.Value;

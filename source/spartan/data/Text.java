@@ -49,10 +49,10 @@ public final class Text extends Datum
     return new Text(format(template.value, args));
   }
   
-  public ByteVector encode(String encoding)
+  public Bytes encode(String encoding)
   {
     try {
-      return new ByteVector(value.getBytes(encoding));
+      return new Bytes(value.getBytes(encoding));
     }
     catch (java.io.UnsupportedEncodingException ex) {
       throw new Error("unsupported encoding " + encoding);

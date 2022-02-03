@@ -2,19 +2,19 @@ package spartan.data;
 
 import spartan.errors.Error;
 
-public class ByteVector extends Datum
+public class Bytes extends Datum
 {
   public Type type()
   {
-    return Type.ByteVector;
+    return Type.Bytes;
   }
   
-  public ByteVector(int n)
+  public Bytes(int n)
   {
     this.bytes = new byte[n];
   }
   
-  public ByteVector(byte[] bytes)
+  public Bytes(byte[] bytes)
   {
     this.bytes = bytes;
   }
