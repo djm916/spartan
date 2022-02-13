@@ -887,7 +887,7 @@ public class Compiler
     if (!checkParamListForm(params))
       throw malformedExp(exp);
     
-    vm.globals.bind(symb, new Macro(makeProcTemplate(params, body, null)));
+    vm.globals.bindMacro(symb, new Macro(makeProcTemplate(params, body, null)));
     return new LoadConst(Nil.Value, next);
   }
   
@@ -902,7 +902,7 @@ public class Compiler
   */
   private Inst compileApplyMacro(List exp, Scope scope, boolean tail, Inst next)
   {
-    var f = (Macro) vm.globals.lookup((Symbol) exp.car());
+    var f = vm.globals.lookupMacro((Symbol) exp.car());
     var args = exp.cdr();
     
     try {
@@ -931,7 +931,7 @@ public class Compiler
   
   private boolean isMacro(Symbol symb)
   {
-    return vm.globals.lookup(symb).type() == Type.Macro;
+    return vm.globals.lookupMacro(symb) != null;
   }
   
   /* Compile a generic list expression, handling special forms and procedure/macro applications. */

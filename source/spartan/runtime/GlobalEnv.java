@@ -12,9 +12,37 @@ import java.util.IdentityHashMap;
 
 public final class GlobalEnv
 {
+  public static GlobalEnv createBasis()
   {
-    globals = new IdentityHashMap<>();
-    
+    return new GlobalEnv();
+  }
+  
+  public void bind(Symbol s, Datum x)
+  {
+    globals.put(s, x);
+  }
+  
+  public Datum lookup(Symbol s)
+  {
+    return globals.getOrDefault(s, Nil.Value);
+  }
+  
+  public void bindMacro(Symbol s, Macro x)
+  {
+    macros.put(s, x);
+  }
+  
+  public Macro lookupMacro(Symbol s)
+  {
+    return macros.get(s);
+  }
+  
+  private GlobalEnv() {}
+  
+  private final Map<Symbol, Datum> globals = new IdentityHashMap<>();
+  private final Map<Symbol, Macro> macros = new IdentityHashMap<>();
+
+  {
     /* General procedures */
     
     bind(Symbol.get("list"), CoreLib.MakeList);
@@ -118,23 +146,4 @@ public final class GlobalEnv
     bind(Symbol.get("port/stdin"), InputPort.Stdin);
     bind(Symbol.get("port/stdout"), OutputPort.Stdout);
   }
-  
-  public static GlobalEnv createBasis()
-  {
-    return new GlobalEnv();
-  }
-  
-  public void bind(Symbol s, Datum x)
-  {
-    globals.put(s, x);
-  }
-  
-  public Datum lookup(Symbol s)
-  {
-    return globals.getOrDefault(s, Nil.Value);
-  }
-  
-  private GlobalEnv() {}
-  
-  private final Map<Symbol, Datum> globals;
 }
