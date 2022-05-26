@@ -5,9 +5,6 @@ import java.util.List;
 
 public class Error extends RuntimeException
 {
-  private Position position;
-  private List<Position> backTrace;
-  
   public Error(String message)
   {
     super(message);
@@ -60,4 +57,7 @@ public class Error extends RuntimeException
     
     return message.toString();
   }
+
+  private Position position;
+  private List<Position> backTrace;
 }

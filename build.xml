@@ -1,5 +1,5 @@
 <project name="Spartan">
-  <property name="classpath" value="C:/JUnit/junit.jar"/>
+  <property name="classpath" value="C:/JUnit/junit-4.13.2.jar"/>
   
   <target name="clean">
     <delete dir="build"/>

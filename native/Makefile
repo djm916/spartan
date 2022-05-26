@@ -4,10 +4,10 @@ GCC = gcc
 LIB = libspartan.dll
 
 # Location of JDK include files
-JDK_INC = "C:\Program Files\Java\jdk-16.0.2\include"
+JDK_INC = "C:\jdk-17.0.2\include"
 
 # Location of Win32 JDK include files
-JDK_INC_WIN32 = "C:\Program Files\Java\jdk-16.0.2\include\win32"
+JDK_INC_WIN32 = "C:\jdk-17.0.2\include\win32"
 
 # Compile JNI libraries
 $(LIB): spartan_data_Complex.h spartan_data_Complex.c
