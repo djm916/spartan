@@ -1,21 +1,25 @@
 package spartan;
 
+import picocli.CommandLine;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Option;
+import picocli.CommandLine.Parameters;
+import java.util.concurrent.Callable;
 import spartan.data.List;
 import spartan.data.Text;
 import spartan.data.Symbol;
 import spartan.runtime.GlobalEnv;
 import spartan.errors.Error;
 
-public class Main
+@Command(name = "Spartan",
+         description = "The Spartan interpreter CLI",
+         mixinStandardHelpOptions = true,
+         showEndOfOptionsDelimiterInUsageHelp = true,
+         sortOptions = false)
+public class Main implements Callable<Integer>
 {
-  private static final String UsageMessage = """
-Usage: java -jar Spartan.jar [option...] [args...]
-
-Options:
-  --help            Display this message
-  --file <path>     Execute script at <path>""";
-  
-  private static final String IntroMessage = """
+  // Intro text displayed when entering the REPL
+  private static final String ReplIntro = """
 Welcome to the Spartan interactive interpreter!
 Enter expressions to be evaluated.
 Enter Control-D (on Linux) or Control-Z (on Windows) to exit.""";
@@ -24,11 +28,13 @@ Enter Control-D (on Linux) or Control-Z (on Windows) to exit.""";
   private static final String BuiltinsFilePath = "./stdlib/builtins.s";
   
   // Path to the script file to execute (or null if none given)
-  private static String scriptPath;
+  @Option(names = "--file", paramLabel = "path", description = "path to script file")
+  private String scriptPath;
   
-  // List of script arguments (as a List of Text values)
-  private static List scriptArgs = List.Empty;
-    
+  // List of arguments passed to the script (or null if none given)
+  @Parameters(paramLabel = "args", description = "script arguments")
+  private String[] scriptArgs;
+  
   static
   {
     //System.out.println("loading libspartan.dll...");
@@ -37,46 +43,39 @@ Enter Control-D (on Linux) or Control-Z (on Windows) to exit.""";
     System.loadLibrary("libspartan");
   }
   
-  public static void main(String[] args)
-  throws java.io.IOException
+  public static void main(String[] args) //throws java.io.IOException
   {
-    parseCommandLine(args);
-    
+    System.exit(new CommandLine(new Main()).execute(args));
+  }
+  
+  public Integer call() throws Exception
+  {
     var globals = GlobalEnv.createBasis();
-    globals.bind(Symbol.get("sys/args"), scriptArgs);    
+    
     Evaluator.loadFile(BuiltinsFilePath, globals);
     
     if (scriptPath == null) {
-      System.out.println(IntroMessage);
-      Evaluator.startRepl(globals);
+      System.out.println(ReplIntro);
+      Evaluator.startRepl(globals);      
     }
     else {
+      globals.bind(Symbol.get("sys/args"), makeArgsList());
       Evaluator.loadFile(scriptPath, globals);
     }
+    
+    return 0;
   }
   
-  private static void parseCommandLine(String[] args)
+  private List makeArgsList()
   {
-    for (int i = 0; i < args.length; ++i) {
-      if (args[i].equals("--help")) {
-        System.out.println(UsageMessage);
-        System.exit(0);
-      }
-      else if (args[i].equals("--file")) {
-        if (i >= args.length) {
-          System.err.println("error: --file option requires argument");
-          System.exit(-1);
-        }
-        scriptPath = args[i + 1];
-        gatherScriptArgs(args, i + 2);
-        return;
-      }
-    }
-  }
-  
-  private static void gatherScriptArgs(String[] args, int start)
-  {
-    for (int i = args.length - 1; i >= start; --i)
-      scriptArgs = List.cons(new Text(args[i]), scriptArgs);
+    if (scriptArgs == null)
+      return List.Empty;
+    
+    List args = List.Empty;
+    
+    for (int i = scriptArgs.length - 1; i >= 0; --i)
+      args = List.cons(new Text(scriptArgs[i]), args);
+    
+    return args;
   }
 }
