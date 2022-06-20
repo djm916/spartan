@@ -145,9 +145,9 @@ public class Compiler
     }
   }
   
-  /* Transform "defun" form to equivalent "def" form:
+  /* Transform "defun" special form into equivalent equivalent "def" form:
      
-     (defun symbol (params...) body...) => (def symbol (fun (params...) body...))
+     (defun symb (params...) body...) => (def symb (fun (params...) body...))
   */
   private List transformDefun(List exp)
   {
@@ -489,13 +489,11 @@ public class Compiler
     int numArgs = exp.length() - 1;
     
     // Optimization: omit frame for call in tail position
-    /* NOTE: Currently disabled -- does not interact properly with the loop special form
     
     if (tail)
       return evalArgs(exp.cdr(), scope,
              compile(exp.car(), scope, false,
              new Apply(numArgs, positionMap.get(exp))));
-    */
     
     return new PushFrame(next, positionMap.get(exp),
            evalArgs(exp.cdr(), scope,
@@ -710,68 +708,6 @@ public class Compiler
                           new LoadConst(Nil.Value, next)));
     jump.setTarget(loop);
     return loop;
-  }
-  
-  /* Compiles the "loop" special form.
-
-     Syntax: (loop ((var init)...) body...)
-
-     Compilation:
-  */
-  
-  private Inst compileLoop(List exp, Scope scope, boolean tail, Inst next)
-  {
-    if (exp.length() < 3 || exp.cadr().type() != Type.List)
-      throw malformedExp(exp);
-
-    var bindings = (List) exp.cadr();
-    var body = exp.cddr();
-
-    if (!checkBindingListForm(bindings))
-      throw malformedExp(bindings);
-
-    int numBindings = bindings.length();
-    var vars = extractFirst(bindings);
-    var inits = extractSecond(bindings);
-    var extendedScope = new Scope(scope, vars);
-    
-    recurPoints.push(new RecurPoint(numBindings));
-    
-    var loop = compileSequence(body, extendedScope, true, new PopEnv(next));
-    
-    recurPoints.pop().setJumpTargets(loop);
-    
-    return evalArgs(inits, scope,
-           new PushEnv(numBindings,
-           bindLocals(0, numBindings,
-           loop)));
-  }
-  
-  /* Compiles the "recur" special form.
-
-     Syntax: (recur arg...)
-
-     Compilation:
-  */
-  
-  private Inst compileRecur(List exp, Scope scope, boolean tail, Inst next)
-  {
-    if (!tail)
-      throw new Error("recur must occur in tail position", positionMap.get(exp));
-    
-    var args = exp.cdr();
-    var numArgs = args.length();
-    
-    if (numArgs != recurPoints.peek().numBindings())
-      throw new Error("wrong number of arguments", positionMap.get(exp));
-    
-    var jump = new Jump();
-
-    recurPoints.peek().addJump(jump);
-
-    return evalArgs(args, scope,
-           bindLocals(0, numArgs,
-           jump));    
   }
   
   // (quote x)
@@ -1038,11 +974,7 @@ public class Compiler
       if (car == Symbols.Set)
         return compileSet(exp, scope, next);
       if (car == Symbols.While)
-        return compileWhile(exp, scope, tail, next);
-      if (car == Symbols.Loop)
-        return compileLoop(exp, scope, tail, next);
-      if (car == Symbols.Recur)
-        return compileRecur(exp, scope, tail, next);
+        return compileWhile(exp, scope, tail, next);      
       if (isMacro(car))
         return compileApplyMacro(exp, scope, tail, next);
     }
@@ -1068,6 +1000,4 @@ public class Compiler
     Boolean.valueOf(System.getProperty("spartan.debug", "false"));
   private static final Logger log = 
     Logger.getLogger(Compiler.class.getName());
-  //private java.util.Deque<java.util.List<Jump>> jumps = new java.util.ArrayDeque<>();
-  private java.util.Deque<RecurPoint> recurPoints = new java.util.ArrayDeque<>();
 }
