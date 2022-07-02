@@ -890,7 +890,7 @@ public class Compiler
     if (!checkParamListForm(params))
       throw malformedExp(exp);
     
-    vm.globals.bindMacro(symb, new Macro(makeProcTemplate(params, body, null)));
+    vm.globals.bind(symb, new Macro(makeProcTemplate(params, body, null)));
     return new LoadConst(Nil.Value, next);
   }
   
@@ -898,14 +898,14 @@ public class Compiler
   
      Syntax: (f args...)
      
-       where f is a macro procedure
+       where f is a macro
      
      Applies the macro procedure to the list of (unevaluated) arguments,
      and compiles the code returned by the macro.
   */
   private Inst compileApplyMacro(List exp, Scope scope, boolean tail, Inst next)
   {
-    var f = vm.globals.lookupMacro((Symbol) exp.car());
+    var f = (Macro) vm.globals.lookup((Symbol) exp.car());
     var args = exp.cdr();
     
     try {
@@ -934,7 +934,7 @@ public class Compiler
   
   private boolean isMacro(Symbol symb)
   {
-    return vm.globals.lookupMacro(symb) != null;
+    return vm.globals.lookup(symb).type() == Type.Macro;
   }
   
   /* Compile a generic list expression, handling special forms and procedure/macro applications. */

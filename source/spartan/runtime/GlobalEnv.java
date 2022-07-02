@@ -27,21 +27,10 @@ public final class GlobalEnv
     return globals.getOrDefault(s, Nil.Value);
   }
   
-  public void bindMacro(Symbol s, Macro x)
-  {
-    macros.put(s, x);
-  }
-  
-  public Macro lookupMacro(Symbol s)
-  {
-    return macros.get(s);
-  }
-  
   private GlobalEnv() {}
   
   private final Map<Symbol, Datum> globals = new IdentityHashMap<>();
-  private final Map<Symbol, Macro> macros = new IdentityHashMap<>();
-
+  
   {
     /* General procedures */
     
