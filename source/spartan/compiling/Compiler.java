@@ -7,7 +7,6 @@ import spartan.parsing.PositionMap;
 import spartan.parsing.Position;
 import spartan.errors.Error;
 import spartan.errors.MalformedExpression;
-import spartan.errors.MultipleDefinition;
 import spartan.runtime.VirtualMachine;
 import java.util.logging.Logger;
 
@@ -65,8 +64,10 @@ public class Compiler
   {
     var index = (scope == null) ? null : scope.lookup(symb);
 
-    return (index == null) ? new LoadGlobal(symb, next)
-                           : new LoadLocal(index.depth, index.offset, next);
+    if (index == null)
+      return new LoadGlobal(symb, next);
+    else
+      return new LoadLocal(index.depth, index.offset, next);
   }
 
   /* Compile a variable assignment.
@@ -88,11 +89,14 @@ public class Compiler
     var init = exp.caddr();
     var index = (scope == null) ? null : scope.lookup(symb);
 
-    return compile(init, scope, false,
-                   index == null ? new StoreGlobal(symb,
-                                   new LoadConst(Nil.Value, next))                                 
-                                 : new StoreLocal(index.depth, index.offset,
-                                   new LoadConst(Nil.Value, next)));
+    if (index == null)
+      return compile(init, scope, false,
+                     new StoreGlobal(symb,
+                     new LoadConst(Nil.Value, next)));
+    else
+      return compile(init, scope, false,
+                     new StoreLocal(index.depth, index.offset,
+                     new LoadConst(Nil.Value, next)));
   }
 
   /* Compile a definition. A definition either binds or mutates a global variable.
