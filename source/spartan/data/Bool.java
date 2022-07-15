@@ -14,7 +14,7 @@ public final class Bool extends Datum
   {
     return value ? "true" : "false";
   }
-      
+  
   private Bool(boolean value)
   {
     this.value = value;

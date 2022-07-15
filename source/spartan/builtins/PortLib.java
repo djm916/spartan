@@ -11,11 +11,11 @@ public final class PortLib
     public void apply(VirtualMachine vm) {      
       if (vm.peekArg().type() != Type.Text)
         throw new TypeMismatch();
-      var fileName = ((Text) vm.popArg()).value();
+      var fileName = ((Text) vm.popArg()).str();
       
       if (vm.peekArg().type() != Type.Text)
         throw new TypeMismatch();
-      var flags = ((Text) vm.popArg()).value();
+      var flags = ((Text) vm.popArg()).str();
       
       vm.result = Port.open(fileName, flags);
       vm.popFrame();

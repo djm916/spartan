@@ -21,7 +21,7 @@
       (set! i (+ 1 i)))))
 
 (defun vector/filter (f xs)
-  (let* ((result [])
+  (let* ((result (vector))
          (n (length xs))
          (i 0))
     (while (< i n)

@@ -19,7 +19,7 @@ public final class Text extends Datum
     return "\"" + value + "\"";
   }
   
-  public String value()
+  public String str()
   {
     return value;
   }

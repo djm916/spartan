@@ -16,7 +16,7 @@ public final class TextLib
     for (; !args.empty(); args = args.cdr()) {
       if (args.car().type() != Type.Text)
         throw new TypeMismatch();
-      buffer.append(((Text)args.car()).value());
+      buffer.append(((Text)args.car()).str());
     }
     return new Text(buffer.toString());
   }

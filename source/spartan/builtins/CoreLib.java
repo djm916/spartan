@@ -196,7 +196,7 @@ public final class CoreLib
   public static final Primitive Print = new Primitive(1, true) {
     public void apply(VirtualMachine vm) {
       while (!vm.args.empty())
-        System.out.print(vm.popArg().repr());
+        System.out.print(vm.popArg().str());
       vm.result = Nil.Value;
       vm.popFrame();
     }
@@ -205,7 +205,8 @@ public final class CoreLib
   public static final Primitive PrintLine = new Primitive(1, true) {
     public void apply(VirtualMachine vm) {
       while (!vm.args.empty())
-        System.out.println(vm.popArg().repr());
+        System.out.print(vm.popArg().str());
+      System.out.println();
       vm.result = Nil.Value;
       vm.popFrame();
     }
@@ -239,7 +240,7 @@ public final class CoreLib
     public void apply(VirtualMachine vm) {
       if (vm.peekArg().type() != Type.Text)
         throw new TypeMismatch();
-      var fileName = ((Text) vm.popArg()).value();
+      var fileName = ((Text) vm.popArg()).str();
       
       //TODO: Better handling of errors bubbling up from loaded file
       
@@ -260,7 +261,7 @@ public final class CoreLib
     public void apply(VirtualMachine vm) {
       if (vm.peekArg().type() != Type.Symbol)
         throw new TypeMismatch();
-      vm.result = new Text(((Symbol)vm.popArg()).value());
+      vm.result = new Text(((Symbol)vm.popArg()).str());
       vm.popFrame();
     }
   };
@@ -269,7 +270,7 @@ public final class CoreLib
     public void apply(VirtualMachine vm) {
       if (vm.peekArg().type() != Type.Text)
         throw new TypeMismatch();
-      vm.result = Symbol.get(((Text)vm.popArg()).value());
+      vm.result = Symbol.get(((Text)vm.popArg()).str());
       vm.popFrame();
     }
   };

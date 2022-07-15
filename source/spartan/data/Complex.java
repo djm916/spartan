@@ -29,7 +29,7 @@ public final class Complex extends Datum
   {
     return String.format("%g%+gi", real, imag);
   }
-
+  
   public Real real()
   {
     return new Real(real);

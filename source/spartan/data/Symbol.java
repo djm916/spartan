@@ -26,12 +26,7 @@ public final class Symbol extends Datum
   {
     return id;
   }
-  
-  public String value()
-  {
-    return id;
-  }
-  
+    
   private Symbol(String id)
   {
     this.id = id;
