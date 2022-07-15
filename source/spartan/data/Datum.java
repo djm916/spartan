@@ -4,12 +4,11 @@ public abstract class Datum
 {
   public abstract Type type();
   
-  /* Returns a String representation of this object, intended to be a valid expression
-     that represents this object.
+  /* Returns a String representation of this object, intended to be machine-readable.
   
-     That is, evalutating the output of x.repr() should (if possible) result in an object
-     equivalent to x. However, this behavior is generally not possible for all objects and
-     is neither guaranteed nor required.
+     If possible, evalutating the output of x.repr() should result in an object
+     equivalent to x. However, this behavior is generally not possible for all objects
+     and is neither guaranteed nor required.
      
      The default implementation returns a string of the format
      

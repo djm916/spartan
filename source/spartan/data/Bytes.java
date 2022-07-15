@@ -18,7 +18,7 @@ public class Bytes extends Datum
   {
     this.bytes = bytes;
   }
-  
+    
   public byte[] getBytes()
   {
     return bytes;

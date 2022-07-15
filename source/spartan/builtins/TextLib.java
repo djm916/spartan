@@ -36,13 +36,4 @@ public final class TextLib
       vm.popFrame();
     }
   };
-  
-  public static final Primitive Format = new Primitive(1, true) {
-    public void apply(VirtualMachine vm) {
-      if (vm.peekArg().type() != Type.Text)
-        throw new TypeMismatch();
-      vm.result = Text.format((Text) vm.popArg(), vm.popRestArgs());
-      vm.popFrame();
-    }
-  };
 }

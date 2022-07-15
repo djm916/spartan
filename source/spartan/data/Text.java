@@ -44,11 +44,6 @@ public final class Text extends Datum
     return x.value.compareTo(y.value);
   }
   
-  public static Text format(Text template, List args)
-  {
-    return new Text(format(template.value, args));
-  }
-  
   public Bytes encode(String encoding)
   {
     try {
@@ -58,33 +53,6 @@ public final class Text extends Datum
       throw new Error("unsupported encoding " + encoding);
     }
   }
-  
-  private static String format(String template, List args)
-  {
-    var result = new StringBuilder();
-    int n = template.length();
     
-    for (int i = 0; i < n; ++i) {
-      char c = template.charAt(i);
-      if (c == '%') {
-        if (i + 1 < n && template.charAt(i + 1) == '%') {
-          result.append('%');
-          ++i;
-        }
-        else {
-          if (args.empty())
-            throw new Error("too few arguments supplied in text format template");
-          result.append(args.car().repr());
-          args = args.cdr();
-        }
-      }
-      else {
-        result.append(c);
-      }
-    }
-    
-    return result.toString();
-  }
-  
   private final String value;
 }
