@@ -53,6 +53,7 @@ public final class GlobalEnv
     bind(Symbol.get("not"), CoreLib.Not);    
     bind(Symbol.get("gensym"), CoreLib.GenSym);
     bind(Symbol.get("identity-hash"), CoreLib.IdentityHash);
+    bind(Symbol.get("error"), CoreLib.Error);
     
     /* Type predicates */
     

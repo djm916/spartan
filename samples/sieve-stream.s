@@ -10,6 +10,13 @@
       (let ((next from))
         (set! from (+ 1 from))
         next))))
-        
-(stream/reduce cons () (stream/new (int-range 1 10)))
 
+(defun prime-sieve (n)
+  (defun loop (xs)
+    (if (stream/empty? xs) ()
+      (let* ((x (stream/car xs))
+             (xs (stream/filter (not-factor? x) xs)))
+        (cons x (loop xs)))))
+  (loop (stream/new (int-range 2 n))))
+
+(print-line (prime-sieve 100))

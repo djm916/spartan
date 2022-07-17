@@ -22,7 +22,7 @@ public final class Real extends Datum
   
   public String repr()
   {
-    return String.format("%g", value);
+    return Double.toString(value);
   }
   
   public double value()

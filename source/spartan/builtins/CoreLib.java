@@ -338,4 +338,13 @@ public final class CoreLib
       vm.popFrame();
     }
   };
+  
+  public static final Primitive Error = new Primitive(1, false) {
+    public void apply(VirtualMachine vm) {
+      if (vm.peekArg().type() != Type.Text)
+        throw new TypeMismatch();
+      var errMsg = (Text) vm.popArg();
+      throw new Error(errMsg.str());
+    }
+  };
 }
