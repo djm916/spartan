@@ -5,7 +5,14 @@ import spartan.errors.TypeMismatch;
 import spartan.runtime.VirtualMachine;
 
 public final class VectorLib
-{
+{  
+  public static final Primitive MakeVector = new Primitive(0, true) {
+    public void apply(VirtualMachine vm) {
+      vm.result = Vector.fromList(vm.popRestArgs());
+      vm.popFrame();
+    }
+  };
+  
   public static final Primitive New = new Primitive(2, false) {
     public void apply(VirtualMachine vm) {
       if (vm.peekArg().type() != Type.Int)

@@ -310,6 +310,34 @@ public final class MathLib
     }
   };
   
+  public static final Complex makeComplex(Datum x, Datum y)
+  {
+    if (x.type() != Type.Real || y.type() != Type.Real)
+      throw new TypeMismatch();
+    return new Complex((Real)x, (Real)y);
+  }
+  
+  public static final Primitive MakeComplex = new Primitive(2, false) {
+    public void apply(VirtualMachine vm) {
+      vm.result = makeComplex(vm.popArg(), vm.popArg());
+      vm.popFrame();
+    }
+  };
+  
+  public static final Ratio makeRatio(Datum x, Datum y)
+  {
+    if (x.type() != Type.Int || y.type() != Type.Int)
+      throw new TypeMismatch();
+    return new Ratio((Int)x, (Int)y);
+  }
+  
+  public static final Primitive MakeRatio = new Primitive(2, false) {
+    public void apply(VirtualMachine vm) {
+      vm.result = makeRatio(vm.popArg(), vm.popArg());
+      vm.popFrame();
+    }
+  };
+  
   public static final Primitive Numerator = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
       if (vm.peekArg().type() != Type.Ratio)

@@ -34,10 +34,6 @@ public final class GlobalEnv
   {
     /* General procedures */
     
-    bind(Symbol.get("list"), CoreLib.MakeList);
-    bind(Symbol.get("vector"), CoreLib.MakeVector);
-    bind(Symbol.get("complex"), CoreLib.MakeComplex);
-    bind(Symbol.get("ratio"), CoreLib.MakeRatio);
     bind(Symbol.get("apply"), CoreLib.Apply);    
     bind(Symbol.get("print"), CoreLib.Print);
     bind(Symbol.get("print-line"), CoreLib.PrintLine);
@@ -53,15 +49,13 @@ public final class GlobalEnv
     bind(Symbol.get("not"), CoreLib.Not);    
     bind(Symbol.get("gensym"), CoreLib.GenSym);
     bind(Symbol.get("identity-hash"), CoreLib.IdentityHash);
-    bind(Symbol.get("error"), CoreLib.Error);
-    
-    /* Type predicates */
-    
+    bind(Symbol.get("error"), CoreLib.Error);    
     bind(Symbol.get("nil?"), CoreLib.IsNil);
-    bind(Symbol.get("empty?"), CoreLib.IsEmptyList);
     
     /* Math procedures */
     
+    bind(Symbol.get("complex"), MathLib.MakeComplex);
+    bind(Symbol.get("ratio"), MathLib.MakeRatio);
     bind(Symbol.get("E"), Real.E);
     bind(Symbol.get("PI"), Real.PI);
     bind(Symbol.get("I"), Complex.I);
@@ -98,7 +92,9 @@ public final class GlobalEnv
     bind(Symbol.get("bytes->text"), CoreLib.BytesToText); // decode
     
     /* List procedures */
-    
+
+    bind(Symbol.get("empty?"), ListLib.IsEmpty);
+    bind(Symbol.get("list"), ListLib.MakeList);
     bind(Symbol.get("cons"), ListLib.Cons);
     bind(Symbol.get("car"), ListLib.Car);
     bind(Symbol.get("caar"), ListLib.Caar);
@@ -115,6 +111,7 @@ public final class GlobalEnv
     
     /* Vector procedures */
     
+    bind(Symbol.get("vector"), VectorLib.MakeVector);
     bind(Symbol.get("vector/new"), VectorLib.New);
     bind(Symbol.get("vector/copy"), VectorLib.Copy);
     bind(Symbol.get("vector/get"), VectorLib.Get);

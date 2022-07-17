@@ -7,23 +7,10 @@ import spartan.data.List;
 import spartan.data.Nil;
 import spartan.runtime.VirtualMachine;
 import spartan.errors.TypeMismatch;
+import spartan.errors.InvalidArgument;
 
 public final class ListLib
 {
-  public static Datum car(Datum x)
-  {
-    if (x.type() != Type.List || x == List.Empty)
-      throw new TypeMismatch();
-    return ((List)x).car();
-  }
-  
-  public static List cdr(Datum x)
-  {
-    if (x.type() != Type.List || x == List.Empty)
-      throw new TypeMismatch();
-    return ((List)x).cdr();
-  }
-  
   public static List cons(Datum first, Datum rest)
   {
     if (rest.type() != Type.List)
@@ -31,6 +18,42 @@ public final class ListLib
     return List.cons(first, (List)rest);
   }
 
+  public static Datum car(Datum x)
+  {
+    if (x.type() != Type.List)
+      throw new TypeMismatch();
+    if (x == List.Empty)
+      throw new InvalidArgument();
+    return ((List)x).car();
+  }
+  
+  public static List cdr(Datum x)
+  {
+    if (x.type() != Type.List)
+      throw new TypeMismatch();
+    if (x == List.Empty)
+      throw new InvalidArgument();
+    return ((List)x).cdr();
+  }
+
+  public static void setCar(Datum x, Datum y)
+  {
+    if (x.type() != Type.List)
+      throw new TypeMismatch();
+    if (x == List.Empty)
+      throw new InvalidArgument();
+    ((List)x).setCar(y);
+  }
+  
+  public static void setCdr(Datum x, Datum y)
+  {
+    if (x.type() != Type.List || y.type() != Type.List)
+      throw new TypeMismatch();
+    if (x == List.Empty)
+      throw new InvalidArgument();
+    ((List)x).setCdr((List)y);
+  }
+  
   public static List append(Datum x, Datum y)
   {
     if (x.type() != Type.List)
@@ -49,6 +72,20 @@ public final class ListLib
     }
     return builder.build();
   }
+  
+  public static final Primitive MakeList = new Primitive(0, true) {
+    public void apply(VirtualMachine vm) {
+      vm.result = vm.popRestArgs();
+      vm.popFrame();
+    }
+  };
+  
+  public static final Primitive IsEmpty = new Primitive(1, false) {
+    public void apply(VirtualMachine vm) {
+      vm.result = CoreLib.truth(vm.popArg() == List.Empty);
+      vm.popFrame();
+    }
+  };
   
   public static final Primitive Car = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
@@ -131,11 +168,7 @@ public final class ListLib
   
   public static final Primitive SetCar = new Primitive(2, false) {
     public void apply(VirtualMachine vm) {
-      if (vm.peekArg().type() != Type.List)
-        throw new TypeMismatch();
-      var list = (List)vm.popArg();
-      var car = vm.popArg();
-      list.setCar(car);
+      setCar(vm.popArg(), vm.popArg());
       vm.result = Nil.Value;
       vm.popFrame();
     }
@@ -143,13 +176,7 @@ public final class ListLib
   
   public static final Primitive SetCdr = new Primitive(2, false) {
     public void apply(VirtualMachine vm) {
-      if (vm.peekArg().type() != Type.List)
-        throw new TypeMismatch();
-      var list = (List)vm.popArg();
-      if (vm.peekArg().type() != Type.List)
-        throw new TypeMismatch();
-      var cdr = (List)vm.popArg();
-      list.setCdr(cdr);
+      setCdr(vm.popArg(), vm.popArg());
       vm.result = Nil.Value;
       vm.popFrame();
     }

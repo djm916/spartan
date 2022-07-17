@@ -140,49 +140,7 @@ public final class CoreLib
       vm.popFrame();
     }
   };
-  
-  public static final Primitive MakeList = new Primitive(0, true) {
-    public void apply(VirtualMachine vm) {
-      vm.result = vm.popRestArgs();
-      vm.popFrame();
-    }
-  };
-  
-  public static final Primitive MakeVector = new Primitive(0, true) {
-    public void apply(VirtualMachine vm) {
-      vm.result = Vector.fromList(vm.popRestArgs());
-      vm.popFrame();
-    }
-  };
-  
-  public static final Complex makeComplex(Datum x, Datum y)
-  {
-    if (x.type() != Type.Real || y.type() != Type.Real)
-      throw new TypeMismatch();
-    return new Complex((Real)x, (Real)y);
-  }
-  
-  public static final Primitive MakeComplex = new Primitive(2, false) {
-    public void apply(VirtualMachine vm) {
-      vm.result = makeComplex(vm.popArg(), vm.popArg());
-      vm.popFrame();
-    }
-  };
-  
-  public static final Ratio makeRatio(Datum x, Datum y)
-  {
-    if (x.type() != Type.Int || y.type() != Type.Int)
-      throw new TypeMismatch();
-    return new Ratio((Int)x, (Int)y);
-  }
-  
-  public static final Primitive MakeRatio = new Primitive(2, false) {
-    public void apply(VirtualMachine vm) {
-      vm.result = makeRatio(vm.popArg(), vm.popArg());
-      vm.popFrame();
-    }
-  };
-  
+    
   public static final Primitive Apply = new Primitive(2, false) {
     public void apply(VirtualMachine vm) {
       vm.result = vm.popArg();
@@ -296,13 +254,6 @@ public final class CoreLib
   public static final Primitive GenSym = new Primitive(0, false) {
     public void apply(VirtualMachine vm) {
       vm.result = Symbol.gen();
-      vm.popFrame();
-    }
-  };
-  
-  public static final Primitive IsEmptyList = new Primitive(1, false) {
-    public void apply(VirtualMachine vm) {
-      vm.result = truth(vm.popArg() == List.Empty);
       vm.popFrame();
     }
   };
