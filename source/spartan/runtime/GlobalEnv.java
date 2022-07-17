@@ -68,6 +68,8 @@ public final class GlobalEnv
     bind(Symbol.get("abs"), MathLib.Abs);
     bind(Symbol.get("floor"), MathLib.Floor);
     bind(Symbol.get("ceiling"), MathLib.Ceiling);
+    bind(Symbol.get("round"), MathLib.Round);
+    //bind(Symbol.get("trunc"), MathLib.Trunc);
     bind(Symbol.get("exp"), MathLib.Exp);
     bind(Symbol.get("log"), MathLib.Log);
     bind(Symbol.get("sin"), MathLib.Sin);

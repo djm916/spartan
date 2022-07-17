@@ -34,7 +34,7 @@ public final class Ratio extends Datum
   
   public Ratio(Int numer, Int denom)
   {
-    this(numer.value(), denom.value());
+    this(numer.value, denom.value);
   }
   
   public Type type()

@@ -50,3 +50,5 @@
 (def v (create-random-vector 50))
 
 (vector/sort! < v)
+
+(print-line v)

@@ -52,4 +52,4 @@
 
 (defun sqrt (x) (newton (fun (y) (- x (* y y))) 1.0))
 
-(print-line (sqrt 2.0))
+(print-line "The square root of 2 is " (sqrt 2.0))

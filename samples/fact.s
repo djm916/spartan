@@ -26,3 +26,4 @@
 
 (print-line "6! = " (fact-rec 6))
 (print-line "6! = " (fact-loop 6))
+(print-line "6! = " (fact-loop 17))

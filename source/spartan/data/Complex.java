@@ -12,7 +12,7 @@ public final class Complex extends Datum
   
   public Complex(Real x, Real y)  
   {
-    this(x.value(), y.value());
+    this(x.doubleValue(), y.doubleValue());
   }
   
   public Complex(String real, String imag)

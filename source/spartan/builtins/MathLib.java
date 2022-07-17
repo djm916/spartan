@@ -141,12 +141,11 @@ public final class MathLib
     }
   };
   
-  public static Datum floor(Datum x)
+  public static Real floor(Datum x)
   {
-    switch (x.type()) {
-      case Real: return ((Real)x).floor();
-    }
-    throw new TypeMismatch();
+    if (x.type() != Type.Real)
+      throw new TypeMismatch();
+    return ((Real)x).floor();
   }
   
   public static final Primitive Floor = new Primitive(1, false) {
@@ -156,17 +155,30 @@ public final class MathLib
     }
   };
   
-  public static Datum ceiling(Datum x)
+  public static Real ceiling(Datum x)
   {
-    switch (x.type()) {
-      case Real: return ((Real)x).ceil();
-    }
-    throw new TypeMismatch();
+    if (x.type() != Type.Real)
+      throw new TypeMismatch();
+    return ((Real)x).ceiling();
   }
   
   public static final Primitive Ceiling = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
       vm.result = ceiling(vm.popArg());
+      vm.popFrame();
+    }
+  };
+  
+  public static Int round(Datum x)
+  {
+    if (x.type() != Type.Real)
+      throw new TypeMismatch();
+    return ((Real)x).round();
+  }
+  
+  public static final Primitive Round = new Primitive(1, false) {
+    public void apply(VirtualMachine vm) {
+      vm.result = round(vm.popArg());
       vm.popFrame();
     }
   };

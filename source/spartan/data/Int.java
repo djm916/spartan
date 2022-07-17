@@ -30,12 +30,7 @@ public final class Int extends Datum
   {
     return value.toString();
   }
-  
-  public BigInteger value()
-  {
-    return value;
-  }
-  
+    
   public int intValue()
   {
     try {
@@ -116,5 +111,5 @@ public final class Int extends Datum
     return x.value.compareTo(y.value);
   }
   
-  private final BigInteger value;
+  final BigInteger value;
 }

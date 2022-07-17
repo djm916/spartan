@@ -20,19 +20,19 @@ public final class Real extends Datum
     return Type.Real;
   }
   
-  public String repr()
+  public long longValue()
   {
-    return Double.toString(value);
+    return (long)value;
   }
   
-  public double value()
+  public double doubleValue()
   {
     return value;
   }
   
-  public long longValue()
+  public String repr()
   {
-    return (long) value;
+    return Double.toString(value);
   }
   
   public Real neg()
@@ -50,11 +50,16 @@ public final class Real extends Datum
     return new Real(Math.floor(value));
   }
   
-  public Real ceil()
+  public Real ceiling()
   {
     return new Real(Math.ceil(value));
   }
-    
+  
+  public Int round()
+  {
+    return new Int(Math.round(value));
+  }
+  
   public static Real exp(Real base, Real pow)
   {
     return new Real(Math.pow(base.value, pow.value));

@@ -58,11 +58,11 @@ public final class Vector extends Callable
     return Type.Vector;
   }
   
-  public String repr()
+  public String str()
   {
     return elems.stream()
       .map(e -> e.repr())
-      .collect(Collectors.joining(" ", "[", "]"));
+      .collect(Collectors.joining(", ", "[", "]"));
   }
   
   public int length()
