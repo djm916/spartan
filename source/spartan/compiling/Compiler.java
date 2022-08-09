@@ -505,6 +505,31 @@ public class Compiler
            new Apply(numArgs, positionMap.get(exp)))));
   }
 
+  /* Compile the call/cc form.
+  
+     Syntax: (call/cc exp), where exp is required to be a "fun" expression.
+     
+     Compilation:
+     
+     push-frame
+     make-cont
+     push-arg
+     <<exp>>     
+     apply
+  */
+  
+  private Inst compileCallCC(List exp, Scope scope, boolean tail, Inst next)
+  {
+    if (exp.length() != 2)
+      throw malformedExp(exp);
+    
+    return new PushFrame(next, positionMap.get(exp),
+           new MakeCont(
+           new PushArg(
+           compile(exp.cadr(), scope, tail,           
+           new Apply(1, positionMap.get(exp.cadr()))))));
+  }
+  
   /* Compiles a sequence of expressions.
      The sequence elements are evaluated in order.
      The value of the last element is the value of the sequence.
@@ -979,6 +1004,8 @@ public class Compiler
         return compileSet(exp, scope, next);
       if (car == Symbols.While)
         return compileWhile(exp, scope, tail, next);      
+      if (car == Symbols.CallCC)
+        return compileCallCC(exp, scope, tail, next);
       if (isMacro(car))
         return compileApplyMacro(exp, scope, tail, next);
     }

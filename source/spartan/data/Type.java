@@ -15,6 +15,7 @@ public enum Type
   Primitive("type/procedure"),
   Closure("type/procedure"),
   Macro("type/macro"),
+  Continuation("type/continuation"),
   Port("type/port"),
   Bytes("type/bytes");
   

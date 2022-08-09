@@ -25,6 +25,7 @@ public final class Symbols
   public static final Symbol Ampersand = Symbol.get("&");
   public static final Symbol Cons = Symbol.get("cons");
   public static final Symbol Concat = Symbol.get("concat");
+  public static final Symbol CallCC = Symbol.get("call/cc");
   
   private Symbols() {}
 }
