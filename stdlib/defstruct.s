@@ -56,7 +56,7 @@
   (fun (field index)
     `(defun ,(generate-getter-name name field)
             (self)
-            (vector/get self ,index))))
+            (vector/ref self ,index))))
 
 (defun generate-getters (name fields)
   (map-with-index (generate-getter name) 1 fields))
@@ -74,7 +74,7 @@
   `(defun ,(generate-predicate-name name) (self)
      (and (= (type self) 'type/vector)
           (> (length self) 0)
-          (= (vector/get self 0) ',name))))
+          (= (vector/ref self 0) ',name))))
 
 (defmacro defstruct (name fields)  
   `(do

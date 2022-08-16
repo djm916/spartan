@@ -34,14 +34,14 @@ public final class Text extends Datum
     return value.hashCode();
   }
   
-  public static boolean eq(Text x, Text y)
+  public boolean eq(Text other)
   {
-    return x.value.equals(y.value);
+    return this.value.equals(other.value);
   }
   
-  public static int compare(Text x, Text y)
+  public int compare(Text other)
   {
-    return x.value.compareTo(y.value);
+    return this.value.compareTo(other.value);
   }
   
   public Bytes encode(String encoding)

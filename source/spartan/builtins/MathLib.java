@@ -11,10 +11,10 @@ public final class MathLib
   {
     if (x.type() == y.type()) {
       switch (x.type()) {
-        case Int:     return Int.add((Int)x, (Int)y);
-        case Ratio:   return Ratio.add((Ratio)x, (Ratio)y);
-        case Real:    return Real.add((Real)x, (Real)y);
-        case Complex: return Complex.add((Complex)x, (Complex)y);
+        case Int:     return ((Int)x).add((Int)y);
+        case Ratio:   return ((Ratio)x).add((Ratio)y);
+        case Real:    return ((Real)x).add((Real)y);
+        case Complex: return ((Complex)x).add((Complex)y);
       }
     }
     throw new TypeMismatch();
@@ -33,10 +33,10 @@ public final class MathLib
   {
     if (x.type() == y.type()) {
       switch (x.type()) {
-        case Int:     return Int.sub((Int)x, (Int)y);
-        case Ratio:   return Ratio.sub((Ratio)x, (Ratio)y);
-        case Real:    return Real.sub((Real)x, (Real)y);
-        case Complex: return Complex.sub((Complex)x, (Complex)y);
+        case Int:     return ((Int)x).sub((Int)y);
+        case Ratio:   return ((Ratio)x).sub((Ratio)y);
+        case Real:    return ((Real)x).sub((Real)y);
+        case Complex: return ((Complex)x).sub((Complex)y);
       }
     }
     throw new TypeMismatch();
@@ -53,10 +53,10 @@ public final class MathLib
   {
     if (x.type() == y.type()) {
       switch (x.type()) {
-        case Int:     return Int.mul((Int)x, (Int)y);
-        case Ratio:   return Ratio.mul((Ratio)x, (Ratio)y);
-        case Real:    return Real.mul((Real)x, (Real)y);
-        case Complex: return Complex.mul((Complex)x, (Complex)y);
+        case Int:     return ((Int)x).mul((Int)y);
+        case Ratio:   return ((Ratio)x).mul((Ratio)y);
+        case Real:    return ((Real)x).mul((Real)y);
+        case Complex: return ((Complex)x).mul((Complex)y);
       }
     }
     throw new TypeMismatch();
@@ -75,10 +75,10 @@ public final class MathLib
   {
     if (x.type() == y.type()) {
       switch (x.type()) {
-        case Int:     return Int.div((Int)x, (Int)y);
-        case Ratio:   return Ratio.div((Ratio)x, (Ratio)y);
-        case Real:    return Real.div((Real)x, (Real)y);
-        case Complex: return Complex.div((Complex)x, (Complex)y);
+        case Int:     return ((Int)x).div((Int)y);
+        case Ratio:   return ((Ratio)x).div((Ratio)y);
+        case Real:    return ((Real)x).div((Real)y);
+        case Complex: return ((Complex)x).div((Complex)y);
       }
     }
     throw new TypeMismatch();
@@ -94,7 +94,7 @@ public final class MathLib
   public static Datum mod(Datum x, Datum y)
   {
     if (x.type() == Type.Int && y.type() == Type.Int)
-      return Int.mod((Int)x, (Int)y);
+      return ((Int)x).mod((Int)y);
     throw new TypeMismatch();
   }
   
@@ -187,8 +187,8 @@ public final class MathLib
   {
     if (x.type() == y.type()) {
       switch (x.type()) {
-        case Real: return Real.exp((Real)x, (Real)y);
-        case Complex: return Complex.exp((Complex)x, (Complex)y);
+        case Real: return ((Real)x).exp((Real)y);
+        case Complex: return ((Complex)x).exp((Complex)y);
       }
     }
     throw new TypeMismatch();
@@ -205,8 +205,8 @@ public final class MathLib
   {
     if (x.type() == y.type()) {
       switch (x.type()) {
-        case Real: return Real.log((Real)x, (Real)y);
-        case Complex: return Complex.log((Complex)x, (Complex)y);
+        case Real: return ((Real)x).log((Real)y);
+        case Complex: return ((Complex)x).log((Complex)y);
       }
     }
     throw new TypeMismatch();

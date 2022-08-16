@@ -66,49 +66,49 @@ public final class Int extends Datum
     return new Int(value.abs());
   }
   
-  public static Int add(Int x, Int y)
+  public Int add(Int other)
   {
-    return new Int(x.value.add(y.value));
+    return new Int(this.value.add(other.value));
   }
   
-  public static Int sub(Int x, Int y)
+  public Int sub(Int other)
   {
-    return new Int(x.value.subtract(y.value));
+    return new Int(this.value.subtract(other.value));
   }
   
-  public static Int mul(Int x, Int y)
+  public Int mul(Int other)
   {
-    return new Int(x.value.multiply(y.value));
+    return new Int(this.value.multiply(other.value));
   }
   
-  public static Int div(Int x, Int y)
+  public Int div(Int other)
   {
     try {
-      return new Int(x.value.divide(y.value));
+      return new Int(this.value.divide(other.value));
     }
     catch (ArithmeticException ex) {
       throw new DivisionByZero();
     }
   }
   
-  public static Int mod(Int x, Int y)
+  public Int mod(Int other)
   {
     try {
-      return new Int(x.value.remainder(y.value));
+      return new Int(this.value.remainder(other.value));
     }
     catch (ArithmeticException ex) {
       throw new DivisionByZero();
     }
   }
   
-  public static boolean eq(Int x, Int y)
+  public boolean eq(Int other)
   {
-    return x.value.equals(y.value);
+    return this.value.equals(other.value);
   }
   
-  public static int compare(Int x, Int y)
+  public int compare(Int other)
   {
-    return x.value.compareTo(y.value);
+    return this.value.compareTo(other.value);
   }
   
   final BigInteger value;

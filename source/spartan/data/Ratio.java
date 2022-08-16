@@ -79,12 +79,12 @@ public final class Ratio extends Datum
            = (a*d)/(b*d) + (c*b)/(d*b)
            = ((a*d)+(c*b))/(b*d)
   */
-  public static Ratio add(Ratio x, Ratio y)
+  public Ratio add(Ratio other)
   {
-    var a = x.numer;
-    var b = x.denom;
-    var c = y.numer;
-    var d = y.denom;
+    var a = this.numer;
+    var b = this.denom;
+    var c = other.numer;
+    var d = other.denom;
     return new Ratio(a.multiply(d).add(c.multiply(b)), b.multiply(d));
   }
   
@@ -94,12 +94,12 @@ public final class Ratio extends Datum
      
      x - y = x + (-y)
   */
-  public static Ratio sub(Ratio x, Ratio y)
+  public Ratio sub(Ratio other)
   {
-    var a = x.numer;
-    var b = x.denom;
-    var c = y.numer;
-    var d = y.denom;
+    var a = this.numer;
+    var b = this.denom;
+    var c = other.numer;
+    var d = other.denom;
     return new Ratio(a.multiply(d).subtract(c.multiply(b)), b.multiply(d));
   }
   
@@ -109,12 +109,12 @@ public final class Ratio extends Datum
      
      x * y = (a/b)*(c/d) = (a*c)/(b*d)
   */
-  public static Ratio mul(Ratio x, Ratio y)
+  public Ratio mul(Ratio other)
   {
-    var a = x.numer;
-    var b = x.denom;
-    var c = y.numer;
-    var d = y.denom;
+    var a = this.numer;
+    var b = this.denom;
+    var c = other.numer;
+    var d = other.denom;
     return new Ratio(a.multiply(c), b.multiply(d));
   }
   
@@ -124,12 +124,12 @@ public final class Ratio extends Datum
      
      x / y = x * (1/y) = (a*d)/(b*c)
   */
-  public static Ratio div(Ratio x, Ratio y)
+  public Ratio div(Ratio other)
   {
-    var a = x.numer;
-    var b = x.denom;
-    var c = y.numer;
-    var d = y.denom;
+    var a = this.numer;
+    var b = this.denom;
+    var c = other.numer;
+    var d = other.denom;
     return new Ratio(a.multiply(d), b.multiply(c));
   }
   
@@ -139,12 +139,12 @@ public final class Ratio extends Datum
      
      x = y iff b = d ^ a = c
   */
-  public static boolean eq(Ratio x, Ratio y)
+  public boolean eq(Ratio other)
   {
-    var a = x.numer;
-    var b = x.denom;
-    var c = y.numer;
-    var d = y.denom;
+    var a = this.numer;
+    var b = this.denom;
+    var c = other.numer;
+    var d = other.denom;
     return b.equals(d) && a.equals(c);
   }
   
@@ -156,12 +156,12 @@ public final class Ratio extends Datum
            => (a*d)/(b*d) < (b*c)/(b*d)
            => (a*d) < (b*c)
   */
-  public static int compare(Ratio x, Ratio y)
+  public int compare(Ratio other)
   {
-    var a = x.numer;
-    var b = x.denom;
-    var c = y.numer;
-    var d = y.denom;
+    var a = this.numer;
+    var b = this.denom;
+    var c = other.numer;
+    var d = other.denom;
     
     // Same denominator, compare by numerator
     if (b.equals(d))

@@ -9,4 +9,4 @@
         (cons x (loop xs)))))
   (loop (iota 2 n)))
 
-(print-line (prime-sieve 100))
+(print-line "The prime numbers up to 100 are " (prime-sieve 100))

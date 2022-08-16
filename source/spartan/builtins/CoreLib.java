@@ -4,6 +4,7 @@ import spartan.data.*;
 import spartan.errors.Error;
 import spartan.errors.TypeMismatch;
 import spartan.runtime.VirtualMachine;
+import spartan.Config;
 
 public final class CoreLib
 {
@@ -33,12 +34,12 @@ public final class CoreLib
   {
     if (x.type() == y.type())
       switch (x.type()) {
-        case Int   : return Int.eq((Int)x, (Int)y);
-        case Ratio : return Ratio.eq((Ratio)x, (Ratio)y);
-        case Real  : return Real.eq((Real)x, (Real)y);
-        case Text  : return Text.eq((Text)x, (Text)y);
-        case Vector: return Vector.eq((Vector)x, (Vector)y, CoreLib::eq);
-        case List  : return List.eq((List)x, (List)y, CoreLib::eq);
+        case Int   : return ((Int)x).eq((Int)y);
+        case Ratio : return ((Ratio)x).eq((Ratio)y);
+        case Real  : return ((Real)x).eq((Real)y);
+        case Text  : return ((Text)x).eq((Text)y);
+        case Vector: return ((Vector)x).eq((Vector)y, CoreLib::eq);
+        case List  : return ((List)x).eq((List)y, CoreLib::eq);
         case Bool  :
         case Symbol:
         case Nil   : return x == y;
@@ -65,10 +66,10 @@ public final class CoreLib
   {
     if (x.type() == y.type())
       switch (x.type()) {
-        case Int  : return Int.compare((Int)x,  (Int)y)  < 0;
-        case Ratio: return Ratio.compare((Ratio)x, (Ratio)y) < 0;
-        case Real : return Real.compare((Real)x, (Real)y) < 0;
-        case Text : return Text.compare((Text)x, (Text)y) < 0;
+        case Int   : return ((Int)x).compare((Int)y) < 0;
+        case Ratio : return ((Ratio)x).compare((Ratio)y) < 0;
+        case Real  : return ((Real)x).compare((Real)y) < 0;
+        case Text  : return ((Text)x).compare((Text)y) < 0;
       }
     
     throw new TypeMismatch();
@@ -85,10 +86,10 @@ public final class CoreLib
   {
     if (x.type() == y.type())
       switch (x.type()) {
-        case Int  : return Int.compare ((Int)x,  (Int)y)  <= 0;
-        case Ratio: return Ratio.compare((Ratio)x, (Ratio)y) <= 0;
-        case Real : return Real.compare((Real)x, (Real)y) <= 0;
-        case Text : return Text.compare((Text)x, (Text)y) <= 0;
+        case Int   : return ((Int)x).compare((Int)y) <= 0;
+        case Ratio : return ((Ratio)x).compare((Ratio)y) <= 0;
+        case Real  : return ((Real)x).compare((Real)y) <= 0;
+        case Text  : return ((Text)x).compare((Text)y) <= 0;
       }
     
     throw new TypeMismatch();
@@ -105,10 +106,10 @@ public final class CoreLib
   {
     if (x.type() == y.type())
       switch (x.type()) {
-        case Int  : return Int.compare ((Int)x,  (Int)y)  > 0;
-        case Ratio: return Ratio.compare((Ratio)x, (Ratio)y) > 0;
-        case Real : return Real.compare((Real)x, (Real)y) > 0;
-        case Text : return Text.compare((Text)x, (Text)y) > 0;
+        case Int   : return ((Int)x).compare((Int)y) > 0;
+        case Ratio : return ((Ratio)x).compare((Ratio)y) > 0;
+        case Real  : return ((Real)x).compare((Real)y) > 0;
+        case Text  : return ((Text)x).compare((Text)y) > 0;
       }
     
     throw new TypeMismatch();
@@ -125,10 +126,10 @@ public final class CoreLib
   {
     if (x.type() == y.type())
       switch (x.type()) {
-        case Int  : return Int.compare ((Int)x,  (Int)y)  >= 0;
-        case Ratio: return Ratio.compare((Ratio)x, (Ratio)y) >= 0;
-        case Real : return Real.compare((Real)x, (Real)y) >= 0;
-        case Text : return Text.compare((Text)x, (Text)y) >= 0;
+        case Int   : return ((Int)x).compare((Int)y) >= 0;
+        case Ratio : return ((Ratio)x).compare((Ratio)y) >= 0;
+        case Real  : return ((Real)x).compare((Real)y) >= 0;
+        case Text  : return ((Text)x).compare((Text)y) >= 0;
       }
     
     throw new TypeMismatch();
@@ -276,7 +277,8 @@ public final class CoreLib
     public void apply(VirtualMachine vm) {
       if (vm.peekArg().type() != Type.Text)
         throw new TypeMismatch();
-      vm.result = ((Text)vm.popArg()).encode("UTF-8");
+      var text = (Text) vm.popArg();
+      vm.result = text.encode(Config.DefaultEncoding);
       vm.popFrame();
     }
   };
@@ -285,7 +287,8 @@ public final class CoreLib
     public void apply(VirtualMachine vm) {
       if (vm.peekArg().type() != Type.Bytes)
         throw new TypeMismatch();
-      vm.result = ((Bytes)vm.popArg()).decode("UTF-8");
+      var bytes = (Bytes) vm.popArg();
+      vm.result = bytes.decode(Config.DefaultEncoding);
       vm.popFrame();
     }
   };
@@ -296,6 +299,16 @@ public final class CoreLib
         throw new TypeMismatch();
       var errMsg = (Text) vm.popArg();
       throw new Error(errMsg.str());
+    }
+  };
+  
+  public static final Primitive FormatDecimal = new Primitive(1, false) {
+    public void apply(VirtualMachine vm) {
+      if (vm.peekArg().type() != Type.Real)
+        throw new TypeMismatch();
+      var number = (Real) vm.popArg();
+      vm.result = new Text(Config.NumberFormatter.format(number.doubleValue()));
+      vm.popFrame();
     }
   };
 }

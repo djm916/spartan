@@ -10,7 +10,7 @@
         (map (fun (subset) (cons (car set) subset)) excludes)
         excludes))))
 
-(power-set ())
-(power-set '(1))
-(power-set '(1 2))
-(power-set '(1 2 3))
+(print-line "(power-set ()) = " (power-set ()))
+(print-line "(power-set '(1)) = " (power-set '(1)))
+(print-line "(power-set '(1 2)) = " (power-set '(1 2)))
+(print-line "(power-set '(1 2 3)) = " (power-set '(1 2 3)))

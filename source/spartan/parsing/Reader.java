@@ -50,7 +50,7 @@ public class Reader implements AutoCloseable
   private Reader(String source, InputStream input) throws UnsupportedEncodingException
   {
     this.source = source;
-    this.input = new PushbackReader(new BufferedReader(new InputStreamReader(input, DefaultEncoding)));
+    this.input = new PushbackReader(new BufferedReader(new InputStreamReader(input, spartan.Config.DefaultEncoding)));
   }
 
   private static boolean isDigit(int ch)
@@ -459,8 +459,6 @@ public class Reader implements AutoCloseable
 
     throw syntaxError("unrecognized character " + (char)lastChar);
   }
-   
-  private static final String DefaultEncoding = "UTF-8";
     
   private final PushbackReader input;
   private final String source;

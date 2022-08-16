@@ -51,6 +51,7 @@ public final class GlobalEnv
     bind(Symbol.get("identity-hash"), CoreLib.IdentityHash);
     bind(Symbol.get("error"), CoreLib.Error);    
     bind(Symbol.get("nil?"), CoreLib.IsNil);
+    bind(Symbol.get("format-decimal"), CoreLib.FormatDecimal);
     
     /* Math procedures */
     
@@ -116,7 +117,7 @@ public final class GlobalEnv
     bind(Symbol.get("vector"), VectorLib.MakeVector);
     bind(Symbol.get("vector/new"), VectorLib.New);
     bind(Symbol.get("vector/copy"), VectorLib.Copy);
-    bind(Symbol.get("vector/get"), VectorLib.Get);
+    bind(Symbol.get("vector/ref"), VectorLib.Ref);
     bind(Symbol.get("vector/set!"), VectorLib.Set);
     bind(Symbol.get("vector/append!"), VectorLib.Append);
        

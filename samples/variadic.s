@@ -10,5 +10,5 @@
   (if (empty? xs) init
     (apply sum (cons (+ init (car xs)) (cdr xs)))))
 
-(sum 0)
-(sum 1 2 3 4 5)
+(print-line "(sum 0) = " (sum 0))
+(print-line "(sum 1 2 3 4 5) = " (sum 1 2 3 4 5))

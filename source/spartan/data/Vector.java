@@ -105,14 +105,14 @@ public final class Vector extends Callable
     elems.add(x);
   }
   
-  public static boolean eq(Vector x, Vector y, BiPredicate<Datum, Datum> eq)
+  public boolean eq(Vector other, BiPredicate<Datum, Datum> eq)
   {
-    if (x.length() != y.length())
+    if (this.length() != other.length())
       return false;
     
-    var n = x.length();
+    var n = this.elems.size();
     for (int i = 0; i < n; ++i)
-      if (!eq.test(x.elems.get(i), y.elems.get(i)))
+      if (!eq.test(this.elems.get(i), other.elems.get(i)))
         return false;
     
     return true;

@@ -71,33 +71,48 @@ public final class Complex extends Datum
     return new Real(Math.hypot(real, imag));
   }
   
-  public static boolean eq(Complex x, Complex y)
+  public boolean eq(Complex that)
   {
-    return x.real == y.real && x.imag == y.imag;
+    return this.real == that.real && this.imag == that.imag;
   }
   
-  public static Complex add(Complex x, Complex y)
+  public Complex add(Complex that)
   {
-    return new Complex(x.real + y.real, x.imag + y.imag);
+    return new Complex(this.real + that.real, this.imag + that.imag);
   }
   
-  public static Complex sub(Complex x, Complex y)
-  {
-    return new Complex(x.real - y.real, x.imag - y.imag);
+  public Complex sub(Complex that)
+  { 
+    return new Complex(this.real - that.real, this.imag - that.imag);
   }
   
-  public static Complex mul(Complex x, Complex y)
-  {
-    return new Complex(x.real * y.real - x.imag * y.imag,
-                       x.real * y.imag + x.imag * y.real);
-  }
-  
-  /* Perform a complex division by multiplying by the conjugate
-     of the divisor.
+  /* Complex number multiplication procedure.
      
      let x = a + b*i, y = c + d*i
      
-     conj(y) = c - d*i
+     xy = (a + b*i)(c + d*i)
+        = a*c + a*d*i + b*c*i + b*d*i^2
+        = a*c + a*d*i + b*c*i - b*d
+        = (a*c - b*d) + (a*d + b*c)*i
+  */
+  
+  public Complex mul(Complex that)
+  {
+    var a = this.real;
+    var b = this.imag;
+    var c = that.real;
+    var d = that.imag;
+    
+    return new Complex(a * c - b * d, a * d + b * c);
+  }
+  
+  /* Complex number division procedure.
+  
+     Multiplying by the conjugate of the divisor.
+     
+     let x = a + bi, y = c + di
+     
+     conj(y) = c - di
      y * conj(y) = (c + d*i) * (c - d*i) = c^2 + d^2
      x / y = (x / y) * (conj(y) / conj(y))
            = (x * conj(y)) / (c^2 + d^2)
@@ -105,21 +120,25 @@ public final class Complex extends Datum
            = ((a*c + b*d) + (b*c - a*d)*i) / (c^2 + d^2)
            = ((a*c + b*d) / (c^2 + d^2)) + ((b*c - a*d) / (c^2 + d^2))*i
   */
-  public static Complex div(Complex x, Complex y)
+  public Complex div(Complex that)
   {
-    double scale = 1.0 / (y.real * y.real + y.imag * y.imag);
-    return new Complex(scale * (x.real * y.real + x.imag * y.imag),
-                       scale * (x.imag * y.real - x.real * y.imag));
+    var a = this.real;
+    var b = this.imag;
+    var c = that.real;
+    var d = that.imag;
+    
+    double s = 1.0 / (c * c + d * d);
+    return new Complex(s * (a * c + b * d), s * (b * c - a * d));
   }
   
-  public static Complex log(Complex x, Complex y)
+  public Complex log(Complex that)
   {
-    return clog(x.real, x.imag, y.real, y.imag);
+    return clog(this.real, this.imag, that.real, that.imag);
   }
   
-  public static Complex exp(Complex x, Complex y)
+  public Complex exp(Complex that)
   {
-    return cexp(x.real, x.imag, y.real, y.imag);
+    return cexp(this.real, this.imag, that.real, that.imag);
   }
   
   public Complex sin()

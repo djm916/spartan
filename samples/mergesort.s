@@ -13,7 +13,7 @@
     (let ((i from) (j mid) (k from))
       
       (while (and (< i mid) (< j to))
-        (if (f (source i) (source j))
+        (if (f (vector/ref source i) (vector/ref source j))
           (do (vector/set! temp k (source i))
               (set! i (+ 1 i)))
           (do (vector/set! temp k (source j))
@@ -21,18 +21,18 @@
         (set! k (+ 1 k)))
       
       (while (< i mid)
-        (vector/set! temp k (source i))
+        (vector/set! temp k (vector/ref source i))
         (set! i (+ 1 i))
         (set! k (+ 1 k)))
       
       (while (< j to)
-        (vector/set! temp k (source j))
+        (vector/set! temp k (vector/ref source j))
         (set! j (+ 1 j))
         (set! k (+ 1 k)))
       
       (set! k from)
       (while (< k to)
-        (vector/set! source k (temp k))
+        (vector/set! source k (vector/ref temp k))
         (set! k (+ 1 k)))))
       
    (let* ((n (length v))

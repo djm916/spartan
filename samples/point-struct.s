@@ -3,9 +3,8 @@
 
 (defstruct point (x y))
 (def p (make-point 1 2))
-(point-x p)
-(point-y p)
+(print-line "p is a point? " (point? p))
+(print-line "p = (" (point-x p) ", " (point-y p) ")")
 (set-point-x! p 2)
 (set-point-y! p 1)
-(point? p)
-
+(print-line "p = (" (point-x p) ", " (point-y p) ")")

@@ -111,13 +111,9 @@ public final class List extends Datum
     return at(this, index);
   }
   
-  public static boolean eq(List x, List y, BiPredicate<Datum, Datum> eq)
+  public boolean eq(List other, BiPredicate<Datum, Datum> eq)
   {
-    for (; x != Empty && y != Empty; x = x.rest, y = y.rest)
-      if (!eq.test(x.first, y.first))
-        return false;
-    
-    return x == Empty && y == Empty;
+    return eq(this, other, eq);
   }
   
   public List concat(List that)
@@ -196,6 +192,15 @@ public final class List extends Datum
         result.add(self.first);
     }
     return result.build();
+  }
+  
+  private static boolean eq(List x, List y, BiPredicate<Datum, Datum> eq)
+  {
+    for (; x != Empty && y != Empty; x = x.rest, y = y.rest)
+      if (!eq.test(x.first, y.first))
+        return false;
+    
+    return x == Empty && y == Empty;
   }
   
   private static String repr(List self)

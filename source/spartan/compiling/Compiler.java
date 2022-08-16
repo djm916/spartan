@@ -273,9 +273,9 @@ public class Compiler
     var inits = extractSecond(bindings);
     var extendedScope = new Scope(scope, vars);
 
-    return evalArgs(inits, scope,
+    return compilePushArgs(inits, scope,
            new PushEnv(numBindings,
-           bindLocals(0, numBindings,
+           compileBindLocals(0, numBindings,
            compileSequence(body, extendedScope, tail,
            new PopEnv(next)))));
   }
@@ -322,7 +322,7 @@ public class Compiler
 
   private Inst compileRecursiveBindings(List inits, int offset, Scope scope, Inst next)
   {
-    if (inits.empty())
+    if (inits == List.Empty)
       return next;
 
     return compile(inits.car(), scope, false,
@@ -364,14 +364,14 @@ public class Compiler
     var extendedScope = new Scope(scope, extractFirst(bindings));
 
     return new PushEnv(numBindings,
-           compileBindingsSequential(bindings, 0, new Scope(scope),
+           compileSequentialBindings(bindings, 0, new Scope(scope),
            compileSequence(body, extendedScope, tail,
            new PopEnv(next))));
   }
 
-  private Inst compileBindingsSequential(List bindings, int offset, Scope scope, Inst next)
+  private Inst compileSequentialBindings(List bindings, int offset, Scope scope, Inst next)
   {
-    if (bindings.empty())
+    if (bindings == List.Empty)
       return next;
 
     var binding = (List) bindings.car();
@@ -380,7 +380,7 @@ public class Compiler
 
     return compile(init, scope, false,
                    new StoreLocal(0, offset,
-                   compileBindingsSequential(bindings.cdr(), offset + 1, scope.bind(symb),
+                   compileSequentialBindings(bindings.cdr(), offset + 1, scope.bind(symb),
                    next)));
   }
 
@@ -403,13 +403,11 @@ public class Compiler
 
   private boolean checkParamListForm(List params)
   {
-    for (; !params.empty(); params = params.cdr()) {
+    for (; params != List.Empty; params = params.cdr()) {
       if (params.car().type() != Type.Symbol)
         return false;
-      // The symbol & appearing in the parameters must
-      // occur immediately before the final parameter
-      if (params.car() == Symbols.Ampersand &&
-           (params.cdr().empty() || !params.cddr().empty()))
+      // The symbol & appearing in the parameter list must occur immediately before the final parameter
+      if (params.car() == Symbols.Ampersand && (params.cdr() == List.Empty || params.cddr() != List.Empty))
         return false;
     }
     return true;
@@ -432,7 +430,7 @@ public class Compiler
   {
     var result = new List.Builder();
 
-    for (; !pairs.empty(); pairs = pairs.cdr())
+    for (; pairs != List.Empty; pairs = pairs.cdr())
       result.add(((List)pairs.car()).car());
 
     return result.build();
@@ -446,30 +444,40 @@ public class Compiler
   {
     var result = new List.Builder();
 
-    for (; !pairs.empty(); pairs = pairs.cdr())
+    for (; pairs != List.Empty; pairs = pairs.cdr())
       result.add(((List)pairs.car()).cadr());
 
     return result.build();
   }
 
-  private Inst evalArgs(List args, Scope scope, Inst next)
+  private Inst compilePushArgs(List args, Scope scope, Inst next)
   {
     if (args == List.Empty)
       return next;
 
-    return evalArgs(args.cdr(), scope,
+    return compilePushArgs(args.cdr(), scope,
            compile(args.car(), scope, false,
            new PushArg(next)));
   }
 
-  private Inst bindLocals(int offset, int numBindings, Inst next)
+  private Inst compilePushArgsUneval(List args, Inst next)
+  {
+    if (args == List.Empty)
+      return next;
+
+    return compilePushArgsUneval(args.cdr(),
+           new LoadConst(args.car(),
+           new PushArg(next)));
+  }
+  
+  private Inst compileBindLocals(int offset, int numBindings, Inst next)
   {
     if (offset >= numBindings)
       return next;
 
     return new PopArg(
            new StoreLocal(0, offset,
-           bindLocals(offset + 1, numBindings, next)));
+           compileBindLocals(offset + 1, numBindings, next)));
   }
   
   /* Compiles a procedure application.
@@ -478,7 +486,7 @@ public class Compiler
 
      Compilation:
 
-     push-frame
+     push-frame  // omit if in tail position
      <<argN>>
      push-arg
      ...
@@ -495,12 +503,12 @@ public class Compiler
     // Optimization: omit frame for call in tail position
     
     if (tail)
-      return evalArgs(exp.cdr(), scope,
+      return compilePushArgs(exp.cdr(), scope,
              compile(exp.car(), scope, false,
              new Apply(numArgs, positionMap.get(exp))));
     
     return new PushFrame(next, positionMap.get(exp),
-           evalArgs(exp.cdr(), scope,
+           compilePushArgs(exp.cdr(), scope,
            compile(exp.car(), scope, false,
            new Apply(numArgs, positionMap.get(exp)))));
   }
@@ -511,7 +519,7 @@ public class Compiler
      
      Compilation:
      
-     push-frame
+     push-frame  // omit if in tail position
      make-cont
      push-arg
      <<exp>>     
@@ -522,6 +530,14 @@ public class Compiler
   {
     if (exp.length() != 2)
       throw malformedExp(exp);
+    
+    // Optimization: omit frame for call in tail position
+    
+    if (tail)
+      return new MakeCont(
+             new PushArg(
+             compile(exp.cadr(), scope, tail,           
+             new Apply(1, positionMap.get(exp.cadr())))));
     
     return new PushFrame(next, positionMap.get(exp),
            new MakeCont(
@@ -550,7 +566,7 @@ public class Compiler
     if (exp == List.Empty)
       return next;
 
-    return compile(exp.car(), scope, (tail && exp.cdr().empty()),
+    return compile(exp.car(), scope, (tail && exp.cdr() == List.Empty),
            compileSequence(exp.cdr(), scope, tail, next));
   }
 
@@ -613,7 +629,7 @@ public class Compiler
   {
     List.Builder bindings = new List.Builder();
 
-    while (!body.empty() && isInnerDef(body.car())) {
+    while (body != List.Empty && isInnerDef(body.car())) {
       var exp = (List) body.car();
       if (exp.car() == Symbols.Defun)
         exp = transformDefun(exp);
@@ -658,10 +674,10 @@ public class Compiler
 
   private Inst compileDisjunction(List exp, Scope scope, boolean tail, Inst next)
   {
-    if (exp.empty())
+    if (exp == List.Empty)
       return next;
 
-    return compile(exp.car(), scope, tail && exp.cdr().empty(),
+    return compile(exp.car(), scope, (tail && exp.cdr() == List.Empty),
            new Branch(next,
                       compileDisjunction(exp.cdr(), scope, tail, next)));
   }
@@ -689,10 +705,10 @@ public class Compiler
 
   private Inst compileConjuction(List exp, Scope scope, boolean tail, Inst next)
   {
-    if (exp.empty())
+    if (exp == List.Empty)
       return next;
 
-    return compile(exp.car(), scope, tail && exp.cdr().empty(),
+    return compile(exp.car(), scope, (tail && exp.cdr() == List.Empty),
            new Branch(compileConjuction(exp.cdr(), scope, tail, next),
                       next));
   }
@@ -862,7 +878,7 @@ public class Compiler
   private Inst compileFixedProc(List body, Scope scope, int requiredArgs)
   {
     return new PushEnv(requiredArgs,
-           bindLocals(0, requiredArgs,
+           compileBindLocals(0, requiredArgs,
            compileBody(body, scope,
            new PopFrame())));
   }
@@ -889,7 +905,7 @@ public class Compiler
   private Inst compileVariadicProc(List body, Scope scope, int requiredArgs)
   {
     return new PushEnv(requiredArgs + 1,
-               bindLocals(0, requiredArgs,
+               compileBindLocals(0, requiredArgs,
                new PopRestArgs(
                new StoreLocal(0, requiredArgs,
                compileBody(body, scope,
@@ -939,10 +955,10 @@ public class Compiler
     
     try {
       var xform = applyMacroTransform(f, args);
-       
+      
       if (debug)
         log.info(() -> String.format("macro transform: %s => %s", exp.repr(), xform.repr()));
-    
+      
       return compile(xform, scope, tail, next);
     }
     catch (Error err) {
@@ -953,10 +969,14 @@ public class Compiler
   
   private Datum applyMacroTransform(Macro f, List args)
   {
-    vm.pushFrame(null, null);
-    vm.result = f;
-    vm.args = args;
-    return vm.eval(new Apply(args.length(), null));
+    return vm.eval(new PushFrame(null, null,
+                   compilePushArgsUneval(args,
+                   new LoadConst(f,
+                   new Apply(args.length(), null)))));
+    //vm.pushFrame(null, null);
+    //vm.result = f;
+    //vm.args = args;
+    //return vm.eval(new Apply(args.length(), null));
   }
   
   /* Determine if a symbol is bound to a macro in the global environment. */

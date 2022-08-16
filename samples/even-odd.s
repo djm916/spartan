@@ -22,3 +22,6 @@
               false
               (even? (- n 1))))))
    (even? 11))
+
+(print-line "100 is even? " (even 100))
+(print-line "101 is even? " (even 101))
