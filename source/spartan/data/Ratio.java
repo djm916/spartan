@@ -57,6 +57,21 @@ public final class Ratio extends Datum
     return new Int(denom);
   }
   
+  public double doubleValue()
+  {
+    return numer.doubleValue() / denom.doubleValue();
+  }
+  
+  public Real toReal()
+  {
+    return new Real(doubleValue());
+  }
+  
+  public Complex toComplex()
+  {
+    return new Complex(doubleValue(), 0.0);
+  }
+  
   /* Take the absolute value of a fraction */
   
   public Ratio abs()
@@ -170,6 +185,6 @@ public final class Ratio extends Datum
     return a.multiply(d).compareTo(b.multiply(c));
   }
     
-  private BigInteger numer;
-  private BigInteger denom;
+  private final BigInteger numer;
+  private final BigInteger denom;
 }

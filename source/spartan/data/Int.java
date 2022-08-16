@@ -56,6 +56,21 @@ public final class Int extends Datum
     return value.doubleValue();
   }
   
+  public Ratio toRatio()
+  {
+    return new Ratio(value, BigInteger.ONE);
+  }
+  
+  public Real toReal()
+  {
+    return new Real(doubleValue());
+  }
+  
+  public Complex toComplex()
+  {
+    return new Complex(doubleValue(), 0.0);
+  }
+  
   public Int neg()
   {
     return new Int(value.negate());

@@ -30,6 +30,11 @@ public final class Real extends Datum
     return value;
   }
   
+  public Complex toComplex()
+  {
+    return new Complex(value, 0.0);
+  }
+  
   public String repr()
   {
     return Double.toString(value);
