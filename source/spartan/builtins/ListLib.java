@@ -79,14 +79,7 @@ public final class ListLib
       vm.popFrame();
     }
   };
-  
-  public static final Primitive IsEmpty = new Primitive(1, false) {
-    public void apply(VirtualMachine vm) {
-      vm.result = CoreLib.truth(vm.popArg() == List.Empty);
-      vm.popFrame();
-    }
-  };
-  
+    
   public static final Primitive Car = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
       vm.result = car(vm.popArg());

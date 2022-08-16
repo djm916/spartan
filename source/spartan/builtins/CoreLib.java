@@ -258,14 +258,7 @@ public final class CoreLib
       vm.popFrame();
     }
   };
-  
-  public static final Primitive IsNil = new Primitive(1, false) {
-    public void apply(VirtualMachine vm) {
-      vm.result = truth(vm.popArg() == Nil.Value);
-      vm.popFrame();
-    }
-  };
-  
+    
   public static final Primitive IdentityHash = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
       vm.result = new Int(System.identityHashCode(vm.popArg()));
@@ -311,4 +304,85 @@ public final class CoreLib
       vm.popFrame();
     }
   };
+  
+  public static final Primitive IsNil = new Primitive(1, false) {
+    public void apply(VirtualMachine vm) {
+      vm.result = truth(vm.popArg() == Nil.Value);
+      vm.popFrame();
+    }
+  };
+  
+  public static final Primitive IsEmptyList = new Primitive(1, false) {
+    public void apply(VirtualMachine vm) {
+      vm.result = truth(vm.popArg() == List.Empty);
+      vm.popFrame();
+    }
+  };
+  
+  public static final Primitive IsBoolean = new Primitive(1, false) {
+    public void apply(VirtualMachine vm) {
+      vm.result = truth(vm.popArg().type() == Type.Bool);
+      vm.popFrame();
+    }
+  };
+  
+  public static final Primitive IsInteger = new Primitive(1, false) {
+    public void apply(VirtualMachine vm) {
+      vm.result = truth(vm.popArg().type() == Type.Int);
+      vm.popFrame();
+    }
+  };
+  
+  public static final Primitive IsRational = new Primitive(1, false) {
+    public void apply(VirtualMachine vm) {
+      vm.result = truth(vm.popArg().type() == Type.Ratio);
+      vm.popFrame();
+    }
+  };
+  
+  public static final Primitive IsReal = new Primitive(1, false) {
+    public void apply(VirtualMachine vm) {
+      vm.result = truth(vm.popArg().type() == Type.Real);
+      vm.popFrame();
+    }
+  };
+  
+  public static final Primitive IsComplex = new Primitive(1, false) {
+    public void apply(VirtualMachine vm) {
+      vm.result = truth(vm.popArg().type() == Type.Complex);
+      vm.popFrame();
+    }
+  };
+  
+  public static final Primitive IsNumber = new Primitive(1, false) {
+    public void apply(VirtualMachine vm) {
+      var t = vm.popArg().type();
+      vm.result = truth(t == Type.Int || t == Type.Ratio || t == Type.Real || t == Type.Complex);
+      vm.popFrame();
+    }
+  };
+  
+  public static final Primitive IsSymbol = new Primitive(1, false) {
+    public void apply(VirtualMachine vm) {
+      vm.result = truth(vm.popArg().type() == Type.Symbol);
+      vm.popFrame();
+    }
+  };
+  
+  public static final Primitive IsText = new Primitive(1, false) {
+    public void apply(VirtualMachine vm) {
+      vm.result = truth(vm.popArg().type() == Type.Text);
+      vm.popFrame();
+    }
+  };
+  
+  public static final Primitive IsCallable = new Primitive(1, false) {
+    public void apply(VirtualMachine vm) {
+      var t = vm.popArg().type();
+      vm.result = truth(t == Type.Primitive || t == Type.Closure || t == Type.Macro || t == Type.Continuation);
+      vm.popFrame();
+    }
+  };
+  
+  
 }

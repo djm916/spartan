@@ -50,8 +50,24 @@ public final class GlobalEnv
     bind(Symbol.get("gensym"), CoreLib.GenSym);
     bind(Symbol.get("identity-hash"), CoreLib.IdentityHash);
     bind(Symbol.get("error"), CoreLib.Error);    
-    bind(Symbol.get("nil?"), CoreLib.IsNil);
     bind(Symbol.get("format-decimal"), CoreLib.FormatDecimal);
+    
+    /* Type predicates */
+    
+    bind(Symbol.get("nil?"), CoreLib.IsNil);
+    bind(Symbol.get("empty?"), CoreLib.IsEmptyList);
+    bind(Symbol.get("boolean?"), CoreLib.IsBoolean);
+    bind(Symbol.get("integer?"), CoreLib.IsInteger);
+    bind(Symbol.get("rational?"), CoreLib.IsRational);
+    bind(Symbol.get("real?"), CoreLib.IsReal);
+    bind(Symbol.get("complex?"), CoreLib.IsComplex);
+    bind(Symbol.get("number?"), CoreLib.IsNumber);
+    bind(Symbol.get("symbol?"), CoreLib.IsSymbol);
+    bind(Symbol.get("text?"), CoreLib.IsText);
+    //bind(Symbol.get("bytes?"), CoreLib.IsBytes);
+    //bind(Symbol.get("list?"), CoreLib.IsList);
+    //bind(Symbol.get("vector?"), CoreLib.IsVector);
+    bind(Symbol.get("callable?"), CoreLib.IsCallable);
     
     /* Math procedures */
     
@@ -96,7 +112,6 @@ public final class GlobalEnv
     
     /* List procedures */
 
-    bind(Symbol.get("empty?"), ListLib.IsEmpty);
     bind(Symbol.get("list"), ListLib.MakeList);
     bind(Symbol.get("cons"), ListLib.Cons);
     bind(Symbol.get("car"), ListLib.Car);

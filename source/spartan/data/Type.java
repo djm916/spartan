@@ -3,21 +3,21 @@ package spartan.data;
 public enum Type
 {
   Nil("type/nil"),
-  Bool("type/bool"),
-  Int("type/int"),
-  Ratio("type/ratio"),
+  Bool("type/boolean"),
+  Int("type/integer"),
+  Ratio("type/rational"),
   Real("type/real"),
   Complex("type/complex"),
   Symbol("type/symbol"),
   Text("type/text"),
+  Bytes("type/bytes"),
   List("type/list"),
   Vector("type/vector"),
   Primitive("type/procedure"),
   Closure("type/procedure"),
   Macro("type/macro"),
   Continuation("type/continuation"),
-  Port("type/port"),
-  Bytes("type/bytes");
+  Port("type/port");
   
   public String getName()
   {
