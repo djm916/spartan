@@ -298,10 +298,10 @@ public final class MathLib
   public static Datum neg(Datum x)
   {
     switch (x.type()) {
-      case Int: return ((Int)x).neg();
-      case BigInt: return ((BigInt)x).neg();
-      case Ratio: return ((Ratio)x).neg();
-      case Real: return ((Real)x).neg();
+      case Int:     return ((Int)x).neg();
+      case BigInt:  return ((BigInt)x).neg();
+      case Ratio:   return ((Ratio)x).neg();
+      case Real:    return ((Real)x).neg();
       case Complex: return ((Complex)x).neg();
     }
     throw new TypeMismatch();
@@ -317,10 +317,10 @@ public final class MathLib
   public static Datum abs(Datum x)
   {
     switch (x.type()) {
-      case Int: return ((Int)x).abs();
-      case BigInt: return ((BigInt)x).abs();
-      case Ratio: return ((Ratio)x).abs();
-      case Real: return ((Real)x).abs();
+      case Int:     return ((Int)x).abs();
+      case BigInt:  return ((BigInt)x).abs();
+      case Ratio:   return ((Ratio)x).abs();
+      case Real:    return ((Real)x).abs();
       case Complex: return ((Complex)x).abs();
     }
     throw new TypeMismatch();
@@ -333,11 +333,16 @@ public final class MathLib
     }
   };
   
-  public static Real floor(Datum x)
+  public static Datum floor(Datum x)
   {
-    if (x.type() != Type.Real)
-      throw new TypeMismatch();
-    return ((Real)x).floor();
+    switch (x.type()) {
+      case Int:    
+      case BigInt: return x;
+      case Ratio:  return ((Ratio)x).toReal().floor();
+      case Real:   return ((Real)x).floor();
+    }
+     
+    throw new TypeMismatch();
   }
   
   public static final Primitive Floor = new Primitive(1, false) {
@@ -347,11 +352,16 @@ public final class MathLib
     }
   };
   
-  public static Real ceiling(Datum x)
+  public static Datum ceiling(Datum x)
   {
-    if (x.type() != Type.Real)
-      throw new TypeMismatch();
-    return ((Real)x).ceiling();
+    switch (x.type()) {
+      case Int:    
+      case BigInt: return x;
+      case Ratio:  return ((Ratio)x).toReal().ceiling();
+      case Real:   return ((Real)x).ceiling();
+    }
+    
+    throw new TypeMismatch();
   }
   
   public static final Primitive Ceiling = new Primitive(1, false) {
@@ -361,11 +371,16 @@ public final class MathLib
     }
   };
   
-  public static Int round(Datum x)
+  public static Datum round(Datum x)
   {
-    if (x.type() != Type.Real)
-      throw new TypeMismatch();
-    return ((Real)x).round();
+    switch (x.type()) {
+      case Int:    
+      case BigInt: return x;
+      case Ratio:  return ((Ratio)x).toReal().round();
+      case Real:   return ((Real)x).round();
+    }
+     
+    throw new TypeMismatch();
   }
   
   public static final Primitive Round = new Primitive(1, false) {
@@ -377,10 +392,56 @@ public final class MathLib
   
   public static Datum exp(Datum x, Datum y)
   {
-    if (x.type() == y.type()) {
-      switch (x.type()) {
-        case Real: return ((Real)x).exp((Real)y);
-        case Complex: return ((Complex)x).exp((Complex)y);
+    switch (x.type()) {
+      case Int: {
+        switch (y.type()) {
+          case Int:     return ((Int)x).toReal().exp(((Int)y).toReal());
+          case BigInt:  return ((Int)x).toReal().exp(((BigInt)y).toReal());
+          case Ratio:   return ((Int)x).toReal().exp(((Ratio)y).toReal());
+          case Real:    return ((Int)x).toReal().exp((Real)y);
+          case Complex: return ((Int)x).toComplex().exp((Complex)y);
+        }
+        break;
+      }
+      case BigInt: {
+        switch (y.type()) {
+          case Int:     return ((BigInt)x).toReal().exp(((Int)y).toReal());
+          case BigInt:  return ((BigInt)x).toReal().exp(((BigInt)y).toReal());
+          case Ratio:   return ((BigInt)x).toReal().exp(((Ratio)y).toReal());
+          case Real:    return ((BigInt)x).toReal().exp((Real)y);
+          case Complex: return ((BigInt)x).toComplex().exp((Complex)y);
+        }
+        break;
+      }
+      case Ratio: {
+        switch (y.type()) {
+          case Int:     return ((Ratio)x).toReal().exp(((Int)y).toReal());
+          case BigInt:  return ((BigInt)x).toReal().exp(((BigInt)y).toReal());
+          case Ratio:   return ((Ratio)x).toReal().exp(((Ratio)y).toReal());
+          case Real:    return ((Ratio)x).toReal().exp((Real)y);
+          case Complex: return ((Ratio)x).toComplex().exp((Complex)y);
+        }
+        break;
+      }
+      case Real: {
+        switch (y.type()) {
+          case Int:     return ((Real)x).exp(((Int)y).toReal());
+          case BigInt:  return ((Real)x).exp(((BigInt)y).toReal());
+          case Ratio:   return ((Real)x).exp(((Ratio)y).toReal());
+          case Real:    return ((Real)x).exp((Real)y);
+          case Complex: return ((Real)x).toComplex().exp((Complex)y);
+        }
+        break;
+      }
+      case Complex: {
+        switch (y.type()) {
+          case Int:     return ((Complex)x).exp(((Int)y).toComplex());
+          case BigInt:  return ((Complex)x).exp(((BigInt)y).toComplex());
+          case Ratio:   return ((Complex)x).exp(((Ratio)y).toComplex());
+          case Real:    return ((Complex)x).exp(((Real)y).toComplex());
+          case Complex: return ((Complex)x).exp((Complex)y);
+        }
+        break;
       }
     }
     throw new TypeMismatch();
@@ -395,10 +456,56 @@ public final class MathLib
   
   public static Datum log(Datum x, Datum y)
   {
-    if (x.type() == y.type()) {
-      switch (x.type()) {
-        case Real: return ((Real)x).log((Real)y);
-        case Complex: return ((Complex)x).log((Complex)y);
+    switch (x.type()) {
+      case Int: {
+        switch (y.type()) {
+          case Int:     return ((Int)x).toReal().log(((Int)y).toReal());
+          case BigInt:  return ((Int)x).toReal().log(((BigInt)y).toReal());
+          case Ratio:   return ((Int)x).toReal().log(((Ratio)y).toReal());
+          case Real:    return ((Int)x).toReal().log((Real)y);
+          case Complex: return ((Int)x).toComplex().log((Complex)y);
+        }
+        break;
+      }
+      case BigInt: {
+        switch (y.type()) {
+          case Int:     return ((BigInt)x).toReal().log(((Int)y).toReal());
+          case BigInt:  return ((BigInt)x).toReal().log(((BigInt)y).toReal());
+          case Ratio:   return ((BigInt)x).toReal().log(((Ratio)y).toReal());
+          case Real:    return ((BigInt)x).toReal().log((Real)y);
+          case Complex: return ((BigInt)x).toComplex().log((Complex)y);
+        }
+        break;
+      }
+      case Ratio: {
+        switch (y.type()) {
+          case Int:     return ((Ratio)x).toReal().log(((Int)y).toReal());
+          case BigInt:  return ((BigInt)x).toReal().log(((BigInt)y).toReal());
+          case Ratio:   return ((Ratio)x).toReal().log(((Ratio)y).toReal());
+          case Real:    return ((Ratio)x).toReal().log((Real)y);
+          case Complex: return ((Ratio)x).toComplex().log((Complex)y);
+        }
+        break;
+      }
+      case Real: {
+        switch (y.type()) {
+          case Int:     return ((Real)x).log(((Int)y).toReal());
+          case BigInt:  return ((Real)x).log(((BigInt)y).toReal());
+          case Ratio:   return ((Real)x).log(((Ratio)y).toReal());
+          case Real:    return ((Real)x).log((Real)y);
+          case Complex: return ((Real)x).toComplex().log((Complex)y);
+        }
+        break;
+      }
+      case Complex: {
+        switch (y.type()) {
+          case Int:     return ((Complex)x).log(((Int)y).toComplex());
+          case BigInt:  return ((Complex)x).log(((BigInt)y).toComplex());
+          case Ratio:   return ((Complex)x).log(((Ratio)y).toComplex());
+          case Real:    return ((Complex)x).log(((Real)y).toComplex());
+          case Complex: return ((Complex)x).log((Complex)y);
+        }
+        break;
       }
     }
     throw new TypeMismatch();
@@ -414,7 +521,9 @@ public final class MathLib
   public static Datum sin(Datum x)
   {
     switch (x.type()) {
-      case Real: return ((Real)x).sin();
+      case Int:     return ((Int)x).toReal().sin();
+      case BigInt:  return ((BigInt)x).toReal().sin();
+      case Real:    return ((Real)x).sin();
       case Complex: return ((Complex)x).sin();
     }
     throw new TypeMismatch();
@@ -430,7 +539,9 @@ public final class MathLib
   public static Datum cos(Datum x)
   {
     switch (x.type()) {
-      case Real: return ((Real)x).cos();
+      case Int:     return ((Int)x).toReal().cos();
+      case BigInt:  return ((BigInt)x).toReal().cos();
+      case Real:    return ((Real)x).cos();
       case Complex: return ((Complex)x).cos();
     }
     throw new TypeMismatch();
@@ -446,7 +557,9 @@ public final class MathLib
   public static Datum tan(Datum x)
   {
     switch (x.type()) {
-      case Real: return ((Real)x).tan();
+      case Int:     return ((Int)x).toReal().tan();
+      case BigInt:  return ((BigInt)x).toReal().tan();
+      case Real:    return ((Real)x).tan();
       case Complex: return ((Complex)x).tan();
     }
     throw new TypeMismatch();
@@ -462,7 +575,9 @@ public final class MathLib
   public static Datum asin(Datum x)
   {
     switch (x.type()) {
-      case Real: return ((Real)x).asin();
+      case Int:     return ((Int)x).toReal().asin();
+      case BigInt:  return ((BigInt)x).toReal().asin();
+      case Real:    return ((Real)x).asin();
       case Complex: return ((Complex)x).asin();
     }
     throw new TypeMismatch();
@@ -478,7 +593,9 @@ public final class MathLib
   public static Datum acos(Datum x)
   {
     switch (x.type()) {
-      case Real: return ((Real)x).acos();
+      case Int:     return ((Int)x).toReal().acos();
+      case BigInt:  return ((BigInt)x).toReal().acos();
+      case Real:    return ((Real)x).acos();
       case Complex: return ((Complex)x).acos();
     }
     throw new TypeMismatch();
@@ -494,7 +611,9 @@ public final class MathLib
   public static Datum atan(Datum x)
   {
     switch (x.type()) {
-      case Real: return ((Real)x).atan();
+      case Int:     return ((Int)x).toReal().atan();
+      case BigInt:  return ((BigInt)x).toReal().atan();
+      case Real:    return ((Real)x).atan();
       case Complex: return ((Complex)x).atan();
     }
     throw new TypeMismatch();

@@ -46,21 +46,18 @@ public final class Real extends Datum
     return new Real(Math.abs(value));
   }
   
-  // TODO: Should return integer?
-  public Real floor()
+  public Int floor()
   {
-    return new Real(Math.floor(value));
+    return new Int((int) Math.floor(value));
   }
   
-  // TODO: Should return integer?
-  public Real ceiling()
+  public Int ceiling()
   {
-    return new Real(Math.ceil(value));
+    return new Int((int) Math.ceil(value));
   }
   
   public Int round()
   {
-    // TODO: Fix lossy conversion
     return new Int((int) Math.round(value));
   }
   

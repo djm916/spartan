@@ -28,12 +28,12 @@ public final class Int extends Datum
   
   public BigInt toBigInt()
   {
-    return new BigInt(value);
+    return new BigInt((long)value);
   }
   
   public Ratio toRatio()
   {
-    return new Ratio(BigInteger.valueOf(value), BigInteger.ONE);
+    return new Ratio(BigInteger.valueOf((long)value), BigInteger.ONE);
   }
   
   public Real toReal()
