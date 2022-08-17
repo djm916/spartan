@@ -6,19 +6,14 @@ import spartan.errors.IntegerOverflow;
 
 public final class Int extends Datum
 {
-  public Int(long value)
-  {
-    this(BigInteger.valueOf(value));
-  }
-  
-  public Int(BigInteger value)
+  public Int(int value)
   {
     this.value = value;
   }
   
   public Int(String value)
   {
-    this(new BigInteger(value));
+    this.value = Integer.parseInt(value);
   }
   
   public Type type()
@@ -28,78 +23,58 @@ public final class Int extends Datum
   
   public String repr()
   {
-    return value.toString();
-  }
-    
-  public int intValue()
-  {
-    try {
-      return value.intValueExact();
-    }
-    catch (ArithmeticException ex) {
-      throw new IntegerOverflow();
-    }
+    return Integer.toString(value);
   }
   
-  public long longValue()
+  public BigInt toBigInt()
   {
-    try {
-      return value.longValueExact();
-    }
-    catch (ArithmeticException ex) {
-      throw new IntegerOverflow();
-    }
-  }
-  
-  public double doubleValue()
-  {
-    return value.doubleValue();
+    return new BigInt(value);
   }
   
   public Ratio toRatio()
   {
-    return new Ratio(value, BigInteger.ONE);
+    return new Ratio(BigInteger.valueOf(value), BigInteger.ONE);
   }
   
   public Real toReal()
   {
-    return new Real(doubleValue());
+    return new Real((double)value);
   }
   
   public Complex toComplex()
   {
-    return new Complex(doubleValue(), 0.0);
+    return new Complex((double)value, 0.0);
   }
   
   public Int neg()
   {
-    return new Int(value.negate());
+    return new Int(-value);
   }
   
   public Int abs()
   {
-    return new Int(value.abs());
+    return new Int(Math.abs(value));
   }
   
   public Int add(Int other)
   {
-    return new Int(this.value.add(other.value));
+    return new Int(this.value + other.value);
   }
   
   public Int sub(Int other)
   {
-    return new Int(this.value.subtract(other.value));
+    return new Int(this.value - other.value);
   }
   
   public Int mul(Int other)
   {
-    return new Int(this.value.multiply(other.value));
+    return new Int(this.value * other.value);
   }
   
   public Int div(Int other)
   {
     try {
-      return new Int(this.value.divide(other.value));
+      return new Int(this.value / other.value);
     }
     catch (ArithmeticException ex) {
       throw new DivisionByZero();
@@ -109,7 +84,7 @@ public final class Int extends Datum
   public Int mod(Int other)
   {
     try {
-      return new Int(this.value.remainder(other.value));
+      return new Int(this.value % other.value);
     }
     catch (ArithmeticException ex) {
       throw new DivisionByZero();
@@ -118,13 +93,13 @@ public final class Int extends Datum
   
   public boolean eq(Int other)
   {
-    return this.value.equals(other.value);
+    return this.value == other.value;
   }
   
   public int compare(Int other)
   {
-    return this.value.compareTo(other.value);
+    return Integer.compare(this.value, other.value);
   }
   
-  final BigInteger value;
+  public final int value;
 }

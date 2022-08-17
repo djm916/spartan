@@ -1,29 +1,31 @@
 
-; Example of the factorial (!) function, written
-; using both functional and imperative styles.
+; Example of the factorial (!) function, written using both functional
+; and imperative styles, as well as arbitrary precision integers.
 
+; The mathematical definition of factorial is:
+;
 ; 0! = 1
 ; n! = n * (n - 1)!
 
-; This is the functional style, using tail-recursion
+; Functional style, using (tail) recursion
 
 (defun fact-rec (n)
   (defun loop (n p)
-    (if (= 0 n) p
-      (loop (- n 1) (* n p))))
-  (loop n 1))
+    (if (= 0L n) p
+      (loop (- n 1L) (* n p))))
+  (loop n 1L))
 
-; This is the imperative style, with assignment
-; and a loop
+;Imperative style, with loops and assignments
 
 (defun fact-loop (n)
-  (if (< n 2) n
-    (let ((p 1))
-      (while (> n 0)
+  (if (< n 2L) n
+    (let ((p 1L))
+      (while (/= n 0L)
         (set! p (* n p))
-        (set! n (- n 1)))
+        (set! n (- n 1L)))
       p)))
 
-(print-line "6! = " (fact-rec 6))
-(print-line "6! = " (fact-loop 6))
-(print-line "6! = " (fact-loop 17))
+(print-line "6! = " (fact-rec 6L))
+(print-line "17! = " (fact-rec 17L))
+(print-line "6! = " (fact-loop 6L))
+(print-line "17! = " (fact-loop 17L))

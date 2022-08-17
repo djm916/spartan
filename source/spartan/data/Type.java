@@ -5,6 +5,7 @@ public enum Type
   Nil("type/nil"),
   Bool("type/boolean"),
   Int("type/integer"),
+  BigInt("type/integer"),
   Ratio("type/rational"),
   Real("type/real"),
   Complex("type/complex"),

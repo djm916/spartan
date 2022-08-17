@@ -41,7 +41,7 @@ public final class PortLib
       
       if (vm.peekArg().type() != Type.Int)
         throw new TypeMismatch();
-      var numBytes = ((Int) vm.popArg()).intValue();
+      var numBytes = ((Int) vm.popArg()).value;
       
       vm.result = port.read(numBytes);
       vm.popFrame();

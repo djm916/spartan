@@ -21,12 +21,7 @@ public final class Real extends Datum
   {
     return Type.Real;
   }
-  
-  public double doubleValue()
-  {
-    return value;
-  }
-  
+    
   public Complex toComplex()
   {
     return new Complex(value, 0.0);
@@ -51,11 +46,13 @@ public final class Real extends Datum
     return new Real(Math.abs(value));
   }
   
+  // TODO: Should return integer?
   public Real floor()
   {
     return new Real(Math.floor(value));
   }
   
+  // TODO: Should return integer?
   public Real ceiling()
   {
     return new Real(Math.ceil(value));
@@ -63,7 +60,8 @@ public final class Real extends Datum
   
   public Int round()
   {
-    return new Int(Math.round(value));
+    // TODO: Fix lossy conversion
+    return new Int((int) Math.round(value));
   }
   
   public Real exp(Real that)
@@ -138,5 +136,5 @@ public final class Real extends Datum
     return Double.compare(this.value, other.value);
   }
   
-  private final double value;
+  public final double value;
 }

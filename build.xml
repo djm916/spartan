@@ -17,7 +17,7 @@
            includeantruntime="false"
            classpath="${classpath}"
            nativeheaderdir="native">
-      <compilerarg value="-Xlint"/>
+      <!-- <compilerarg value="-Xlint"/> -->
     </javac>
     <jar destfile="Spartan.jar"
          basedir="build"

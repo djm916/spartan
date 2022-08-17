@@ -13,15 +13,27 @@ public final class MathLib
       case Int: {
         switch (y.type()) {
           case Int:     return ((Int)x).add((Int)y);
+          case BigInt:  return ((Int)x).toBigInt().add((BigInt)y);
           case Ratio:   return ((Int)x).toRatio().add((Ratio)y);
           case Real:    return ((Int)x).toReal().add((Real)y);
           case Complex: return ((Int)x).toComplex().add((Complex)y);
         }
         break;
       }
+      case BigInt: {
+        switch (y.type()) {
+          case Int:     return ((BigInt)x).add(((Int)y).toBigInt());
+          case BigInt:  return ((BigInt)x).add((BigInt)y);
+          case Ratio:   return ((BigInt)x).toRatio().add((Ratio)y);
+          case Real:    return ((BigInt)x).toReal().add((Real)y);
+          case Complex: return ((BigInt)x).toComplex().add((Complex)y);
+        }
+        break;
+      }
       case Ratio: {
         switch (y.type()) {
           case Int:     return ((Ratio)x).add(((Int)y).toRatio());
+          case BigInt:  return ((Ratio)x).add(((BigInt)y).toRatio());
           case Ratio:   return ((Ratio)x).add((Ratio)y);
           case Real:    return ((Ratio)x).toReal().add((Real)y);
           case Complex: return ((Ratio)x).toComplex().add((Complex)y);
@@ -31,6 +43,7 @@ public final class MathLib
       case Real: {
         switch (y.type()) {
           case Int:     return ((Real)x).add(((Int)y).toReal());
+          case BigInt:  return ((Real)x).add(((BigInt)y).toReal());
           case Ratio:   return ((Real)x).add(((Ratio)y).toReal());
           case Real:    return ((Real)x).add((Real)y);
           case Complex: return ((Real)x).toComplex().add((Complex)y);
@@ -40,6 +53,7 @@ public final class MathLib
       case Complex: {
         switch (y.type()) {
           case Int:     return ((Complex)x).add(((Int)y).toComplex());
+          case BigInt:  return ((Complex)x).add(((BigInt)y).toComplex());
           case Ratio:   return ((Complex)x).add(((Ratio)y).toComplex());
           case Real:    return ((Complex)x).add(((Real)y).toComplex());
           case Complex: return ((Complex)x).add((Complex)y);
@@ -65,15 +79,27 @@ public final class MathLib
       case Int: {
         switch (y.type()) {
           case Int:     return ((Int)x).sub((Int)y);
+          case BigInt:  return ((Int)x).toBigInt().sub((BigInt)y);
           case Ratio:   return ((Int)x).toRatio().sub((Ratio)y);
           case Real:    return ((Int)x).toReal().sub((Real)y);
           case Complex: return ((Int)x).toComplex().sub((Complex)y);
         }
         break;
       }
+      case BigInt: {
+        switch (y.type()) {
+          case Int:     return ((BigInt)x).sub(((Int)y).toBigInt());
+          case BigInt:  return ((BigInt)x).sub((BigInt)y);
+          case Ratio:   return ((BigInt)x).toRatio().sub((Ratio)y);
+          case Real:    return ((BigInt)x).toReal().sub((Real)y);
+          case Complex: return ((BigInt)x).toComplex().sub((Complex)y);
+        }
+        break;
+      }
       case Ratio: {
         switch (y.type()) {
           case Int:     return ((Ratio)x).sub(((Int)y).toRatio());
+          case BigInt:  return ((Ratio)x).sub(((BigInt)y).toRatio());
           case Ratio:   return ((Ratio)x).sub((Ratio)y);
           case Real:    return ((Ratio)x).toReal().sub((Real)y);
           case Complex: return ((Ratio)x).toComplex().sub((Complex)y);
@@ -83,6 +109,7 @@ public final class MathLib
       case Real: {
         switch (y.type()) {
           case Int:     return ((Real)x).sub(((Int)y).toReal());
+          case BigInt:  return ((Real)x).sub(((BigInt)y).toReal());
           case Ratio:   return ((Real)x).sub(((Ratio)y).toReal());
           case Real:    return ((Real)x).sub((Real)y);
           case Complex: return ((Real)x).toComplex().sub((Complex)y);
@@ -92,6 +119,7 @@ public final class MathLib
       case Complex: {
         switch (y.type()) {
           case Int:     return ((Complex)x).sub(((Int)y).toComplex());
+          case BigInt:  return ((Complex)x).sub(((BigInt)y).toComplex());
           case Ratio:   return ((Complex)x).sub(((Ratio)y).toComplex());
           case Real:    return ((Complex)x).sub(((Real)y).toComplex());
           case Complex: return ((Complex)x).sub((Complex)y);
@@ -115,15 +143,27 @@ public final class MathLib
       case Int: {
         switch (y.type()) {
           case Int:     return ((Int)x).mul((Int)y);
+          case BigInt:  return ((Int)x).toBigInt().mul((BigInt)y);
           case Ratio:   return ((Int)x).toRatio().mul((Ratio)y);
           case Real:    return ((Int)x).toReal().mul((Real)y);
           case Complex: return ((Int)x).toComplex().mul((Complex)y);
         }
         break;
       }
+      case BigInt: {
+        switch (y.type()) {
+          case Int:     return ((BigInt)x).mul(((Int)y).toBigInt());
+          case BigInt:  return ((BigInt)x).mul((BigInt)y);
+          case Ratio:   return ((BigInt)x).toRatio().mul((Ratio)y);
+          case Real:    return ((BigInt)x).toReal().mul((Real)y);
+          case Complex: return ((BigInt)x).toComplex().mul((Complex)y);
+        }
+        break;
+      }
       case Ratio: {
         switch (y.type()) {
           case Int:     return ((Ratio)x).mul(((Int)y).toRatio());
+          case BigInt:  return ((Ratio)x).mul(((BigInt)y).toRatio());
           case Ratio:   return ((Ratio)x).mul((Ratio)y);
           case Real:    return ((Ratio)x).toReal().mul((Real)y);
           case Complex: return ((Ratio)x).toComplex().mul((Complex)y);
@@ -133,6 +173,7 @@ public final class MathLib
       case Real: {
         switch (y.type()) {
           case Int:     return ((Real)x).mul(((Int)y).toReal());
+          case BigInt:  return ((Real)x).mul(((BigInt)y).toReal());
           case Ratio:   return ((Real)x).mul(((Ratio)y).toReal());
           case Real:    return ((Real)x).mul((Real)y);
           case Complex: return ((Real)x).toComplex().mul((Complex)y);
@@ -142,6 +183,7 @@ public final class MathLib
       case Complex: {
         switch (y.type()) {
           case Int:     return ((Complex)x).mul(((Int)y).toComplex());
+          case BigInt:  return ((Complex)x).mul(((BigInt)y).toComplex());
           case Ratio:   return ((Complex)x).mul(((Ratio)y).toComplex());
           case Real:    return ((Complex)x).mul(((Real)y).toComplex());
           case Complex: return ((Complex)x).mul((Complex)y);
@@ -167,15 +209,27 @@ public final class MathLib
       case Int: {
         switch (y.type()) {
           case Int:     return ((Int)x).div((Int)y);
+          case BigInt:  return ((Int)x).toBigInt().div((BigInt)y);
           case Ratio:   return ((Int)x).toRatio().div((Ratio)y);
           case Real:    return ((Int)x).toReal().div((Real)y);
           case Complex: return ((Int)x).toComplex().div((Complex)y);
         }
         break;
       }
+      case BigInt: {
+        switch (y.type()) {
+          case Int:     return ((BigInt)x).div(((Int)y).toBigInt());
+          case BigInt:  return ((BigInt)x).div((BigInt)y);
+          case Ratio:   return ((BigInt)x).toRatio().div((Ratio)y);
+          case Real:    return ((BigInt)x).toReal().div((Real)y);
+          case Complex: return ((BigInt)x).toComplex().div((Complex)y);
+        }
+        break;
+      }
       case Ratio: {
         switch (y.type()) {
           case Int:     return ((Ratio)x).div(((Int)y).toRatio());
+          case BigInt:  return ((Ratio)x).div(((BigInt)y).toRatio());
           case Ratio:   return ((Ratio)x).div((Ratio)y);
           case Real:    return ((Ratio)x).toReal().div((Real)y);
           case Complex: return ((Ratio)x).toComplex().div((Complex)y);
@@ -185,6 +239,7 @@ public final class MathLib
       case Real: {
         switch (y.type()) {
           case Int:     return ((Real)x).div(((Int)y).toReal());
+          case BigInt:  return ((Real)x).div(((BigInt)y).toReal());
           case Ratio:   return ((Real)x).div(((Ratio)y).toReal());
           case Real:    return ((Real)x).div((Real)y);
           case Complex: return ((Real)x).toComplex().div((Complex)y);
@@ -194,6 +249,7 @@ public final class MathLib
       case Complex: {
         switch (y.type()) {
           case Int:     return ((Complex)x).div(((Int)y).toComplex());
+          case BigInt:  return ((Complex)x).div(((BigInt)y).toComplex());
           case Ratio:   return ((Complex)x).div(((Ratio)y).toComplex());
           case Real:    return ((Complex)x).div(((Real)y).toComplex());
           case Complex: return ((Complex)x).div((Complex)y);
@@ -213,8 +269,22 @@ public final class MathLib
 
   public static Datum mod(Datum x, Datum y)
   {
-    if (x.type() == Type.Int && y.type() == Type.Int)
-      return ((Int)x).mod((Int)y);
+    switch (x.type()) {
+      case Int: {
+        switch (y.type()) {
+          case Int:    return ((Int)x).mod((Int)y);
+          case BigInt: return ((Int)x).toBigInt().mod((BigInt)y);
+        }
+        break;
+      }
+      case BigInt: {
+        switch (y.type()) {
+          case Int:    return ((BigInt)x).mod(((Int)y).toBigInt());
+          case BigInt: return ((BigInt)x).mod((BigInt)y);
+        }
+        break;
+      }
+    }
     throw new TypeMismatch();
   }
   
@@ -229,6 +299,7 @@ public final class MathLib
   {
     switch (x.type()) {
       case Int: return ((Int)x).neg();
+      case BigInt: return ((BigInt)x).neg();
       case Ratio: return ((Ratio)x).neg();
       case Real: return ((Real)x).neg();
       case Complex: return ((Complex)x).neg();
@@ -247,6 +318,7 @@ public final class MathLib
   {
     switch (x.type()) {
       case Int: return ((Int)x).abs();
+      case BigInt: return ((BigInt)x).abs();
       case Ratio: return ((Ratio)x).abs();
       case Real: return ((Real)x).abs();
       case Complex: return ((Complex)x).abs();
@@ -458,9 +530,23 @@ public final class MathLib
   
   public static final Ratio makeRatio(Datum x, Datum y)
   {
-    if (x.type() != Type.Int || y.type() != Type.Int)
-      throw new TypeMismatch();
-    return new Ratio((Int)x, (Int)y);
+    switch (x.type()) {
+      case Int: {
+        switch (y.type()) {
+          case Int:     return new Ratio(((Int)x).toBigInt(), ((Int)y).toBigInt());
+          case BigInt:  return new Ratio(((Int)x).toBigInt(), (BigInt)y);
+        }
+        break;
+      }
+      case BigInt: {
+        switch (y.type()) {
+          case Int:     return new Ratio((BigInt)x, ((Int)y).toBigInt());
+          case BigInt:  return new Ratio((BigInt)x, (BigInt)y);
+        }
+        break;
+      }
+    }
+    throw new TypeMismatch();
   }
   
   public static final Primitive MakeRatio = new Primitive(2, false) {

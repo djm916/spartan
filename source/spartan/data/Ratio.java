@@ -32,7 +32,7 @@ public final class Ratio extends Datum
     this(new BigInteger(numer), new BigInteger(denom));
   }
   
-  public Ratio(Int numer, Int denom)
+  public Ratio(BigInt numer, BigInt denom)
   {
     this(numer.value, denom.value);
   }
@@ -47,29 +47,29 @@ public final class Ratio extends Datum
     return String.format("%s/%s", numer, denom);
   }
   
-  public Int numerator()
+  public BigInt numerator()
   {
-    return new Int(numer);
+    return new BigInt(numer);
   }
   
-  public Int denominator()
+  public BigInt denominator()
   {
-    return new Int(denom);
+    return new BigInt(denom);
   }
   
-  public double doubleValue()
+  public double approx()
   {
     return numer.doubleValue() / denom.doubleValue();
   }
-  
+
   public Real toReal()
   {
-    return new Real(doubleValue());
+    return new Real(approx());
   }
   
   public Complex toComplex()
   {
-    return new Complex(doubleValue(), 0.0);
+    return new Complex(approx(), 0.0);
   }
   
   /* Take the absolute value of a fraction */

@@ -290,6 +290,11 @@ public class Reader implements AutoCloseable
       return new Real(text.toString());
     }
     
+    if (peekChar() == 'L') {
+      getChar();
+      return new BigInt(text.toString());
+    }
+    
     return new Int(text.toString());
   }
 

@@ -28,7 +28,7 @@ public final class Vector extends Callable
   
   public static Vector create(Int length, Datum init)
   {
-    return create(length.intValue(), init);
+    return create(length.value, init);
   }
   
   public Vector(int length)
@@ -39,7 +39,7 @@ public final class Vector extends Callable
   
   public Vector(Int length)
   {
-    this(length.intValue());
+    this(length.value);
   }
   
   public Vector(Vector that)
@@ -72,7 +72,7 @@ public final class Vector extends Callable
   
   public Datum get(Int index)
   {
-    return get(index.intValue());
+    return get(index.value);
   }
   
   private Datum get(int index)
@@ -97,7 +97,7 @@ public final class Vector extends Callable
   
   public void set(Int index, Datum value)
   {
-    set(index.intValue(), value);
+    set(index.value, value);
   }
   
   public void append(Datum x)
@@ -122,7 +122,7 @@ public final class Vector extends Callable
   {
     if (vm.peekArg().type() != Type.Int)
       throw new TypeMismatch();
-    var index = ((Int) vm.popArg()).intValue();
+    var index = ((Int) vm.popArg()).value;
     vm.result = get(index);
     vm.popFrame();
   }
