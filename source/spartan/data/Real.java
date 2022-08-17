@@ -4,6 +4,8 @@ public final class Real extends Datum
 {
   public static final Real PI = new Real(Math.PI);
   public static final Real E = new Real(Math.E);
+  public static final Real POS_INF = new Real(Double.POSITIVE_INFINITY);
+  public static final Real NEG_INF = new Real(Double.NEGATIVE_INFINITY);
   
   public Real(double value)
   {
@@ -37,6 +39,10 @@ public final class Real extends Datum
   
   public String repr()
   {
+    if (value == Double.POSITIVE_INFINITY)
+      return "+inf";
+    if (value == Double.NEGATIVE_INFINITY)
+      return "-inf";
     return Double.toString(value);
   }
   

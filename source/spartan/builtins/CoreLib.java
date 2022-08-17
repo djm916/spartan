@@ -376,24 +376,6 @@ public final class CoreLib
     }
   };
   
-  public static final Primitive IntToReal = new Primitive(1, false) {
-    public void apply(VirtualMachine vm) {
-      if (vm.peekArg().type() != Type.Int)
-        throw new TypeMismatch();
-      vm.result = new Real(((Int)vm.popArg()).doubleValue());
-      vm.popFrame();
-    }
-  };
-  
-  public static final Primitive RealToInt = new Primitive(1, false) {
-    public void apply(VirtualMachine vm) {
-      if (vm.peekArg().type() != Type.Real)
-        throw new TypeMismatch();
-      vm.result = new Int(((Real)vm.popArg()).longValue());
-      vm.popFrame();
-    }
-  };
-  
   public static final Primitive GenSym = new Primitive(0, false) {
     public void apply(VirtualMachine vm) {
       vm.result = Symbol.gen();

@@ -75,7 +75,9 @@ public final class GlobalEnv
     bind(Symbol.get("ratio"), MathLib.MakeRatio);
     bind(Symbol.get("E"), Real.E);
     bind(Symbol.get("PI"), Real.PI);
-    bind(Symbol.get("I"), Complex.I);
+    bind(Symbol.get("+inf"), Real.POS_INF);
+    bind(Symbol.get("-inf"), Real.NEG_INF);
+    bind(Symbol.get("I"), Complex.I);    
     bind(Symbol.get("+"), MathLib.Add);
     bind(Symbol.get("-"), MathLib.Sub);
     bind(Symbol.get("*"), MathLib.Mul);
@@ -104,9 +106,7 @@ public final class GlobalEnv
     /* Conversion procedures */
     
     bind(Symbol.get("text->symbol"), CoreLib.TextToSymbol);
-    bind(Symbol.get("symbol->text"), CoreLib.SymbolToText);
-    bind(Symbol.get("int->real"), CoreLib.IntToReal);   
-    bind(Symbol.get("real->int"), CoreLib.RealToInt);
+    bind(Symbol.get("symbol->text"), CoreLib.SymbolToText);    
     bind(Symbol.get("text->bytes"), CoreLib.TextToBytes); // encode
     bind(Symbol.get("bytes->text"), CoreLib.BytesToText); // decode
     
