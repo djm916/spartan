@@ -22,11 +22,6 @@ public final class Real extends Datum
     return Type.Real;
   }
   
-  public long longValue()
-  {
-    return (long)value;
-  }
-  
   public double doubleValue()
   {
     return value;
