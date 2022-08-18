@@ -384,7 +384,116 @@ public class Compiler
                    compileSequentialBindings(bindings.cdr(), offset + 1, scope.bind(symb),
                    next)));
   }
+    
+  private boolean checkLoopForm(List exp)
+  {
+    var length = exp.length();
+        
+    if (length < 3)
+      return false;
+    
+    var bindings = exp.cadr();
+    
+    if (bindings.type() != Type.List || !checkLoopBindingListForm((List)bindings))
+      return false;
+    
+    var test = exp.caddr();
+    
+    if (test.type() != Type.List || ((List)test).length() != 2)
+      return false;
+    
+    return true;
+  }
+  
+  /* Compiles the "loop" special form.
+  
+  Syntax:
+    (loop ((var1 init1 step1)
+          ...
+           (varN initN stepN))
+          (pred result)
+          body...)
+  
+  Compilation:
+  
+    push-env N                   ; Evaluate init expressions
+    <<init1>>
+    store-local 0 0
+    ...
+    <<initN>>
+    store-local 0 N-1
+    loop:
+    <<pred>>
+    branch done body             ; Evaluate predicate
+    update:                      ; If predicate false,
+    <<body>>                     ; Evaluate body
+    <<step1>>                    ; Evaluate step expressions
+    store-local 0 0
+    ...
+    <<stepN>>
+    store-local 0 N-1
+    jump loop                    ; repeat loop
+    done:                        ; If predicate true,
+    <<result>>                   ; Evaluate result
+    pop-env                      ; Exit loop
+    next: ...
+  
+  */
 
+  private Inst compileLoop(List exp, Scope scope, Inst next)
+  {
+    if (!checkLoopForm(exp))
+      throw malformedExp(exp);
+    
+    var bindings = (List) exp.cadr();
+    var test = (List) exp.caddr();
+    var body = exp.cdddr();    
+    
+    int numBindings = bindings.length();
+    var extendedScope = new Scope(scope, extractFirst(bindings));
+    
+    var done = compile(test.cadr(), extendedScope, false, new PopEnv(next));
+    var jump = new Jump();
+    var update = compileSequence(body, extendedScope, false,
+                 compileLoopUpdateStep(bindings, extendedScope, 0,
+                 jump));
+    var loop = compile(test.car(), extendedScope, false,
+               new Branch(done, update));
+    jump.setTarget(loop);
+    return new PushEnv(numBindings,
+           compileSequentialBindings(bindings, 0, new Scope(scope),
+           loop));
+  }
+  
+  private Inst compileLoopUpdateStep(List bindings, Scope scope, int offset, Inst next)
+  {
+    if (bindings == List.Empty)
+      return next;
+    
+    var binding = (List) bindings.car();
+    
+    return compile(binding.caddr(), scope, false,
+           new StoreLocal(0, offset,
+           compileLoopUpdateStep(bindings.cdr(), scope, offset + 1, next)));
+  }
+  
+  private boolean checkLoopBindingListForm(List bindings)
+  {
+    if (bindings == List.Empty)
+      return false;
+
+    for (; bindings != List.Empty; bindings = bindings.cdr())
+      if (bindings.car().type() != Type.List || !checkLoopBindingPairForm((List) bindings.car()))
+        return false;
+
+    return true;
+  }
+  
+  private boolean checkLoopBindingPairForm(List binding)
+  {
+    return binding.length() == 3 && binding.car().type() == Type.Symbol;
+  }
+  
   private boolean checkBindingListForm(List bindings)
   {
     if (bindings == List.Empty)
@@ -1024,7 +1133,9 @@ public class Compiler
       if (car == Symbols.Set)
         return compileSet(exp, scope, next);
       if (car == Symbols.While)
-        return compileWhile(exp, scope, tail, next);      
+        return compileWhile(exp, scope, tail, next);
+      if (car == Symbols.Loop)
+        return compileLoop(exp, scope, next);
       if (car == Symbols.CallCC)
         return compileCallCC(exp, scope, tail, next);
       if (isMacro(car))

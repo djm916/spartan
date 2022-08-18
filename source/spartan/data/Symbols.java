@@ -22,6 +22,7 @@ public final class Symbols
   public static final Symbol Do = Symbol.get("do");
   public static final Symbol Set = Symbol.get("set!");
   public static final Symbol While = Symbol.get("while");
+  public static final Symbol Loop = Symbol.get("loopy"); // TODO: change "do" to "begin" and "loop" to "do".
   public static final Symbol Ampersand = Symbol.get("&");
   public static final Symbol Cons = Symbol.get("cons");
   public static final Symbol Concat = Symbol.get("concat");
