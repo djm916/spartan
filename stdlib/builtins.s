@@ -12,6 +12,16 @@
 (defun even? (x) (= 0 (% x 2)))
 (defun odd?  (x) (not (even? x)))
 
+(defmacro when (test & body)
+  `(if ,test
+     (begin ,@body)
+     nil))
+
+(defmacro unless (test & body)
+  `(if ,test
+    nil
+    (begin ,@body)))
+
 (defmacro swap! (a b)
   (let ((tmp (gensym)))
     `(let ((,tmp ,a))
@@ -22,9 +32,9 @@
   (let ((value-ready? false)
         (cached-value nil))
     (fun ()
-      (if (not value-ready?)
-          (do (set! cached-value (proc))
-              (set! value-ready? true)))
+      (unless value-ready?
+        (set! cached-value (proc))
+        (set! value-ready? true))
       cached-value)))
 
 (defmacro delay (exp) `(memoize (fun () ,exp)))
@@ -64,3 +74,8 @@
            `(fun (,(car args)) ,(loop (cdr args))))))
   (loop args))
 
+(let ((*files-loaded* ()))
+  (defun require (filename)
+    (unless (contains? filename *files-loaded*)
+      (set! *files-loaded* (cons filename *files-loaded*))
+      (load filename))))

@@ -12,11 +12,11 @@
         next))))
 
 (defun prime-sieve (n)
-  (defun loop (xs)
+  (defun prime-sieve (xs)
     (if (stream/empty? xs) ()
       (let* ((x (stream/car xs))
              (xs (stream/filter (not-factor? x) xs)))
-        (cons x (loop xs)))))
-  (loop (stream/new (int-range 2 n))))
+        (cons x (prime-sieve xs)))))
+  (prime-sieve (stream/new (int-range 2 n))))
 
 (print-line (prime-sieve 100))

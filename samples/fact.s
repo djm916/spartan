@@ -10,10 +10,10 @@
 ; Functional style, using (tail) recursion
 
 (defun fact-rec (n)
-  (defun loop (n p)
+  (defun fact-rect (n p)
     (if (= 0L n) p
-      (loop (- n 1L) (* n p))))
-  (loop n 1L))
+      (fact-rect (- n 1L) (* n p))))
+  (fact-rect n 1L))
 
 ;Imperative style, with loops and assignments
 

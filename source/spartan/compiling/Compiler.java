@@ -424,7 +424,7 @@ public class Compiler
     store-local 0 N-1
     loop:
     <<pred>>
-    branch done body             ; Evaluate predicate
+    branch done update           ; Evaluate predicate
     update:                      ; If predicate false,
     <<body>>                     ; Evaluate body
     <<step1>>                    ; Evaluate step expressions
@@ -440,7 +440,7 @@ public class Compiler
   
   */
 
-  private Inst compileLoop(List exp, Scope scope, Inst next)
+  private Inst compileDoLoop(List exp, Scope scope, boolean tail, Inst next)
   {
     if (!checkLoopForm(exp))
       throw malformedExp(exp);
@@ -448,11 +448,8 @@ public class Compiler
     var bindings = (List) exp.cadr();
     var test = (List) exp.caddr();
     var body = exp.cdddr();    
-    
-    int numBindings = bindings.length();
-    var extendedScope = new Scope(scope, extractFirst(bindings));
-    
-    var done = compile(test.cadr(), extendedScope, false, new PopEnv(next));
+    var extendedScope = new Scope(scope, extractFirst(bindings));   
+    var done = compile(test.cadr(), extendedScope, tail, new PopEnv(next));
     var jump = new Jump();
     var update = compileSequence(body, extendedScope, false,
                  compileLoopUpdateStep(bindings, extendedScope, 0,
@@ -460,7 +457,7 @@ public class Compiler
     var loop = compile(test.car(), extendedScope, false,
                new Branch(done, update));
     jump.setTarget(loop);
-    return new PushEnv(numBindings,
+    return new PushEnv(bindings.length(),
            compileSequentialBindings(bindings, 0, new Scope(scope),
            loop));
   }
@@ -823,12 +820,12 @@ public class Compiler
                       next));
   }
 
-  /* Compiles the "do" special form.
+  /* Compiles the "begin" special form.
 
-     Syntax: (do exp...)
+     Syntax: (begin exp...)
   */
 
-  private Inst compileDo(List exp, Scope scope, boolean tail, Inst next)
+  private Inst compileBegin(List exp, Scope scope, boolean tail, Inst next)
   {
     if (exp.length() < 2)
       throw malformedExp(exp);
@@ -1110,6 +1107,8 @@ public class Compiler
         return compileLetStar(exp, scope, tail, next);
       if (car == Symbols.LetRec)
         return compileLetRec(exp, scope, tail, next);
+      if (car == Symbols.Begin)
+        return compileBegin(exp, scope, tail, next);
       if (car == Symbols.Def)
         return compileDef(exp, scope, next);
       if (car == Symbols.Defun)
@@ -1127,15 +1126,13 @@ public class Compiler
       if (car == Symbols.And)
         return compileAnd(exp, scope, tail, next);
       if (car == Symbols.Cond)
-        return compileCond(exp, scope, tail, next);
-      if (car == Symbols.Do)
-        return compileDo(exp, scope, tail, next);
+        return compileCond(exp, scope, tail, next);      
       if (car == Symbols.Set)
         return compileSet(exp, scope, next);
       if (car == Symbols.While)
         return compileWhile(exp, scope, tail, next);
-      if (car == Symbols.Loop)
-        return compileLoop(exp, scope, next);
+      if (car == Symbols.Do)
+        return compileDoLoop(exp, scope, tail, next);
       if (car == Symbols.CallCC)
         return compileCallCC(exp, scope, tail, next);
       if (isMacro(car))

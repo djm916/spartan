@@ -77,7 +77,7 @@
           (= (vector/ref self 0) ',name))))
 
 (defmacro defstruct (name fields)  
-  `(do
+  `(begin
      ,(generate-constructor name fields)
      ,@(generate-getters name fields)
      ,@(generate-setters name fields)

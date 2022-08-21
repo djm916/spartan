@@ -17,8 +17,8 @@
 
 (defun for-each (f xs)
   (if (not (empty? xs))
-    (do (f (car xs))
-        (for-each f (cdr xs)))))
+    (begin (f (car xs))
+           (for-each f (cdr xs)))))
 
 (defun filter (f xs)
   (if (empty? xs) ()
@@ -38,18 +38,14 @@
       (find-first f (cdr xs)))))
 
 (defun find-index (f xs)
-  (defun loop (i xs)
+  (defun find-index (i xs)
     (cond ((empty? xs)  false)
           ((f (car xs)) i)
-          (true         (loop (+ 1 i) (cdr xs)))))
-  (loop 0 xs))
+          (true         (find-index (+ 1 i) (cdr xs)))))
+  (find-index 0 xs))
 
-(defun count (f xs)
-  (defun loop (n xs)
-    (cond ((empty? xs)  n)
-          ((f (car xs)) (loop (+ 1 n) (cdr xs)))
-          (true         (loop n (cdr xs)))))
-  (loop 0 xs))
+(defun contains? (x xs)
+  (not (= false (find-first (fun (y) (= x y)) xs))))
 
 (defun remove (f xs)
   (filter (fun (x) (not (f x))) xs))

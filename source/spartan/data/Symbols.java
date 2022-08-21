@@ -10,6 +10,7 @@ public final class Symbols
   public static final Symbol Let = Symbol.get("let");
   public static final Symbol LetStar = Symbol.get("let*");
   public static final Symbol LetRec = Symbol.get("letrec");
+  public static final Symbol Begin = Symbol.get("begin");
   public static final Symbol Def = Symbol.get("def");
   public static final Symbol Defun = Symbol.get("defun");
   public static final Symbol Defmacro = Symbol.get("defmacro");
@@ -19,10 +20,10 @@ public final class Symbols
   public static final Symbol Quasiquote = Symbol.get("quasiquote");
   public static final Symbol Unquote = Symbol.get("unquote");
   public static final Symbol UnquoteSplicing = Symbol.get("unquote-splicing");  
-  public static final Symbol Do = Symbol.get("do");
+  public static final Symbol Loop = Symbol.get("loop");
   public static final Symbol Set = Symbol.get("set!");
   public static final Symbol While = Symbol.get("while");
-  public static final Symbol Loop = Symbol.get("loopy"); // TODO: change "do" to "begin" and "loop" to "do".
+  public static final Symbol Do = Symbol.get("do");
   public static final Symbol Ampersand = Symbol.get("&");
   public static final Symbol Cons = Symbol.get("cons");
   public static final Symbol Concat = Symbol.get("concat");
