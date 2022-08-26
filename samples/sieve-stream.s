@@ -1,22 +1,21 @@
 
-(load "stdlib/streams.s")
+(require "stdlib/streams.s")
 
 (defun not-factor? (y) (fun (x) (not (= (% x y) 0))))
 
-(defun int-range (from to)
+(defun make-int-generator (start)
   (fun ()
-    (if (> from to)
-      nil
-      (let ((next from))
-        (set! from (+ 1 from))
-        next))))
+    (let ((next start))
+      (set! start (+ 1 start))
+      next)))
 
-(defun prime-sieve (n)
-  (defun prime-sieve (xs)
-    (if (stream/empty? xs) ()
-      (let* ((x (stream/car xs))
-             (xs (stream/filter (not-factor? x) xs)))
-        (cons x (prime-sieve xs)))))
-  (prime-sieve (stream/new (int-range 2 n))))
+(defun make-prime-generator ()
+  (def nats (stream/new (make-int-generator 2)))
+  (fun ()
+    (let ((next-prime (stream/car nats)))
+      (set! nats (stream/filter (not-factor? next-prime) nats))
+      next-prime)))
 
-(print-line (prime-sieve 100))
+(def primes (stream/new (make-prime-generator)))
+
+(print-line (stream->list (stream/take 100 primes)))

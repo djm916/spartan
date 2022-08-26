@@ -66,6 +66,15 @@
           (gen)))))
   (stream/new gen))
 
+(defun stream/take (n s)
+  (defun gen ()
+    (if (or (stream/empty? s) (= n 0)) nil
+      (let ((next (stream/car s)))
+        (set! s (stream/cdr s))
+        (set! n (- n 1))
+        next)))
+  (stream/new gen))
+
 (defun stream/reduce (f i s)
   (if (stream/empty? s) i
     (stream/reduce f (f i (stream/car s)) (stream/cdr s))))
