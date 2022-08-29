@@ -51,10 +51,9 @@
   (stream/new gen))
 
 (defun stream/for-each (f s)
-  (if (stream/empty? s)
-    nil
-    (begin (f (stream/car s))
-           (stream/for-each f (stream/cdr s)))))
+  (if (stream/empty? s) nil
+    (do (f (stream/car s))
+        (stream/for-each f (stream/cdr s)))))
 
 (defun stream/filter (f s)
   (defun gen ()

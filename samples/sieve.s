@@ -1,5 +1,5 @@
 
-(defun not-factor? (y) (fun (x) (not (= (% x y) 0))))
+(defun not-factor? (y) (fun (x) (not (= (remainder x y) 0))))
 
 (defun prime-sieve (n)
   (defun prime-sieve (xs)

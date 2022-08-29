@@ -9,18 +9,18 @@
 (load "stdlib/streams.s")
 (load "stdlib/defstruct.s")
 
-(defun even? (x) (= 0 (% x 2)))
+(defun even? (x) (= 0 (remainder x 2)))
 (defun odd?  (x) (not (even? x)))
 
 (defmacro when (test & body)
   `(if ,test
-     (begin ,@body)
+     (do ,@body)
      nil))
 
 (defmacro unless (test & body)
   `(if ,test
     nil
-    (begin ,@body)))
+    (do ,@body)))
 
 (defmacro swap! (a b)
   (let ((tmp (gensym)))
@@ -74,8 +74,9 @@
            `(fun (,(car args)) ,(loop (cdr args))))))
   (loop args))
 
-(let ((*files-loaded* ()))
-  (defun require (filename)
-    (unless (contains? filename *files-loaded*)
-      (set! *files-loaded* (cons filename *files-loaded*))
-      (load filename))))
+(def require
+  (let ((*files-loaded* ()))
+    (fun (filename)
+      (unless (contains? filename *files-loaded*)
+        (set! *files-loaded* (cons filename *files-loaded*))
+        (load filename)))))

@@ -384,35 +384,15 @@ public class Compiler
                    compileSequentialBindings(bindings.cdr(), offset + 1, scope.bind(symb),
                    next)));
   }
-    
-  private boolean checkLoopForm(List exp)
-  {
-    var length = exp.length();
-        
-    if (length < 3)
-      return false;
-    
-    var bindings = exp.cadr();
-    
-    if (bindings.type() != Type.List || !checkLoopBindingListForm((List)bindings))
-      return false;
-    
-    var test = exp.caddr();
-    
-    if (test.type() != Type.List || ((List)test).length() != 2)
-      return false;
-    
-    return true;
-  }
   
-  /* Compiles the "loop" special form.
+  /* Compiles the "for" special form.
   
   Syntax:
-    (loop ((var1 init1 step1)
+    (for ((var1 init1 step1)
           ...
-           (varN initN stepN))
-          (pred result)
-          body...)
+          (varN initN stepN))
+      (pred result)
+      body...)
   
   Compilation:
   
@@ -439,10 +419,10 @@ public class Compiler
     next: ...
   
   */
-
-  private Inst compileDoLoop(List exp, Scope scope, boolean tail, Inst next)
+  
+  private Inst compileForLoop(List exp, Scope scope, boolean tail, Inst next)
   {
-    if (!checkLoopForm(exp))
+    if (!checkForLoopForm(exp))
       throw malformedExp(exp);
     
     var bindings = (List) exp.cadr();
@@ -452,7 +432,7 @@ public class Compiler
     var done = compile(test.cadr(), extendedScope, tail, new PopEnv(next));
     var jump = new Jump();
     var update = compileSequence(body, extendedScope, false,
-                 compileLoopUpdateStep(bindings, extendedScope, 0,
+                 compileForLoopUpdateStep(bindings, extendedScope, 0,
                  jump));
     var loop = compile(test.car(), extendedScope, false,
                new Branch(done, update));
@@ -462,7 +442,7 @@ public class Compiler
            loop));
   }
   
-  private Inst compileLoopUpdateStep(List bindings, Scope scope, int offset, Inst next)
+  private Inst compileForLoopUpdateStep(List bindings, Scope scope, int offset, Inst next)
   {
     if (bindings == List.Empty)
       return next;
@@ -471,26 +451,46 @@ public class Compiler
     
     return compile(binding.caddr(), scope, false,
            new StoreLocal(0, offset,
-           compileLoopUpdateStep(bindings.cdr(), scope, offset + 1, next)));
+           compileForLoopUpdateStep(bindings.cdr(), scope, offset + 1, next)));
+  }
+      
+  private boolean checkForLoopForm(List exp)
+  {
+    var length = exp.length();
+        
+    if (length < 3)
+      return false;
+    
+    var bindings = exp.cadr();
+    
+    if (bindings.type() != Type.List || !checkForLoopBindingListForm((List)bindings))
+      return false;
+    
+    var test = exp.caddr();
+    
+    if (test.type() != Type.List || ((List)test).length() != 2)
+      return false;
+    
+    return true;
   }
   
-  private boolean checkLoopBindingListForm(List bindings)
+  private boolean checkForLoopBindingListForm(List bindings)
   {
     if (bindings == List.Empty)
       return false;
 
     for (; bindings != List.Empty; bindings = bindings.cdr())
-      if (bindings.car().type() != Type.List || !checkLoopBindingPairForm((List) bindings.car()))
+      if (bindings.car().type() != Type.List || !checkForLoopBindingPairForm((List) bindings.car()))
         return false;
 
     return true;
   }
   
-  private boolean checkLoopBindingPairForm(List binding)
+  private boolean checkForLoopBindingPairForm(List binding)
   {
     return binding.length() == 3 && binding.car().type() == Type.Symbol;
   }
-  
+    
   private boolean checkBindingListForm(List bindings)
   {
     if (bindings == List.Empty)
@@ -502,7 +502,7 @@ public class Compiler
 
     return true;
   }
-
+  
   private boolean checkBindingPairForm(List binding)
   {
     return binding.length() == 2 && binding.car().type() == Type.Symbol;
@@ -820,12 +820,12 @@ public class Compiler
                       next));
   }
 
-  /* Compiles the "begin" special form.
+  /* Compiles the "do" special form.
 
-     Syntax: (begin exp...)
+     Syntax: (do exp...)
   */
 
-  private Inst compileBegin(List exp, Scope scope, boolean tail, Inst next)
+  private Inst compileDo(List exp, Scope scope, boolean tail, Inst next)
   {
     if (exp.length() < 2)
       throw malformedExp(exp);
@@ -1107,8 +1107,8 @@ public class Compiler
         return compileLetStar(exp, scope, tail, next);
       if (car == Symbols.LetRec)
         return compileLetRec(exp, scope, tail, next);
-      if (car == Symbols.Begin)
-        return compileBegin(exp, scope, tail, next);
+      if (car == Symbols.Do)
+        return compileDo(exp, scope, tail, next);
       if (car == Symbols.Def)
         return compileDef(exp, scope, next);
       if (car == Symbols.Defun)
@@ -1131,8 +1131,8 @@ public class Compiler
         return compileSet(exp, scope, next);
       if (car == Symbols.While)
         return compileWhile(exp, scope, tail, next);
-      if (car == Symbols.Do)
-        return compileDoLoop(exp, scope, tail, next);
+      if (car == Symbols.For)
+        return compileForLoop(exp, scope, tail, next);
       if (car == Symbols.CallCC)
         return compileCallCC(exp, scope, tail, next);
       if (isMacro(car))

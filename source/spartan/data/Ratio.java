@@ -37,6 +37,12 @@ public final class Ratio extends Datum
     this(numer.value, denom.value);
   }
   
+  public Ratio(int numer, int denom)
+  {
+    this(BigInteger.valueOf(numer),
+         BigInteger.valueOf(denom));
+  }
+  
   public Type type()
   {
     return Type.Ratio;

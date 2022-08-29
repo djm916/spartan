@@ -71,7 +71,17 @@ public final class Int extends Datum
     return new Int(this.value * other.value);
   }
   
-  public Int div(Int other)
+  public Ratio div(Int other)
+  {
+    try {
+      return new Ratio(this.value, other.value);
+    }
+    catch (ArithmeticException ex) {
+      throw new DivisionByZero();
+    }
+  }
+  
+  public Int quotient(Int other)
   {
     try {
       return new Int(this.value / other.value);
@@ -81,7 +91,7 @@ public final class Int extends Datum
     }
   }
   
-  public Int mod(Int other)
+  public Int remainder(Int other)
   {
     try {
       return new Int(this.value % other.value);

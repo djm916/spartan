@@ -81,7 +81,17 @@ public final class BigInt extends Datum
     return new BigInt(this.value.multiply(other.value));
   }
   
-  public BigInt div(BigInt other)
+  public Ratio div(BigInt other)
+  {
+    try {
+      return new Ratio(this.value, other.value);
+    }
+    catch (ArithmeticException ex) {
+      throw new DivisionByZero();
+    }
+  }
+  
+  public BigInt quotient(BigInt other)
   {
     try {
       return new BigInt(this.value.divide(other.value));
@@ -91,7 +101,7 @@ public final class BigInt extends Datum
     }
   }
   
-  public BigInt mod(BigInt other)
+  public BigInt remainder(BigInt other)
   {
     try {
       return new BigInt(this.value.remainder(other.value));

@@ -10,14 +10,13 @@
         (set! from (+ 1 from))
         next))))
 
-(def s1 (stream/new (int-range 1 10)))
+(def nats (stream/new (int-range 1 10)))
 
-(def s2 (stream/map (fun (x) (* x x)) s1))
+(def squares (stream/map (fun (x) (* x x)) nats))
 
-(def s3 (stream/filter (fun (x) (= (% x 2) 0)) s1))
+(def even-squares (stream/filter (fun (x) (= (remainder x 2) 0)) nats))
 
-(print-line "Integers from 1 to 10 = " (stream->list s1))
-(print-line "Squares up to 10 = " (stream->list s2))
-(print-line "Even squares = " (stream->list s3)
-(print-line "Sum of integers up to 10 = " (stream/reduce + 0 s1))
-(print-line "Sum of squares up to 10 = " (stream/reduce + 0 s2))
+(print-line "Integers = " (stream->list nats))
+(print-line "Squares = " (stream->list squares))
+(print-line "Even squares = " (stream->list even-squares))
+(print-line "Sum of squares = " (stream/reduce + 0 nats))

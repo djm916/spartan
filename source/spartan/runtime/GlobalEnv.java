@@ -82,7 +82,6 @@ public final class GlobalEnv
     bind(Symbol.get("-"), MathLib.Sub);
     bind(Symbol.get("*"), MathLib.Mul);
     bind(Symbol.get("/"), MathLib.Div);
-    bind(Symbol.get("%"), MathLib.Mod);    
     bind(Symbol.get("~"), MathLib.Neg);
     bind(Symbol.get("abs"), MathLib.Abs);
     bind(Symbol.get("floor"), MathLib.Floor);
@@ -102,6 +101,8 @@ public final class GlobalEnv
     bind(Symbol.get("denominator"), MathLib.Denominator);
     bind(Symbol.get("real-part"), MathLib.RealPart);
     bind(Symbol.get("imag-part"), MathLib.ImagPart);
+    bind(Symbol.get("quotient"), MathLib.Quotient);
+    bind(Symbol.get("remainder"), MathLib.Remainder);
     
     /* Conversion procedures */
     

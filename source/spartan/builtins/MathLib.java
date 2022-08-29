@@ -2,7 +2,6 @@ package spartan.builtins;
 
 import spartan.data.*;
 import spartan.errors.TypeMismatch;
-import spartan.errors.DivisionByZero;
 import spartan.runtime.VirtualMachine;
 
 public final class MathLib
@@ -266,21 +265,21 @@ public final class MathLib
       vm.popFrame();
     }
   };
-
-  public static Datum mod(Datum x, Datum y)
+  
+  public static Datum quotient(Datum x, Datum y)
   {
     switch (x.type()) {
       case Int: {
         switch (y.type()) {
-          case Int:    return ((Int)x).mod((Int)y);
-          case BigInt: return ((Int)x).toBigInt().mod((BigInt)y);
+          case Int:    return ((Int)x).quotient((Int)y);
+          case BigInt: return ((Int)x).toBigInt().quotient((BigInt)y);
         }
         break;
       }
       case BigInt: {
         switch (y.type()) {
-          case Int:    return ((BigInt)x).mod(((Int)y).toBigInt());
-          case BigInt: return ((BigInt)x).mod((BigInt)y);
+          case Int:    return ((BigInt)x).quotient(((Int)y).toBigInt());
+          case BigInt: return ((BigInt)x).quotient((BigInt)y);
         }
         break;
       }
@@ -288,13 +287,41 @@ public final class MathLib
     throw new TypeMismatch();
   }
   
-  public static final Primitive Mod = new Primitive(2, false) {
+  public static final Primitive Quotient = new Primitive(2, false) {
     public void apply(VirtualMachine vm) {
-      vm.result = mod(vm.popArg(), vm.popArg());
+      vm.result = quotient(vm.popArg(), vm.popArg());
       vm.popFrame();
     }
   };
 
+  public static Datum remainder(Datum x, Datum y)
+  {
+    switch (x.type()) {
+      case Int: {
+        switch (y.type()) {
+          case Int:    return ((Int)x).remainder((Int)y);
+          case BigInt: return ((Int)x).toBigInt().remainder((BigInt)y);
+        }
+        break;
+      }
+      case BigInt: {
+        switch (y.type()) {
+          case Int:    return ((BigInt)x).remainder(((Int)y).toBigInt());
+          case BigInt: return ((BigInt)x).remainder((BigInt)y);
+        }
+        break;
+      }
+    }
+    throw new TypeMismatch();
+  }
+  
+  public static final Primitive Remainder = new Primitive(2, false) {
+    public void apply(VirtualMachine vm) {
+      vm.result = remainder(vm.popArg(), vm.popArg());
+      vm.popFrame();
+    }
+  };
+  
   public static Datum neg(Datum x)
   {
     switch (x.type()) {
