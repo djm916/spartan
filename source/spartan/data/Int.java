@@ -25,27 +25,7 @@ public final class Int extends Datum
   {
     return Integer.toString(value);
   }
-  
-  public BigInt toBigInt()
-  {
-    return new BigInt((long)value);
-  }
-  
-  public Ratio toRatio()
-  {
-    return new Ratio(BigInteger.valueOf((long)value), BigInteger.ONE);
-  }
-  
-  public Real toReal()
-  {
-    return new Real((double)value);
-  }
-  
-  public Complex toComplex()
-  {
-    return new Complex((double)value, 0.0);
-  }
-  
+    
   public Int neg()
   {
     return new Int(-value);
@@ -71,14 +51,9 @@ public final class Int extends Datum
     return new Int(this.value * other.value);
   }
   
-  public Ratio div(Int other)
+  public Real div(Int other)
   {
-    try {
-      return new Ratio(this.value, other.value);
-    }
-    catch (ArithmeticException ex) {
-      throw new DivisionByZero();
-    }
+    return new Real((double)this.value / (double)other.value);
   }
   
   public Int quotient(Int other)

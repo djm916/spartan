@@ -21,11 +21,6 @@ public final class Real extends Datum
   {
     return Type.Real;
   }
-    
-  public Complex toComplex()
-  {
-    return new Complex(value, 0.0);
-  }
   
   public String repr()
   {
@@ -59,6 +54,11 @@ public final class Real extends Datum
   public Int round()
   {
     return new Int((int) Math.round(value));
+  }
+  
+  public Int truncate()
+  {
+    return new Int((int) value);
   }
   
   public Real exp(Real that)

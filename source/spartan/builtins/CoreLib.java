@@ -32,80 +32,21 @@ public final class CoreLib
 
   public static boolean eq(Datum x, Datum y)
   {
-    switch (x.type()) {
-      case Int: {
-        switch (y.type()) {
-          case Int:     return ((Int)x).eq((Int)y);
-          case BigInt:  return ((Int)x).toBigInt().eq((BigInt)y);
-          case Ratio:   return ((Int)x).toRatio().eq((Ratio)y);
-          case Real:    return ((Int)x).toReal().eq((Real)y);
-          case Complex: return ((Int)x).toComplex().eq((Complex)y);
-        }
-        break;
-      }
-      case BigInt: {
-        switch (y.type()) {
-          case Int:     return ((BigInt)x).eq(((Int)y).toBigInt());
-          case BigInt:  return ((BigInt)x).eq((BigInt)y);
-          case Ratio:   return ((BigInt)x).toRatio().eq((Ratio)y);
-          case Real:    return ((BigInt)x).toReal().eq((Real)y);
-          case Complex: return ((BigInt)x).toComplex().eq((Complex)y);
-        }
-        break;
-      }
-      case Ratio: {
-        switch (y.type()) {
-          case Int:     return ((Ratio)x).eq(((Int)y).toRatio());
-          case BigInt:  return ((Ratio)x).eq(((BigInt)y).toRatio());
-          case Ratio:   return ((Ratio)x).eq((Ratio)y);
-          case Real:    return ((Ratio)x).toReal().eq((Real)y);
-          case Complex: return ((Ratio)x).toComplex().eq((Complex)y);
-        }
-        break;
-      }
-      case Real: {
-        switch (y.type()) {
-          case Int:     return ((Real)x).eq(((Int)y).toReal());
-          case BigInt:  return ((Real)x).eq(((BigInt)y).toReal());
-          case Ratio:   return ((Real)x).eq(((Ratio)y).toReal());
-          case Real:    return ((Real)x).eq((Real)y);
-          case Complex: return ((Real)x).toComplex().eq((Complex)y);
-        }
-        break;
-      }
-      case Complex: {
-        switch (y.type()) {
-          case Int:     return ((Complex)x).eq(((Int)y).toComplex());
-          case BigInt:  return ((Complex)x).eq(((BigInt)y).toComplex());
-          case Ratio:   return ((Complex)x).eq(((Ratio)y).toComplex());
-          case Real:    return ((Complex)x).eq(((Real)y).toComplex());
-          case Complex: return ((Complex)x).eq((Complex)y);
-        }
-        break;
-      }
-      case Text: {
-        switch (y.type()) {
-          case Text: return ((Text)x).eq((Text)y);
-        }
-        break;
-      }
-      case Vector: {
-        switch (y.type()) {
-          case Vector: return ((Vector)x).eq((Vector)y, CoreLib::eq);
-        }
-        break;
-      }
-      case List: {
-        switch (y.type()) {
-          case List: return ((List)x).eq((List)y, CoreLib::eq);
-        }
-        break;
-      }
-      case Bool  :
-      case Symbol:
-      case Nil   : return x == y;
-    }
-    return false;
+    if (x.type() != y.type())
+      return false;
+    
+    return switch (x.type()) {
+      case Int     -> ((Int)x).eq((Int)y);
+      case Real    -> ((Real)x).eq((Real)y);
+      case Complex -> ((Complex)x).eq((Complex)y);
+      case Text    -> ((Text)x).eq((Text)y);
+      case Vector  -> ((Vector)x).eq((Vector)y, CoreLib::eq);
+      case List    -> ((List)x).eq((List)y, CoreLib::eq);
+      case Bool,
+           Symbol,
+           Nil     -> x == y;
+      default      -> false;
+    };
   }
   
   public static final Primitive Eq = new Primitive(2, false) {
@@ -124,51 +65,15 @@ public final class CoreLib
 
   public static boolean lt(Datum x, Datum y)
   {
-    switch (x.type()) {
-      case Int: {
-        switch (y.type()) {
-          case Int:     return ((Int)x).compare((Int)y) < 0;
-          case BigInt:  return ((Int)x).toBigInt().compare((BigInt)y) < 0;
-          case Ratio:   return ((Int)x).toRatio().compare((Ratio)y) < 0;
-          case Real:    return ((Int)x).toReal().compare((Real)y) < 0;
-        }
-        break;
-      }
-      case BigInt: {
-        switch (y.type()) {
-          case Int:     return ((BigInt)x).compare(((Int)y).toBigInt()) < 0;
-          case BigInt:  return ((BigInt)x).compare((BigInt)y) < 0;
-          case Ratio:   return ((BigInt)x).toRatio().compare((Ratio)y) < 0;
-          case Real:    return ((BigInt)x).toReal().compare((Real)y) < 0;
-        }
-        break;
-      }
-      case Ratio: {
-        switch (y.type()) {
-          case Int:     return ((Ratio)x).compare(((Int)y).toRatio()) < 0;
-          case BigInt:  return ((Ratio)x).compare(((BigInt)y).toRatio()) < 0;
-          case Ratio:   return ((Ratio)x).compare((Ratio)y) < 0;
-          case Real:    return ((Ratio)x).toReal().compare((Real)y) < 0;
-        }
-        break;
-      }
-      case Real: {
-        switch (y.type()) {
-          case Int:     return ((Real)x).compare(((Int)y).toReal()) < 0;
-          case BigInt:  return ((Real)x).compare(((BigInt)y).toReal()) < 0;
-          case Ratio:   return ((Real)x).compare(((Ratio)y).toReal()) < 0;
-          case Real:    return ((Real)x).compare((Real)y) < 0;
-        }
-        break;
-      }
-      case Text: {
-        switch (y.type()) {
-          case Text: return ((Text)x).compare((Text)y) < 0;
-        }
-        break;
-      }
-    }
-    return false;
+    if (x.type() != y.type())
+      throw new TypeMismatch();
+    
+    return switch (x.type()) {
+      case Int  -> ((Int)x).compare((Int)y) < 0;
+      case Real -> ((Real)x).compare((Real)y) < 0;
+      case Text -> ((Text)x).compare((Text)y) < 0;
+      default   -> throw new TypeMismatch();
+    };
   }
   
   public static final Primitive Lt = new Primitive(2, false) {
@@ -180,51 +85,15 @@ public final class CoreLib
 
   public static boolean le(Datum x, Datum y)
   {
-    switch (x.type()) {
-      case Int: {
-        switch (y.type()) {
-          case Int:     return ((Int)x).compare((Int)y) <= 0;
-          case BigInt:  return ((Int)x).toBigInt().compare((BigInt)y) <= 0;
-          case Ratio:   return ((Int)x).toRatio().compare((Ratio)y) <= 0;
-          case Real:    return ((Int)x).toReal().compare((Real)y) <= 0;
-        }
-        break;
-      }
-      case BigInt: {
-        switch (y.type()) {
-          case Int:     return ((BigInt)x).compare(((Int)y).toBigInt()) <= 0;
-          case BigInt:  return ((BigInt)x).compare((BigInt)y) <= 0;
-          case Ratio:   return ((BigInt)x).toRatio().compare((Ratio)y) <= 0;
-          case Real:    return ((BigInt)x).toReal().compare((Real)y) <= 0;
-        }
-        break;
-      }
-      case Ratio: {
-        switch (y.type()) {
-          case Int:     return ((Ratio)x).compare(((Int)y).toRatio()) <= 0;
-          case BigInt:  return ((Ratio)x).compare(((BigInt)y).toRatio()) <= 0;
-          case Ratio:   return ((Ratio)x).compare((Ratio)y) <= 0;
-          case Real:    return ((Ratio)x).toReal().compare((Real)y) <= 0;
-        }
-        break;
-      }
-      case Real: {
-        switch (y.type()) {
-          case Int:     return ((Real)x).compare(((Int)y).toReal()) <= 0;
-          case BigInt:  return ((Real)x).compare(((BigInt)y).toReal()) <= 0;
-          case Ratio:   return ((Real)x).compare(((Ratio)y).toReal()) <= 0;
-          case Real:    return ((Real)x).compare((Real)y) <= 0;
-        }
-        break;
-      }
-      case Text: {
-        switch (y.type()) {
-          case Text: return ((Text)x).compare((Text)y) <= 0;
-        }
-        break;
-      }
-    }
-    return false;
+    if (x.type() != y.type())
+      throw new TypeMismatch();
+    
+    return switch (x.type()) {
+      case Int  -> ((Int)x).compare((Int)y) <= 0;
+      case Real -> ((Real)x).compare((Real)y) <= 0;
+      case Text -> ((Text)x).compare((Text)y) <= 0;
+      default   -> throw new TypeMismatch();
+    };
   }
   
   public static final Primitive Le = new Primitive(2, false) {
@@ -236,51 +105,15 @@ public final class CoreLib
 
   public static boolean gt(Datum x, Datum y)
   {
-    switch (x.type()) {
-      case Int: {
-        switch (y.type()) {
-          case Int:     return ((Int)x).compare((Int)y) > 0;
-          case BigInt:  return ((Int)x).toBigInt().compare((BigInt)y) > 0;
-          case Ratio:   return ((Int)x).toRatio().compare((Ratio)y) > 0;
-          case Real:    return ((Int)x).toReal().compare((Real)y) > 0;
-        }
-        break;
-      }
-      case BigInt: {
-        switch (y.type()) {
-          case Int:     return ((BigInt)x).compare(((Int)y).toBigInt()) > 0;
-          case BigInt:  return ((BigInt)x).compare((BigInt)y) > 0;
-          case Ratio:   return ((BigInt)x).toRatio().compare((Ratio)y) > 0;
-          case Real:    return ((BigInt)x).toReal().compare((Real)y) > 0;
-        }
-        break;
-      }
-      case Ratio: {
-        switch (y.type()) {
-          case Int:     return ((Ratio)x).compare(((Int)y).toRatio()) > 0;
-          case BigInt:  return ((Ratio)x).compare(((BigInt)y).toRatio()) > 0;
-          case Ratio:   return ((Ratio)x).compare((Ratio)y) > 0;
-          case Real:    return ((Ratio)x).toReal().compare((Real)y) > 0;
-        }
-        break;
-      }
-      case Real: {
-        switch (y.type()) {
-          case Int:     return ((Real)x).compare(((Int)y).toReal()) > 0;
-          case BigInt:  return ((Real)x).compare(((BigInt)y).toReal()) > 0;
-          case Ratio:   return ((Real)x).compare(((Ratio)y).toReal()) > 0;
-          case Real:    return ((Real)x).compare((Real)y) > 0;
-        }
-        break;
-      }
-      case Text: {
-        switch (y.type()) {
-          case Text: return ((Text)x).compare((Text)y) > 0;
-        }
-        break;
-      }
-    }
-    return false;
+    if (x.type() != y.type())
+      throw new TypeMismatch();
+    
+    return switch (x.type()) {
+      case Int  -> ((Int)x).compare((Int)y) > 0;
+      case Real -> ((Real)x).compare((Real)y) > 0;
+      case Text -> ((Text)x).compare((Text)y) > 0;
+      default   -> throw new TypeMismatch();
+    };
   }
   
   public static final Primitive Gt = new Primitive(2, false) {
@@ -292,51 +125,15 @@ public final class CoreLib
 
   public static boolean ge(Datum x, Datum y)
   {
-    switch (x.type()) {
-      case Int: {
-        switch (y.type()) {
-          case Int:     return ((Int)x).compare((Int)y) >= 0;
-          case BigInt:  return ((Int)x).toBigInt().compare((BigInt)y) >= 0;
-          case Ratio:   return ((Int)x).toRatio().compare((Ratio)y) >= 0;
-          case Real:    return ((Int)x).toReal().compare((Real)y) >= 0;
-        }
-        break;
-      }
-      case BigInt: {
-        switch (y.type()) {
-          case Int:     return ((BigInt)x).compare(((Int)y).toBigInt()) >= 0;
-          case BigInt:  return ((BigInt)x).compare((BigInt)y) >= 0;
-          case Ratio:   return ((BigInt)x).toRatio().compare((Ratio)y) >= 0;
-          case Real:    return ((BigInt)x).toReal().compare((Real)y) >= 0;
-        }
-        break;
-      }
-      case Ratio: {
-        switch (y.type()) {
-          case Int:     return ((Ratio)x).compare(((Int)y).toRatio()) >= 0;
-          case BigInt:  return ((Ratio)x).compare(((BigInt)y).toRatio()) >= 0;
-          case Ratio:   return ((Ratio)x).compare((Ratio)y) >= 0;
-          case Real:    return ((Ratio)x).toReal().compare((Real)y) >= 0;
-        }
-        break;
-      }
-      case Real: {
-        switch (y.type()) {
-          case Int:     return ((Real)x).compare(((Int)y).toReal()) >= 0;
-          case BigInt:  return ((Real)x).compare(((BigInt)y).toReal()) >= 0;
-          case Ratio:   return ((Real)x).compare(((Ratio)y).toReal()) >= 0;
-          case Real:    return ((Real)x).compare((Real)y) >= 0;
-        }
-        break;
-      }
-      case Text: {
-        switch (y.type()) {
-          case Text: return ((Text)x).compare((Text)y) >= 0;
-        }
-        break;
-      }
-    }
-    return false;
+    if (x.type() != y.type())
+      throw new TypeMismatch();
+    
+    return switch (x.type()) {
+      case Int  -> ((Int)x).compare((Int)y) >= 0;
+      case Real -> ((Real)x).compare((Real)y) >= 0;
+      case Text -> ((Text)x).compare((Text)y) >= 0;
+      default   -> throw new TypeMismatch();
+    };
   }
   
   public static final Primitive Ge = new Primitive(2, false) {
@@ -514,15 +311,7 @@ public final class CoreLib
   
   public static final Primitive IsInteger = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
-      var t = vm.popArg().type();
-      vm.result = truth(t == Type.Int || t == Type.BigInt);
-      vm.popFrame();
-    }
-  };
-  
-  public static final Primitive IsRational = new Primitive(1, false) {
-    public void apply(VirtualMachine vm) {
-      vm.result = truth(vm.popArg().type() == Type.Ratio);
+      vm.result = truth(vm.popArg().type() == Type.Int);
       vm.popFrame();
     }
   };
@@ -544,7 +333,7 @@ public final class CoreLib
   public static final Primitive IsNumber = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
       var t = vm.popArg().type();
-      vm.result = truth(t == Type.Int || t == Type.BigInt || t == Type.Ratio || t == Type.Real || t == Type.Complex);
+      vm.result = truth(t == Type.Int || t == Type.Real || t == Type.Complex);
       vm.popFrame();
     }
   };

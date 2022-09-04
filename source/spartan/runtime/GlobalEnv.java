@@ -58,7 +58,6 @@ public final class GlobalEnv
     bind(Symbol.get("empty?"), CoreLib.IsEmptyList);
     bind(Symbol.get("boolean?"), CoreLib.IsBoolean);
     bind(Symbol.get("integer?"), CoreLib.IsInteger);
-    bind(Symbol.get("rational?"), CoreLib.IsRational);
     bind(Symbol.get("real?"), CoreLib.IsReal);
     bind(Symbol.get("complex?"), CoreLib.IsComplex);
     bind(Symbol.get("number?"), CoreLib.IsNumber);
@@ -72,7 +71,6 @@ public final class GlobalEnv
     /* Math procedures */
     
     bind(Symbol.get("complex"), MathLib.MakeComplex);
-    bind(Symbol.get("ratio"), MathLib.MakeRatio);
     bind(Symbol.get("E"), Real.E);
     bind(Symbol.get("PI"), Real.PI);
     bind(Symbol.get("+inf"), Real.POS_INF);
@@ -87,7 +85,9 @@ public final class GlobalEnv
     bind(Symbol.get("floor"), MathLib.Floor);
     bind(Symbol.get("ceiling"), MathLib.Ceiling);
     bind(Symbol.get("round"), MathLib.Round);
-    //bind(Symbol.get("trunc"), MathLib.Trunc);
+    bind(Symbol.get("truncate"), MathLib.Truncate);
+    bind(Symbol.get("quotient"), MathLib.Quotient);
+    bind(Symbol.get("remainder"), MathLib.Remainder);
     bind(Symbol.get("exp"), MathLib.Exp);
     bind(Symbol.get("log"), MathLib.Log);
     bind(Symbol.get("sin"), MathLib.Sin);
@@ -97,13 +97,9 @@ public final class GlobalEnv
     bind(Symbol.get("acos"), MathLib.Cos);
     bind(Symbol.get("atan"), MathLib.Tan);    
     bind(Symbol.get("rand"), MathLib.Rand);
-    bind(Symbol.get("numerator"), MathLib.Numerator);
-    bind(Symbol.get("denominator"), MathLib.Denominator);
     bind(Symbol.get("real-part"), MathLib.RealPart);
     bind(Symbol.get("imag-part"), MathLib.ImagPart);
-    bind(Symbol.get("quotient"), MathLib.Quotient);
-    bind(Symbol.get("remainder"), MathLib.Remainder);
-    
+        
     /* Conversion procedures */
     
     bind(Symbol.get("text->symbol"), CoreLib.TextToSymbol);

@@ -244,9 +244,8 @@ public class Reader implements AutoCloseable
   /* Read a number (integer, rational, real, or complex)
      according to the following grammar:
     
-    <number> -> <sign>? (<integer> | <rational> | <real> | <complex>)
+    <number> -> <sign>? (<integer> | <real> | <complex>)
     <integer> -> <digit>+
-    <rational> -> <integer> "/" <integer>
     <real> -> <integer> "." <integer> <exponent>?
     <complex> -> <real> <sign> <real> "i"
     <exponent> -> ("e" | "E") <sign>? <integer>
@@ -266,16 +265,6 @@ public class Reader implements AutoCloseable
 
     scanDigits(text);
 
-    if (peekChar() == '/') {
-      var numer = text.toString();
-      text = new StringBuilder();
-      getChar(); // skip /
-      getChar();
-      scanDigits(text);
-      var denom = text.toString();
-      return new Ratio(numer, denom);
-    }
-    
     if (peekChar() == '.') {      
       scanFractionAndExponent(text);
       
@@ -289,12 +278,7 @@ public class Reader implements AutoCloseable
       
       return new Real(text.toString());
     }
-    
-    if (peekChar() == 'L') {
-      getChar();
-      return new BigInt(text.toString());
-    }
-    
+        
     return new Int(text.toString());
   }
 
@@ -307,17 +291,7 @@ public class Reader implements AutoCloseable
       throw syntaxError("malformed numeric literal");
     }
   }
-  
-  private Ratio makeRatio(String numer, String denom)
-  {
-    try {
-      return new Ratio(numer, denom);
-    }
-    catch (NumberFormatException ex) {
-      throw syntaxError("malformed numeric literal");
-    }
-  }
-  
+    
   private Real makeReal(String text)
   {
     try {
