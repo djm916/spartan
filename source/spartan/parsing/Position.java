@@ -1,18 +1,7 @@
 package spartan.parsing;
 
-public class Position
+public record Position(String source, int line, int column)
 {
-  public final String source;
-  public final int line;
-  public final int column;
-  
-  public Position(String source, int line, int column)
-  {
-    this.source = source;
-    this.line = line;
-    this.column = column;
-  }
-
   public String toString()
   {
     return String.format("%s: %d: %d", source, line, column);

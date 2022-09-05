@@ -4,10 +4,7 @@ import spartan.data.List;
 import spartan.data.Symbol;
 
 class Scope
-{
-  private final Scope parent;
-  private final List symbols;
-  
+{  
   Scope(Scope parent)
   {
     this.parent = parent;
@@ -47,4 +44,7 @@ class Scope
         return offset;
     return -1;
   }
+
+  private final Scope parent;
+  private final List symbols;
 }
