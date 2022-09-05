@@ -5,13 +5,11 @@ import spartan.runtime.VirtualMachine;
 import spartan.compiling.ProcTemplate;
 
 public final class Macro extends Callable
-{
-  private final Inst code;
-  
+{ 
   public Macro(ProcTemplate template)
   {
-    super(template.requiredArgs, template.isVariadic);
-    this.code = template.code;
+    super(template.requiredArgs(), template.isVariadic());
+    this.code = template.code();
   }
   
   public Type type()
@@ -23,4 +21,6 @@ public final class Macro extends Callable
   {
     vm.control = code;
   }
+  
+  private final Inst code;
 }

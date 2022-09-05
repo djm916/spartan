@@ -7,13 +7,10 @@ import spartan.compiling.ProcTemplate;
 
 public final class Closure extends Callable
 {
-  private final Inst code;
-  private final LocalEnv locals;
-  
   public Closure(ProcTemplate template, LocalEnv locals)
   {
-    super(template.requiredArgs, template.isVariadic);
-    this.code = template.code;
+    super(template.requiredArgs(), template.isVariadic());
+    this.code = template.code();
     this.locals = locals;
   }
   
@@ -27,4 +24,7 @@ public final class Closure extends Callable
     vm.locals = locals;
     vm.control = code;
   }
+  
+  private final Inst code;
+  private final LocalEnv locals;
 }
