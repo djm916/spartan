@@ -66,7 +66,7 @@ public class Compiler
     if (index == null)
       return new LoadGlobal(symb, next);
     else
-      return new LoadLocal(index.depth, index.offset, next);
+      return new LoadLocal(index.depth(), index.offset(), next);
   }
 
   /* Compile a variable assignment.
@@ -94,7 +94,7 @@ public class Compiler
                      new LoadConst(Nil.Value, next)));
     else
       return compile(init, scope, false,
-                     new StoreLocal(index.depth, index.offset,
+                     new StoreLocal(index.depth(), index.offset(),
                      new LoadConst(Nil.Value, next)));
   }
 

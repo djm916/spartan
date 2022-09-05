@@ -5,14 +5,4 @@ package spartan.compiling;
    of intervening environment frames, and offset is the
    index of the variable within that environment.
 */
-class DeBruijnIndex
-{
-  final int depth;
-  final int offset;
-  
-  DeBruijnIndex(int depth, int offset)
-  {
-    this.depth = depth;
-    this.offset = offset;
-  }
-}
+record DeBruijnIndex(int depth, int offset) {}
