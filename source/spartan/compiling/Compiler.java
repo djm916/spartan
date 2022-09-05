@@ -19,8 +19,8 @@ public class Compiler
   
   public Inst compile(SourceDatum sourceExp)
   {
-    positionMap = sourceExp.positionMap;
-    return compile(sourceExp.datum, null, false, null);
+    positionMap = sourceExp.positionMap();
+    return compile(sourceExp.datum(), null, false, null);
   }
 
   private MalformedExpression malformedExp(Datum exp)
