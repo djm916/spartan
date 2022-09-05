@@ -273,13 +273,13 @@ public class Reader implements AutoCloseable
         text = new StringBuilder();
         scanImaginaryPart(text);
         var imag = text.toString();
-        return new Complex(real, imag);
+        return makeComplex(real, imag);
       }
       
-      return new Real(text.toString());
+      return makeReal(text.toString());
     }
         
-    return new Int(text.toString());
+    return makeInt(text.toString());
   }
 
   private Int makeInt(String text)

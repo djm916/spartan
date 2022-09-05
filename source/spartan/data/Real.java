@@ -2,10 +2,11 @@ package spartan.data;
 
 public final class Real extends Datum
 {
-  public static final Real PI = new Real(Math.PI);
+  public static final Real Pi = new Real(Math.PI);
   public static final Real E = new Real(Math.E);
-  public static final Real POS_INF = new Real(Double.POSITIVE_INFINITY);
-  public static final Real NEG_INF = new Real(Double.NEGATIVE_INFINITY);
+  public static final Real PositiveInfinity = new Real(Double.POSITIVE_INFINITY);
+  public static final Real NegativeInfinity = new Real(Double.NEGATIVE_INFINITY);
+  public static final Real NotANumber = new Real(Double.NaN);
   
   public Real(double value)
   {
@@ -28,6 +29,8 @@ public final class Real extends Datum
       return "+inf";
     if (value == Double.NEGATIVE_INFINITY)
       return "-inf";
+    if (value == Double.NaN)
+      return "NaN";
     return Double.toString(value);
   }
   

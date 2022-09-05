@@ -11,21 +11,19 @@
 
 (defun fact-rec (n)
   (defun fact-rect (n p)
-    (if (= 0L n) p
-      (fact-rect (- n 1L) (* n p))))
-  (fact-rect n 1L))
+    (if (= 0 n) p
+      (fact-rect (- n 1) (* n p))))
+  (fact-rect n 1))
 
 ;Imperative style, with loops and assignments
 
 (defun fact-loop (n)
-  (if (< n 2L) n
-    (let ((p 1L))
-      (while (/= n 0L)
+  (if (< n 2) n
+    (let ((p 1))
+      (while (/= n 0)
         (set! p (* n p))
-        (set! n (- n 1L)))
+        (set! n (- n 1)))
       p)))
 
-(print-line "6! = " (fact-rec 6L))
-(print-line "17! = " (fact-rec 17L))
-(print-line "6! = " (fact-loop 6L))
-(print-line "17! = " (fact-loop 17L))
+(print-line "6! = " (fact-rec 6))
+(print-line "6! = " (fact-loop 6))

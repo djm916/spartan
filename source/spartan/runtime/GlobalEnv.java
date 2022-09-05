@@ -68,13 +68,14 @@ public final class GlobalEnv
     //bind(Symbol.get("vector?"), CoreLib.IsVector);
     bind(Symbol.get("callable?"), CoreLib.IsCallable);
     
-    /* Math procedures */
+    /* Math constants & procedures */
     
     bind(Symbol.get("complex"), MathLib.MakeComplex);
     bind(Symbol.get("E"), Real.E);
-    bind(Symbol.get("PI"), Real.PI);
-    bind(Symbol.get("+inf"), Real.POS_INF);
-    bind(Symbol.get("-inf"), Real.NEG_INF);
+    bind(Symbol.get("PI"), Real.Pi);
+    bind(Symbol.get("+inf"), Real.PositiveInfinity);
+    bind(Symbol.get("-inf"), Real.NegativeInfinity);
+    bind(Symbol.get("NaN"), Real.NotANumber);
     bind(Symbol.get("I"), Complex.I);    
     bind(Symbol.get("+"), MathLib.Add);
     bind(Symbol.get("-"), MathLib.Sub);
@@ -99,7 +100,9 @@ public final class GlobalEnv
     bind(Symbol.get("rand"), MathLib.Rand);
     bind(Symbol.get("real-part"), MathLib.RealPart);
     bind(Symbol.get("imag-part"), MathLib.ImagPart);
-        
+    bind(Symbol.get("rect->polar"), MathLib.RectToPolar);
+    bind(Symbol.get("polar->rect"), MathLib.PolarToRect);
+    
     /* Conversion procedures */
     
     bind(Symbol.get("text->symbol"), CoreLib.TextToSymbol);
@@ -128,6 +131,7 @@ public final class GlobalEnv
     
     bind(Symbol.get("vector"), VectorLib.MakeVector);
     bind(Symbol.get("vector/new"), VectorLib.New);
+    bind(Symbol.get("vector/length"), VectorLib.Length);
     bind(Symbol.get("vector/copy"), VectorLib.Copy);
     bind(Symbol.get("vector/ref"), VectorLib.Ref);
     bind(Symbol.get("vector/set!"), VectorLib.Set);

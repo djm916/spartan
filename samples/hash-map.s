@@ -19,16 +19,15 @@
   (def index (remainder ((hash-map-hash-fun self) key) capacity))
   (def node (find-node-with-key self index key))
   (if (empty? node)
-    ; No key exists, add a new key, value pair
+    ; Key doesn't exist, add new (key, value) pair to bucket
     (let ((node-list (vector/ref table index))
           (new-node (list key value)))
       (vector/set! table index (cons new-node node-list))
       (set-hash-map-size! self (+ 1 size))
-      ; Automatically expand table when load factor exceeded
-      (def load-factor (/ size capacity))
-      (if (> load-factor 0.75)
+      ; Expand table capacity when load factor exceeded
+      (if (> (/ size capacity) 0.75)
         (resize-to-capacity! self)))
-    ; Key exists, replace current value
+    ; Key exists, replace current value associated with key
     (set-car! (cdr node) value)))
 
 (defun hash-map/key-exists? (self key)

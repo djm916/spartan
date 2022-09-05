@@ -386,4 +386,22 @@ public final class MathLib
       vm.popFrame();
     }
   };
+  
+  public static final Primitive RectToPolar = new Primitive(1, false) {
+    public void apply(VirtualMachine vm) {
+      if (vm.peekArg().type() != Type.Complex)
+        throw new TypeMismatch();
+      vm.result = ((Complex)vm.popArg()).toPolar();
+      vm.popFrame();
+    }
+  };
+  
+  public static final Primitive PolarToRect = new Primitive(1, false) {
+    public void apply(VirtualMachine vm) {
+      if (vm.peekArg().type() != Type.Complex)
+        throw new TypeMismatch();
+      vm.result = ((Complex)vm.popArg()).toRect();
+      vm.popFrame();
+    }
+  };
 }

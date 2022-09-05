@@ -13,6 +13,15 @@ public final class VectorLib
     }
   };
   
+  public static final Primitive Length = new Primitive(1, false) {
+    public void apply(VirtualMachine vm) {
+      if (vm.peekArg().type() != Type.Vector)
+        throw new TypeMismatch();
+      vm.result = new Int(((Vector)vm.popArg()).length());
+      vm.popFrame();
+    }
+  };
+  
   public static final Primitive New = new Primitive(2, false) {
     public void apply(VirtualMachine vm) {
       if (vm.peekArg().type() != Type.Int)
