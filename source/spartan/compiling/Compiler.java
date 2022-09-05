@@ -195,7 +195,8 @@ public class Compiler
 
      Syntax: (cond (pred1 body1)
                    ...
-                   (predN bodyN))
+                   (predN bodyN)
+                   (else  default))
 
      Compilation:
 
@@ -207,6 +208,8 @@ public class Compiler
      predN:  <<predN>>
              branch bodyN none
      bodyN:  <<bodyN>>
+             jump next
+     default:<<default>>
              jump next
      none:   load-const nil
      next:   ...
@@ -227,6 +230,9 @@ public class Compiler
     var clause = (List) clauses.car();
     var test = clause.car();
     var body = clause.cdr();
+
+    if (test == Symbols.Else)
+      return compileSequence(body, scope, tail, next);
 
     return compile(test, scope, false,
            new Branch(compileSequence(body, scope, tail, next),
@@ -521,10 +527,15 @@ public class Compiler
 
   private boolean checkClauseListForm(List clauses)
   {
-    for (; clauses != List.Empty; clauses = clauses.cdr())
-      if (clauses.car().type() != Type.List || ((List) clauses.car()).length() < 2)
+    for (; clauses != List.Empty; clauses = clauses.cdr()) {
+      if (clauses.car().type() != Type.List)
         return false;
-
+      var clause = (List) clauses.car();
+      if (clause.length() < 2)
+        return false;
+      if (clause.car() == Symbols.Else && clauses.cdr() != List.Empty)
+        return false;
+    }
     return true;
   }
 

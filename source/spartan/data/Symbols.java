@@ -7,6 +7,7 @@ public final class Symbols
   public static final Symbol Fun = Symbol.get("fun");
   public static final Symbol If = Symbol.get("if");
   public static final Symbol Cond = Symbol.get("cond");
+  public static final Symbol Else = Symbol.get("else");
   public static final Symbol Let = Symbol.get("let");
   public static final Symbol LetStar = Symbol.get("let*");
   public static final Symbol LetRec = Symbol.get("letrec");
@@ -27,6 +28,6 @@ public final class Symbols
   public static final Symbol Cons = Symbol.get("cons");
   public static final Symbol Concat = Symbol.get("concat");
   public static final Symbol CallCC = Symbol.get("call/cc");
-  
+    
   private Symbols() {}
 }
