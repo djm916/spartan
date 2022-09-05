@@ -31,6 +31,11 @@ public final class Vector extends Callable
     return create(length.value, init);
   }
   
+  public Vector()
+  {
+    this(DefaultInitialSize);
+  }
+  
   public Vector(int length)
   {
     super(1, false);
@@ -58,12 +63,12 @@ public final class Vector extends Callable
     return Type.Vector;
   }
   
-  public String str()
+  public String repr()
   {
     return elems.stream()
       .map(e -> e.repr())
-      .collect(Collectors.joining(", ", "[", "]"));
-  }
+      .collect(Collectors.joining(" ", "[", "]"));
+  }  
   
   public int length()
   {
@@ -127,5 +132,6 @@ public final class Vector extends Callable
     vm.popFrame();
   }
   
+  private static final int DefaultInitialSize = 8;
   private final ArrayList<Datum> elems;
 }

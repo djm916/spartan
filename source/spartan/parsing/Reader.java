@@ -386,6 +386,21 @@ public class Reader implements AutoCloseable
     return result;
   }
 
+  private Datum readVector() throws IOException
+  {
+    var result = new Vector();
+    var position = getTokenPosition();
+
+    skipSpace();
+
+    while (lastChar != -1 && lastChar != ']') {
+      result.append(readDatum());
+      skipSpace();
+    }
+
+    return result;
+  }
+  
   private Datum readQuote() throws IOException
   {
     skipSpace();
@@ -419,6 +434,8 @@ public class Reader implements AutoCloseable
       return null;
     if (lastChar == '(')
       return readList();
+    if (lastChar == '[')
+      return readVector();
     if (isSign(lastChar) && isDigit(peekChar()))
       return readNumber();
     if (isDigit(lastChar))

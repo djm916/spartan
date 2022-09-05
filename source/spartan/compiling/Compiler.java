@@ -38,6 +38,7 @@ public class Compiler
         || exp.type() == Type.Complex
         || exp.type() == Type.Bool
         || exp.type() == Type.Text
+        || exp.type() == Type.Vector
         || exp == List.Empty
         || exp == Nil.Value;
   }
