@@ -2,8 +2,6 @@ package spartan.runtime;
 
 public final class Jump extends Inst
 {
-  private Inst target;
-  
   public Jump()
   {
     super(null);
@@ -18,4 +16,6 @@ public final class Jump extends Inst
   {
     vm.control = target;
   }
+  
+  private Inst target;
 }

@@ -4,10 +4,7 @@ import spartan.parsing.Position;
 import spartan.errors.Error;
 
 public final class Apply extends Inst
-{
-  private final int numArgs;
-  private final Position position;
-  
+{  
   public Apply(int numArgs, Position position)
   {
     super(null);
@@ -25,4 +22,7 @@ public final class Apply extends Inst
       throw err;
     }
   }
+
+  private final int numArgs;
+  private final Position position;
 }

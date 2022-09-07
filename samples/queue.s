@@ -1,7 +1,7 @@
 
 ; Example of ADT "queue", making use of "defstruct" macro
 
-(load "stdlib/defstruct.s")
+(require "stdlib/defstruct.s")
 
 (defstruct queue (front back))
 
@@ -17,13 +17,13 @@
     (cond ((queue/empty? q)
              (set-queue-front! q node)
              (set-queue-back! q node))
-          (true
+          (else
              (set-cdr! (queue-back q) node)
              (set-queue-back! q node)))))
 
 (defun queue/pop (q)
   (cond ((queue/empty? q) nil)
-        (true
+        (else
           (let ((node (queue-front q)))
             (set-queue-front! q (cdr node))
             (if (empty? (queue-front q))
@@ -31,11 +31,10 @@
             (car node)))))
 
 (def q (queue/new))
-(queue/empty? q)
 (queue/push q 1)
 (queue/push q 2)
 (queue/push q 3)
-(queue/pop q)
-(queue/pop q)
-(queue/pop q)
-(queue/empty? q)
+(print-line "popped " (queue/pop q))
+(print-line "popped " (queue/pop q))
+(print-line "popped " (queue/pop q))
+(print-line "queue empty? " (queue/empty? q))

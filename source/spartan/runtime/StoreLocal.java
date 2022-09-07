@@ -1,10 +1,7 @@
 package spartan.runtime;
 
 public final class StoreLocal extends Inst
-{
-  private final int depth;
-  private final int offset;
-  
+{  
   public StoreLocal(int depth, int offset, Inst next)
   {
     super(next);
@@ -17,4 +14,7 @@ public final class StoreLocal extends Inst
     vm.locals.store(vm.result, depth, offset);
     vm.control = next;
   }
+
+  private final int depth;
+  private final int offset;
 }

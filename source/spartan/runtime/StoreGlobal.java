@@ -3,9 +3,7 @@ package spartan.runtime;
 import spartan.data.Symbol;
 
 public final class StoreGlobal extends Inst
-{
-  private final Symbol symb;
-  
+{  
   public StoreGlobal(Symbol symb, Inst next)
   {
     super(next);
@@ -17,4 +15,6 @@ public final class StoreGlobal extends Inst
     vm.globals.bind(symb, vm.result);
     vm.control = next;
   }
+
+  private final Symbol symb;
 }

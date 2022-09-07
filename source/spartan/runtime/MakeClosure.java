@@ -4,9 +4,7 @@ import spartan.data.Closure;
 import spartan.compiling.ProcTemplate;
 
 public final class MakeClosure extends Inst
-{
-  private final ProcTemplate template;
-  
+{  
   public MakeClosure(ProcTemplate template, Inst next)
   {
     super(next);
@@ -18,4 +16,6 @@ public final class MakeClosure extends Inst
     vm.result = new Closure(template, vm.locals);
     vm.control = next;
   }
+
+  private final ProcTemplate template;
 }

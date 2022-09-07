@@ -4,10 +4,7 @@ import spartan.data.Datum;
 import spartan.data.Nil;
 
 public final class LocalEnv
-{
-  private final Datum[] slots;
-  private final LocalEnv parent;
-  
+{  
   LocalEnv(int numSlots, LocalEnv parent)
   {
     this.slots = new Datum[numSlots];  
@@ -36,4 +33,7 @@ public final class LocalEnv
       self = self.parent;
     self.slots[offset] = x;
   }
+
+  private final Datum[] slots;
+  private final LocalEnv parent;
 }

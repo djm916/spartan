@@ -4,9 +4,6 @@ import spartan.parsing.Position;
 
 public final class PushFrame extends Inst
 {
-  private final Inst returnTo;
-  private final Position position;
-  
   public PushFrame(Inst returnTo, Position position, Inst next)
   {
     super(next);
@@ -19,4 +16,7 @@ public final class PushFrame extends Inst
     vm.pushFrame(returnTo, position);
     vm.control = next;
   }
+
+  private final Inst returnTo;
+  private final Position position;
 }

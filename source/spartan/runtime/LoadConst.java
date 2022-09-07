@@ -4,8 +4,6 @@ import spartan.data.Datum;
 
 public final class LoadConst extends Inst
 {
-  private final Datum x;
-  
   public LoadConst(Datum x, Inst next)
   {
     super(next);
@@ -17,4 +15,6 @@ public final class LoadConst extends Inst
     vm.result = x;
     vm.control = next;
   }
+
+  private final Datum x;
 }

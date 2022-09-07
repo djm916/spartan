@@ -158,7 +158,7 @@ public class Compiler
     var symb = exp.cadr();
     var params = exp.caddr();
     var body = exp.cdddr();
-    return List.of(Symbols.Def, symb, List.cons(Symbols.Fun, List.cons(params, body)));
+    return List.of(Symbol.Def, symb, List.cons(Symbol.Fun, List.cons(params, body)));
   }
 
   /* Compile the "if" special form.
@@ -231,7 +231,7 @@ public class Compiler
     var test = clause.car();
     var body = clause.cdr();
 
-    if (test == Symbols.Else)
+    if (test == Symbol.Else)
       return compileSequence(body, scope, tail, next);
 
     return compile(test, scope, false,
@@ -519,7 +519,7 @@ public class Compiler
       if (params.car().type() != Type.Symbol)
         return false;
       // The symbol & appearing in the parameter list must occur immediately before the final parameter
-      if (params.car() == Symbols.Ampersand && (params.cdr() == List.Empty || params.cddr() != List.Empty))
+      if (params.car() == Symbol.Ampersand && (params.cdr() == List.Empty || params.cddr() != List.Empty))
         return false;
     }
     return true;
@@ -533,7 +533,8 @@ public class Compiler
       var clause = (List) clauses.car();
       if (clause.length() < 2)
         return false;
-      if (clause.car() == Symbols.Else && clauses.cdr() != List.Empty)
+      // The symbol "else" must occur in the final clause
+      if (clause.car() == Symbol.Else && clauses.cdr() != List.Empty)
         return false;
     }
     return true;
@@ -748,13 +749,13 @@ public class Compiler
 
     while (body != List.Empty && isInnerDef(body.car())) {
       var exp = (List) body.car();
-      if (exp.car() == Symbols.Defun)
+      if (exp.car() == Symbol.Defun)
         exp = transformDefun(exp);
       bindings.add(exp.cdr());
       body = body.cdr();
     }
 
-    return List.cons(Symbols.LetRec, List.cons(bindings.build(), body));
+    return List.cons(Symbol.LetRec, List.cons(bindings.build(), body));
   }
 
   /* Determine if an expression is an inner-define form, i.e. a list beginning
@@ -765,7 +766,7 @@ public class Compiler
     if (exp.type() != Type.List || exp == List.Empty)
       return false;
     var car = ((List)exp).car();
-    return car == Symbols.Def || car == Symbols.Defun;
+    return car == Symbol.Def || car == Symbol.Defun;
   }
 
   /* Compiles the "or" special form, a logical disjunction.
@@ -916,7 +917,7 @@ public class Compiler
     // (quasiquote x) => (quote x) for atomic (non-list) x
     
     if (exp.type() != Type.List)
-      return List.of(Symbols.Quote, exp);
+      return List.of(Symbol.Quote, exp);
 
     var list = (List) exp;
     
@@ -928,10 +929,10 @@ public class Compiler
       
       // (quasiquote (unquote x) xs...) => (cons x (quasiquote xs...))
       
-      if (car.car() == Symbols.Unquote) {
+      if (car.car() == Symbol.Unquote) {
         if (car.length() != 2)
           throw malformedExp(exp);
-        return List.cons(Symbols.Cons,
+        return List.cons(Symbol.Cons,
                List.cons(car.cadr(),
                List.cons(transformQuasiquote(list.cdr()),
                List.Empty)));
@@ -939,10 +940,10 @@ public class Compiler
 
       // (quasiquote (unquote-splicing x) xs...) => (concat x (quasiquote xs...))    
       
-      if (car.car() == Symbols.UnquoteSplicing) {
+      if (car.car() == Symbol.UnquoteSplicing) {
         if (car.length() != 2)
           throw malformedExp(exp);
-        return List.cons(Symbols.Concat,
+        return List.cons(Symbol.Concat,
                List.cons(car.cadr(),
                List.cons(transformQuasiquote(list.cdr()),
                List.Empty)));
@@ -953,7 +954,7 @@ public class Compiler
     
     // (quasiquote x xs...) => (cons (quasiquote x) (quasiquote xs...))
 
-    return List.cons(Symbols.Cons,
+    return List.cons(Symbol.Cons,
            List.cons(transformQuasiquote(list.car()),
            List.cons(transformQuasiquote(list.cdr()),
            List.Empty)));
@@ -962,11 +963,11 @@ public class Compiler
   private ProcTemplate makeProcTemplate(List params, List body, Scope scope)
   {
     var numParams = params.length();
-    var isVariadic = numParams > 1 && params.at(numParams - 2) == Symbols.Ampersand;
+    var isVariadic = numParams > 1 && params.at(numParams - 2) == Symbol.Ampersand;
     var requiredArgs = isVariadic ? numParams - 2 : numParams;
     
     if (isVariadic)
-      params = params.remove((x) -> x == Symbols.Ampersand);
+      params = params.remove((x) -> x == Symbol.Ampersand);
     
     var extendedScope = new Scope(scope, params);
     
@@ -1109,41 +1110,41 @@ public class Compiler
   {
     if (exp.car().type() == Type.Symbol) {
       var car = (Symbol) exp.car();
-      if (car == Symbols.If)
+      if (car == Symbol.If)
         return compileIf(exp, scope, tail, next);
-      if (car == Symbols.Let)
+      if (car == Symbol.Let)
         return compileLet(exp, scope, tail, next);
-      if (car == Symbols.LetStar)
+      if (car == Symbol.LetStar)
         return compileLetStar(exp, scope, tail, next);
-      if (car == Symbols.LetRec)
+      if (car == Symbol.LetRec)
         return compileLetRec(exp, scope, tail, next);
-      if (car == Symbols.Do)
+      if (car == Symbol.Do)
         return compileDo(exp, scope, tail, next);
-      if (car == Symbols.Def)
+      if (car == Symbol.Def)
         return compileDef(exp, scope, next);
-      if (car == Symbols.Defun)
+      if (car == Symbol.Defun)
         return compileDefun(exp, scope, next);
-      if (car == Symbols.Defmacro)
+      if (car == Symbol.Defmacro)
         return compileDefMacro(exp, scope, next);
-      if (car == Symbols.Fun)
+      if (car == Symbol.Fun)
         return compileFun(exp, scope, next);
-      if (car == Symbols.Quote)
+      if (car == Symbol.Quote)
         return compileQuote(exp, next);
-      if (car == Symbols.Quasiquote)
+      if (car == Symbol.Quasiquote)
         return compileQuasiquote(exp, scope, next);
-      if (car == Symbols.Or)
+      if (car == Symbol.Or)
         return compileOr(exp, scope, tail, next);
-      if (car == Symbols.And)
+      if (car == Symbol.And)
         return compileAnd(exp, scope, tail, next);
-      if (car == Symbols.Cond)
+      if (car == Symbol.Cond)
         return compileCond(exp, scope, tail, next);      
-      if (car == Symbols.Set)
+      if (car == Symbol.Set)
         return compileSet(exp, scope, next);
-      if (car == Symbols.While)
+      if (car == Symbol.While)
         return compileWhile(exp, scope, tail, next);
-      if (car == Symbols.For)
+      if (car == Symbol.For)
         return compileForLoop(exp, scope, tail, next);
-      if (car == Symbols.CallCC)
+      if (car == Symbol.CallCC)
         return compileCallCC(exp, scope, tail, next);
       if (isMacro(car))
         return compileApplyMacro(exp, scope, tail, next);

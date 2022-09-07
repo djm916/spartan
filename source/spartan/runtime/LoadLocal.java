@@ -1,10 +1,7 @@
 package spartan.runtime;
 
 public final class LoadLocal extends Inst
-{
-  private final int depth;
-  private final int offset;
-  
+{  
   public LoadLocal(int depth, int offset, Inst next)
   {
     super(next);
@@ -17,4 +14,7 @@ public final class LoadLocal extends Inst
     vm.result = vm.locals.load(depth, offset);
     vm.control = next;
   }
+
+  private final int depth;
+  private final int offset;
 }

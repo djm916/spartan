@@ -3,9 +3,7 @@ package spartan.runtime;
 import spartan.builtins.CoreLib;
 
 public final class Branch extends Inst
-{
-  private final Inst ifTrue;
-  
+{  
   public Branch(Inst ifTrue, Inst ifFalse)
   {
     super(ifFalse);
@@ -19,4 +17,6 @@ public final class Branch extends Inst
     else
       vm.control = next;
   }
+
+  private final Inst ifTrue;
 }

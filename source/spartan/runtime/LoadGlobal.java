@@ -4,8 +4,6 @@ import spartan.data.Symbol;
 
 public final class LoadGlobal extends Inst
 {
-  private final Symbol symb;
-  
   public LoadGlobal(Symbol symb, Inst next)
   {
     super(next);
@@ -17,4 +15,6 @@ public final class LoadGlobal extends Inst
     vm.result = vm.globals.lookup(symb);
     vm.control = next;
   }
+
+  private final Symbol symb;
 }

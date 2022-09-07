@@ -77,10 +77,10 @@ public final class VirtualMachine
   
   public final void popFrame()
   {
-    control = frame.returnTo;
-    locals = frame.locals;
-    args = frame.args;
-    frame = frame.parent;
+    control = frame.returnTo();
+    locals = frame.locals();
+    args = frame.args();
+    frame = frame.parent();
   }
   
   public final void apply(int numArgs)
@@ -104,9 +104,9 @@ public final class VirtualMachine
   private java.util.List<Position> generateBackTrace()
   {
     var backTrace = new java.util.ArrayList<Position>();
-    for (; frame != null; frame = frame.parent)
-      if (frame.position != null)
-        backTrace.add(frame.position);
+    for (; frame != null; frame = frame.parent())
+      if (frame.position() != null)
+        backTrace.add(frame.position());
     return backTrace;
   }
 }

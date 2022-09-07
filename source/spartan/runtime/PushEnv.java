@@ -2,8 +2,6 @@ package spartan.runtime;
 
 public final class PushEnv extends Inst
 {
-  private final int numSlots;
-  
   public PushEnv(int numSlots, Inst next)
   {
     super(next);
@@ -15,4 +13,6 @@ public final class PushEnv extends Inst
     vm.locals = new LocalEnv(numSlots, vm.locals);
     vm.control = next;
   }
+
+  private final int numSlots;
 }

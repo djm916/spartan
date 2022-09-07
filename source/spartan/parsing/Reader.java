@@ -404,26 +404,26 @@ public class Reader implements AutoCloseable
   private Datum readQuote() throws IOException
   {
     skipSpace();
-    return List.of(Symbols.Quote, readDatum());
+    return List.of(Symbol.Quote, readDatum());
   }
   
   private Datum readUnquote() throws IOException
   {
     skipSpace();
-    return List.of(Symbols.Unquote, readDatum());
+    return List.of(Symbol.Unquote, readDatum());
   }
 
   private Datum readUnquoteSplicing() throws IOException
   {
     getChar();
     skipSpace();
-    return List.of(Symbols.UnquoteSplicing, readDatum());
+    return List.of(Symbol.UnquoteSplicing, readDatum());
   }
 
   private Datum readQuasiQuote() throws IOException
   {
     skipSpace();
-    return List.of(Symbols.Quasiquote, readDatum());
+    return List.of(Symbol.Quasiquote, readDatum());
   }
   
   private Datum readDatum() throws IOException
