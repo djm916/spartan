@@ -38,7 +38,6 @@ public class Compiler
         || exp.type() == Type.Complex
         || exp.type() == Type.Bool
         || exp.type() == Type.Text
-        || exp.type() == Type.Vector
         || exp == List.Empty
         || exp == Nil.Value;
   }
@@ -1104,6 +1103,22 @@ public class Compiler
     return vm.globals.lookup(symb).type() == Type.Macro;
   }
   
+  private Inst compileVector(Vector vector, Scope scope, Inst next)
+  {
+    return compileVectorElements(vector, scope, 0, vector.length(),
+           new MakeVector(vector.length(), next));
+  }
+  
+  private Inst compileVectorElements(Vector v, Scope scope, int i, int n, Inst next)
+  {
+    if (i == n)
+      return next;
+    
+    return compile(v.get(i), scope, false,
+           new PushArg(
+           compileVectorElements(v, scope, i + 1, n, next)));
+  }
+  
   /* Compile a generic list expression, handling special forms and procedure/macro applications. */
   
   private Inst compileList(List exp, Scope scope, boolean tail, Inst next)
@@ -1161,6 +1176,8 @@ public class Compiler
       return compileSelfEval(exp, next);
     else if (exp.type() == Type.Symbol)
       return compileVarRef((Symbol)exp, scope, next);
+    else if (exp.type() == Type.Vector)
+      return compileVector((Vector)exp, scope, next);
     else
       return compileList((List)exp, scope, tail, next);
   }

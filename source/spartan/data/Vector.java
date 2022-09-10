@@ -80,7 +80,7 @@ public final class Vector extends Callable
     return get(index.value);
   }
   
-  private Datum get(int index)
+  public Datum get(int index)
   {
     try {
       return elems.get(index);
