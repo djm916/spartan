@@ -11,14 +11,17 @@ import java.nio.file.Path;
 import java.nio.file.InvalidPathException;
 import java.util.logging.Logger;
 
+/** This class is responsible for locating, reading, and evaluating source code files. */
 public final class Loader
 {
-  public static void loadFile(String fileName, GlobalEnv globals)
+  public static void load(String fileName, GlobalEnv globals)
   throws IOException
   {
     var path = resolvePath(fileName);
+    
     if (Config.Debug)
       log.info(() -> "loading \"" + path + "\"");
+    
     try (Reader reader = Reader.forFile(path)) {
       var vm = new VirtualMachine(globals);
       var compiler = new Compiler(vm);
@@ -43,11 +46,12 @@ public final class Loader
     try {
       var givenPath = Path.of(fileName);
       
+      // Absolute path doesn't require search
       if (givenPath.isAbsolute())
         return givenPath.toString();
       
-      for (var loadPath : Config.LoadPaths) {
-        var tryPath = loadPath.resolve(givenPath);
+      for (var searchDir : Config.LoadSearchDirs) {
+        var tryPath = searchDir.resolve(givenPath);
         if (Config.Debug)
           log.info(() -> "Attempting to load \"" + tryPath + "\"");
         if (Files.exists(tryPath))

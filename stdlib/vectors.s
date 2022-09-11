@@ -39,9 +39,9 @@
       (set! i (+ 1 i)))
     result))
 
-(defun vector/sort! (f v)
+(defun vector/sort! (less-than? v)
   
-  (defun sort (source from to temp)
+  (defun sort (source from to temp)    
     (if (> (- to from) 1)
       (let ((mid (quotient (+ from to) 2)))
         (sort source from mid temp)
@@ -53,11 +53,13 @@
     (let ((i from) (j mid) (k from))
       
       (while (and (< i mid) (< j to))
-        (if (f (vector/ref source i) (vector/ref source j))
-          (do (vector/set! temp k (source i))
-              (set! i (+ 1 i)))
-          (do (vector/set! temp k (source j))
-              (set! j (+ 1 j))))
+        (cond ((less-than? (vector/ref source i)
+                           (vector/ref source j))
+                (vector/set! temp k (vector/ref source i))
+                (set! i (+ 1 i)))
+              (else
+                (vector/set! temp k (vector/ref source j))
+                (set! j (+ 1 j))))
         (set! k (+ 1 k)))
       
       (while (< i mid)
