@@ -5,6 +5,7 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 import java.util.concurrent.Callable;
+import java.nio.file.Path;
 import spartan.data.List;
 import spartan.data.Text;
 import spartan.data.Symbol;
@@ -34,10 +35,12 @@ Enter Control-D (on Linux) or Control-Z (on Windows) to exit.""";
   
   static
   {
-    //System.out.println("loading libspartan.dll...");
-    
-    // Load "libspartan.dll", containing JNI native code dependencies
-    System.loadLibrary("libspartan");
+    //System.getProperties().list(System.out);
+    // Load JNI native code libraries
+    var spartanHome = System.getenv("SPARTANHOME");
+    var osName = System.getProperty("os.name").toLowerCase();
+    if (osName.startsWith("win"))
+      System.load(Path.of(spartanHome, "libspartan.dll").toString());
   }
   
   public static void main(String[] args) //throws java.io.IOException

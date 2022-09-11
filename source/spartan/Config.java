@@ -15,9 +15,10 @@ public final class Config
   public static final NumberFormat NumberFormatter;
   public static final String BuiltinsFilePath = "stdlib/builtins.s";
   public static final List<Path> LoadPaths;
+  //public static final Path HomePath;
   public static final boolean Debug;  
   private static final Logger log = Logger.getLogger(Config.class.getName());
-      
+  
   static {
     NumberFormatter = NumberFormat.getNumberInstance();
     NumberFormatter.setMinimumFractionDigits(DefaultDecimalPrecision);
@@ -31,7 +32,7 @@ public final class Config
     final var spartanPath = getSpartanPath();
     if (Debug)
       log.info(() -> "SPARTANPATH = " + spartanPath);
-    var paths = spartanPath.split(";");
+    var paths = spartanPath.split(System.getProperty("path.separator"));
     try {
       return Stream.of(paths).map(Path::of).toList();
     }
@@ -42,7 +43,7 @@ public final class Config
   
   private static String getSpartanPath()
   {
-    final var spartanPath = System.getenv("SPARTANPATH");
-    return spartanPath == null ? "." : spartanPath;
+    final var path = System.getenv("SPARTANPATH");
+    return path == null ? "." : path;
   }
 }
