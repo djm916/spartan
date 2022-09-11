@@ -5,7 +5,12 @@ import spartan.compiling.Compiler;
 import spartan.runtime.VirtualMachine;
 import spartan.runtime.GlobalEnv;
 import spartan.errors.Error;
+import spartan.errors.LoadError;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.InvalidPathException;
+import java.util.logging.Logger;
 
 public final class Evaluator
 {
@@ -34,7 +39,10 @@ public final class Evaluator
   public static void loadFile(String fileName, GlobalEnv globals)
   throws IOException
   {
-    try (Reader reader = Reader.forFile(fileName)) {
+    var path = resolvePath(fileName);
+    if (Config.Debug)
+      log.info(() -> "loading \"" + path + "\"");
+    try (Reader reader = Reader.forFile(path)) {
       var vm = new VirtualMachine(globals);
       var compiler = new Compiler(vm);
       
@@ -52,4 +60,29 @@ public final class Evaluator
       }
     }
   }
+  
+  private static String resolvePath(String fileName)
+  {
+    try {
+      var givenPath = Path.of(fileName);
+      
+      if (givenPath.isAbsolute())
+        return givenPath.toString();
+      
+      for (var loadPath : Config.LoadPaths) {
+        var tryPath = loadPath.resolve(givenPath);
+        if (Config.Debug)
+          log.info(() -> "Attempting to load \"" + tryPath + "\"");
+        if (Files.exists(tryPath))
+          return tryPath.toString();
+      }
+    }
+    catch (InvalidPathException ex) {
+      throw new LoadError(fileName);
+    }
+    
+    throw new LoadError(fileName);
+  }
+  
+  private static final Logger log = Logger.getLogger(Evaluator.class.getName());
 }

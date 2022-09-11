@@ -24,9 +24,6 @@ Welcome to the Spartan interactive interpreter!
 Enter expressions to be evaluated.
 Enter Control-D (on Linux) or Control-Z (on Windows) to exit.""";
   
-  // Path to code file to be pre-loaded
-  private static final String BuiltinsFilePath = "./stdlib/builtins.s";
-  
   // Path to the script file to execute (or null if none given)
   @Option(names = "--file", paramLabel = "path", description = "path to script file")
   private String scriptPath;
@@ -52,7 +49,7 @@ Enter Control-D (on Linux) or Control-Z (on Windows) to exit.""";
   {
     var globals = GlobalEnv.createBasis();
     
-    Evaluator.loadFile(BuiltinsFilePath, globals);
+    Evaluator.loadFile(Config.BuiltinsFilePath, globals);
     
     if (scriptPath == null) {
       System.out.println(ReplIntro);

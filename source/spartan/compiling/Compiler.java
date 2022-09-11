@@ -8,6 +8,7 @@ import spartan.parsing.Position;
 import spartan.errors.Error;
 import spartan.errors.MalformedExpression;
 import spartan.runtime.VirtualMachine;
+import spartan.Config;
 import java.util.logging.Logger;
 
 public class Compiler
@@ -136,7 +137,7 @@ public class Compiler
     
     var xform = transformDefun(exp);
     
-    if (debug)
+    if (Config.Debug)
       log.info(() -> String.format("defun transform: %s => %s", exp.repr(), xform.repr()));
     
     try {
@@ -697,7 +698,7 @@ public class Compiler
   {
     if (isInnerDef(body.car())) {
       var xform = transformInnerDefs(body);
-      if (debug)
+      if (Config.Debug)
         log.info(() -> String.format("inner defs transform: %s => %s", body.repr(), xform.repr()));
       return compile(xform, scope, true, next);
     }
@@ -892,7 +893,7 @@ public class Compiler
 
     var xform = transformQuasiquote(exp.cadr());
     
-    if (debug)
+    if (Config.Debug)
       log.info(() -> String.format("quasiquote transform: %s => %s", exp.repr(), xform.repr()));
     
     try {
@@ -1073,7 +1074,7 @@ public class Compiler
     try {
       var xform = applyMacroTransform(f, args);
       
-      if (debug)
+      if (Config.Debug)
         log.info(() -> String.format("macro transform: %s => %s", exp.repr(), xform.repr()));
       
       return compile(xform, scope, tail, next);
@@ -1105,18 +1106,18 @@ public class Compiler
   
   private Inst compileVector(Vector vector, Scope scope, Inst next)
   {
-    return compileVectorElements(vector, scope, 0, vector.length(),
-           new MakeVector(vector.length(), next));
+    return compileVectorElements(vector, scope, vector.length(),
+           new MakeVector(next));
   }
   
-  private Inst compileVectorElements(Vector v, Scope scope, int i, int n, Inst next)
+  private Inst compileVectorElements(Vector v, Scope scope, int i, Inst next)
   {
-    if (i == n)
+    if (i == 0)
       return next;
     
-    return compile(v.get(i), scope, false,
+    return compile(v.get(i - 1), scope, false,
            new PushArg(
-           compileVectorElements(v, scope, i + 1, n, next)));
+           compileVectorElements(v, scope, i - 1, next)));
   }
   
   /* Compile a generic list expression, handling special forms and procedure/macro applications. */
@@ -1184,8 +1185,5 @@ public class Compiler
 
   private PositionMap positionMap;
   private final VirtualMachine vm;
-  private static final boolean debug = 
-    Boolean.valueOf(System.getProperty("spartan.debug", "false"));
-  private static final Logger log = 
-    Logger.getLogger(Compiler.class.getName());
+  private static final Logger log = Logger.getLogger(Compiler.class.getName());
 }
