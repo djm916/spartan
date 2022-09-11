@@ -205,7 +205,7 @@ public final class CoreLib
       //TODO: Better handling of errors bubbling up from loaded file
       
       try {
-        spartan.Evaluator.loadFile(fileName, vm.globals);
+        spartan.Loader.loadFile(fileName, vm.globals);
       }
       catch (java.io.IOException ex) {
         throw new Error(ex.getMessage());

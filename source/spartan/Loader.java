@@ -3,7 +3,6 @@ package spartan;
 import spartan.parsing.Reader;
 import spartan.compiling.Compiler;
 import spartan.runtime.VirtualMachine;
-import spartan.runtime.GlobalEnv;
 import spartan.errors.Error;
 import spartan.errors.LoadError;
 import java.io.IOException;
@@ -12,30 +11,8 @@ import java.nio.file.Path;
 import java.nio.file.InvalidPathException;
 import java.util.logging.Logger;
 
-public final class Evaluator
+public final class Loader
 {
-  public static void startRepl(GlobalEnv globals)
-  throws IOException
-  {
-    try (Reader reader = Reader.forConsole()) {
-      var vm = new VirtualMachine(globals);
-      var compiler = new Compiler(vm);
-            
-      while (true) {
-        try {
-          var exp = reader.read();
-          if (exp == null)
-            return;
-          var result = vm.eval(compiler.compile(exp));
-          System.out.println(result.repr());
-        }
-        catch (Error err) {
-          System.err.println(err);
-        }
-      }
-    }
-  }
-  
   public static void loadFile(String fileName, GlobalEnv globals)
   throws IOException
   {
@@ -84,5 +61,5 @@ public final class Evaluator
     throw new LoadError(fileName);
   }
   
-  private static final Logger log = Logger.getLogger(Evaluator.class.getName());
+  private static final Logger log = Logger.getLogger(Loader.class.getName());
 }

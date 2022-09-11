@@ -1,4 +1,4 @@
-package spartan.runtime;
+package spartan;
 
 import spartan.data.*;
 import spartan.builtins.CoreLib;

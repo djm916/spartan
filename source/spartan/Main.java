@@ -9,7 +9,6 @@ import java.nio.file.Path;
 import spartan.data.List;
 import spartan.data.Text;
 import spartan.data.Symbol;
-import spartan.runtime.GlobalEnv;
 import spartan.errors.Error;
 
 @Command(name = "Spartan",
@@ -52,15 +51,15 @@ Enter Control-D (on Linux) or Control-Z (on Windows) to exit.""";
   {
     var globals = GlobalEnv.createBasis();
     
-    Evaluator.loadFile(Config.BuiltinsFilePath, globals);
+    Loader.loadFile(Config.BuiltinsFilePath, globals);
     
     if (scriptPath == null) {
       System.out.println(ReplIntro);
-      Evaluator.startRepl(globals);      
+      Repl.startRepl(globals);      
     }
     else {
       globals.bind(Symbol.get("sys/args"), makeArgsList());
-      Evaluator.loadFile(scriptPath, globals);
+      Loader.loadFile(scriptPath, globals);
     }
     
     return 0;

@@ -3,10 +3,12 @@ package spartan.runtime;
 import spartan.data.Datum;
 import spartan.data.List;
 import spartan.data.Callable;
+import spartan.GlobalEnv;
 import spartan.errors.Error;
 import spartan.errors.WrongNumberArgs;
 import spartan.errors.TypeMismatch;
 import spartan.parsing.Position;
+
 
 public final class VirtualMachine
 {
