@@ -3,48 +3,69 @@ package spartan.compiling;
 import spartan.data.List;
 import spartan.data.Symbol;
 
+/** This class implements a lexical environment for local variables. */
 class Scope
-{  
+{
+  /** Create a Scope with the given parent and an empty set of variables.
+      @param parent The parent scope
+  */
   Scope(Scope parent)
   {
     this.parent = parent;
-    this.symbols = List.Empty;
+    this.names = List.Empty;
   }
   
-  Scope(Scope parent, List symbols)
+  /** Create a Scope with the given parent and set of variables.
+      @param parent The parent scope
+      @param names The set of variables
+  */
+  Scope(Scope parent, List names)
   {
     this.parent = parent;
-    this.symbols = symbols;
+    this.names = names;
   }
   
-  Scope bind(Symbol s)
+  /** Extend this scope with a new variable binding. The extended scope
+      includes the given variable as well as all variables previously
+      bound by this scope and all its ancestors.
+      @param name The variable to bind
+      @return The extended scope
+  */
+  Scope bind(Symbol name)
   {
-    return new Scope(parent, symbols.append(s));
+    return new Scope(parent, names.append(name));
   }
   
-  DeBruijnIndex lookup(Symbol s)
+  /** Lookup a variable in the environment: this scope and all its ancestors.
+      @param name The variable to look up
+      @return The index of the variable, or null if not found.
+  */
+  DeBruijnIndex lookup(Symbol name)
   {
-    int depth = 0;
-    var scope = this;    
-    for (; scope != null; ++depth) {
-      int offset = scope.offsetOf(s);
-      if (offset >= 0)
-        return new DeBruijnIndex(depth, offset);
-      scope = scope.parent;
-    }
-    return null;
+    return lookup(this, name, 0);
   }
   
-  private int offsetOf(Symbol s)
+  private static DeBruijnIndex lookup(Scope scope, Symbol name, int depth)
   {
-    int offset = 0;
-    var symbols = this.symbols;
-    for (; !symbols.empty(); symbols = symbols.cdr(), ++offset)
-      if (symbols.car() == s)
-        return offset;
-    return -1;
+    int offset = offsetOf(scope.names, name, 0);
+    if (offset >= 0)
+      return new DeBruijnIndex(depth, offset);
+    else if (scope.parent != null)
+      return lookup(scope.parent, name, depth + 1);
+    else
+      return null;
+  }
+  
+  private static int offsetOf(List names, Symbol name, int offset)
+  {
+    if (names == List.Empty)
+      return -1;
+    else if (names.car() == name)
+      return offset;
+    else
+      return offsetOf(names.cdr(), name, offset + 1);
   }
 
   private final Scope parent;
-  private final List symbols;
+  private final List names;
 }

@@ -37,6 +37,7 @@
     <mkdir dir="javadoc"/>
     <javadoc sourcepath="source" destdir="javadoc">
       <excludepackage name="spartan.tests"/>
+      <excludepackage name="picocli"/>
     </javadoc>
   </target>
   

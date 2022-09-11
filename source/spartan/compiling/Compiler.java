@@ -64,10 +64,12 @@ public class Compiler
   {
     var index = (scope == null) ? null : scope.lookup(symb);
 
-    if (index == null)
+    if (index == null) {
       return new LoadGlobal(symb, next);
-    else
+    }
+    else {
       return new LoadLocal(index.depth(), index.offset(), next);
+    }      
   }
 
   /* Compile a variable assignment.
@@ -923,7 +925,7 @@ public class Compiler
     
     // Check for the unquote and unquote-splicing forms
     
-    if (list.car().type() == Type.List) {
+    if (list.car().type() == Type.List && list.car() != List.Empty) {
       
       var car = (List) list.car();
       

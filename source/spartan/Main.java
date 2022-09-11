@@ -16,14 +16,9 @@ import spartan.errors.Error;
          mixinStandardHelpOptions = true,
          showEndOfOptionsDelimiterInUsageHelp = true,
          sortOptions = false)
+
 public class Main implements Callable<Integer>
-{
-  // Intro text displayed when entering the REPL
-  private static final String ReplIntro = """
-Welcome to the Spartan interactive interpreter!
-Enter expressions to be evaluated.
-Enter Control-D (on Linux) or Control-Z (on Windows) to exit.""";
-  
+{  
   // Path to the script file to execute (or null if none given)
   @Option(names = "--file", paramLabel = "path", description = "path to script file")
   private String scriptPath;
@@ -51,15 +46,15 @@ Enter Control-D (on Linux) or Control-Z (on Windows) to exit.""";
   {
     var globals = GlobalEnv.createBasis();
     
-    Loader.loadFile(Config.BuiltinsFilePath, globals);
+    Loader.load(Config.BuiltinsFilePath, globals);
+    
+    globals.bind(Symbol.get("sys/args"), makeArgsList());
     
     if (scriptPath == null) {
-      System.out.println(ReplIntro);
-      Repl.startRepl(globals);      
+      Repl.start(globals);      
     }
-    else {
-      globals.bind(Symbol.get("sys/args"), makeArgsList());
-      Loader.loadFile(scriptPath, globals);
+    else {      
+      Loader.load(scriptPath, globals);
     }
     
     return 0;
