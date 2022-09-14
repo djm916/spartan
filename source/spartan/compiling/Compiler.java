@@ -7,7 +7,6 @@ import spartan.parsing.PositionMap;
 import spartan.parsing.Position;
 import spartan.errors.Error;
 import spartan.errors.MalformedExpression;
-import spartan.errors.UnboundVariable;
 import spartan.runtime.VirtualMachine;
 import spartan.Config;
 import java.util.logging.Logger;
@@ -22,7 +21,7 @@ public class Compiler
   public Inst compile(SourceDatum sourceExp)
   {
     positionMap = sourceExp.positionMap();
-    return compile(sourceExp.datum(), null, false, null);
+    return compile(sourceExp.datum(), Scope.Empty, false, null);
   }
 
   private MalformedExpression malformedExp(Datum exp)
@@ -63,14 +62,9 @@ public class Compiler
   
   private Inst compileVarRef(Symbol symb, Scope scope, Inst next)
   {
-    var index = (scope == null) ? null : scope.lookup(symb);
-
-    if (index == null) {
-      return new LoadGlobal(symb, positionMap.get(symb), next);
-    }
-    else {
-      return new LoadLocal(index.depth(), index.offset(), next);
-    }      
+    return scope.lookupOrElse(symb,
+      (index) -> new LoadLocal(index.depth(), index.offset(), next),
+      () -> new LoadGlobal(symb, positionMap.get(symb), next));
   }
 
   /* Compile a variable assignment.
@@ -90,16 +84,10 @@ public class Compiler
 
     var symb = (Symbol) exp.cadr();
     var init = exp.caddr();
-    var index = (scope == null) ? null : scope.lookup(symb);
-
-    if (index == null)
-      return compile(init, scope, false,
-                     new StoreGlobal(symb,
-                     new LoadConst(Nil.Value, next)));
-    else
-      return compile(init, scope, false,
-                     new StoreLocal(index.depth(), index.offset(),
-                     new LoadConst(Nil.Value, next)));
+    
+    return scope.lookupOrElse(symb,      
+      (index) -> compile(init, scope, false, new StoreLocal(index.depth(), index.offset(), next)),
+      () -> compile(init, scope, false, new StoreGlobal(symb, next)));
   }
 
   /* Compile a definition. A definition either binds or mutates a global variable.
@@ -1103,14 +1091,9 @@ public class Compiler
   
   /* Determine if a symbol is bound to a macro in the global environment. */
   
-  private boolean isMacro(Symbol symb)
+  private boolean isMacro(Symbol s)
   {
-    try {
-      return vm.globals.lookup(symb).type() == Type.Macro;
-    }
-    catch (UnboundVariable err) {
-      return false;
-    }
+    return vm.globals.lookupOrElse(s, (v) -> v.type() == Type.Macro, () -> false);
   }
   
   private Inst compileVector(Vector vector, Scope scope, Inst next)

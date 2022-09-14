@@ -10,6 +10,8 @@ import spartan.builtins.PortLib;
 import spartan.errors.UnboundVariable;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 public final class GlobalEnv
 {
@@ -23,12 +25,33 @@ public final class GlobalEnv
     globals.put(name, val);
   }
   
+  /** Lookup a variable in the global environment.
+      @param name The variable to look up
+      @return The value of the variable
+      @throws UnboundVariable if the variable is not found
+  */
   public Datum lookup(Symbol name)
   {
     var value = globals.get(name);
     if (value == null)
       throw new UnboundVariable(name);
     return value;
+  }
+  
+  /** Lookup a variable in the global environment.
+      If the variable is found, returns the value of invoking ifPresent on the
+      variable's value. Otherwise, returns the value of invoking getAbsent.
+      @param name The variable to look up
+      @param ifPresent The function to invoke if the variable was found
+      @param ifAbsent The supplier to invoke if the variable was not found
+      @return The value returned by ifPresent or ifAbsent
+  */
+  public <R> R lookupOrElse(Symbol name, Function<Datum, R> ifPresent, Supplier<R> ifAbsent)
+  {
+    if (globals.containsKey(name))
+      return ifPresent.apply(globals.get(name));
+    else
+      return ifAbsent.get();
   }
   
   private GlobalEnv() {}

@@ -1,6 +1,7 @@
 package spartan.runtime;
 
 import spartan.data.Symbol;
+import spartan.data.Nil;
 
 public final class StoreGlobal extends Inst
 {  
@@ -13,6 +14,7 @@ public final class StoreGlobal extends Inst
   public final void eval(VirtualMachine vm)
   {
     vm.globals.bind(name, vm.result);
+    vm.result = Nil.Value;
     vm.control = next;
   }
 
