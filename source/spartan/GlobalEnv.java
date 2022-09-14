@@ -7,6 +7,7 @@ import spartan.builtins.ListLib;
 import spartan.builtins.VectorLib;
 import spartan.builtins.TextLib;
 import spartan.builtins.PortLib;
+import spartan.errors.UnboundVariable;
 import java.util.Map;
 import java.util.HashMap;
 
@@ -24,7 +25,10 @@ public final class GlobalEnv
   
   public Datum lookup(Symbol name)
   {
-    return globals.get(name);
+    var value = globals.get(name);
+    if (value == null)
+      throw new UnboundVariable(name);
+    return value;
   }
   
   private GlobalEnv() {}
