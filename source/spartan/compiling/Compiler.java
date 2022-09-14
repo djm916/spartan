@@ -926,7 +926,7 @@ public class Compiler
     
     // Check for the unquote and unquote-splicing forms
     
-    if (list.car().type() == Type.List) {
+    if (list.car().type() == Type.List && list.car() != List.Empty) {
       
       var car = (List) list.car();
       
