@@ -65,7 +65,7 @@ public class Compiler
     var index = (scope == null) ? null : scope.lookup(symb);
 
     if (index == null) {
-      return new LoadGlobal(symb, next);
+      return new LoadGlobal(symb, positionMap.get(symb), next);
     }
     else {
       return new LoadLocal(index.depth(), index.offset(), next);
@@ -233,7 +233,7 @@ public class Compiler
     var test = clause.car();
     var body = clause.cdr();
 
-    if (test == Symbol.Else)
+    if (test.type() == Type.Symbol && ((Symbol)test).eq(Symbol.Else))
       return compileSequence(body, scope, tail, next);
 
     return compile(test, scope, false,
@@ -521,7 +521,8 @@ public class Compiler
       if (params.car().type() != Type.Symbol)
         return false;
       // The symbol & appearing in the parameter list must occur immediately before the final parameter
-      if (params.car() == Symbol.Ampersand && (params.cdr() == List.Empty || params.cddr() != List.Empty))
+      var param = (Symbol) params.car();
+      if (param.eq(Symbol.Ampersand) && (params.cdr() == List.Empty || params.cddr() != List.Empty))
         return false;
     }
     return true;
@@ -536,7 +537,7 @@ public class Compiler
       if (clause.length() < 2)
         return false;
       // The symbol "else" must occur in the final clause
-      if (clause.car() == Symbol.Else && clauses.cdr() != List.Empty)
+      if (clause.car().type() == Type.Symbol && ((Symbol)clause.car()).eq(Symbol.Else) && clauses.cdr() != List.Empty)
         return false;
     }
     return true;
@@ -751,7 +752,7 @@ public class Compiler
 
     while (body != List.Empty && isInnerDef(body.car())) {
       var exp = (List) body.car();
-      if (exp.car() == Symbol.Defun)
+      if (exp.car().type() == Type.Symbol && ((Symbol)exp.car()).eq(Symbol.Defun))
         exp = transformDefun(exp);
       bindings.add(exp.cdr());
       body = body.cdr();
@@ -768,7 +769,7 @@ public class Compiler
     if (exp.type() != Type.List || exp == List.Empty)
       return false;
     var car = ((List)exp).car();
-    return car == Symbol.Def || car == Symbol.Defun;
+    return car.type() == Type.Symbol && (((Symbol)car).eq(Symbol.Def) || ((Symbol)car).eq(Symbol.Defun));
   }
 
   /* Compiles the "or" special form, a logical disjunction.
@@ -931,7 +932,7 @@ public class Compiler
       
       // (quasiquote (unquote x) xs...) => (cons x (quasiquote xs...))
       
-      if (car.car() == Symbol.Unquote) {
+      if (car.car().type() == Type.Symbol && ((Symbol)car.car()).eq(Symbol.Unquote)) {
         if (car.length() != 2)
           throw malformedExp(exp);
         return List.cons(Symbol.Cons,
@@ -942,7 +943,7 @@ public class Compiler
 
       // (quasiquote (unquote-splicing x) xs...) => (concat x (quasiquote xs...))    
       
-      if (car.car() == Symbol.UnquoteSplicing) {
+      if (car.car().type() == Type.Symbol && ((Symbol)car.car()).eq(Symbol.UnquoteSplicing)) {
         if (car.length() != 2)
           throw malformedExp(exp);
         return List.cons(Symbol.Concat,
@@ -965,11 +966,11 @@ public class Compiler
   private ProcTemplate makeProcTemplate(List params, List body, Scope scope)
   {
     var numParams = params.length();
-    var isVariadic = numParams > 1 && params.at(numParams - 2) == Symbol.Ampersand;
+    var isVariadic = numParams > 1 && ((Symbol)params.at(numParams - 2)).eq(Symbol.Ampersand);
     var requiredArgs = isVariadic ? numParams - 2 : numParams;
     
     if (isVariadic)
-      params = params.remove((x) -> x == Symbol.Ampersand);
+      params = params.remove((x) -> ((Symbol)x).eq(Symbol.Ampersand));
     
     var extendedScope = new Scope(scope, params);
     
@@ -1103,7 +1104,10 @@ public class Compiler
   
   private boolean isMacro(Symbol symb)
   {
-    return vm.globals.lookup(symb).type() == Type.Macro;
+    var macro = vm.globals.lookup(symb);
+    if (macro == null)
+      return false;
+    return macro.type() == Type.Macro;
   }
   
   private Inst compileVector(Vector vector, Scope scope, Inst next)
@@ -1128,41 +1132,41 @@ public class Compiler
   {
     if (exp.car().type() == Type.Symbol) {
       var car = (Symbol) exp.car();
-      if (car == Symbol.If)
+      if (car.eq("if"))
         return compileIf(exp, scope, tail, next);
-      if (car == Symbol.Let)
+      if (car.eq("let"))
         return compileLet(exp, scope, tail, next);
-      if (car == Symbol.LetStar)
+      if (car.eq("let*"))
         return compileLetStar(exp, scope, tail, next);
-      if (car == Symbol.LetRec)
+      if (car.eq("letrec"))
         return compileLetRec(exp, scope, tail, next);
-      if (car == Symbol.Do)
+      if (car.eq("do"))
         return compileDo(exp, scope, tail, next);
-      if (car == Symbol.Def)
+      if (car.eq("def"))
         return compileDef(exp, scope, next);
-      if (car == Symbol.Defun)
+      if (car.eq("defun"))
         return compileDefun(exp, scope, next);
-      if (car == Symbol.Defmacro)
+      if (car.eq("defmacro"))
         return compileDefMacro(exp, scope, next);
-      if (car == Symbol.Fun)
+      if (car.eq("fun"))
         return compileFun(exp, scope, next);
-      if (car == Symbol.Quote)
+      if (car.eq("quote"))
         return compileQuote(exp, next);
-      if (car == Symbol.Quasiquote)
+      if (car.eq("quasiquote"))
         return compileQuasiquote(exp, scope, next);
-      if (car == Symbol.Or)
+      if (car.eq("or"))
         return compileOr(exp, scope, tail, next);
-      if (car == Symbol.And)
+      if (car.eq("and"))
         return compileAnd(exp, scope, tail, next);
-      if (car == Symbol.Cond)
+      if (car.eq("cond"))
         return compileCond(exp, scope, tail, next);      
-      if (car == Symbol.Set)
+      if (car.eq("set!"))
         return compileSet(exp, scope, next);
-      if (car == Symbol.While)
+      if (car.eq("while"))
         return compileWhile(exp, scope, tail, next);
-      if (car == Symbol.For)
+      if (car.eq("for"))
         return compileForLoop(exp, scope, tail, next);
-      if (car == Symbol.CallCC)
+      if (car.eq("call/cc"))
         return compileCallCC(exp, scope, tail, next);
       if (isMacro(car))
         return compileApplyMacro(exp, scope, tail, next);

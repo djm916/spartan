@@ -191,7 +191,7 @@ public final class CoreLib
   
   public static final Primitive TypeOf = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
-      vm.result = Symbol.get(vm.popArg().type().getName());
+      vm.result = new Symbol(vm.popArg().type().getName());
       vm.popFrame();
     }
   };
@@ -230,14 +230,14 @@ public final class CoreLib
     public void apply(VirtualMachine vm) {
       if (vm.peekArg().type() != Type.Text)
         throw new TypeMismatch();
-      vm.result = Symbol.get(((Text)vm.popArg()).str());
+      vm.result = new Symbol(((Text)vm.popArg()).str());
       vm.popFrame();
     }
   };
   
   public static final Primitive GenSym = new Primitive(0, false) {
     public void apply(VirtualMachine vm) {
-      vm.result = Symbol.gen();
+      vm.result = Symbol.generateUnique();
       vm.popFrame();
     }
   };

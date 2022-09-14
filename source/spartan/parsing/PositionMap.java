@@ -5,9 +5,7 @@ import java.util.IdentityHashMap;
 import spartan.data.Datum;
 
 public class PositionMap
-{
-  private final Map<Datum, Position> map = new IdentityHashMap<>();
-  
+{  
   public void put(Datum x, Position p)
   {
     map.put(x, p);
@@ -22,4 +20,6 @@ public class PositionMap
   {
     map.clear();
   }
+  
+  private final Map<Datum, Position> map = new IdentityHashMap<>();
 }

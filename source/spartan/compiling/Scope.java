@@ -60,7 +60,7 @@ class Scope
   {
     if (names == List.Empty)
       return -1;
-    else if (names.car() == name)
+    else if (((Symbol)names.car()).eq(name))
       return offset;
     else
       return offsetOf(names.cdr(), name, offset + 1);

@@ -331,7 +331,7 @@ public class Reader implements AutoCloseable
       return Bool.True;
     if ("false".equals(s))
       return Bool.False;
-    return Symbol.get(s);
+    return new Symbol(s);
   }
   
   private Datum readText() throws IOException
