@@ -315,7 +315,8 @@ public class Reader implements AutoCloseable
   private Datum readSymbol() throws IOException
   {
     var text = new StringBuilder();
-
+    var position = getTokenPosition();
+    
     text.append((char)lastChar);
 
     while (isSymbol(peekChar())) {
@@ -323,15 +324,9 @@ public class Reader implements AutoCloseable
       text.append((char)lastChar);
     }
     
-    // Handle keyword symbols such as nil, true, false
-    var s = text.toString();
-    if ("nil".equals(s))
-      return Nil.Value;
-    if ("true".equals(s))
-      return Bool.True;
-    if ("false".equals(s))
-      return Bool.False;
-    return Symbol.get(s);
+    var result = new Symbol(text.toString());
+    positionMap.put(result, position);
+    return result;
   }
   
   private Datum readText() throws IOException

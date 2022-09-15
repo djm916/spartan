@@ -2,10 +2,19 @@ package spartan.compiling;
 
 import spartan.data.List;
 import spartan.data.Symbol;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 /** This class implements a lexical environment for local variables. */
 class Scope
 {
+  static final Scope Empty = new Scope(null) {
+    Optional<DeBruijnIndex> lookup(Symbol name) {
+      return Optional.empty();
+    }
+  };
+
   /** Create a Scope with the given parent and an empty set of variables.
       @param parent The parent scope
   */
@@ -36,35 +45,42 @@ class Scope
     return new Scope(parent, names.append(name));
   }
   
-  /** Lookup a variable in the environment: this scope and all its ancestors.
+  /** Lookup a variable in the environment represented by this scope.
       @param name The variable to look up
-      @return The index of the variable, or null if not found.
+      @return The (optional) index of the variable
   */
-  DeBruijnIndex lookup(Symbol name)
+  Optional<DeBruijnIndex> lookup(Symbol name)
   {
-    return lookup(this, name, 0);
+    return lookup(name, 0);
   }
   
-  private static DeBruijnIndex lookup(Scope scope, Symbol name, int depth)
+  /** Lookup a variable in the environment represented by this scope.
+      If the variable is found, returns the value of invoking ifPresent on the
+      variable's index. Otherwise, returns the value of invoking getAbsent.
+      @param name The variable to look up
+      @param ifPresent The function to invoke if the variable was found
+      @param ifAbsent The supplier to invoke if the variable was not found
+      @return The value returned by ifPresent or ifAbsent
+  */
+  <R> R lookupOrElse(Symbol name, Function<DeBruijnIndex, R> ifPresent, Supplier<R> ifAbsent)
   {
-    int offset = offsetOf(scope.names, name, 0);
+    var maybeIndex = lookup(name);
+    if (maybeIndex.isPresent())
+      return ifPresent.apply(maybeIndex.get());
+    else
+      return ifAbsent.get();
+  }
+  
+  private Optional<DeBruijnIndex> lookup(Symbol toFind, int depth)
+  {
+    int offset = names.indexOf(toFind, (name) -> toFind.equals((Symbol)name));
     if (offset >= 0)
-      return new DeBruijnIndex(depth, offset);
-    else if (scope.parent != null)
-      return lookup(scope.parent, name, depth + 1);
+      return Optional.of(new DeBruijnIndex(depth, offset));
+    else if (parent != null)
+      return parent.lookup(toFind, depth + 1);
     else
-      return null;
-  }
-  
-  private static int offsetOf(List names, Symbol name, int offset)
-  {
-    if (names == List.Empty)
-      return -1;
-    else if (names.car() == name)
-      return offset;
-    else
-      return offsetOf(names.cdr(), name, offset + 1);
-  }
+      return Optional.empty();
+  }  
 
   private final Scope parent;
   private final List names;

@@ -48,7 +48,7 @@ public class Main implements Callable<Integer>
     
     Loader.load(Config.BuiltinsFilePath, globals);
     
-    globals.bind(Symbol.get("sys/args"), makeArgsList());
+    globals.bind(new Symbol("sys/args"), makeArgsList());
     
     if (scriptPath == null) {
       Repl.start(globals);      

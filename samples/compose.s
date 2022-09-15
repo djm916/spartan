@@ -4,8 +4,7 @@
 (defun square (x) (* x x))
 (defun double (x) (* 2 x))
 
-((compose double square) 2)
-
-(pipe 2 double square)
-(pipe 2 double double square)
-(pipe 2 double square square)
+(print-line "(2*2)^2 = " ((compose double square) 2))
+(print-line "(2*2)^2 = " (pipe 2 double square))
+(print-line "2*(2^2) = " (pipe 2 square double))
+(print-line "2*(2^2) = " ((compose square double) 2))

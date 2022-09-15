@@ -32,3 +32,17 @@
     true
     `(if (not ,(car xs)) false (all? ,@(cdr xs)))))
 
+(print-line "(any? false) = " (any? false))
+(print-line "(any? true) = " (any? true))
+(print-line "(any? false true) = " (any? false true))
+(print-line "(any? true false) = " (any? true false))
+(print-line "(any? false false) = " (any? false false))
+(print-line "(any? true true) = " (any? true true))
+
+(print-line "(all? false) = " (all? false))
+(print-line "(all? true) = " (all? true))
+(print-line "(all? false true) = " (all? false true))
+(print-line "(all? true false) = " (all? true false))
+(print-line "(all? true true) = " (all? true true))
+(print-line "(all? false false) = " (all? false false))
+

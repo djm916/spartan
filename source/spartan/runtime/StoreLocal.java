@@ -1,5 +1,7 @@
 package spartan.runtime;
 
+import spartan.data.Nil;
+
 public final class StoreLocal extends Inst
 {  
   public StoreLocal(int depth, int offset, Inst next)
@@ -12,6 +14,7 @@ public final class StoreLocal extends Inst
   public final void eval(VirtualMachine vm)
   {
     vm.locals.store(vm.result, depth, offset);
+    vm.result = Nil.Value;
     vm.control = next;
   }
 
