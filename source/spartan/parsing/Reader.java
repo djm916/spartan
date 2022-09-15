@@ -324,15 +324,7 @@ public class Reader implements AutoCloseable
       text.append((char)lastChar);
     }
     
-    // Handle keyword symbols such as nil, true, false
-    var s = text.toString();
-    if ("nil".equals(s))
-      return Nil.Value;
-    if ("true".equals(s))
-      return Bool.True;
-    if ("false".equals(s))
-      return Bool.False;
-    var result = new Symbol(s);
+    var result = new Symbol(text.toString());
     positionMap.put(result, position);
     return result;
   }

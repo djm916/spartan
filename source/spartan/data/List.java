@@ -142,6 +142,11 @@ public final class List extends Datum
       f.accept(list.first);
   }
   
+  public int indexOf(Datum x, Predicate<Datum> pred)
+  {
+    return indexOf(this, x, pred);
+  }
+  
   private static int length(List list)
   {
     int length = 0;
@@ -187,11 +192,18 @@ public final class List extends Datum
   private static List remove(List self, Predicate<Datum> pred)
   {
     var result = new Builder();
-    for (; self != Empty; self = self.rest) {
+    for (; self != Empty; self = self.rest)
       if (!pred.test(self.first))
         result.add(self.first);
-    }
     return result.build();
+  }
+  
+  private static int indexOf(List list, Datum x, Predicate<Datum> pred)
+  {
+    for (int i = 0; list != Empty; list = list.rest, ++i)
+      if (pred.test(list.first))
+        return i;
+    return -1;
   }
   
   private static boolean eq(List x, List y, BiPredicate<Datum, Datum> eq)

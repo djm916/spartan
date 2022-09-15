@@ -59,8 +59,11 @@ public final class GlobalEnv
   private final Map<Symbol, Datum> globals = new HashMap<>();
   
   {
-    /* General procedures */
+    /* General values & procedures */
     
+    bind(new Symbol("nil"), Nil.Value);
+    bind(new Symbol("true"), Bool.True);
+    bind(new Symbol("false"), Bool.False);    
     bind(new Symbol("apply"), CoreLib.Apply);    
     bind(new Symbol("print"), CoreLib.Print);
     bind(new Symbol("print-line"), CoreLib.PrintLine);

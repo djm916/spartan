@@ -6,7 +6,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-/** This class implements a lexical environment for local variables. */
+/** This class implements a statically-scoped, lexical environment. */
 class Scope
 {
   static final Scope Empty = new Scope(null) {
@@ -51,7 +51,7 @@ class Scope
   */
   Optional<DeBruijnIndex> lookup(Symbol name)
   {
-    return lookup(this, name, 0);
+    return lookup(name, 0);
   }
   
   /** Lookup a variable in the environment represented by this scope.
@@ -71,26 +71,16 @@ class Scope
       return ifAbsent.get();
   }
   
-  private static Optional<DeBruijnIndex> lookup(Scope scope, Symbol name, int depth)
+  private Optional<DeBruijnIndex> lookup(Symbol toFind, int depth)
   {
-    int offset = offsetOf(scope.names, name, 0);
+    int offset = names.indexOf(toFind, (name) -> toFind.equals((Symbol)name));
     if (offset >= 0)
       return Optional.of(new DeBruijnIndex(depth, offset));
-    else if (scope.parent != null)
-      return lookup(scope.parent, name, depth + 1);
+    else if (parent != null)
+      return parent.lookup(toFind, depth + 1);
     else
       return Optional.empty();
-  }
-  
-  private static int offsetOf(List names, Symbol name, int offset)
-  {
-    if (names == List.Empty)
-      return -1;
-    else if (((Symbol)names.car()).equals(name))
-      return offset;
-    else
-      return offsetOf(names.cdr(), name, offset + 1);
-  }
+  }  
 
   private final Scope parent;
   private final List names;
