@@ -81,6 +81,8 @@ public final class GlobalEnv
     bind(new Symbol("identity-hash"), CoreLib.IdentityHash);
     bind(new Symbol("error"), CoreLib.Error);    
     bind(new Symbol("format-decimal"), CoreLib.FormatDecimal);
+    bind(new Symbol("max"), CoreLib.Max);
+    bind(new Symbol("min"), CoreLib.Min);
     
     /* Type predicates */
     

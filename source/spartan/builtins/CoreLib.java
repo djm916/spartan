@@ -360,5 +360,43 @@ public final class CoreLib
     }
   };
   
+  public static Datum max(List xs)
+  {
+    var max = xs.car();
+    xs = xs.cdr();
+    while (xs != List.Empty) {
+      var x = xs.car();
+      if (gt(x, max))
+        max = x;
+      xs = xs.cdr();
+    }
+    return max;
+  }
   
+  public static final Primitive Max = new Primitive(1, true) {
+    public void apply(VirtualMachine vm) {
+      vm.result = max(vm.popRestArgs());
+      vm.popFrame();
+    }
+  };
+  
+  public static Datum min(List xs)
+  {
+    var min = xs.car();
+    xs = xs.cdr();
+    while (xs != List.Empty) {
+      var x = xs.car();
+      if (lt(x, min))
+        min = x;
+      xs = xs.cdr();
+    }
+    return min;
+  }
+  
+  public static final Primitive Min = new Primitive(1, true) {
+    public void apply(VirtualMachine vm) {
+      vm.result = min(vm.popRestArgs());
+      vm.popFrame();
+    }
+  };
 }

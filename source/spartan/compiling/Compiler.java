@@ -268,7 +268,7 @@ public class Compiler
     int numBindings = bindings.length();
     var vars = extractFirst(bindings);
     var inits = extractSecond(bindings);
-    var extendedScope = new Scope(scope, vars);
+    var extendedScope = scope.extend(vars);
 
     return compilePushArgs(inits, scope,
            new PushEnv(numBindings,
@@ -309,7 +309,7 @@ public class Compiler
     int numBindings = bindings.length();
     var vars = extractFirst(bindings);
     var inits = extractSecond(bindings);
-    var extendedScope = new Scope(scope, vars);
+    var extendedScope = scope.extend(vars);
 
     return new PushEnv(numBindings,
            compileRecursiveBindings(inits, 0, extendedScope,
@@ -358,10 +358,11 @@ public class Compiler
       throw malformedExp(exp);
 
     int numBindings = bindings.length();
-    var extendedScope = new Scope(scope, extractFirst(bindings));
+    var vars = extractFirst(bindings);
+    var extendedScope = scope.extend(vars);
 
     return new PushEnv(numBindings,
-           compileSequentialBindings(bindings, 0, new Scope(scope),
+           compileSequentialBindings(bindings, 0, scope.extend(),
            compileSequence(body, extendedScope, tail,
            new PopEnv(next))));
   }
@@ -422,9 +423,10 @@ public class Compiler
       throw malformedExp(exp);
     
     var bindings = (List) exp.cadr();
+    var vars = extractFirst(bindings);
     var test = (List) exp.caddr();
-    var body = exp.cdddr();    
-    var extendedScope = new Scope(scope, extractFirst(bindings));   
+    var body = exp.cdddr();        
+    var extendedScope = scope.extend(vars);
     var done = compile(test.cadr(), extendedScope, tail, new PopEnv(next));
     var jump = new Jump();
     var update = compileSequence(body, extendedScope, false,
@@ -434,7 +436,7 @@ public class Compiler
                new Branch(done, update));
     jump.setTarget(loop);
     return new PushEnv(bindings.length(),
-           compileSequentialBindings(bindings, 0, new Scope(scope),
+           compileSequentialBindings(bindings, 0, scope.extend(),
            loop));
   }
   
@@ -961,7 +963,7 @@ public class Compiler
     if (isVariadic)
       params = params.remove((x) -> ((Symbol)x).equals(Symbol.Ampersand));
     
-    var extendedScope = new Scope(scope, params);
+    var extendedScope = scope.extend(params);
     
     var code = isVariadic ? compileVariadicProc(body, extendedScope, requiredArgs)
                           : compileFixedProc(body, extendedScope, requiredArgs);
@@ -1045,7 +1047,7 @@ public class Compiler
     if (!checkParamListForm(params))
       throw malformedExp(exp);
     
-    vm.globals.bind(symb, new Macro(makeProcTemplate(params, body, null)));
+    vm.globals.bind(symb, new Macro(makeProcTemplate(params, body, Scope.Empty)));
     return new LoadConst(Nil.Value, next);
   }
   

@@ -9,40 +9,27 @@ import java.util.function.Supplier;
 /** This class implements a lexical environment for local variables. */
 class Scope
 {
-  static final Scope Empty = new Scope(null) {
-    Optional<DeBruijnIndex> lookup(Symbol name) {
-      return Optional.empty();
-    }
-  };
-
-  /** Create a Scope with the given parent and an empty set of variables.
-      @param parent The parent scope
-  */
-  Scope(Scope parent)
+  static final Scope Empty = new Scope(null);
+ 
+  /** Create a new empty, scope that extends this. */
+  Scope extend()
   {
-    this.parent = parent;
-    this.names = List.Empty;
+    return new Scope(this, List.Empty);
   }
   
-  /** Create a Scope with the given parent and set of variables.
-      @param parent The parent scope
-      @param names The set of variables
-  */
-  Scope(Scope parent, List names)
+  /** Create a new scope that extends this with a given set of variables. */
+  Scope extend(List vars)
   {
-    this.parent = parent;
-    this.names = names;
+    return new Scope(this, vars);
   }
   
-  /** Extend this scope with a new variable binding. The extended scope
-      includes the given variable as well as all variables previously
-      bound by this scope and all its ancestors.
+  /** Binds the given variable in this scope.
       @param name The variable to bind
       @return The extended scope
   */
   Scope bind(Symbol name)
   {
-    return new Scope(parent, names.append(name));
+    return new Scope(parent, vars.append(name));
   }
   
   /** Lookup a variable in the environment represented by this scope.
@@ -73,7 +60,7 @@ class Scope
   
   private Optional<DeBruijnIndex> lookup(Symbol toFind, int depth)
   {
-    int offset = names.indexOf(toFind, (name) -> toFind.equals((Symbol)name));
+    int offset = vars.indexOf(toFind, (name) -> toFind.equals((Symbol)name));
     if (offset >= 0)
       return Optional.of(new DeBruijnIndex(depth, offset));
     else if (parent != null)
@@ -82,6 +69,22 @@ class Scope
       return Optional.empty();
   }  
 
+  private Scope(Scope parent)
+  {
+    this.parent = parent;
+    this.vars = List.Empty;
+  }
+  
+  /** Create a Scope with the given parent and set of variables.
+      @param parent The parent scope
+      @param vars The set of variables
+  */
+  private Scope(Scope parent, List vars)
+  {
+    this.parent = parent;
+    this.vars = vars;
+  }
+    
   private final Scope parent;
-  private final List names;
+  private final List vars;
 }
