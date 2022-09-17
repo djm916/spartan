@@ -5,6 +5,8 @@ import spartan.errors.Error;
 import spartan.errors.TypeMismatch;
 import spartan.runtime.VirtualMachine;
 import spartan.Config;
+import java.util.Map;
+import java.util.EnumMap;
 
 public final class CoreLib
 {
@@ -191,8 +193,13 @@ public final class CoreLib
   
   public static final Primitive TypeOf = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
-      vm.result = new Symbol(vm.popArg().type().getName());
+      vm.result = typeSymbolMap.get(vm.popArg().type());
       vm.popFrame();
+    }
+    private Map<Type, Symbol> typeSymbolMap = new EnumMap<>(Type.class);
+    {
+      for (Type t : Type.values())
+        typeSymbolMap.put(t, new Symbol(t.getName()));
     }
   };
   
@@ -304,58 +311,56 @@ public final class CoreLib
   
   public static final Primitive IsBoolean = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
-      vm.result = truth(vm.popArg().type() == Type.Bool);
+      vm.result = truth(vm.popArg().type().isBool());
       vm.popFrame();
     }
   };
   
   public static final Primitive IsInteger = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
-      vm.result = truth(vm.popArg().type() == Type.Int);
+      vm.result = truth(vm.popArg().type().isInt());
       vm.popFrame();
     }
   };
   
   public static final Primitive IsReal = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
-      vm.result = truth(vm.popArg().type() == Type.Real);
+      vm.result = truth(vm.popArg().type().isReal());
       vm.popFrame();
     }
   };
   
   public static final Primitive IsComplex = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
-      vm.result = truth(vm.popArg().type() == Type.Complex);
+      vm.result = truth(vm.popArg().type().isComplex());
       vm.popFrame();
     }
   };
   
   public static final Primitive IsNumber = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
-      var t = vm.popArg().type();
-      vm.result = truth(t == Type.Int || t == Type.Real || t == Type.Complex);
+      vm.result = truth(vm.popArg().type().isNumber());
       vm.popFrame();
     }
   };
   
   public static final Primitive IsSymbol = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
-      vm.result = truth(vm.popArg().type() == Type.Symbol);
+      vm.result = truth(vm.popArg().type().isSymbol());
       vm.popFrame();
     }
   };
   
   public static final Primitive IsText = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
-      vm.result = truth(vm.popArg().type() == Type.Text);
+      vm.result = truth(vm.popArg().type().isText());
       vm.popFrame();
     }
   };
   
   public static final Primitive IsCallable = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
-      var t = vm.popArg().type();
-      vm.result = truth(t == Type.Primitive || t == Type.Closure || t == Type.Macro || t == Type.Continuation);
+      vm.result = truth(vm.popArg().type().isCallable());
       vm.popFrame();
     }
   };

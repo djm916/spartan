@@ -23,6 +23,46 @@ public enum Type
     return name;
   }
   
+  public boolean isBool()
+  {
+    return this == Bool;
+  }
+  
+  public boolean isInt()
+  {
+    return this == Int;
+  }
+  
+  public boolean isReal()
+  {
+    return this == Real;
+  }
+  
+  public boolean isComplex()
+  {
+    return this == Complex;
+  }
+  
+  public boolean isNumber()
+  {
+    return this == Int || this == Real || this == Complex;
+  }
+  
+  public boolean isSymbol()
+  {
+    return this == Symbol;
+  }
+  
+  public boolean isText()
+  {
+    return this == Text;
+  }
+  
+  public boolean isCallable()
+  {
+    return this == Primitive || this == Closure || this == Macro || this == Continuation;
+  }
+  
   private Type(String name)
   {
     this.name = name;
