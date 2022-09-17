@@ -89,7 +89,7 @@ public final class VirtualMachine
   {
     if (! (result instanceof Callable))
       throw new TypeMismatch();
-    Callable f = (Callable) result;
+    var f = (Callable) result;
     if (!f.matchArity(numArgs))
       throw new WrongNumberArgs();
     f.apply(this);

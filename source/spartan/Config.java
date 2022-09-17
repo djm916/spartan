@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.nio.file.InvalidPathException;
 import java.util.stream.Stream;
 import java.util.List;
+import java.util.random.RandomGenerator;
 
 /** Contains global system configuration parameters. */
 public final class Config
@@ -32,6 +33,8 @@ public final class Config
   /** Enables or disables debug logging. Configured with the "spartan.debug" Java system property. Should
       be "true" or "false". Defaults to "false". */
   public static final boolean Debug = Boolean.valueOf(System.getProperty("spartan.debug", "false"));
+  
+  public static final RandomGenerator DefaultRNG = RandomGenerator.getDefault();
   
   static {
     NumberFormatter.setMinimumFractionDigits(DefaultDecimalPrecision);

@@ -3,6 +3,7 @@ package spartan.builtins;
 import spartan.data.*;
 import spartan.errors.TypeMismatch;
 import spartan.runtime.VirtualMachine;
+import spartan.Config;
 
 public final class MathLib
 {
@@ -347,10 +348,10 @@ public final class MathLib
       vm.popFrame();
     }
   };
-  
+    
   public static final Primitive Rand = new Primitive(0, false) {
     public void apply(VirtualMachine vm) {
-      vm.result = new Real(Math.random());
+      vm.result = new Real(Config.DefaultRNG.nextDouble());
       vm.popFrame();
     }
   };

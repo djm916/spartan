@@ -11,27 +11,38 @@ import spartan.runtime.VirtualMachine;
 import spartan.Config;
 import java.util.logging.Logger;
 
+/** This class is responsible for compiling source expressions into executable bytecode. */
 public class Compiler
 {
+  /** Create a compiler.
+      @param vm A VirtualMachine instance, used for macro expansion during compilation
+      @return A new compiler
+  */
   public Compiler(VirtualMachine vm)
   {
     this.vm = vm;
   }
   
+  /** Compile a source expression.
+      @param sourceExp An expression with source position data, as returned by a Reader
+      @return An instruction graph representing the compiled bytecode, executable by a VirtualMachine
+      @throws MalformedExpression If the given sourceExp is not syntactically valid
+  */
   public Inst compile(SourceDatum sourceExp)
   {
     positionMap = sourceExp.positionMap();
     return compile(sourceExp.datum(), Scope.Empty, false, null);
   }
 
+  /* Convienence method for creating instances of MalformedExpression. */
+  
   private MalformedExpression malformedExp(Datum exp)
   {
     return new MalformedExpression(positionMap.get(exp));
   }
 
-  /* Determine if an expression is self-evaluating.
-     The expression should be returned directly as a value.
-  */
+  /* Determine if an expression is self-evaluating. */
+  
   private static boolean isSelfEval(Datum exp)
   {
     return exp.type() == Type.Int
@@ -63,7 +74,11 @@ public class Compiler
   private Inst compileVarRef(Symbol symb, Scope scope, Inst next)
   {
     return scope.lookupOrElse(symb,
+      
+      // Symbol is a bound local variable
       (index) -> new LoadLocal(index.depth(), index.offset(), next),
+      
+      // Assume symbol is a global variable
       () -> new LoadGlobal(symb, positionMap.get(symb), next));
   }
 
@@ -85,12 +100,20 @@ public class Compiler
     var symb = (Symbol) exp.cadr();
     var init = exp.caddr();
     
-    return scope.lookupOrElse(symb,      
-      (index) -> compile(init, scope, false, new StoreLocal(index.depth(), index.offset(), next)),
-      () -> compile(init, scope, false, new StoreGlobal(symb, next)));
+    return scope.lookupOrElse(symb,
+    
+      // Symbol is a bound local variable
+      (index) -> compile(init, scope, false,
+                 new StoreLocal(index.depth(), index.offset(),
+                 new LoadConst(Nil.Value, next))),
+                    
+      // Assume symbol is a global variable                    
+      () -> compile(init, scope, false,
+            new StoreGlobal(symb,
+            new LoadConst(Nil.Value, next))));
   }
 
-  /* Compile a definition. A definition either binds or mutates a global variable.
+  /* Compile a "def" special form.
   
      Syntax: (def symb init)
 
