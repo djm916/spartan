@@ -44,8 +44,8 @@ public final class CoreLib
       case Text    -> ((Text)x).eq((Text)y);
       case Vector  -> ((Vector)x).eq((Vector)y, CoreLib::eq);
       case List    -> ((List)x).eq((List)y, CoreLib::eq);
+      case Symbol  -> ((Symbol)x).eq((Symbol)y);
       case Bool,
-           Symbol,
            Nil     -> x == y;
       default      -> false;
     };

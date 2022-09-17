@@ -48,16 +48,11 @@ public final class Symbol extends Datum
     return id;
   }
   
-  public boolean equals(Symbol other)
+  public boolean eq(Symbol other)
   {
     return this.id.equals(other.id);
   }
-  
-  public boolean equals(String id)
-  {
-    return this.id.equals(id);
-  }
-  
+    
   public boolean equals(Object other)
   {
     if (! (other instanceof Symbol))
