@@ -9,11 +9,11 @@ public final class PortLib
 {
   public static final Primitive Open = new Primitive(2, false) {
     public void apply(VirtualMachine vm) {      
-      if (vm.peekArg().type() != Type.Text)
+      if (vm.peekArg().type() != Type.TEXT)
         throw new TypeMismatch();
       var fileName = ((Text) vm.popArg()).str();
       
-      if (vm.peekArg().type() != Type.Text)
+      if (vm.peekArg().type() != Type.TEXT)
         throw new TypeMismatch();
       var flags = ((Text) vm.popArg()).str();
       
@@ -24,22 +24,22 @@ public final class PortLib
   
   public static final Primitive Close = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
-      if (vm.peekArg().type() != Type.Port)
+      if (vm.peekArg().type() != Type.PORT)
         throw new TypeMismatch();
       var port = (Port) vm.popArg();      
       port.close();
-      vm.result = Nil.Value;
+      vm.result = Nil.VALUE;
       vm.popFrame();
     }
   };
   
   public static final Primitive Read = new Primitive(2, false) {
     public void apply(VirtualMachine vm) {
-      if (vm.peekArg().type() != Type.Port)
+      if (vm.peekArg().type() != Type.PORT)
         throw new TypeMismatch();
       var port = (Port) vm.popArg();
       
-      if (vm.peekArg().type() != Type.Int)
+      if (vm.peekArg().type() != Type.INT)
         throw new TypeMismatch();
       var numBytes = ((Int) vm.popArg()).value;
       
@@ -50,16 +50,16 @@ public final class PortLib
   
   public static final Primitive Write = new Primitive(2, false) {
     public void apply(VirtualMachine vm) {
-      if (vm.peekArg().type() != Type.Port)
+      if (vm.peekArg().type() != Type.PORT)
         throw new TypeMismatch();
       var port = (Port) vm.popArg();
       
-      if (vm.peekArg().type() != Type.Bytes)
+      if (vm.peekArg().type() != Type.BYTES)
         throw new TypeMismatch();
       var bytes = (Bytes) vm.popArg();
       
       port.write(bytes);
-      vm.result = Nil.Value;
+      vm.result = Nil.VALUE;
       vm.popFrame();
     }
   };

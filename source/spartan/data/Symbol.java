@@ -40,7 +40,7 @@ public final class Symbol extends Datum
   
   public Type type()
   {
-    return Type.Symbol;
+    return Type.SYMBOL;
   }
   
   public String repr()

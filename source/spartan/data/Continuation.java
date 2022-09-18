@@ -15,7 +15,7 @@ public final class Continuation extends Callable
   
   public Type type()
   {
-    return Type.Continuation;
+    return Type.CONTI;
   }
   
   public void apply(VirtualMachine vm)

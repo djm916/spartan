@@ -50,7 +50,7 @@ public class Reader implements AutoCloseable
   private Reader(String source, InputStream input) throws UnsupportedEncodingException
   {
     this.source = source;
-    this.input = new PushbackReader(new BufferedReader(new InputStreamReader(input, spartan.Config.DefaultEncoding)));
+    this.input = new PushbackReader(new BufferedReader(new InputStreamReader(input, spartan.Config.DEFAULT_ENCODING)));
   }
 
   private static boolean isDigit(int ch)

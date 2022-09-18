@@ -45,13 +45,13 @@ public class Compiler
   
   private static boolean isSelfEval(Datum exp)
   {
-    return exp.type() == Type.Int
-        || exp.type() == Type.Real
-        || exp.type() == Type.Complex
-        || exp.type() == Type.Bool
-        || exp.type() == Type.Text
-        || exp == List.Empty
-        || exp == Nil.Value;
+    return exp.type() == Type.INT
+        || exp.type() == Type.REAL
+        || exp.type() == Type.COMPLEX
+        || exp.type() == Type.BOOL
+        || exp.type() == Type.TEXT
+        || exp == List.EMPTY
+        || exp == Nil.VALUE;
   }
   
   /* Compile a self-evaluating expression. */
@@ -94,7 +94,7 @@ public class Compiler
 
   private Inst compileSet(List exp, Scope scope, Inst next)
   {
-    if (exp.length() != 3 || exp.cadr().type() != Type.Symbol)
+    if (exp.length() != 3 || exp.cadr().type() != Type.SYMBOL)
       throw malformedExp(exp);
 
     var symb = (Symbol) exp.cadr();
@@ -105,12 +105,12 @@ public class Compiler
       // Symbol is a bound local variable
       (index) -> compile(init, scope, false,
                  new StoreLocal(index.depth(), index.offset(),
-                 new LoadConst(Nil.Value, next))),
+                 new LoadConst(Nil.VALUE, next))),
                     
       // Assume symbol is a global variable                    
       () -> compile(init, scope, false,
             new StoreGlobal(symb,
-            new LoadConst(Nil.Value, next))));
+            new LoadConst(Nil.VALUE, next))));
   }
 
   /* Compile a "def" special form.
@@ -127,7 +127,7 @@ public class Compiler
 
   private Inst compileDef(List exp, Scope scope, Inst next)
   {
-    if (exp.length() != 3 || exp.cadr().type() != Type.Symbol)
+    if (exp.length() != 3 || exp.cadr().type() != Type.SYMBOL)
       throw malformedExp(exp);
 
     var symb = (Symbol) exp.cadr();
@@ -135,7 +135,7 @@ public class Compiler
 
     return compile(init, scope, false,
            new StoreGlobal(symb,
-           new LoadConst(Nil.Value,
+           new LoadConst(Nil.VALUE,
            next)));
   }
 
@@ -151,7 +151,7 @@ public class Compiler
     
     var xform = transformDefun(exp);
     
-    if (Config.Debug)
+    if (Config.LOG_DEBUG)
       log.info(() -> String.format("defun transform: %s => %s", exp.repr(), xform.repr()));
     
     try {
@@ -198,7 +198,7 @@ public class Compiler
 
     var pred = exp.cadr();
     var sub = exp.caddr();
-    var alt = length == 4 ? exp.cadddr() : Nil.Value;
+    var alt = length == 4 ? exp.cadddr() : Nil.VALUE;
 
     return compile(pred, scope, false,
            new Branch(compile(sub, scope, tail, next),
@@ -238,14 +238,14 @@ public class Compiler
 
   private Inst compileCondClauses(List clauses, Scope scope, boolean tail, Inst next)
   {
-    if (clauses == List.Empty)
-      return new LoadConst(Nil.Value, next);
+    if (clauses == List.EMPTY)
+      return new LoadConst(Nil.VALUE, next);
 
     var clause = (List) clauses.car();
     var test = clause.car();
     var body = clause.cdr();
 
-    if (test.type() == Type.Symbol && ((Symbol)test).equals(Symbol.Else))
+    if (test.type() == Type.SYMBOL && ((Symbol)test).eq(Symbol.Else))
       return compileSequence(body, scope, tail, next);
 
     return compile(test, scope, false,
@@ -279,7 +279,7 @@ public class Compiler
 
   private Inst compileLet(List exp, Scope scope, boolean tail, Inst next)
   {
-    if (exp.length() < 3 || exp.cadr().type() != Type.List)
+    if (exp.length() < 3 || exp.cadr().type() != Type.LIST)
       throw malformedExp(exp);
 
     var bindings = (List) exp.cadr();
@@ -320,7 +320,7 @@ public class Compiler
   */
   private Inst compileLetRec(List exp, Scope scope, boolean tail, Inst next)
   {
-    if (exp.length() < 3 || exp.cadr().type() != Type.List)
+    if (exp.length() < 3 || exp.cadr().type() != Type.LIST)
       throw malformedExp(exp);
 
     var bindings = (List) exp.cadr();
@@ -342,7 +342,7 @@ public class Compiler
 
   private Inst compileRecursiveBindings(List inits, int offset, Scope scope, Inst next)
   {
-    if (inits == List.Empty)
+    if (inits == List.EMPTY)
       return next;
 
     return compile(inits.car(), scope, false,
@@ -371,7 +371,7 @@ public class Compiler
   */
   private Inst compileLetStar(List exp, Scope scope, boolean tail, Inst next)
   {
-    if (exp.length() < 3 || exp.cadr().type() != Type.List)
+    if (exp.length() < 3 || exp.cadr().type() != Type.LIST)
       throw malformedExp(exp);
 
     var bindings = (List) exp.cadr();
@@ -392,7 +392,7 @@ public class Compiler
 
   private Inst compileSequentialBindings(List bindings, int offset, Scope scope, Inst next)
   {
-    if (bindings == List.Empty)
+    if (bindings == List.EMPTY)
       return next;
 
     var binding = (List) bindings.car();
@@ -465,7 +465,7 @@ public class Compiler
   
   private Inst compileForLoopUpdateStep(List bindings, Scope scope, int offset, Inst next)
   {
-    if (bindings == List.Empty)
+    if (bindings == List.EMPTY)
       return next;
     
     var binding = (List) bindings.car();
@@ -484,12 +484,12 @@ public class Compiler
     
     var bindings = exp.cadr();
     
-    if (bindings.type() != Type.List || !checkForLoopBindingListForm((List)bindings))
+    if (bindings.type() != Type.LIST || !checkForLoopBindingListForm((List)bindings))
       return false;
     
     var test = exp.caddr();
     
-    if (test.type() != Type.List || ((List)test).length() != 2)
+    if (test.type() != Type.LIST || ((List)test).length() != 2)
       return false;
     
     return true;
@@ -497,11 +497,11 @@ public class Compiler
   
   private boolean checkForLoopBindingListForm(List bindings)
   {
-    if (bindings == List.Empty)
+    if (bindings == List.EMPTY)
       return false;
 
-    for (; bindings != List.Empty; bindings = bindings.cdr())
-      if (bindings.car().type() != Type.List || !checkForLoopBindingPairForm((List) bindings.car()))
+    for (; bindings != List.EMPTY; bindings = bindings.cdr())
+      if (bindings.car().type() != Type.LIST || !checkForLoopBindingPairForm((List) bindings.car()))
         return false;
 
     return true;
@@ -509,16 +509,16 @@ public class Compiler
   
   private boolean checkForLoopBindingPairForm(List binding)
   {
-    return binding.length() == 3 && binding.car().type() == Type.Symbol;
+    return binding.length() == 3 && binding.car().type() == Type.SYMBOL;
   }
     
   private boolean checkBindingListForm(List bindings)
   {
-    if (bindings == List.Empty)
+    if (bindings == List.EMPTY)
       return false;
 
-    for (; bindings != List.Empty; bindings = bindings.cdr())
-      if (bindings.car().type() != Type.List || !checkBindingPairForm((List) bindings.car()))
+    for (; bindings != List.EMPTY; bindings = bindings.cdr())
+      if (bindings.car().type() != Type.LIST || !checkBindingPairForm((List) bindings.car()))
         return false;
 
     return true;
@@ -526,17 +526,17 @@ public class Compiler
   
   private boolean checkBindingPairForm(List binding)
   {
-    return binding.length() == 2 && binding.car().type() == Type.Symbol;
+    return binding.length() == 2 && binding.car().type() == Type.SYMBOL;
   }
 
   private boolean checkParamListForm(List params)
   {
-    for (; params != List.Empty; params = params.cdr()) {
-      if (params.car().type() != Type.Symbol)
+    for (; params != List.EMPTY; params = params.cdr()) {
+      if (params.car().type() != Type.SYMBOL)
         return false;
       // The symbol & appearing in the parameter list must occur immediately before the final parameter
       var param = (Symbol) params.car();
-      if (param.equals(Symbol.Ampersand) && (params.cdr() == List.Empty || params.cddr() != List.Empty))
+      if (param.eq(Symbol.Ampersand) && (params.cdr() == List.EMPTY || params.cddr() != List.EMPTY))
         return false;
     }
     return true;
@@ -544,14 +544,14 @@ public class Compiler
 
   private boolean checkClauseListForm(List clauses)
   {
-    for (; clauses != List.Empty; clauses = clauses.cdr()) {
-      if (clauses.car().type() != Type.List)
+    for (; clauses != List.EMPTY; clauses = clauses.cdr()) {
+      if (clauses.car().type() != Type.LIST)
         return false;
       var clause = (List) clauses.car();
       if (clause.length() < 2)
         return false;
       // The symbol "else" must occur in the final clause
-      if (clause.car().type() == Type.Symbol && ((Symbol)clause.car()).equals(Symbol.Else) && clauses.cdr() != List.Empty)
+      if (clause.car().type() == Type.SYMBOL && ((Symbol)clause.car()).eq(Symbol.Else) && clauses.cdr() != List.EMPTY)
         return false;
     }
     return true;
@@ -565,7 +565,7 @@ public class Compiler
   {
     var result = new List.Builder();
 
-    for (; pairs != List.Empty; pairs = pairs.cdr())
+    for (; pairs != List.EMPTY; pairs = pairs.cdr())
       result.add(((List)pairs.car()).car());
 
     return result.build();
@@ -579,7 +579,7 @@ public class Compiler
   {
     var result = new List.Builder();
 
-    for (; pairs != List.Empty; pairs = pairs.cdr())
+    for (; pairs != List.EMPTY; pairs = pairs.cdr())
       result.add(((List)pairs.car()).cadr());
 
     return result.build();
@@ -587,7 +587,7 @@ public class Compiler
 
   private Inst compilePushArgs(List args, Scope scope, Inst next)
   {
-    if (args == List.Empty)
+    if (args == List.EMPTY)
       return next;
 
     return compilePushArgs(args.cdr(), scope,
@@ -597,7 +597,7 @@ public class Compiler
 
   private Inst compilePushArgsUneval(List args, Inst next)
   {
-    if (args == List.Empty)
+    if (args == List.EMPTY)
       return next;
 
     return compilePushArgsUneval(args.cdr(),
@@ -698,10 +698,10 @@ public class Compiler
   
   private Inst compileSequence(List exp, Scope scope, boolean tail, Inst next)
   {
-    if (exp == List.Empty)
+    if (exp == List.EMPTY)
       return next;
 
-    return compile(exp.car(), scope, (tail && exp.cdr() == List.Empty),
+    return compile(exp.car(), scope, (tail && exp.cdr() == List.EMPTY),
            compileSequence(exp.cdr(), scope, tail, next));
   }
 
@@ -715,7 +715,7 @@ public class Compiler
   {
     if (isInnerDef(body.car())) {
       var xform = transformInnerDefs(body);
-      if (Config.Debug)
+      if (Config.LOG_DEBUG)
         log.info(() -> String.format("inner defs transform: %s => %s", body.repr(), xform.repr()));
       return compile(xform, scope, true, next);
     }
@@ -727,7 +727,7 @@ public class Compiler
   */
   private Inst compileFun(List exp, Scope scope, Inst next)
   {
-    if (exp.length() < 3 || exp.cadr().type() != Type.List)
+    if (exp.length() < 3 || exp.cadr().type() != Type.LIST)
       throw malformedExp(exp);
 
     var params = (List) exp.cadr();
@@ -764,9 +764,9 @@ public class Compiler
   {
     List.Builder bindings = new List.Builder();
 
-    while (body != List.Empty && isInnerDef(body.car())) {
+    while (body != List.EMPTY && isInnerDef(body.car())) {
       var exp = (List) body.car();
-      if (exp.car().type() == Type.Symbol && ((Symbol)exp.car()).equals(Symbol.Defun))
+      if (exp.car().type() == Type.SYMBOL && ((Symbol)exp.car()).eq(Symbol.Defun))
         exp = transformDefun(exp);
       bindings.add(exp.cdr());
       body = body.cdr();
@@ -780,10 +780,10 @@ public class Compiler
   */
   private boolean isInnerDef(Datum exp)
   {
-    if (exp.type() != Type.List || exp == List.Empty)
+    if (exp.type() != Type.LIST || exp == List.EMPTY)
       return false;
     var car = ((List)exp).car();
-    return car.type() == Type.Symbol && (((Symbol)car).equals(Symbol.Def) || ((Symbol)car).equals(Symbol.Defun));
+    return car.type() == Type.SYMBOL && (((Symbol)car).eq(Symbol.Def) || ((Symbol)car).eq(Symbol.Defun));
   }
 
   /* Compiles the "or" special form, a logical disjunction.
@@ -809,10 +809,10 @@ public class Compiler
 
   private Inst compileDisjunction(List exp, Scope scope, boolean tail, Inst next)
   {
-    if (exp == List.Empty)
+    if (exp == List.EMPTY)
       return next;
 
-    return compile(exp.car(), scope, (tail && exp.cdr() == List.Empty),
+    return compile(exp.car(), scope, (tail && exp.cdr() == List.EMPTY),
            new Branch(next,
                       compileDisjunction(exp.cdr(), scope, tail, next)));
   }
@@ -840,10 +840,10 @@ public class Compiler
 
   private Inst compileConjuction(List exp, Scope scope, boolean tail, Inst next)
   {
-    if (exp == List.Empty)
+    if (exp == List.EMPTY)
       return next;
 
-    return compile(exp.car(), scope, (tail && exp.cdr() == List.Empty),
+    return compile(exp.car(), scope, (tail && exp.cdr() == List.EMPTY),
            new Branch(compileConjuction(exp.cdr(), scope, tail, next),
                       next));
   }
@@ -885,7 +885,7 @@ public class Compiler
     var jump = new Jump();
     var loop = compile(pred, scope, false,
                new Branch(compileSequence(body, scope, tail, jump),
-                          new LoadConst(Nil.Value, next)));
+                          new LoadConst(Nil.VALUE, next)));
     jump.setTarget(loop);
     return loop;
   }
@@ -910,7 +910,7 @@ public class Compiler
 
     var xform = transformQuasiquote(exp.cadr());
     
-    if (Config.Debug)
+    if (Config.LOG_DEBUG)
       log.info(() -> String.format("quasiquote transform: %s => %s", exp.repr(), xform.repr()));
     
     try {
@@ -928,42 +928,42 @@ public class Compiler
   {
     // (quasiquote ()) => ()
     
-    if (exp == List.Empty)
-      return List.Empty;
+    if (exp == List.EMPTY)
+      return List.EMPTY;
     
     // (quasiquote x) => (quote x) for atomic (non-list) x
     
-    if (exp.type() != Type.List)
+    if (exp.type() != Type.LIST)
       return List.of(Symbol.Quote, exp);
 
     var list = (List) exp;
     
     // Check for the unquote and unquote-splicing forms
     
-    if (list.car().type() == Type.List && list.car() != List.Empty) {
+    if (list.car().type() == Type.LIST && list.car() != List.EMPTY) {
       
       var car = (List) list.car();
       
       // (quasiquote (unquote x) xs...) => (cons x (quasiquote xs...))
       
-      if (car.car().type() == Type.Symbol && ((Symbol)car.car()).equals(Symbol.Unquote)) {
+      if (car.car().type() == Type.SYMBOL && ((Symbol)car.car()).eq(Symbol.Unquote)) {
         if (car.length() != 2)
           throw malformedExp(exp);
         return List.cons(new Symbol("cons"),
                List.cons(car.cadr(),
                List.cons(transformQuasiquote(list.cdr()),
-               List.Empty)));
+               List.EMPTY)));
       }
 
       // (quasiquote (unquote-splicing x) xs...) => (concat x (quasiquote xs...))    
       
-      if (car.car().type() == Type.Symbol && ((Symbol)car.car()).equals(Symbol.UnquoteSplicing)) {
+      if (car.car().type() == Type.SYMBOL && ((Symbol)car.car()).eq(Symbol.UnquoteSplicing)) {
         if (car.length() != 2)
           throw malformedExp(exp);
         return List.cons(new Symbol("concat"),
                List.cons(car.cadr(),
                List.cons(transformQuasiquote(list.cdr()),
-               List.Empty)));
+               List.EMPTY)));
       }
     }
     
@@ -974,17 +974,17 @@ public class Compiler
     return List.cons(new Symbol("cons"),
            List.cons(transformQuasiquote(list.car()),
            List.cons(transformQuasiquote(list.cdr()),
-           List.Empty)));
+           List.EMPTY)));
   }
   
   private ProcTemplate makeProcTemplate(List params, List body, Scope scope)
   {
     var numParams = params.length();
-    var isVariadic = numParams > 1 && ((Symbol)params.at(numParams - 2)).equals(Symbol.Ampersand);
+    var isVariadic = numParams > 1 && ((Symbol)params.at(numParams - 2)).eq(Symbol.Ampersand);
     var requiredArgs = isVariadic ? numParams - 2 : numParams;
     
     if (isVariadic)
-      params = params.remove((x) -> ((Symbol)x).equals(Symbol.Ampersand));
+      params = params.remove((x) -> ((Symbol)x).eq(Symbol.Ampersand));
     
     var extendedScope = scope.extend(params);
     
@@ -1060,7 +1060,7 @@ public class Compiler
 
   private Inst compileDefMacro(List exp, Scope scope, Inst next)
   {
-    if (exp.length() < 4 || exp.cadr().type() != Type.Symbol || exp.caddr().type() != Type.List)
+    if (exp.length() < 4 || exp.cadr().type() != Type.SYMBOL || exp.caddr().type() != Type.LIST)
       throw malformedExp(exp);
 
     var symb = (Symbol) exp.cadr();
@@ -1071,7 +1071,7 @@ public class Compiler
       throw malformedExp(exp);
     
     vm.globals.bind(symb, new Macro(makeProcTemplate(params, body, Scope.Empty)));
-    return new LoadConst(Nil.Value, next);
+    return new LoadConst(Nil.VALUE, next);
   }
   
   /* Compile a macro application
@@ -1091,7 +1091,7 @@ public class Compiler
     try {
       var xform = applyMacroTransform(f, args);
       
-      if (Config.Debug)
+      if (Config.LOG_DEBUG)
         log.info(() -> String.format("macro transform: %s => %s", exp.repr(), xform.repr()));
       
       return compile(xform, scope, tail, next);
@@ -1118,7 +1118,7 @@ public class Compiler
   
   private boolean isMacro(Symbol s)
   {
-    return vm.globals.lookupOrElse(s, (v) -> v.type() == Type.Macro, () -> false);
+    return vm.globals.lookupOrElse(s, (v) -> v.type() == Type.MACRO, () -> false);
   }
   
   private Inst compileVector(Vector vector, Scope scope, Inst next)
@@ -1137,47 +1137,47 @@ public class Compiler
            compileVectorElements(v, scope, i - 1, next)));
   }
   
-  /* Compile a generic list expression, handling special forms and procedure/macro applications. */
+  /* Compile an s-expression (a list), handling special forms, macro expansion, and procedure application. */
   
   private Inst compileList(List exp, Scope scope, boolean tail, Inst next)
   {
-    if (exp.car().type() == Type.Symbol) {
+    if (exp.car().type() == Type.SYMBOL) {
       var car = (Symbol) exp.car();
-      if (car.equals(Symbol.If))
+      if (car.eq(Symbol.If))
         return compileIf(exp, scope, tail, next);
-      if (car.equals(Symbol.Let))
+      if (car.eq(Symbol.Let))
         return compileLet(exp, scope, tail, next);
-      if (car.equals(Symbol.LetStar))
+      if (car.eq(Symbol.LetStar))
         return compileLetStar(exp, scope, tail, next);
-      if (car.equals(Symbol.LetRec))
+      if (car.eq(Symbol.LetRec))
         return compileLetRec(exp, scope, tail, next);
-      if (car.equals(Symbol.Do))
+      if (car.eq(Symbol.Do))
         return compileDo(exp, scope, tail, next);
-      if (car.equals(Symbol.Def))
+      if (car.eq(Symbol.Def))
         return compileDef(exp, scope, next);
-      if (car.equals(Symbol.Defun))
+      if (car.eq(Symbol.Defun))
         return compileDefun(exp, scope, next);
-      if (car.equals(Symbol.Defmacro))
+      if (car.eq(Symbol.Defmacro))
         return compileDefMacro(exp, scope, next);
-      if (car.equals(Symbol.Fun))
+      if (car.eq(Symbol.Fun))
         return compileFun(exp, scope, next);
-      if (car.equals(Symbol.Quote))
+      if (car.eq(Symbol.Quote))
         return compileQuote(exp, next);
-      if (car.equals(Symbol.Quasiquote))
+      if (car.eq(Symbol.Quasiquote))
         return compileQuasiquote(exp, scope, next);
-      if (car.equals(Symbol.Or))
+      if (car.eq(Symbol.Or))
         return compileOr(exp, scope, tail, next);
-      if (car.equals(Symbol.And))
+      if (car.eq(Symbol.And))
         return compileAnd(exp, scope, tail, next);
-      if (car.equals(Symbol.Cond))
+      if (car.eq(Symbol.Cond))
         return compileCond(exp, scope, tail, next);      
-      if (car.equals(Symbol.Set))
+      if (car.eq(Symbol.Set))
         return compileSet(exp, scope, next);
-      if (car.equals(Symbol.While))
+      if (car.eq(Symbol.While))
         return compileWhile(exp, scope, tail, next);
-      if (car.equals(Symbol.For))
+      if (car.eq(Symbol.For))
         return compileForLoop(exp, scope, tail, next);
-      if (car.equals(Symbol.CallCC))
+      if (car.eq(Symbol.CallCC))
         return compileCallCC(exp, scope, tail, next);
       if (isMacro(car))
         return compileApplyMacro(exp, scope, tail, next);
@@ -1192,9 +1192,9 @@ public class Compiler
   {
     if (isSelfEval(exp))
       return compileSelfEval(exp, next);
-    else if (exp.type() == Type.Symbol)
+    else if (exp.type() == Type.SYMBOL)
       return compileVarRef((Symbol)exp, scope, next);
-    else if (exp.type() == Type.Vector)
+    else if (exp.type() == Type.VECTOR)
       return compileVector((Vector)exp, scope, next);
     else
       return compileList((List)exp, scope, tail, next);

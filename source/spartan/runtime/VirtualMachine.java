@@ -13,7 +13,7 @@ import spartan.parsing.Position;
 public final class VirtualMachine
 {
   public Datum result;
-  public List args = List.Empty;
+  public List args = List.EMPTY;
   public Inst control;
   public LocalEnv locals;
   public GlobalEnv globals;
@@ -40,7 +40,7 @@ public final class VirtualMachine
     
     // Assert VM returns to its default state
     assert control == null;
-    assert args == List.Empty;
+    assert args == List.EMPTY;
     assert locals == null;
     assert frame == null;
 
@@ -67,14 +67,14 @@ public final class VirtualMachine
   public final List popRestArgs()
   {
     List x = args;
-    args = List.Empty;
+    args = List.EMPTY;
     return x;
   }
   
   public final void pushFrame(Inst returnTo, Position position)
   {
     frame = new Frame(frame, locals, args, returnTo, position);
-    args = List.Empty;
+    args = List.EMPTY;
   }
   
   public final void popFrame()
@@ -98,7 +98,7 @@ public final class VirtualMachine
   public final void reset()
   {
     control = null;
-    args = List.Empty;
+    args = List.EMPTY;
     locals = null;
     frame = null;
   }

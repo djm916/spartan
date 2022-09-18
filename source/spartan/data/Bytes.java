@@ -6,7 +6,7 @@ public class Bytes extends Datum
 {
   public Type type()
   {
-    return Type.Bytes;
+    return Type.BYTES;
   }
   
   public Bytes(int n)

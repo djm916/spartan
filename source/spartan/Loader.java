@@ -19,7 +19,7 @@ public final class Loader
   {
     var path = resolvePath(fileName);
     
-    if (Config.Debug)
+    if (Config.LOG_DEBUG)
       log.info(() -> "loading \"" + path + "\"");
     
     try (Reader reader = Reader.forFile(path)) {
@@ -50,9 +50,9 @@ public final class Loader
       if (givenPath.isAbsolute())
         return givenPath.toString();
       
-      for (var searchDir : Config.LoadSearchDirs) {
+      for (var searchDir : Config.LOAD_SEARCH_DIRS) {
         var tryPath = searchDir.resolve(givenPath);
-        if (Config.Debug)
+        if (Config.LOG_DEBUG)
           log.info(() -> "Attempting to load \"" + tryPath + "\"");
         if (Files.exists(tryPath))
           return tryPath.toString();

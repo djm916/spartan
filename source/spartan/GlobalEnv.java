@@ -61,103 +61,103 @@ public final class GlobalEnv
   {
     /* General values & procedures */
     
-    bind(new Symbol("nil"), Nil.Value);
-    bind(new Symbol("true"), Bool.True);
-    bind(new Symbol("false"), Bool.False);    
-    bind(new Symbol("apply"), CoreLib.Apply);    
-    bind(new Symbol("print"), CoreLib.Print);
-    bind(new Symbol("print-line"), CoreLib.PrintLine);
-    bind(new Symbol("type"), CoreLib.TypeOf);
-    bind(new Symbol("length"), CoreLib.Length);
-    bind(new Symbol("load"), CoreLib.Load);
-    bind(new Symbol("="), CoreLib.Eq);
-    bind(new Symbol("/="), CoreLib.Ne);
-    bind(new Symbol("<"), CoreLib.Lt);
-    bind(new Symbol(">"), CoreLib.Gt);
-    bind(new Symbol("<="), CoreLib.Le);
-    bind(new Symbol(">="), CoreLib.Ge);
-    bind(new Symbol("not"), CoreLib.Not);    
-    bind(new Symbol("gensym"), CoreLib.GenSym);
-    bind(new Symbol("identity-hash"), CoreLib.IdentityHash);
-    bind(new Symbol("error"), CoreLib.Error);    
-    bind(new Symbol("format-decimal"), CoreLib.FormatDecimal);
-    bind(new Symbol("max"), CoreLib.Max);
-    bind(new Symbol("min"), CoreLib.Min);
+    bind(new Symbol("nil"), Nil.VALUE);
+    bind(new Symbol("true"), Bool.TRUE);
+    bind(new Symbol("false"), Bool.FALSE);    
+    bind(new Symbol("apply"), CoreLib.APPLY);
+    bind(new Symbol("print"), CoreLib.PRINT);
+    bind(new Symbol("print-line"), CoreLib.PRINT_LINE);
+    bind(new Symbol("type"), CoreLib.TYPE);
+    bind(new Symbol("length"), CoreLib.LENGTH);
+    bind(new Symbol("load"), CoreLib.LOAD);
+    bind(new Symbol("="), CoreLib.EQ);
+    bind(new Symbol("/="), CoreLib.NE);
+    bind(new Symbol("<"), CoreLib.LT);
+    bind(new Symbol(">"), CoreLib.GT);
+    bind(new Symbol("<="), CoreLib.LE);
+    bind(new Symbol(">="), CoreLib.GE);
+    bind(new Symbol("not"), CoreLib.NOT);    
+    bind(new Symbol("gensym"), CoreLib.GENSYM);
+    bind(new Symbol("identity-hash"), CoreLib.IDENTITY_HASH);
+    bind(new Symbol("error"), CoreLib.ERROR);    
+    bind(new Symbol("format-decimal"), CoreLib.FORMAT_DECIMAL);
+    bind(new Symbol("max"), CoreLib.MAX);
+    bind(new Symbol("min"), CoreLib.MIN);
     
     /* Type predicates */
     
-    bind(new Symbol("nil?"), CoreLib.IsNil);
-    bind(new Symbol("empty?"), CoreLib.IsEmptyList);
-    bind(new Symbol("boolean?"), CoreLib.IsBoolean);
-    bind(new Symbol("integer?"), CoreLib.IsInteger);
-    bind(new Symbol("real?"), CoreLib.IsReal);
-    bind(new Symbol("complex?"), CoreLib.IsComplex);
-    bind(new Symbol("number?"), CoreLib.IsNumber);
-    bind(new Symbol("symbol?"), CoreLib.IsSymbol);
-    bind(new Symbol("text?"), CoreLib.IsText);
+    bind(new Symbol("nil?"), CoreLib.IS_NIL);
+    bind(new Symbol("empty?"), CoreLib.IS_EMPTY_LIST);
+    bind(new Symbol("boolean?"), CoreLib.IS_BOOL);
+    bind(new Symbol("integer?"), CoreLib.IS_INT);
+    bind(new Symbol("real?"), CoreLib.IS_REAL);
+    bind(new Symbol("complex?"), CoreLib.IS_COMPLEX);
+    bind(new Symbol("number?"), CoreLib.IS_NUMBER);
+    bind(new Symbol("symbol?"), CoreLib.IS_SYMBOL);
+    bind(new Symbol("text?"), CoreLib.IS_TEXT);
     //bind(new Symbol("bytes?"), CoreLib.IsBytes);
     //bind(new Symbol("list?"), CoreLib.IsList);
     //bind(new Symbol("vector?"), CoreLib.IsVector);
-    bind(new Symbol("callable?"), CoreLib.IsCallable);
+    bind(new Symbol("callable?"), CoreLib.IS_CALLABLE);
     
     /* Math constants & procedures */
     
-    bind(new Symbol("complex"), MathLib.MakeComplex);
     bind(new Symbol("E"), Real.E);
-    bind(new Symbol("PI"), Real.Pi);
-    bind(new Symbol("+inf"), Real.PositiveInfinity);
-    bind(new Symbol("-inf"), Real.NegativeInfinity);
-    bind(new Symbol("NaN"), Real.NotANumber);
+    bind(new Symbol("PI"), Real.PI);
+    bind(new Symbol("+inf"), Real.POS_INF);
+    bind(new Symbol("-inf"), Real.NEG_INF);
+    bind(new Symbol("NaN"), Real.NAN);
     bind(new Symbol("I"), Complex.I);    
-    bind(new Symbol("+"), MathLib.Add);
-    bind(new Symbol("-"), MathLib.Sub);
-    bind(new Symbol("*"), MathLib.Mul);
-    bind(new Symbol("/"), MathLib.Div);
-    bind(new Symbol("~"), MathLib.Neg);
-    bind(new Symbol("abs"), MathLib.Abs);
-    bind(new Symbol("floor"), MathLib.Floor);
-    bind(new Symbol("ceiling"), MathLib.Ceiling);
-    bind(new Symbol("round"), MathLib.Round);
-    bind(new Symbol("truncate"), MathLib.Truncate);
-    bind(new Symbol("quotient"), MathLib.Quotient);
-    bind(new Symbol("remainder"), MathLib.Remainder);
-    bind(new Symbol("exp"), MathLib.Exp);
-    bind(new Symbol("log"), MathLib.Log);
-    bind(new Symbol("sin"), MathLib.Sin);
-    bind(new Symbol("cos"), MathLib.Cos);
-    bind(new Symbol("tan"), MathLib.Tan);
-    bind(new Symbol("asin"), MathLib.Sin);
-    bind(new Symbol("acos"), MathLib.Cos);
-    bind(new Symbol("atan"), MathLib.Tan);    
-    bind(new Symbol("rand"), MathLib.Rand);
-    bind(new Symbol("real-part"), MathLib.RealPart);
-    bind(new Symbol("imag-part"), MathLib.ImagPart);
-    bind(new Symbol("rect->polar"), MathLib.RectToPolar);
-    bind(new Symbol("polar->rect"), MathLib.PolarToRect);
+    bind(new Symbol("+"), MathLib.ADD);
+    bind(new Symbol("-"), MathLib.SUB);
+    bind(new Symbol("*"), MathLib.MUL);
+    bind(new Symbol("/"), MathLib.DIV);
+    bind(new Symbol("~"), MathLib.NEG);
+    bind(new Symbol("abs"), MathLib.ABS);
+    bind(new Symbol("floor"), MathLib.FLOOR);
+    bind(new Symbol("ceiling"), MathLib.CEILING);
+    bind(new Symbol("round"), MathLib.ROUND);
+    bind(new Symbol("truncate"), MathLib.TRUNCATE);
+    bind(new Symbol("quotient"), MathLib.QUOTIENT);
+    bind(new Symbol("remainder"), MathLib.REMAINDER);
+    bind(new Symbol("exp"), MathLib.EXP);
+    bind(new Symbol("log"), MathLib.LOG);
+    bind(new Symbol("sin"), MathLib.SIN);
+    bind(new Symbol("cos"), MathLib.COS);
+    bind(new Symbol("tan"), MathLib.TAN);
+    bind(new Symbol("asin"), MathLib.ASIN);
+    bind(new Symbol("acos"), MathLib.ACOS);
+    bind(new Symbol("atan"), MathLib.ATAN);    
+    bind(new Symbol("rand"), MathLib.RAND);
+    bind(new Symbol("complex"), MathLib.MAKE_COMPLEX);
+    bind(new Symbol("real-part"), MathLib.REAL_PART);
+    bind(new Symbol("imag-part"), MathLib.IMAG_PART);
+    bind(new Symbol("rect->polar"), MathLib.RECT_TO_POLAR);
+    bind(new Symbol("polar->rect"), MathLib.POLAR_TO_RECT);
     
     /* Conversion procedures */
     
-    bind(new Symbol("text->symbol"), CoreLib.TextToSymbol);
-    bind(new Symbol("symbol->text"), CoreLib.SymbolToText);    
-    bind(new Symbol("text->bytes"), CoreLib.TextToBytes); // encode
-    bind(new Symbol("bytes->text"), CoreLib.BytesToText); // decode
+    bind(new Symbol("text->symbol"), CoreLib.TEXT_TO_SYMBOL);
+    bind(new Symbol("symbol->text"), CoreLib.SYMBOL_TO_TEXT); 
+    bind(new Symbol("text->bytes"), CoreLib.TEXT_TO_BYTES); // encode
+    bind(new Symbol("bytes->text"), CoreLib.BYTES_TO_TEXT); // decode
     
     /* List procedures */
 
-    bind(new Symbol("list"), ListLib.MakeList);
-    bind(new Symbol("cons"), ListLib.Cons);
-    bind(new Symbol("car"), ListLib.Car);
-    bind(new Symbol("caar"), ListLib.Caar);
-    bind(new Symbol("cadr"), ListLib.Cadr);
-    bind(new Symbol("caddr"), ListLib.Caddr);
-    bind(new Symbol("cdr"), ListLib.Cdr);
-    bind(new Symbol("cddr"), ListLib.Cddr);
-    bind(new Symbol("cdddr"), ListLib.Cdddr);
-    bind(new Symbol("concat"), ListLib.Concat);
-    bind(new Symbol("append"), ListLib.Append);
-    bind(new Symbol("reverse"), ListLib.Reverse);
-    bind(new Symbol("set-car!"), ListLib.SetCar);
-    bind(new Symbol("set-cdr!"), ListLib.SetCdr);
+    bind(new Symbol("list"), ListLib.MAKE_LIST);
+    bind(new Symbol("cons"), ListLib.CONS);
+    bind(new Symbol("car"), ListLib.CAR);
+    bind(new Symbol("caar"), ListLib.CAAR);
+    bind(new Symbol("cadr"), ListLib.CADR);
+    bind(new Symbol("caddr"), ListLib.CADDR);
+    bind(new Symbol("cdr"), ListLib.CDR);
+    bind(new Symbol("cddr"), ListLib.CDDR);
+    bind(new Symbol("cdddr"), ListLib.CDDDR);
+    bind(new Symbol("concat"), ListLib.CONCAT);
+    bind(new Symbol("append"), ListLib.APPEND);
+    bind(new Symbol("reverse"), ListLib.REVERSE);
+    bind(new Symbol("set-car!"), ListLib.SET_CAR);
+    bind(new Symbol("set-cdr!"), ListLib.SET_CDR);
     
     /* Vector procedures */
     

@@ -15,7 +15,7 @@ public final class VectorLib
   
   public static final Primitive Length = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
-      if (vm.peekArg().type() != Type.Vector)
+      if (vm.peekArg().type() != Type.VECTOR)
         throw new TypeMismatch();
       vm.result = new Int(((Vector)vm.popArg()).length());
       vm.popFrame();
@@ -24,7 +24,7 @@ public final class VectorLib
   
   public static final Primitive New = new Primitive(2, false) {
     public void apply(VirtualMachine vm) {
-      if (vm.peekArg().type() != Type.Int)
+      if (vm.peekArg().type() != Type.INT)
         throw new TypeMismatch();
       var length = (Int) vm.popArg();
       var init = vm.popArg();
@@ -35,7 +35,7 @@ public final class VectorLib
   
   public static final Primitive Copy = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
-      if (vm.peekArg().type() != Type.Vector)
+      if (vm.peekArg().type() != Type.VECTOR)
         throw new TypeMismatch();
       vm.result = ((Vector) vm.popArg()).copy();
       vm.popFrame();
@@ -44,10 +44,10 @@ public final class VectorLib
   
   public static final Primitive Ref = new Primitive(2, false) {
     public void apply(VirtualMachine vm) {
-      if (vm.peekArg().type() != Type.Vector)
+      if (vm.peekArg().type() != Type.VECTOR)
         throw new TypeMismatch();
       var vector = (Vector) vm.popArg();
-      if (vm.peekArg().type() != Type.Int)
+      if (vm.peekArg().type() != Type.INT)
         throw new TypeMismatch();
       var index = (Int) vm.popArg();
       vm.result = vector.get(index);
@@ -57,26 +57,26 @@ public final class VectorLib
   
   public static final Primitive Set = new Primitive(3, false) {
     public void apply(VirtualMachine vm) {
-      if (vm.peekArg().type() != Type.Vector)
+      if (vm.peekArg().type() != Type.VECTOR)
         throw new TypeMismatch();
       var vector = (Vector) vm.popArg();
-      if (vm.peekArg().type() != Type.Int)
+      if (vm.peekArg().type() != Type.INT)
         throw new TypeMismatch();
       var index = (Int) vm.popArg();
       var value = vm.popArg();
       vector.set(index, value);
-      vm.result = Nil.Value;
+      vm.result = Nil.VALUE;
       vm.popFrame();
     }
   };
   
   public static final Primitive Append = new Primitive(2, false) {
     public void apply(VirtualMachine vm) {
-      if (vm.peekArg().type() != Type.Vector)
+      if (vm.peekArg().type() != Type.VECTOR)
         throw new TypeMismatch();
       var vector = (Vector) vm.popArg();
       vector.append(vm.popArg());
-      vm.result = Nil.Value;
+      vm.result = Nil.VALUE;
       vm.popFrame();
     }
   };

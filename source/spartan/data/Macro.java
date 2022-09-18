@@ -14,7 +14,7 @@ public final class Macro extends Callable
   
   public Type type()
   {
-    return Type.Macro;
+    return Type.MACRO;
   }
   
   public void apply(VirtualMachine vm)

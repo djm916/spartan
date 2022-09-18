@@ -9,7 +9,7 @@ public final class LocalEnv
   {
     this.slots = new Datum[numSlots];  
     for (int i = 0; i < numSlots; ++i)
-      this.slots[i] = Nil.Value;
+      this.slots[i] = Nil.VALUE;
     this.parent = parent;
   }
   

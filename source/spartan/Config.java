@@ -13,32 +13,32 @@ public final class Config
 {
   /** The default character encoding for converting to and from binary data.
       This encoding is assumed when reading source code files. */
-  public static final String DefaultEncoding = "UTF-8";
+  public static final String DEFAULT_ENCODING = "UTF-8";
   
   /** The default decimal display precision */
-  public static final int DefaultDecimalPrecision = 3;
+  public static final int DEFAULT_DECIMAL_PRECISION = 3;
   
   /** Global NumberFormatter instance */
-  public static final NumberFormat NumberFormatter = NumberFormat.getNumberInstance();
+  public static final NumberFormat NUMERIC_FORMATTER = NumberFormat.getNumberInstance();
   
   /** This source file (which is pre-loaded) bootstraps the initial environment with
       a core set of built-in procedures and macros. */
-  public static final String BuiltinsFilePath = "stdlib/builtins.s";
+  public static final String BUILTINS_FILE_PATH = "stdlib/builtins.s";
   
   /** The list of directories to search when loading a file. Populated from the environment variable
       SPARTANPATH. SPARTANPATH must contain a list of directories, separated by a (system-specific) delimiter.
       If SPARTANPATH is not set, defaults to the current working directory. */
-  public static final List<Path> LoadSearchDirs = initLoadSearchDirs();
+  public static final List<Path> LOAD_SEARCH_DIRS = initLoadSearchDirs();
   
   /** Enables or disables debug logging. Configured with the "spartan.debug" Java system property. Should
       be "true" or "false". Defaults to "false". */
-  public static final boolean Debug = Boolean.valueOf(System.getProperty("spartan.debug", "false"));
+  public static final boolean LOG_DEBUG = Boolean.valueOf(System.getProperty("spartan.debug", "false"));
   
-  public static final RandomGenerator DefaultRNG = RandomGenerator.getDefault();
+  public static final RandomGenerator DEFAULT_RNG = RandomGenerator.getDefault();
   
   static {
-    NumberFormatter.setMinimumFractionDigits(DefaultDecimalPrecision);
-    NumberFormatter.setMaximumFractionDigits(DefaultDecimalPrecision);    
+    NUMERIC_FORMATTER.setMinimumFractionDigits(DEFAULT_DECIMAL_PRECISION);
+    NUMERIC_FORMATTER.setMaximumFractionDigits(DEFAULT_DECIMAL_PRECISION);    
   }
   
   private Config() {}

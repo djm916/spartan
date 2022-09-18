@@ -2,21 +2,21 @@ package spartan.data;
 
 public enum Type
 {
-  Nil("type/nil"),
-  Bool("type/boolean"),
-  Int("type/integer"),
-  Real("type/real"),
-  Complex("type/complex"),
-  Symbol("type/symbol"),
-  Text("type/text"),
-  Bytes("type/bytes"),
-  List("type/list"),
-  Vector("type/vector"),
-  Primitive("type/procedure"),
-  Closure("type/procedure"),
-  Macro("type/macro"),
-  Continuation("type/continuation"),
-  Port("type/port");
+  NIL("type/nil"),
+  BOOL("type/boolean"),
+  INT("type/integer"),
+  REAL("type/real"),
+  COMPLEX("type/complex"),
+  SYMBOL("type/symbol"),
+  TEXT("type/text"),
+  BYTES("type/bytes"),
+  LIST("type/list"),
+  VECTOR("type/vector"),
+  PRIMITIVE("type/procedure"),
+  CLOSURE("type/procedure"),
+  MACRO("type/macro"),
+  CONTI("type/continuation"),
+  PORT("type/port");
   
   public String getName()
   {
@@ -25,42 +25,42 @@ public enum Type
   
   public boolean isBool()
   {
-    return this == Bool;
+    return this == BOOL;
   }
   
   public boolean isInt()
   {
-    return this == Int;
+    return this == INT;
   }
   
   public boolean isReal()
   {
-    return this == Real;
+    return this == REAL;
   }
   
   public boolean isComplex()
   {
-    return this == Complex;
+    return this == COMPLEX;
   }
   
   public boolean isNumber()
   {
-    return this == Int || this == Real || this == Complex;
+    return this == INT || this == REAL || this == COMPLEX;
   }
   
   public boolean isSymbol()
   {
-    return this == Symbol;
+    return this == SYMBOL;
   }
   
   public boolean isText()
   {
-    return this == Text;
+    return this == TEXT;
   }
   
   public boolean isCallable()
   {
-    return this == Primitive || this == Closure || this == Macro || this == Continuation;
+    return this == PRIMITIVE || this == CLOSURE || this == MACRO || this == CONTI;
   }
   
   private Type(String name)

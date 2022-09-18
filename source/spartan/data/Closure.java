@@ -16,7 +16,7 @@ public final class Closure extends Callable
   
   public Type type()
   {
-    return Type.Closure;
+    return Type.CLOSURE;
   }
   
   public void apply(VirtualMachine vm)

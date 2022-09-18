@@ -12,7 +12,8 @@ public final class Repl
   public static void start(GlobalEnv globals)
   throws IOException
   {
-    System.out.println(IntroMessage);
+    System.out.println(INTRO_MESSAGE);
+    
     try (Reader reader = Reader.forConsole()) {
       var vm = new VirtualMachine(globals);
       var compiler = new Compiler(vm);
@@ -33,7 +34,7 @@ public final class Repl
   }
   
   // Intro text displayed when entering the REPL
-  private static final String IntroMessage = """
+  private static final String INTRO_MESSAGE = """
 Welcome to the Spartan interactive interpreter!
 Enter expressions to be evaluated.
 Enter Control-D (on Linux) or Control-Z (on Windows) to exit.""";

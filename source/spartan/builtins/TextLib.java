@@ -14,7 +14,7 @@ public final class TextLib
   {
     var buffer = new StringBuilder();
     for (; !args.empty(); args = args.cdr()) {
-      if (args.car().type() != Type.Text)
+      if (args.car().type() != Type.TEXT)
         throw new TypeMismatch();
       buffer.append(((Text)args.car()).str());
     }
@@ -30,7 +30,7 @@ public final class TextLib
   
   public static final Primitive Hash = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
-      if (vm.peekArg().type() != Type.Text)
+      if (vm.peekArg().type() != Type.TEXT)
         throw new TypeMismatch();
       vm.result = new Int(((Text)vm.popArg()).hash());
       vm.popFrame();

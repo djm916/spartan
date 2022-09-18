@@ -18,7 +18,7 @@ public final class Int extends Datum
   
   public Type type()
   {
-    return Type.Int;
+    return Type.INT;
   }
   
   public String repr()

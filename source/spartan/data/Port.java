@@ -7,7 +7,7 @@ public abstract class Port extends Datum
 {
   public final Type type()
   {
-    return Type.Port;
+    return Type.PORT;
   }
   
   public static Port open(String fileName, String flags)

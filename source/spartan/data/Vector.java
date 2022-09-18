@@ -33,7 +33,7 @@ public final class Vector extends Callable
   
   public Vector()
   {
-    this(DefaultInitialSize);
+    this(DEFAULT_INITIAL_SIZE);
   }
   
   public Vector(int length)
@@ -60,7 +60,7 @@ public final class Vector extends Callable
   
   public Type type()
   {
-    return Type.Vector;
+    return Type.VECTOR;
   }
   
   public String repr()
@@ -125,13 +125,13 @@ public final class Vector extends Callable
   
   public void apply(VirtualMachine vm)
   {
-    if (vm.peekArg().type() != Type.Int)
+    if (vm.peekArg().type() != Type.INT)
       throw new TypeMismatch();
     var index = ((Int) vm.popArg()).value;
     vm.result = get(index);
     vm.popFrame();
   }
   
-  private static final int DefaultInitialSize = 8;
+  private static final int DEFAULT_INITIAL_SIZE = 8;
   private final ArrayList<Datum> elems;
 }

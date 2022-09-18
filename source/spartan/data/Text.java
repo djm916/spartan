@@ -11,7 +11,7 @@ public final class Text extends Datum
   
   public Type type()
   {
-    return Type.Text;
+    return Type.TEXT;
   }
   
   public String repr()

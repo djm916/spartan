@@ -6,18 +6,18 @@ import java.util.function.Consumer;
 
 public final class List extends Datum
 {
-  public static final List Empty = new List(null, null);
+  public static final List EMPTY = new List(null, null);
   
   public static class Builder
   {
-    private List head = Empty, tail = Empty;
+    private List head = EMPTY, tail = EMPTY;
     
     public Builder add(Datum x)
     {
-      if (head == Empty)
-        head = tail = new List(x, Empty);
+      if (head == EMPTY)
+        head = tail = new List(x, EMPTY);
       else
-        tail = tail.rest = new List(x, Empty);
+        tail = tail.rest = new List(x, EMPTY);
       
       return this;
     }
@@ -35,7 +35,7 @@ public final class List extends Datum
   
   public static List of(Datum... elems)
   {
-    var result = Empty;
+    var result = EMPTY;
     for (int i = elems.length - 1; i >= 0; --i)
       result = cons(elems[i], result);
     return result;
@@ -43,7 +43,7 @@ public final class List extends Datum
 
   public Type type()
   {
-    return Type.List;
+    return Type.LIST;
   }
   
   public String repr()
@@ -53,7 +53,7 @@ public final class List extends Datum
     
   public boolean empty()
   {
-    return this == Empty;
+    return this == EMPTY;
   }
   
   public Datum car()
@@ -138,7 +138,7 @@ public final class List extends Datum
   
   public void forEach(Consumer<Datum> f)
   {
-    for (var list = this; list != Empty; list = list.rest)
+    for (var list = this; list != EMPTY; list = list.rest)
       f.accept(list.first);
   }
   
@@ -150,7 +150,7 @@ public final class List extends Datum
   private static int length(List list)
   {
     int length = 0;
-    for (; list != Empty; list = list.rest)
+    for (; list != EMPTY; list = list.rest)
       length += 1;
     return length;
   }
@@ -165,9 +165,9 @@ public final class List extends Datum
   private static List concat(List x, List y)
   {
     var result = new Builder();
-    for (; x != Empty; x = x.rest)
+    for (; x != EMPTY; x = x.rest)
       result.add(x.first);
-    for (; y != Empty; y = y.rest)
+    for (; y != EMPTY; y = y.rest)
       result.add(y.first);
     return result.build();
   }
@@ -175,7 +175,7 @@ public final class List extends Datum
   private static List append(List x, Datum y)
   {
     var result = new Builder();
-    for (; x != Empty; x = x.rest)
+    for (; x != EMPTY; x = x.rest)
       result.add(x.first);
     result.add(y);
     return result.build();
@@ -183,8 +183,8 @@ public final class List extends Datum
   
   private static List reverse(List x)
   {
-    var result = List.Empty;
-    for (; x != Empty; x = x.rest)
+    var result = List.EMPTY;
+    for (; x != EMPTY; x = x.rest)
       result = cons(x.car(), result);
     return result;
   }
@@ -192,7 +192,7 @@ public final class List extends Datum
   private static List remove(List self, Predicate<Datum> pred)
   {
     var result = new Builder();
-    for (; self != Empty; self = self.rest)
+    for (; self != EMPTY; self = self.rest)
       if (!pred.test(self.first))
         result.add(self.first);
     return result.build();
@@ -200,7 +200,7 @@ public final class List extends Datum
   
   private static int indexOf(List list, Datum x, Predicate<Datum> pred)
   {
-    for (int i = 0; list != Empty; list = list.rest, ++i)
+    for (int i = 0; list != EMPTY; list = list.rest, ++i)
       if (pred.test(list.first))
         return i;
     return -1;
@@ -208,19 +208,19 @@ public final class List extends Datum
   
   private static boolean eq(List x, List y, BiPredicate<Datum, Datum> eq)
   {
-    for (; x != Empty && y != Empty; x = x.rest, y = y.rest)
+    for (; x != EMPTY && y != EMPTY; x = x.rest, y = y.rest)
       if (!eq.test(x.first, y.first))
         return false;
     
-    return x == Empty && y == Empty;
+    return x == EMPTY && y == EMPTY;
   }
   
   private static String repr(List self)
   {
-    if (self == Empty)
+    if (self == EMPTY)
       return "";
     
-    if (self.rest == Empty)
+    if (self.rest == EMPTY)
       return self.first.repr();
     
     return String.format("%s %s", self.first.repr(), repr(self.rest));

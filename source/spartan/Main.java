@@ -46,7 +46,7 @@ public class Main implements Callable<Integer>
   {
     var globals = GlobalEnv.createBasis();
     
-    Loader.load(Config.BuiltinsFilePath, globals);
+    Loader.load(Config.BUILTINS_FILE_PATH, globals);
     
     globals.bind(new Symbol("sys/args"), makeArgsList());
     
@@ -63,9 +63,9 @@ public class Main implements Callable<Integer>
   private List makeArgsList()
   {
     if (scriptArgs == null)
-      return List.Empty;
+      return List.EMPTY;
     
-    List args = List.Empty;
+    List args = List.EMPTY;
     
     for (int i = scriptArgs.length - 1; i >= 0; --i)
       args = List.cons(new Text(scriptArgs[i]), args);

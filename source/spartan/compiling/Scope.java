@@ -14,7 +14,7 @@ class Scope
   /** Create a new empty, scope that extends this. */
   Scope extend()
   {
-    return new Scope(this, List.Empty);
+    return new Scope(this, List.EMPTY);
   }
   
   /** Create a new scope that extends this with a given set of variables. */
@@ -72,7 +72,7 @@ class Scope
   private Scope(Scope parent)
   {
     this.parent = parent;
-    this.vars = List.Empty;
+    this.vars = List.EMPTY;
   }
   
   /** Create a Scope with the given parent and set of variables.

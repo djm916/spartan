@@ -22,7 +22,7 @@ public final class Complex extends Datum
   
   public Type type()
   {
-    return Type.Complex;
+    return Type.COMPLEX;
   }
   
   public String repr()

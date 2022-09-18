@@ -9,6 +9,6 @@ public abstract class Primitive extends Callable
   
   public final Type type()
   {
-    return Type.Primitive;
+    return Type.PRIMITIVE;
   }
 }
