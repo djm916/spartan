@@ -2,16 +2,21 @@ package spartan.data;
 
 import java.math.BigInteger;
 
-public class BigInt extends Datum
+public class BigInt extends IntBase
 {
-  public BigInt(int val)
+  public BigInt(int value)
   {
-    this.value = BigInteger.valueOf(val);
+    this.value = BigInteger.valueOf(value);
   }
   
-  public BigInt(String val)
+  public BigInt(String value)
   {
-    this.value = new BigInteger(val);
+    this.value = new BigInteger(value);
+  }
+  
+  public BigInt(BigInteger value)
+  {
+    this.value = value;
   }
   
   public Type type()
@@ -24,19 +29,24 @@ public class BigInt extends Datum
     return value.toString();
   }
   
+  public BigInt neg()
+  {
+    return new BigInt(value.negate());
+  }
+  
   public BigInt add(BigInt other)
   {
-    return this.value.add(other.value);
+    return new BigInt(this.value.add(other.value));
   }
   
   public BigInt sub(BigInt other)
   {
-    return this.value.subtract(other.value);
+    return new BigInt(this.value.subtract(other.value));
   }
   
   public BigInt mul(BigInt other)
   {
-    return this.value.multiply(other.value);
+    return new BigInt(this.value.multiply(other.value));
   }
   
   public BigInt div(BigInt other)

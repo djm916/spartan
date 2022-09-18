@@ -3,7 +3,7 @@ package spartan.data;
 import spartan.errors.DivisionByZero;
 import spartan.errors.IntegerOverflow;
 
-public final class Int extends Datum
+public final class Int extends IntBase
 {
   public Int(int value)
   {
@@ -25,7 +25,7 @@ public final class Int extends Datum
     return Integer.toString(value);
   }
     
-  public Int neg()
+  public IntBase neg()
   {
     try {
       return new Int(Math.negateExact(value));
@@ -35,12 +35,12 @@ public final class Int extends Datum
     }
   }
   
-  public Int abs()
+  public IntBase abs()
   {
     return new Int(Math.abs(value));
   }
   
-  public Int add(Int other)
+  public IntBase add(Int other)
   {
     try {
       return new Int(Math.addExact(this.value, other.value));
@@ -50,7 +50,7 @@ public final class Int extends Datum
     }
   }
   
-  public Int sub(Int other)
+  public IntBase sub(Int other)
   {
     try {
       return new Int(Math.subtractExact(this.value, other.value));
@@ -60,7 +60,7 @@ public final class Int extends Datum
     }
   }
   
-  public Int mul(Int other)
+  public IntBase mul(Int other)
   {
     try {
       return new Int(Math.multiplyExact(this.value, other.value));
