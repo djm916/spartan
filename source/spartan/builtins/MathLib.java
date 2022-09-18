@@ -9,15 +9,59 @@ public final class MathLib
 {
   public static Datum add(Datum x, Datum y)
   {
-    if (x.type() != y.type())
-      throw new TypeMismatch();
-    
-    return switch (x.type()) {
-      case INT     -> ((Int)x).add((Int)y);
-      case REAL    -> ((Real)x).add((Real)y);
-      case COMPLEX -> ((Complex)x).add((Complex)y);
-      default      -> throw new TypeMismatch();
-    };
+    switch (x.type()) {
+      case INT: {
+        switch (y.type()) {
+          case INT:     return ((Int)x).add((Int)y);
+          case BIGINT:  return ((Int)x).toBigInt().add((BigInt)y);
+          case RATIO:   return ((Int)x).toRatio().add((Ratio)y);
+          case REAL:    return ((Int)x).toReal().add((Real)y);
+          case COMPLEX: return ((Int)x).toComplex().add((Complex)y);
+        }
+        break;
+      }
+      case BIGINT: {
+        switch (y.type()) {
+          case INT:     return ((BigInt)x).add(((Int)y).toBigInt());
+          case BIGINT:  return ((BigInt)x).add((BigInt)y);
+          case RATIO:   return ((BigInt)x).toRatio().add((Ratio)y);
+          case REAL:    return ((BigInt)x).toReal().add((Real)y);
+          case COMPLEX: return ((BigInt)x).toComplex().add((Complex)y);
+        }
+        break;
+      }
+      case RATIO: {
+        switch (y.type()) {
+          case INT:     return ((Ratio)x).add(((Int)y).toRatio());
+          case BIGINT:  return ((Ratio)x).add(((BigInt)y).toRatio());
+          case RATIO:   return ((Ratio)x).add((Ratio)y);
+          case REAL:    return ((Ratio)x).toReal().add((Real)y);
+          case COMPLEX: return ((Ratio)x).toComplex().add((Complex)y);
+        }
+        break;
+      }
+      case REAL: {
+        switch (y.type()) {
+          case INT:     return ((Real)x).add(((Int)y).toReal());
+          case BIGINT:  return ((Real)x).add(((BigInt)y).toReal());
+          case RATIO:   return ((Real)x).add(((Ratio)y).toReal());
+          case REAL:    return ((Real)x).add((Real)y);
+          case COMPLEX: return ((Real)x).toComplex().add((Complex)y);
+        }
+        break;
+      }
+      case COMPLEX: {
+        switch (y.type()) {
+          case INT:     return ((Complex)x).add(((Int)y).toComplex());
+          case BIGINT:  return ((Complex)x).add(((BigInt)y).toComplex());
+          case RATIO:   return ((Complex)x).add(((Ratio)y).toComplex());
+          case REAL:    return ((Complex)x).add(((Real)y).toComplex());
+          case COMPLEX: return ((Complex)x).add((Complex)y);
+        }
+        break;
+      }
+    }
+    throw new TypeMismatch();
   }
   
   public static final Primitive ADD = new Primitive(2, true) {

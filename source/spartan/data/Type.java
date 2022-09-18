@@ -6,6 +6,7 @@ public enum Type
   BOOL("type/boolean"),
   INT("type/integer"),
   BIGINT("type/integer"),
+  RATIO("type/rational"),
   REAL("type/real"),
   COMPLEX("type/complex"),
   SYMBOL("type/symbol"),
@@ -31,22 +32,27 @@ public enum Type
   
   public boolean isInt()
   {
-    return this == INT;
+    return this == INT || this == BIGINT;
+  }
+  
+  public boolean isRatio()
+  {
+    return this == INT || this == BIGINT || this == RATIO;
   }
   
   public boolean isReal()
   {
-    return this == REAL;
+    return this == INT || this == BIGINT || this == RATIO || this == REAL;
   }
   
   public boolean isComplex()
   {
-    return this == COMPLEX;
+    return this == INT || this == BIGINT || this == RATIO || this == REAL || this == COMPLEX;
   }
   
   public boolean isNumber()
   {
-    return this == INT || this == REAL || this == COMPLEX;
+    return this == INT || this == BIGINT || this == RATIO || this == REAL || this == COMPLEX;
   }
   
   public boolean isSymbol()

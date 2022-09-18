@@ -24,7 +24,27 @@ public final class Int extends IntBase
   {
     return Integer.toString(value);
   }
-    
+  
+  public BigInt toBigInt()
+  {
+    return new BigInt(value);
+  }
+  
+  public Ratio toRatio()
+  {
+    return new Ratio(value, 1);
+  }
+  
+  public Real toReal()
+  {
+    return new Real((double)value);
+  }
+  
+  public Complex toComplex()
+  {
+    return new Complex((double)value, 0.0);
+  }
+  
   public IntBase neg()
   {
     try {
@@ -70,9 +90,15 @@ public final class Int extends IntBase
     }
   }
   
+  /*
   public Real div(Int other)
   {
     return new Real((double)this.value / (double)other.value);
+  }
+  */
+  public Ratio div(Int other)
+  {
+    return new Ratio(this.value, other.value);
   }
   
   public Int quotient(Int other)

@@ -34,6 +34,11 @@ public final class Real extends Datum
     return Double.toString(value);
   }
   
+  public Complex toComplex()
+  {
+    return new Complex(value, 0.0);
+  }
+  
   public Real neg()
   {
     return new Real(-value);

@@ -1,22 +1,24 @@
 package spartan.data;
 
 import java.math.BigInteger;
+import spartan.errors.DivisionByZero;
+import spartan.errors.IntegerOverflow;
 
-public class BigInt extends IntBase
+public final class BigInt extends IntBase
 {
-  public BigInt(int value)
+  public BigInt(long value)
   {
-    this.value = BigInteger.valueOf(value);
-  }
-  
-  public BigInt(String value)
-  {
-    this.value = new BigInteger(value);
+    this(BigInteger.valueOf(value));
   }
   
   public BigInt(BigInteger value)
   {
     this.value = value;
+  }
+  
+  public BigInt(String value)
+  {
+    this(new BigInteger(value));
   }
   
   public Type type()
@@ -28,10 +30,40 @@ public class BigInt extends IntBase
   {
     return value.toString();
   }
+    
+  public int intValue()
+  {
+    try {
+      return value.intValueExact();
+    }
+    catch (ArithmeticException ex) {
+      throw new IntegerOverflow();
+    }
+  }
+  
+  public Ratio toRatio()
+  {
+    return new Ratio(value, BigInteger.ONE);
+  }
+  
+  public Real toReal()
+  {
+    return new Real(value.doubleValue());
+  }
+  
+  public Complex toComplex()
+  {
+    return new Complex(value.doubleValue(), 0.0);
+  }
   
   public BigInt neg()
   {
     return new BigInt(value.negate());
+  }
+  
+  public BigInt abs()
+  {
+    return new BigInt(value.abs());
   }
   
   public BigInt add(BigInt other)
@@ -48,11 +80,46 @@ public class BigInt extends IntBase
   {
     return new BigInt(this.value.multiply(other.value));
   }
-  
-  public BigInt div(BigInt other)
+    
+  public Ratio div(BigInt other)
   {
-    return null;
+    try {
+      return new Ratio(this.value, other.value);
+    }
+    catch (ArithmeticException ex) {
+      throw new DivisionByZero();
+    }
   }
   
-  private final BigInteger value;
+  public BigInt quotient(BigInt other)
+  {
+    try {
+      return new BigInt(this.value.divide(other.value));
+    }
+    catch (ArithmeticException ex) {
+      throw new DivisionByZero();
+    }
+  }
+  
+  public BigInt remainder(BigInt other)
+  {
+    try {
+      return new BigInt(this.value.remainder(other.value));
+    }
+    catch (ArithmeticException ex) {
+      throw new DivisionByZero();
+    }
+  }
+  
+  public boolean eq(BigInt other)
+  {
+    return this.value.equals(other.value);
+  }
+  
+  public int compare(BigInt other)
+  {
+    return this.value.compareTo(other.value);
+  }
+  
+  public final BigInteger value;
 }
