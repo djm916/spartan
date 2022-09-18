@@ -1,6 +1,5 @@
 package spartan.data;
 
-import java.math.BigInteger;
 import spartan.errors.DivisionByZero;
 import spartan.errors.IntegerOverflow;
 
@@ -28,7 +27,12 @@ public final class Int extends Datum
     
   public Int neg()
   {
-    return new Int(-value);
+    try {
+      return new Int(Math.negateExact(value));
+    }
+    catch (ArithmeticException ex) {
+      return new BigInt(this.value).neg();
+    }
   }
   
   public Int abs()
@@ -38,17 +42,32 @@ public final class Int extends Datum
   
   public Int add(Int other)
   {
-    return new Int(this.value + other.value);
+    try {
+      return new Int(Math.addExact(this.value, other.value));
+    }
+    catch (ArithmeticException ex) {
+      return new BigInt(this.value).add(new BigInt(other.value));
+    }
   }
   
   public Int sub(Int other)
   {
-    return new Int(this.value - other.value);
+    try {
+      return new Int(Math.subtractExact(this.value, other.value));
+    }
+    catch (ArithmeticException ex) {
+      return new BigInt(this.value).sub(new BigInt(other.value));
+    }
   }
   
   public Int mul(Int other)
   {
-    return new Int(this.value * other.value);
+    try {
+      return new Int(Math.multiplyExact(this.value, other.value));
+    }
+    catch (ArithmeticException ex) {
+      return new BigInt(this.value).mul(new BigInt(other.value));
+    }
   }
   
   public Real div(Int other)
