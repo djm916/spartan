@@ -1,6 +1,6 @@
 
 ; Example of the factorial (!) function, written using both functional
-; and imperative styles, as well as arbitrary precision integers.
+; and imperative styles.
 
 ; The mathematical definition of factorial is:
 ;
@@ -25,5 +25,5 @@
         (set! n (- n 1)))
       p)))
 
-(print-line "6! = " (fact-rec 6))
-(print-line "6! = " (fact-loop 6))
+(print-line "10! = " (fact-loop 10)) ; should equal 3628800
+(print-line "20! = " (fact-loop 20)) ; should equal 2432902008176640000

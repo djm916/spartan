@@ -134,6 +134,9 @@ public final class GlobalEnv
     bind(new Symbol("imag-part"), MathLib.IMAG_PART);
     bind(new Symbol("rect->polar"), MathLib.RECT_TO_POLAR);
     bind(new Symbol("polar->rect"), MathLib.POLAR_TO_RECT);
+    bind(new Symbol("ratio"), MathLib.MAKE_RATIO);
+    bind(new Symbol("numerator"), MathLib.NUMERATOR);
+    bind(new Symbol("denominator"), MathLib.DENOMINATOR);
     
     /* Conversion procedures */
     

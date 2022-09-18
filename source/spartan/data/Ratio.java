@@ -3,7 +3,7 @@ package spartan.data;
 import java.math.BigInteger;
 import spartan.errors.InvalidArgument;
 
-public final class Ratio extends Datum
+public final class Ratio extends Numeric
 {
   public Ratio(BigInteger numer, BigInteger denom)
   {
@@ -90,6 +90,26 @@ public final class Ratio extends Datum
   public Ratio neg()
   {
     return new Ratio(numer.negate(), denom);
+  }
+  
+  public Int floor()
+  {
+    return new Int((int) Math.floor(approx()));
+  }
+  
+  public Int ceiling()
+  {
+    return new Int((int) Math.ceil(approx()));
+  }
+  
+  public Int truncate()
+  {
+    return new Int((int) approx());
+  }
+  
+  public Int round()
+  {
+    return new Int((int) Math.round(approx()));
   }
   
   /* Add two rational numbers

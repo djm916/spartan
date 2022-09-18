@@ -4,7 +4,7 @@ import java.math.BigInteger;
 import spartan.errors.DivisionByZero;
 import spartan.errors.IntegerOverflow;
 
-public final class BigInt extends IntBase
+public final class BigInt extends Numeric
 {
   public BigInt(long value)
   {
@@ -64,6 +64,26 @@ public final class BigInt extends IntBase
   public BigInt abs()
   {
     return new BigInt(value.abs());
+  }
+  
+  public BigInt floor()
+  {
+    return this;
+  }
+  
+  public BigInt ceiling()
+  {
+    return this;
+  }
+  
+  public BigInt truncate()
+  {
+    return this;
+  }
+  
+  public BigInt round()
+  {
+    return this;
   }
   
   public BigInt add(BigInt other)

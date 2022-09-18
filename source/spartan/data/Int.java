@@ -3,7 +3,7 @@ package spartan.data;
 import spartan.errors.DivisionByZero;
 import spartan.errors.IntegerOverflow;
 
-public final class Int extends IntBase
+public final class Int extends Numeric
 {
   public Int(int value)
   {
@@ -45,7 +45,7 @@ public final class Int extends IntBase
     return new Complex((double)value, 0.0);
   }
   
-  public IntBase neg()
+  public Numeric neg()
   {
     try {
       return new Int(Math.negateExact(value));
@@ -55,12 +55,37 @@ public final class Int extends IntBase
     }
   }
   
-  public IntBase abs()
+  public Numeric abs()
   {
-    return new Int(Math.abs(value));
+    try {
+      return new Int(Math.absExact(value));
+    }
+    catch (ArithmeticException ex) {
+      return new BigInt(this.value).abs();
+    }
   }
   
-  public IntBase add(Int other)
+  public Int floor()
+  {
+    return this;
+  }
+  
+  public Int ceiling()
+  {
+    return this;
+  }
+  
+  public Int truncate()
+  {
+    return this;
+  }
+  
+  public Int round()
+  {
+    return this;
+  }
+  
+  public Numeric add(Int other)
   {
     try {
       return new Int(Math.addExact(this.value, other.value));
@@ -70,7 +95,7 @@ public final class Int extends IntBase
     }
   }
   
-  public IntBase sub(Int other)
+  public Numeric sub(Int other)
   {
     try {
       return new Int(Math.subtractExact(this.value, other.value));
@@ -80,7 +105,7 @@ public final class Int extends IntBase
     }
   }
   
-  public IntBase mul(Int other)
+  public Numeric mul(Int other)
   {
     try {
       return new Int(Math.multiplyExact(this.value, other.value));

@@ -46,6 +46,8 @@ public class Compiler
   private static boolean isSelfEval(Datum exp)
   {
     return exp.type() == Type.INT
+        || exp.type() == Type.BIGINT
+        || exp.type() == Type.RATIO
         || exp.type() == Type.REAL
         || exp.type() == Type.COMPLEX
         || exp.type() == Type.BOOL
