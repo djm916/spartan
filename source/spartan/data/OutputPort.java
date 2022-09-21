@@ -7,9 +7,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.FileNotFoundException;
 
-public class OutputPort extends Port
+public final class OutputPort extends Port
 {
-  public static final OutputPort Stdout = new OutputPort(System.out);
+  public static final OutputPort STDOUT = new OutputPort(System.out);
   
   public static OutputPort fromFile(String fileName)
   {

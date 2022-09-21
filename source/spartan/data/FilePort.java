@@ -5,7 +5,7 @@ import java.io.RandomAccessFile;
 import java.io.IOException;
 import java.io.FileNotFoundException;
 
-public class FilePort extends Port
+public final class FilePort extends Port
 {
   public FilePort(String fileName)
   {
@@ -18,15 +18,15 @@ public class FilePort extends Port
   }
   
   public Bytes read(int numBytes)
-  {
-    var bytes = new byte[numBytes];
+  {    
     try {
-      file.read(bytes, 0, numBytes);
+      var buffer = new byte[numBytes];
+      var bytesRead = file.read(buffer, 0, numBytes);
+      return new Bytes(buffer, bytesRead);
     }
     catch (IOException ex) {
       throw new IOError(ex.getMessage());
     }
-    return new Bytes(bytes);
   }
   
   public void write(Bytes bytes)

@@ -1,6 +1,6 @@
 package spartan.data;
 
-public class Nil extends Datum
+public final class Nil extends Datum
 {
   public static final Nil VALUE = new Nil();
   

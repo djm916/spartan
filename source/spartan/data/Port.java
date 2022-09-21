@@ -3,7 +3,8 @@ package spartan.data;
 import spartan.errors.IOError;
 import spartan.errors.InvalidArgument;
 
-public abstract class Port extends Datum
+public abstract sealed class Port extends Datum
+permits InputPort, OutputPort, FilePort
 {
   public final Type type()
   {
@@ -26,16 +27,21 @@ public abstract class Port extends Datum
   
   public void close()
   {
-    throw new IOError("unsupported I/O operation");
+    throw unsupportedOperation();
   }
   
   public Bytes read(int numBytes)
   {
-    throw new IOError("unsupported I/O operation");
+    throw unsupportedOperation();
   }
   
   public void write(Bytes bytes)
   {
-    throw new IOError("unsupported I/O operation");
+    throw unsupportedOperation();
+  }
+  
+  private static IOError unsupportedOperation()
+  {
+    return new IOError("unsupported I/O operation");
   }
 }

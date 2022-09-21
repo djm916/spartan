@@ -7,9 +7,9 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.FileNotFoundException;
 
-public class InputPort extends Port
+public final class InputPort extends Port
 {
-  public static final InputPort Stdin = new InputPort(System.in);
+  public static final InputPort STDIN = new InputPort(System.in);
   
   public static InputPort fromFile(String fileName)
   {
@@ -23,14 +23,14 @@ public class InputPort extends Port
 
   public Bytes read(int numBytes)
   {
-    var bytes = new byte[numBytes];
     try {
-      stream.read(bytes, 0, numBytes);
+      var buffer = new byte[numBytes];
+      var bytesRead = stream.read(buffer, 0, numBytes);
+      return new Bytes(buffer, bytesRead);
     }
     catch (IOException ex) {
       throw new IOError(ex.getMessage());
-    }
-    return new Bytes(bytes);
+    }    
   }
   
   public void close()

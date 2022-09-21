@@ -7,7 +7,7 @@ import spartan.runtime.VirtualMachine;
 
 public final class PortLib
 {
-  public static final Primitive Open = new Primitive(2, false) {
+  public static final Primitive OPEN = new Primitive(2, false) {    
     public void apply(VirtualMachine vm) {      
       if (vm.peekArg().type() != Type.TEXT)
         throw new TypeMismatch();
@@ -22,7 +22,7 @@ public final class PortLib
     }
   };
   
-  public static final Primitive Close = new Primitive(1, false) {
+  public static final Primitive CLOSE = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
       if (vm.peekArg().type() != Type.PORT)
         throw new TypeMismatch();
@@ -33,7 +33,7 @@ public final class PortLib
     }
   };
   
-  public static final Primitive Read = new Primitive(2, false) {
+  public static final Primitive READ = new Primitive(2, false) {
     public void apply(VirtualMachine vm) {
       if (vm.peekArg().type() != Type.PORT)
         throw new TypeMismatch();
@@ -48,7 +48,7 @@ public final class PortLib
     }
   };
   
-  public static final Primitive Write = new Primitive(2, false) {
+  public static final Primitive WRITE = new Primitive(2, false) {
     public void apply(VirtualMachine vm) {
       if (vm.peekArg().type() != Type.PORT)
         throw new TypeMismatch();

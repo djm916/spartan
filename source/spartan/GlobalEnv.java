@@ -179,11 +179,14 @@ public final class GlobalEnv
         
     /* Port procedures */
     
-    bind(new Symbol("port/open"), PortLib.Open);
-    bind(new Symbol("port/close"), PortLib.Close);
-    bind(new Symbol("port/read"), PortLib.Read);
-    bind(new Symbol("port/write"), PortLib.Write);
-    bind(new Symbol("port/stdin"), InputPort.Stdin);
-    bind(new Symbol("port/stdout"), OutputPort.Stdout);
+    bind(new Symbol("port/open"), PortLib.OPEN);
+    bind(new Symbol("port/close"), PortLib.CLOSE);
+    bind(new Symbol("port/read"), PortLib.READ);
+    bind(new Symbol("port/write"), PortLib.WRITE);
+    bind(new Symbol("port/stdin"), InputPort.STDIN);
+    bind(new Symbol("port/stdout"), OutputPort.STDOUT);
+    
+    /* Bytes procedures */
+    bind(new Symbol("bytes/new"), CoreLib.MAKE_BYTES);
   }
 }

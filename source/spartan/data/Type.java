@@ -17,7 +17,7 @@ public enum Type
   PRIMITIVE("type/procedure"),
   CLOSURE("type/procedure"),
   MACRO("type/macro"),
-  CONTI("type/continuation"),
+  CONTINUE("type/continuation"),
   PORT("type/port");
   
   public String getName()
@@ -37,17 +37,17 @@ public enum Type
   
   public boolean isRatio()
   {
-    return this == INT || this == BIGINT || this == RATIO;
+    return this == RATIO;
   }
   
   public boolean isReal()
   {
-    return this == INT || this == BIGINT || this == RATIO || this == REAL;
+    return this == REAL;
   }
   
   public boolean isComplex()
   {
-    return this == INT || this == BIGINT || this == RATIO || this == REAL || this == COMPLEX;
+    return this == COMPLEX;
   }
   
   public boolean isNumber()
@@ -67,7 +67,7 @@ public enum Type
   
   public boolean isCallable()
   {
-    return this == PRIMITIVE || this == CLOSURE || this == MACRO || this == CONTI;
+    return this == PRIMITIVE || this == CLOSURE || this == MACRO || this == CONTINUE;
   }
   
   private Type(String name)

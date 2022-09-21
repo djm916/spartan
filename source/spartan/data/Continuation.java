@@ -5,8 +5,6 @@ import spartan.runtime.VirtualMachine;
 
 public final class Continuation extends Callable
 {
-  private final Frame frame;
-  
   public Continuation(Frame frame)
   {
     super(1, false);
@@ -15,7 +13,7 @@ public final class Continuation extends Callable
   
   public Type type()
   {
-    return Type.CONTI;
+    return Type.CONTINUE;
   }
   
   public void apply(VirtualMachine vm)
@@ -24,4 +22,6 @@ public final class Continuation extends Callable
     vm.result = vm.popArg();
     vm.popFrame();
   }
+
+  private final Frame frame;
 }

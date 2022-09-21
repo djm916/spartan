@@ -1,6 +1,6 @@
 package spartan.data;
 
-public abstract class Primitive extends Callable
+public abstract non-sealed class Primitive extends Callable
 {
   protected Primitive(int requiredArgs, boolean isVariadic)
   {

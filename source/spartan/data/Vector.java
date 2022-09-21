@@ -5,10 +5,8 @@ import java.util.stream.Collectors;
 import java.util.function.BiPredicate;
 import java.util.ArrayList;
 import spartan.errors.NoSuchElement;
-import spartan.errors.TypeMismatch;
-import spartan.runtime.VirtualMachine;
 
-public final class Vector extends Callable
+public final class Vector extends Datum
 {
   public static Vector fromList(List elems)
   {
@@ -38,7 +36,6 @@ public final class Vector extends Callable
   
   public Vector(int length)
   {
-    super(1, false);
     elems = new ArrayList<Datum>(length);
   }
   
@@ -121,15 +118,6 @@ public final class Vector extends Callable
         return false;
     
     return true;
-  }
-  
-  public void apply(VirtualMachine vm)
-  {
-    if (vm.peekArg().type() != Type.INT)
-      throw new TypeMismatch();
-    var index = ((Int) vm.popArg()).value;
-    vm.result = get(index);
-    vm.popFrame();
   }
   
   private static final int DEFAULT_INITIAL_SIZE = 8;

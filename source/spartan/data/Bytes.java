@@ -2,7 +2,7 @@ package spartan.data;
 
 import spartan.errors.Error;
 
-public class Bytes extends Datum
+public final class Bytes extends Datum
 {
   public Type type()
   {
@@ -12,13 +12,15 @@ public class Bytes extends Datum
   public Bytes(int n)
   {
     this.bytes = new byte[n];
+    this.size = 0;
   }
   
-  public Bytes(byte[] bytes)
+  public Bytes(byte[] bytes, int n)
   {
     this.bytes = bytes;
+    this.size = n;
   }
-    
+  
   public byte[] getBytes()
   {
     return bytes;
@@ -29,10 +31,20 @@ public class Bytes extends Datum
     return bytes[index];
   }
   
+  public void setByte(int index, byte value)
+  {
+    bytes[index] = value;
+  }
+  
+  public int length()
+  {
+    return size;
+  }
+  
   public Text decode(String encoding)
   {
     try {
-      return new Text(new String(bytes, encoding));
+      return new Text(new String(bytes, 0, size, encoding));
     }
     catch (java.io.UnsupportedEncodingException ex) {
       throw new Error("unsupported encoding " + encoding);
@@ -40,4 +52,5 @@ public class Bytes extends Datum
   }
   
   private final byte[] bytes;
+  private final int size;
 }

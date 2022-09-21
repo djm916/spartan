@@ -388,6 +388,7 @@ public final class CoreLib
       case LIST   -> ((List)x).length();
       case VECTOR -> ((Vector)x).length();
       case TEXT   -> ((Text)x).length();
+      case BYTES  -> ((Bytes)x).length();
       default     -> throw new TypeMismatch();
     };
   }
@@ -609,6 +610,15 @@ public final class CoreLib
   public static final Primitive MIN = new Primitive(1, true) {
     public void apply(VirtualMachine vm) {
       vm.result = min(vm.popRestArgs());
+      vm.popFrame();
+    }
+  };
+  
+  public static final Primitive MAKE_BYTES = new Primitive(1, true) {
+    public void apply(VirtualMachine vm) {
+      if (vm.peekArg().type() != Type.INT)
+        throw new TypeMismatch();
+      vm.result = new Bytes(((Int) vm.popArg()).value);
       vm.popFrame();
     }
   };
