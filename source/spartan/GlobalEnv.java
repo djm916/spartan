@@ -7,11 +7,11 @@ import spartan.builtins.ListLib;
 import spartan.builtins.VectorLib;
 import spartan.builtins.TextLib;
 import spartan.builtins.PortLib;
+import spartan.builtins.BytesLib;
 import spartan.errors.UnboundVariable;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.function.Function;
-import java.util.function.Supplier;
+import java.util.Optional;
 
 public final class GlobalEnv
 {
@@ -20,38 +20,35 @@ public final class GlobalEnv
     return new GlobalEnv();
   }
   
+  /** Bind a variable to a given value.
+      If the variable is already bound, its value is replaced.
+      @param name The variable to bind
+  */
   public void bind(Symbol name, Datum val)
   {
     globals.put(name, val);
   }
   
-  /** Lookup a variable in the global environment.
+  /** Lookup a variable by name, optionally returning its bound value.
+      @param name The variable to look up
+      @return The (optional) value of the variable
+  */
+  public Optional<Datum> lookup(Symbol name)
+  {
+    return Optional.ofNullable(globals.get(name));
+  }
+  
+  /** Lookup a variable by name, throwing an exception if it is not bound.
       @param name The variable to look up
       @return The value of the variable
-      @throws UnboundVariable if the variable is not found
+      @throws UnboundVariable if the variable is not bound
   */
-  public Datum lookup(Symbol name)
+  public Datum lookupOrThrow(Symbol name)
   {
     var value = globals.get(name);
     if (value == null)
       throw new UnboundVariable(name);
     return value;
-  }
-  
-  /** Lookup a variable in the global environment.
-      If the variable is found, returns the value of invoking ifPresent on the
-      variable's value. Otherwise, returns the value of invoking getAbsent.
-      @param name The variable to look up
-      @param ifPresent The function to invoke if the variable was found
-      @param ifAbsent The supplier to invoke if the variable was not found
-      @return The value returned by ifPresent or ifAbsent
-  */
-  public <R> R lookupOrElse(Symbol name, Function<Datum, R> ifPresent, Supplier<R> ifAbsent)
-  {
-    if (globals.containsKey(name))
-      return ifPresent.apply(globals.get(name));
-    else
-      return ifAbsent.get();
   }
   
   private GlobalEnv() {}
@@ -187,6 +184,8 @@ public final class GlobalEnv
     bind(new Symbol("port/stdout"), OutputPort.STDOUT);
     
     /* Bytes procedures */
-    bind(new Symbol("bytes/new"), CoreLib.MAKE_BYTES);
+    
+    bind(new Symbol("bytes/new"), BytesLib.MAKE_BYTES);
+    bind(new Symbol("bytes/ref"), BytesLib.BYTES_REF);
   }
 }

@@ -17,16 +17,15 @@ public final class FilePort extends Port
     }
   }
   
-  public Bytes read(int numBytes)
-  {    
+  public Int read(Bytes bytes, Int count)
+  {
     try {
-      var buffer = new byte[numBytes];
-      var bytesRead = file.read(buffer, 0, numBytes);
-      return new Bytes(buffer, bytesRead);
+      var bytesRead = file.read(bytes.getBytes(), 0, count.value);
+      return new Int(bytesRead);
     }
     catch (IOException ex) {
       throw new IOError(ex.getMessage());
-    }
+    }    
   }
   
   public void write(Bytes bytes)

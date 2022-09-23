@@ -33,22 +33,7 @@ public final class PortLib
     }
   };
   
-  public static final Primitive READ = new Primitive(2, false) {
-    public void apply(VirtualMachine vm) {
-      if (vm.peekArg().type() != Type.PORT)
-        throw new TypeMismatch();
-      var port = (Port) vm.popArg();
-      
-      if (vm.peekArg().type() != Type.INT)
-        throw new TypeMismatch();
-      var numBytes = ((Int) vm.popArg()).value;
-      
-      vm.result = port.read(numBytes);
-      vm.popFrame();
-    }
-  };
-  
-  public static final Primitive WRITE = new Primitive(2, false) {
+  public static final Primitive READ = new Primitive(3, false) {
     public void apply(VirtualMachine vm) {
       if (vm.peekArg().type() != Type.PORT)
         throw new TypeMismatch();
@@ -56,9 +41,32 @@ public final class PortLib
       
       if (vm.peekArg().type() != Type.BYTES)
         throw new TypeMismatch();
-      var bytes = (Bytes) vm.popArg();
+      var byteBuffer = (Bytes) vm.popArg();
       
-      port.write(bytes);
+      if (vm.peekArg().type() != Type.INT)
+        throw new TypeMismatch();
+      var count = (Int) vm.popArg();
+      
+      vm.result = port.read(byteBuffer, count);
+      vm.popFrame();
+    }
+  };
+  
+  public static final Primitive WRITE = new Primitive(3, false) {
+    public void apply(VirtualMachine vm) {
+      if (vm.peekArg().type() != Type.PORT)
+        throw new TypeMismatch();
+      var port = (Port) vm.popArg();
+      
+      if (vm.peekArg().type() != Type.BYTES)
+        throw new TypeMismatch();
+      var byteBuffer = (Bytes) vm.popArg();
+      
+      if (vm.peekArg().type() != Type.INT)
+        throw new TypeMismatch();
+      var count = (Int) vm.popArg();
+      
+      port.write(byteBuffer, count);
       vm.result = Nil.VALUE;
       vm.popFrame();
     }

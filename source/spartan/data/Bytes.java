@@ -26,12 +26,17 @@ public final class Bytes extends Datum
     return bytes;
   }
   
-  public byte getByte(int index)
+  public Int get(Int index)
+  {
+    return new Int(get(index.value));
+  }
+  
+  public byte get(int index)
   {
     return bytes[index];
   }
   
-  public void setByte(int index, byte value)
+  public void set(int index, byte value)
   {
     bytes[index] = value;
   }

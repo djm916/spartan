@@ -72,18 +72,24 @@ public class Compiler
 
      Otherwise, assume the symbol is a global variable, and generate a load-global instruction.
   */
-  
+
   private Inst compileVarRef(Symbol symb, Scope scope, Inst next)
   {
-    return scope.lookupOrElse(symb,
-      
-      // Symbol is a bound local variable
-      (index) -> new LoadLocal(index.depth(), index.offset(), next),
-      
-      // Assume symbol is a global variable
-      () -> new LoadGlobal(symb, positionMap.get(symb), next));
+    return scope.lookup(symb)
+                .map((index) -> compileLocalVarRef(index, next))
+                .orElseGet(() -> compileGlobalVarRef(symb, next));
   }
-
+  
+  private Inst compileLocalVarRef(DeBruijnIndex index, Inst next)
+  {
+    return new LoadLocal(index.depth(), index.offset(), next);
+  }
+  
+  private Inst compileGlobalVarRef(Symbol symb, Inst next)
+  {
+    return new LoadGlobal(symb, positionMap.get(symb), next);
+  }
+  
   /* Compile a variable assignment.
 
      Syntax: (set! symbol init)
@@ -102,19 +108,22 @@ public class Compiler
     var symb = (Symbol) exp.cadr();
     var init = exp.caddr();
     
-    return scope.lookupOrElse(symb,
-    
-      // Symbol is a bound local variable
-      (index) -> compile(init, scope, false,
-                 new StoreLocal(index.depth(), index.offset(),
-                 new LoadConst(Nil.VALUE, next))),
-                    
-      // Assume symbol is a global variable                    
-      () -> compile(init, scope, false,
-            new StoreGlobal(symb,
-            new LoadConst(Nil.VALUE, next))));
+    return compile(init, scope, false,
+           scope.lookup(symb)
+                .map((index) -> compileLocalVarSet(index, next))
+                .orElseGet(() -> compileGlobalVarSet(symb, next)));
   }
-
+  
+  private Inst compileLocalVarSet(DeBruijnIndex index, Inst next)
+  {
+    return new StoreLocal(index.depth(), index.offset(), new LoadConst(Nil.VALUE, next));
+  }
+  
+  private Inst compileGlobalVarSet(Symbol symb, Inst next)
+  {
+    return new StoreGlobal(symb, new LoadConst(Nil.VALUE, next));
+  }
+  
   /* Compile a "def" special form.
   
      Syntax: (def symb init)
@@ -1087,7 +1096,7 @@ public class Compiler
   */
   private Inst compileApplyMacro(List exp, Scope scope, boolean tail, Inst next)
   {
-    var f = (Macro) vm.globals.lookup((Symbol) exp.car());
+    var f = (Macro) vm.globals.lookup((Symbol) exp.car()).get();
     var args = exp.cdr();
     
     try {
@@ -1120,7 +1129,7 @@ public class Compiler
   
   private boolean isMacro(Symbol s)
   {
-    return vm.globals.lookupOrElse(s, (v) -> v.type() == Type.MACRO, () -> false);
+    return vm.globals.lookup(s).map(v -> v.type() == Type.MACRO).orElse(false);
   }
   
   private Inst compileVector(Vector vector, Scope scope, Inst next)

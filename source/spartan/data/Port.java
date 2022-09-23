@@ -6,11 +6,6 @@ import spartan.errors.InvalidArgument;
 public abstract sealed class Port extends Datum
 permits InputPort, OutputPort, FilePort
 {
-  public final Type type()
-  {
-    return Type.PORT;
-  }
-  
   public static Port open(String fileName, String flags)
   {
     if ("rw".equals(flags))
@@ -25,17 +20,22 @@ permits InputPort, OutputPort, FilePort
     throw new InvalidArgument("invalid file open flags");
   }
   
+  public Type type()
+  {
+    return Type.PORT;
+  }
+  
   public void close()
   {
     throw unsupportedOperation();
   }
   
-  public Bytes read(int numBytes)
+  public Int read(Bytes bytes, Int count)
   {
     throw unsupportedOperation();
   }
   
-  public void write(Bytes bytes)
+  public void write(Bytes bytes, Int count)
   {
     throw unsupportedOperation();
   }

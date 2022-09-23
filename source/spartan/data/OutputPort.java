@@ -21,10 +21,10 @@ public final class OutputPort extends Port
     }
   }
 
-  public void write(Bytes bytes)
+  public void write(Bytes bytes, Int count)
   {
     try {
-      stream.write(bytes.getBytes());
+      stream.write(bytes.getBytes(), 0, count.value);
     }
     catch (IOException ex) {
       throw new IOError(ex.getMessage());
