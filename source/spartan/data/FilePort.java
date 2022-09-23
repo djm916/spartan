@@ -1,5 +1,6 @@
 package spartan.data;
 
+import spartan.errors.Error;
 import spartan.errors.IOError;
 import java.io.RandomAccessFile;
 import java.io.IOException;
@@ -19,13 +20,19 @@ public final class FilePort extends Port
   
   public Int read(Bytes bytes, Int count)
   {
-    try {
-      var bytesRead = file.read(bytes.getBytes(), 0, count.value);
+    if (bytes.remaining() < count.value)
+      throw new Error("buffer overflow");
+    
+    try {      
+      var bytesRead = file.read(bytes.getBytes(), bytes.position(), count.value);
+      if (bytesRead == -1)
+        return EOF;
+      bytes.position(bytes.position() + bytesRead);
       return new Int(bytesRead);
     }
     catch (IOException ex) {
       throw new IOError(ex.getMessage());
-    }    
+    }
   }
   
   public void write(Bytes bytes)

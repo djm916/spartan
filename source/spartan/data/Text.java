@@ -48,7 +48,7 @@ public final class Text extends Datum
   {
     try {
       var bytes = value.getBytes(encoding);
-      return new Bytes(bytes, bytes.length);
+      return new Bytes(bytes);
     }
     catch (java.io.UnsupportedEncodingException ex) {
       throw new Error("unsupported encoding " + encoding);

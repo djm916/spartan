@@ -9,16 +9,16 @@ public final class Bytes extends Datum
     return Type.BYTES;
   }
   
-  public Bytes(int n)
+  public Bytes(int capacity)
   {
-    this.bytes = new byte[n];
-    this.size = 0;
+    this.bytes = new byte[capacity];
+    this.position = 0;
   }
   
-  public Bytes(byte[] bytes, int n)
+  public Bytes(byte[] bytes)
   {
     this.bytes = bytes;
-    this.size = n;
+    this.position = 0;
   }
   
   public byte[] getBytes()
@@ -41,15 +41,40 @@ public final class Bytes extends Datum
     bytes[index] = value;
   }
   
+  public int position()
+  {
+    return position;
+  }
+  
+  public void position(int position)
+  {
+    this.position = position;
+  }
+  
   public int length()
   {
-    return size;
+    return position;
+  }
+  
+  public int capacity()
+  {
+    return bytes.length;
+  }
+  
+  public int remaining()
+  {
+    return bytes.length - position;
+  }
+  
+  public void clear()
+  {
+    position = 0;
   }
   
   public Text decode(String encoding)
   {
     try {
-      return new Text(new String(bytes, 0, size, encoding));
+      return new Text(new String(bytes, 0, position, encoding));
     }
     catch (java.io.UnsupportedEncodingException ex) {
       throw new Error("unsupported encoding " + encoding);
@@ -57,5 +82,5 @@ public final class Bytes extends Datum
   }
   
   private final byte[] bytes;
-  private final int size;
+  private int position;
 }

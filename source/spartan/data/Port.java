@@ -6,6 +6,8 @@ import spartan.errors.InvalidArgument;
 public abstract sealed class Port extends Datum
 permits InputPort, OutputPort, FilePort
 {
+  public static final Int EOF = new Int(-1);
+  
   public static Port open(String fileName, String flags)
   {
     if ("rw".equals(flags))
