@@ -3,7 +3,7 @@ package spartan.data;
 import spartan.errors.DivisionByZero;
 import spartan.errors.IntegerOverflow;
 
-public final class Int extends Numeric
+public final class Int extends Integral
 {
   public Int(int value)
   {
@@ -45,7 +45,7 @@ public final class Int extends Numeric
     return new Complex((double)value, 0.0);
   }
   
-  public Numeric neg()
+  public Integral neg()
   {
     try {
       return new Int(Math.negateExact(value));
@@ -55,7 +55,7 @@ public final class Int extends Numeric
     }
   }
   
-  public Numeric abs()
+  public Integral abs()
   {
     try {
       return new Int(Math.absExact(value));
@@ -85,7 +85,7 @@ public final class Int extends Numeric
     return this;
   }
   
-  public Numeric add(Int other)
+  public Integral add(Int other)
   {
     try {
       return new Int(Math.addExact(this.value, other.value));
@@ -95,7 +95,7 @@ public final class Int extends Numeric
     }
   }
   
-  public Numeric sub(Int other)
+  public Integral sub(Int other)
   {
     try {
       return new Int(Math.subtractExact(this.value, other.value));
@@ -105,7 +105,7 @@ public final class Int extends Numeric
     }
   }
   
-  public Numeric mul(Int other)
+  public Integral mul(Int other)
   {
     try {
       return new Int(Math.multiplyExact(this.value, other.value));

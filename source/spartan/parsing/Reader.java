@@ -293,7 +293,7 @@ public class Reader implements AutoCloseable
     return makeInt(text.toString());
   }
 
-  private Numeric makeInt(String text)
+  private Integral makeInt(String text)
   {
     try {
       return new Int(text);
