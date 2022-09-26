@@ -32,12 +32,12 @@ permits InputPort, OutputPort, FilePort
     throw unsupportedOperation();
   }
   
-  public Int read(Bytes bytes, Int count)
+  public int read(Bytes bytes)
   {
     throw unsupportedOperation();
   }
   
-  public void write(Bytes bytes, Int count)
+  public int write(Bytes bytes)
   {
     throw unsupportedOperation();
   }

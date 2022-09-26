@@ -6,6 +6,8 @@ import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.FileNotFoundException;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
 
 public final class InputPort extends Port
 {
@@ -21,11 +23,10 @@ public final class InputPort extends Port
     }
   }
 
-  public Int read(Bytes bytes, Int count)
+  public int read(Bytes dst)
   {
     try {
-      var bytesRead = stream.read(bytes.getBytes(), 0, count.value);
-      return new Int(bytesRead);
+      return channel.read(dst.buffer());
     }
     catch (IOException ex) {
       throw new IOError(ex.getMessage());
@@ -35,7 +36,7 @@ public final class InputPort extends Port
   public void close()
   {
     try {
-      stream.close();
+      channel.close();
     }
     catch (IOException ex) {
       throw new IOError(ex.getMessage());
@@ -44,8 +45,8 @@ public final class InputPort extends Port
   
   private InputPort(InputStream stream)
   {
-    this.stream = stream;
+    this.channel = Channels.newChannel(stream);
   }
   
-  private final InputStream stream;
+  private final ReadableByteChannel channel;
 }

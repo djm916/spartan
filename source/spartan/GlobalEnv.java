@@ -185,7 +185,15 @@ public final class GlobalEnv
     
     /* Bytes procedures */
     
+    bind(new Symbol("bytes"), BytesLib.FROM_LIST);
     bind(new Symbol("bytes/new"), BytesLib.MAKE_BYTES);
-    bind(new Symbol("bytes/ref"), BytesLib.BYTES_REF);
+    bind(new Symbol("bytes/ref"), BytesLib.REF);
+    bind(new Symbol("bytes/set!"), BytesLib.SET);
+    bind(new Symbol("bytes/push!"), BytesLib.PUSH);
+    bind(new Symbol("bytes/pop!"), BytesLib.POP);
+    bind(new Symbol("bytes/flip!"), BytesLib.FLIP);
+    bind(new Symbol("bytes/clear!"), BytesLib.FLIP);
+    bind(new Symbol("bytes/remaining"), BytesLib.REMAINING);
+    bind(new Symbol("bytes/empty?"), BytesLib.IS_EMPTY);
   }
 }

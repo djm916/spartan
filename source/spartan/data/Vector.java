@@ -1,10 +1,10 @@
 package spartan.data;
 
+import spartan.errors.NoSuchElement;
 import java.util.stream.Stream;
 import java.util.stream.Collectors;
 import java.util.function.BiPredicate;
 import java.util.ArrayList;
-import spartan.errors.NoSuchElement;
 
 public final class Vector extends Datum
 {
@@ -12,7 +12,7 @@ public final class Vector extends Datum
   {
     var result = new Vector(elems.length());
     for (; !elems.empty(); elems = elems.cdr())
-      result.elems.add(elems.car());
+      result.append(elems.car());
     return result;
   }
   

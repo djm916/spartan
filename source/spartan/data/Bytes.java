@@ -1,9 +1,25 @@
 package spartan.data;
 
 import spartan.errors.Error;
+import spartan.errors.NoSuchElement;
+import spartan.errors.TypeMismatch;
+import java.nio.ByteBuffer;
+import java.nio.BufferUnderflowException;
 
 public final class Bytes extends Datum
 {
+  public static Bytes fromList(List elems)
+  {
+    var result = new Bytes(elems.length());
+    for (; !elems.empty(); elems = elems.cdr()) {
+      if (elems.car().type() != Type.INT)
+        throw new TypeMismatch();
+      result.push((byte)((Int)elems.car()).value);
+    }
+    result.flip();
+    return result;
+  }
+  
   public Type type()
   {
     return Type.BYTES;
@@ -11,76 +27,98 @@ public final class Bytes extends Datum
   
   public Bytes(int capacity)
   {
-    this.bytes = new byte[capacity];
-    this.position = 0;
+    this.buffer = ByteBuffer.allocate(capacity);
   }
   
   public Bytes(byte[] bytes)
   {
-    this.bytes = bytes;
-    this.position = 0;
+    this.buffer = ByteBuffer.wrap(bytes);
   }
   
-  public byte[] getBytes()
+  public byte[] array()
   {
-    return bytes;
+    return buffer.array();
   }
   
-  public Int get(Int index)
+  public ByteBuffer buffer()
   {
-    return new Int(get(index.value));
+    return buffer;
   }
   
   public byte get(int index)
   {
-    return bytes[index];
+    return buffer.get(index);
   }
   
   public void set(int index, byte value)
   {
-    bytes[index] = value;
+    buffer.put(index, value);
+  }
+  
+  public void push(byte value)
+  {
+    buffer.put(value);
+  }
+  
+  public byte pop()
+  {
+    try {
+      return buffer.get();
+    }
+    catch (BufferUnderflowException ex) {
+      throw new NoSuchElement();
+    }
   }
   
   public int position()
   {
-    return position;
+    return buffer.position();
   }
   
-  public void position(int position)
+  public void position(int newPosition)
   {
-    this.position = position;
+    buffer.position(newPosition);
   }
   
-  public int length()
+  public int limit()
   {
-    return position;
+    return buffer.limit();
+  }
+  
+  public void limit(int newLimit)
+  {
+    buffer.limit(newLimit);
   }
   
   public int capacity()
   {
-    return bytes.length;
+    return buffer.capacity();
   }
   
   public int remaining()
   {
-    return bytes.length - position;
+    return buffer.remaining();
   }
   
   public void clear()
   {
-    position = 0;
+    buffer.clear();
+  }
+  
+  public void flip()
+  {
+    buffer.flip();
   }
   
   public Text decode(String encoding)
   {
     try {
-      return new Text(new String(bytes, 0, position, encoding));
+      return new Text(new String(buffer.array(), 0, buffer.remaining(), encoding));
     }
     catch (java.io.UnsupportedEncodingException ex) {
       throw new Error("unsupported encoding " + encoding);
     }
   }
   
-  private final byte[] bytes;
-  private int position;
+  private final ByteBuffer buffer;
 }

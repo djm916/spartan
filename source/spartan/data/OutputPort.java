@@ -6,6 +6,8 @@ import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.FileNotFoundException;
+import java.nio.channels.Channels;
+import java.nio.channels.WritableByteChannel;
 
 public final class OutputPort extends Port
 {
@@ -21,10 +23,10 @@ public final class OutputPort extends Port
     }
   }
 
-  public void write(Bytes bytes, Int count)
+  public int write(Bytes src)
   {
     try {
-      stream.write(bytes.getBytes(), 0, count.value);
+      return channel.write(src.buffer());
     }
     catch (IOException ex) {
       throw new IOError(ex.getMessage());
@@ -34,7 +36,7 @@ public final class OutputPort extends Port
   public void close()
   {
     try {
-      stream.close();
+      channel.close();
     }
     catch (IOException ex) {
       throw new IOError(ex.getMessage());
@@ -43,8 +45,8 @@ public final class OutputPort extends Port
   
   private OutputPort(OutputStream stream)
   {
-    this.stream = stream;
+    this.channel = Channels.newChannel(stream);
   }
   
-  private final OutputStream stream;
+  private final WritableByteChannel channel;
 }

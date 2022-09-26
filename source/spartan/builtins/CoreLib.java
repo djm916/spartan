@@ -388,7 +388,7 @@ public final class CoreLib
       case LIST   -> ((List)x).length();
       case VECTOR -> ((Vector)x).length();
       case TEXT   -> ((Text)x).length();
-      case BYTES  -> ((Bytes)x).length();
+      //case BYTES  -> ((Bytes)x).length();
       default     -> throw new TypeMismatch();
     };
   }

@@ -735,7 +735,11 @@ public class Compiler
   }
     
   /* Compiles a lambda expression (anonymous procedure)
-  */
+   *
+   * Syntax: (fun (args...) body...)
+   *         (fun (args... & rest) body...)
+   *
+   */
   private Inst compileFun(List exp, Scope scope, Inst next)
   {
     if (exp.length() < 3 || exp.cadr().type() != Type.LIST)

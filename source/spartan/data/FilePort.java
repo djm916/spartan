@@ -2,43 +2,38 @@ package spartan.data;
 
 import spartan.errors.Error;
 import spartan.errors.IOError;
-import java.io.RandomAccessFile;
 import java.io.IOException;
 import java.io.FileNotFoundException;
+import java.nio.channels.FileChannel;
+import java.nio.file.Path;
+import static java.nio.file.StandardOpenOption.*;
 
 public final class FilePort extends Port
 {
   public FilePort(String fileName)
   {
     try {
-      this.file = new RandomAccessFile(fileName, "rw");
-    }
-    catch (FileNotFoundException | SecurityException ex) {
-      throw new IOError(ex.getMessage());
-    }
-  }
-  
-  public Int read(Bytes bytes, Int count)
-  {
-    if (bytes.remaining() < count.value)
-      throw new Error("buffer overflow");
-    
-    try {      
-      var bytesRead = file.read(bytes.getBytes(), bytes.position(), count.value);
-      if (bytesRead == -1)
-        return EOF;
-      bytes.position(bytes.position() + bytesRead);
-      return new Int(bytesRead);
+      this.channel = FileChannel.open(Path.of(fileName), READ, WRITE);
     }
     catch (IOException ex) {
       throw new IOError(ex.getMessage());
     }
   }
   
-  public void write(Bytes bytes)
+  public int read(Bytes dst)
   {
     try {
-      file.write(bytes.getBytes());
+      return channel.read(dst.buffer());
+    }
+    catch (IOException ex) {
+      throw new IOError(ex.getMessage());
+    }    
+  }
+  
+  public int write(Bytes src)
+  {
+    try {
+      return channel.write(src.buffer());
     }
     catch (IOException ex) {
       throw new IOError(ex.getMessage());
@@ -48,12 +43,12 @@ public final class FilePort extends Port
   public void close()
   {
     try {
-      file.close();
+      channel.close();
     }
     catch (IOException ex) {
       throw new IOError(ex.getMessage());
     }
   }
   
-  private final RandomAccessFile file;
+  private final FileChannel channel;
 }
