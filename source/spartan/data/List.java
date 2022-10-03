@@ -48,9 +48,17 @@ public final class List extends Datum
   
   public String repr()
   {
-    return String.format("(%s)", repr(this));
+    var result = new StringBuilder();
+    result.append("(");
+    for (var list = this; list != List.EMPTY; list = list.cdr()) {
+      result.append(list.car().repr());
+      if (list.cdr() != EMPTY)
+        result.append(" ");
+    }
+    result.append(")");
+    return result.toString();
   }
-    
+  
   public boolean empty()
   {
     return this == EMPTY;
@@ -103,12 +111,18 @@ public final class List extends Datum
   
   public int length()
   {
-    return length(this);
+    int length = 0;
+    for (var list = this; list != EMPTY; list = list.rest)
+      ++length;
+    return length;
   }
   
   public Datum at(int index)
   {
-    return at(this, index);
+    var list = this;
+    while (index-- > 0)
+      list = list.rest;
+    return list.first;
   }
   
   public boolean eq(List other, BiPredicate<Datum, Datum> eq)
@@ -146,22 +160,7 @@ public final class List extends Datum
   {
     return indexOf(this, x, pred);
   }
-  
-  private static int length(List list)
-  {
-    int length = 0;
-    for (; list != EMPTY; list = list.rest)
-      length += 1;
-    return length;
-  }
-  
-  private static Datum at(List list, int index)
-  {
-    while (index-- > 0)
-      list = list.rest;
-    return list.first;
-  }
-  
+    
   private static List concat(List x, List y)
   {
     var result = new Builder();
@@ -214,18 +213,7 @@ public final class List extends Datum
     
     return x == EMPTY && y == EMPTY;
   }
-  
-  private static String repr(List self)
-  {
-    if (self == EMPTY)
-      return "";
     
-    if (self.rest == EMPTY)
-      return self.first.repr();
-    
-    return String.format("%s %s", self.first.repr(), repr(self.rest));
-  }
-  
   private List(Datum first, List rest)
   {
     this.first = first;

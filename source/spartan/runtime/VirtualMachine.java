@@ -9,7 +9,6 @@ import spartan.errors.WrongNumberArgs;
 import spartan.errors.TypeMismatch;
 import spartan.parsing.Position;
 
-
 public final class VirtualMachine
 {
   public Datum result;
@@ -24,7 +23,7 @@ public final class VirtualMachine
     this.globals = globals;
   }
   
-  public final Datum eval(Inst code)
+  public Datum eval(Inst code)
   {
     control = code;
     
@@ -47,37 +46,37 @@ public final class VirtualMachine
     return result;
   }
   
-  public final void pushArg(Datum x)
+  public void pushArg(Datum x)
   {
     args = List.cons(x, args);
   }
   
-  public final Datum popArg()
+  public Datum popArg()
   {
     Datum x = args.car();
     args = args.cdr();
     return x;
   }
   
-  public final Datum peekArg()
+  public Datum peekArg()
   {
     return args.car();
   }
   
-  public final List popRestArgs()
+  public List popRestArgs()
   {
     List x = args;
     args = List.EMPTY;
     return x;
   }
   
-  public final void pushFrame(Inst returnTo, Position position)
+  public void pushFrame(Inst returnTo, Position position)
   {
     frame = new Frame(frame, locals, args, returnTo, position);
     args = List.EMPTY;
   }
   
-  public final void popFrame()
+  public void popFrame()
   {
     control = frame.returnTo();
     locals = frame.locals();
@@ -85,7 +84,7 @@ public final class VirtualMachine
     frame = frame.parent();
   }
   
-  public final void apply(int numArgs)
+  public void apply(int numArgs)
   {
     if (!result.type().isCallable())
       throw new TypeMismatch();
@@ -94,8 +93,8 @@ public final class VirtualMachine
       throw new WrongNumberArgs();
     f.apply(this);
   }
-  
-  public final void reset()
+    
+  public void reset()
   {
     control = null;
     args = List.EMPTY;

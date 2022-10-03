@@ -7,11 +7,11 @@ public final class Ratio extends Numeric
 {
   public Ratio(BigInteger numer, BigInteger denom)
   {
-    //if (denom.equals(BigInteger.ZERO))
-      //throw new InvalidArgument();  
+    if (denom.equals(BigInteger.ZERO))
+      throw new InvalidArgument();
     
-    // Maintain the invariant that the numerator carries the sign of
-    // the fraction, such that the denominator is always positive.
+    // Maintain the invariant that the numerator carries the sign,
+    // of the fraction, and the denominator is always positive.
     if (denom.compareTo(BigInteger.ZERO) < 0) {
       numer = numer.negate();
       denom = denom.negate();

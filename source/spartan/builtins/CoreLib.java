@@ -85,12 +85,6 @@ public final class CoreLib
         }
         break;
       }
-      case SYMBOL: {
-        switch (y.type()) {
-          case SYMBOL: return ((Symbol)x).eq((Symbol)y);
-        }
-        break;
-      }
       case TEXT: {
         switch (y.type()) {
           case TEXT: return ((Text)x).eq((Text)y);
@@ -109,6 +103,7 @@ public final class CoreLib
         }
         break;
       }
+      case SYMBOL:
       case BOOL:
       case NIL: return x == y;
     }
@@ -408,7 +403,7 @@ public final class CoreLib
     private Map<Type, Symbol> typeSymbolMap = new EnumMap<>(Type.class);
     {
       for (Type t : Type.values())
-        typeSymbolMap.put(t, new Symbol(t.getName()));
+        typeSymbolMap.put(t, Symbol.of(t.getName()));
     }
   };
   
@@ -446,7 +441,7 @@ public final class CoreLib
     public void apply(VirtualMachine vm) {
       if (vm.peekArg().type() != Type.TEXT)
         throw new TypeMismatch();
-      vm.result = new Symbol(((Text)vm.popArg()).str());
+      vm.result = Symbol.of(((Text)vm.popArg()).str());
       vm.popFrame();
     }
   };

@@ -355,9 +355,7 @@ public class Reader implements AutoCloseable
       text.append((char)lastChar);
     }
     
-    var result = new Symbol(text.toString());
-    positionMap.put(result, position);
-    return result;
+    return Symbol.of(text.toString());
   }
   
   private Datum readText() throws IOException
@@ -430,26 +428,26 @@ public class Reader implements AutoCloseable
   private Datum readQuote() throws IOException
   {
     skipSpace();
-    return List.of(Symbol.Quote, readDatum());
+    return List.of(Symbol.QUOTE, readDatum());
   }
   
   private Datum readUnquote() throws IOException
   {
     skipSpace();
-    return List.of(Symbol.Unquote, readDatum());
+    return List.of(Symbol.UNQUOTE, readDatum());
   }
 
   private Datum readUnquoteSplicing() throws IOException
   {
     getChar();
     skipSpace();
-    return List.of(Symbol.UnquoteSplicing, readDatum());
+    return List.of(Symbol.UNQUOTE_SPLICING, readDatum());
   }
 
   private Datum readQuasiQuote() throws IOException
   {
     skipSpace();
-    return List.of(Symbol.Quasiquote, readDatum());
+    return List.of(Symbol.QUASIQUOTE, readDatum());
   }
   
   private Datum readDatum() throws IOException

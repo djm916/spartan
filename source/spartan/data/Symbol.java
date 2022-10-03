@@ -5,37 +5,42 @@ import java.util.HashMap;
 
 public final class Symbol extends Datum
 {
-  public static final Symbol Def = new Symbol("def");
-  public static final Symbol Defun = new Symbol("defun");
-  public static final Symbol Defmacro = new Symbol("defmacro");
-  public static final Symbol Fun = new Symbol("fun");
-  public static final Symbol If = new Symbol("if");
-  public static final Symbol Cond = new Symbol("cond");
-  public static final Symbol Else = new Symbol("else");  
-  public static final Symbol Quote = new Symbol("quote");
-  public static final Symbol Quasiquote = new Symbol("quasiquote");
-  public static final Symbol Unquote = new Symbol("unquote");  
-  public static final Symbol UnquoteSplicing = new Symbol("unquote-splicing");
-  public static final Symbol Let = new Symbol("let");
-  public static final Symbol LetStar = new Symbol("let*");
-  public static final Symbol LetRec = new Symbol("letrec");
-  public static final Symbol Do = new Symbol("do");
-  public static final Symbol While = new Symbol("while");
-  public static final Symbol For = new Symbol("for");
-  public static final Symbol Set = new Symbol("set!");
-  public static final Symbol And = new Symbol("and");
-  public static final Symbol Or = new Symbol("or");
-  public static final Symbol Ampersand = new Symbol("&");
-  public static final Symbol CallCC = new Symbol("call/cc");
+  private static final Map<String, Symbol> interned = new HashMap<>();
+  
+  public static final Symbol DEF = Symbol.of("def");
+  public static final Symbol DEFUN = Symbol.of("defun");
+  public static final Symbol DEFMACRO = Symbol.of("defmacro");
+  public static final Symbol FUN = Symbol.of("fun");
+  public static final Symbol IF = Symbol.of("if");
+  public static final Symbol COND = Symbol.of("cond");
+  public static final Symbol ELSE = Symbol.of("else");  
+  public static final Symbol QUOTE = Symbol.of("quote");
+  public static final Symbol QUASIQUOTE = Symbol.of("quasiquote");
+  public static final Symbol UNQUOTE = Symbol.of("unquote");  
+  public static final Symbol UNQUOTE_SPLICING = Symbol.of("unquote-splicing");
+  public static final Symbol LET = Symbol.of("let");
+  public static final Symbol LETSTAR = Symbol.of("let*");
+  public static final Symbol LETREC = Symbol.of("letrec");
+  public static final Symbol DO = Symbol.of("do");
+  public static final Symbol WHILE = Symbol.of("while");
+  public static final Symbol FOR = Symbol.of("for");
+  public static final Symbol SET = Symbol.of("set!");
+  public static final Symbol AND = Symbol.of("and");
+  public static final Symbol OR = Symbol.of("or");
+  public static final Symbol AMPERSAND = Symbol.of("&");
+  public static final Symbol CALL_CC = Symbol.of("call/cc");
 
+  public static Symbol of(String id)
+  {
+    if (!interned.containsKey(id)) {
+      interned.put(id, new Symbol(id));
+    }
+    return interned.get(id);
+  }
+  
   public static Symbol generateUnique()
   {
-    return new Symbol(String.format("#%d", nextSymbolNum++));
-  }
-
-  public Symbol(String id)
-  {
-    this.id = id;
+    return Symbol.of(String.format("#%d", nextSymbolNum++));
   }
   
   public Type type()
@@ -48,21 +53,9 @@ public final class Symbol extends Datum
     return id;
   }
   
-  public boolean eq(Symbol other)
+  private Symbol(String id)
   {
-    return this.id.equals(other.id);
-  }
-    
-  public boolean equals(Object other)
-  {
-    if (! (other instanceof Symbol))
-      return false;
-    return this.id.equals(((Symbol)other).id);
-  }
-  
-  public int hashCode()
-  {
-    return id.hashCode();
+    this.id = id;
   }
   
   private static int nextSymbolNum;

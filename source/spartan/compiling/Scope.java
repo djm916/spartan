@@ -39,13 +39,13 @@ class Scope
     return Optional.ofNullable(lookup(name, 0));
   }
   
-  private DeBruijnIndex lookup(Symbol toFind, int depth)
+  private DeBruijnIndex lookup(Symbol name, int depth)
   {
-    int offset = vars.indexOf(toFind, (name) -> toFind.eq((Symbol)name));
+    int offset = vars.indexOf(name, (s) -> s == name);
     if (offset >= 0)
       return new DeBruijnIndex(depth, offset);
     else if (parent != null)
-      return parent.lookup(toFind, depth + 1);
+      return parent.lookup(name, depth + 1);
     else
       return null;
   }  

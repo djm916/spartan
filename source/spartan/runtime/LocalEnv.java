@@ -8,8 +8,8 @@ public final class LocalEnv
   LocalEnv(int numSlots, LocalEnv parent)
   {
     this.slots = new Datum[numSlots];  
-    for (int i = 0; i < numSlots; ++i)
-      this.slots[i] = Nil.VALUE;
+    //for (int i = 0; i < numSlots; ++i)
+      //this.slots[i] = Nil.VALUE;
     this.parent = parent;
   }
   
