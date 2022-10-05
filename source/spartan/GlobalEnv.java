@@ -168,8 +168,10 @@ public final class GlobalEnv
     /* String procedures */
     
     bind(Symbol.of("string/concat"), StringLib.CONCAT);
+    bind(Symbol.of("string/join"), StringLib.JOIN);
+    bind(Symbol.of("string/substr"), StringLib.SUBSTR);
     bind(Symbol.of("string/hash"), StringLib.HASH);
-        
+    
     /* Port procedures */
     
     bind(Symbol.of("port/open"), PortLib.OPEN);

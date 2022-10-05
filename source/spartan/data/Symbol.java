@@ -40,7 +40,7 @@ public final class Symbol extends Datum
     if (result == null || result.get() == null) {
       var symbol = new Symbol(id);
       interned.put(id, new WeakReference<>(symbol, unused));
-      purgeUnreferencedSymbols();
+      purgeUnusedSymbols();
       return symbol;
     }
     return result.get();
@@ -48,7 +48,7 @@ public final class Symbol extends Datum
   
   public static Symbol generateUnique()
   {
-    return Symbol.of(String.format("#%d", nextSymbolNum++));
+    return Symbol.of(String.format("#%d", nextUniqueId++));
   }
   
   public Type type()
@@ -66,7 +66,7 @@ public final class Symbol extends Datum
     this.id = id;
   }
   
-  private static void purgeUnreferencedSymbols()
+  private static void purgeUnusedSymbols()
   {
     //var beforeSize = interned.size();
     var used = interned.values();
@@ -77,6 +77,6 @@ public final class Symbol extends Datum
     //System.out.println(String.format("purged symbol table (before: %d, after: %d)", beforeSize, afterSize));
   }
   
-  private static int nextSymbolNum;
+  private static int nextUniqueId;
   private final String id;
 }

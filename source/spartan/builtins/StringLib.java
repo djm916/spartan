@@ -10,20 +10,38 @@ import spartan.errors.TypeMismatch;
 
 public final class StringLib
 {  
-  public static Text concat(List args)
-  {
-    var buffer = new StringBuilder();
-    for (; !args.empty(); args = args.cdr()) {
-      if (args.car().type() != Type.TEXT)
-        throw new TypeMismatch();
-      buffer.append(((Text)args.car()).str());
-    }
-    return new Text(buffer.toString());
-  }
-  
-  public static final Primitive CONCAT = new Primitive(2, true) {
+  public static final Primitive CONCAT = new Primitive(1, true) {
     public void apply(VirtualMachine vm) {
-      vm.result = concat(vm.popRestArgs());
+      if (vm.peekArg().type() != Type.TEXT)
+        throw new TypeMismatch();
+      var text = (Text) vm.popArg();
+      vm.result = text.concat(vm.popRestArgs());
+      vm.popFrame();
+    }
+  };
+  
+  public static final Primitive JOIN = new Primitive(1, true) {
+    public void apply(VirtualMachine vm) {
+      if (vm.peekArg().type() != Type.TEXT)
+        throw new TypeMismatch();
+      var delimiter = (Text) vm.popArg();
+      vm.result = delimiter.join(vm.popRestArgs());
+      vm.popFrame();
+    }
+  };
+  
+  public static final Primitive SUBSTR = new Primitive(3, false) {
+    public void apply(VirtualMachine vm) {
+      if (vm.peekArg().type() != Type.TEXT)
+        throw new TypeMismatch();
+      var text = (Text) vm.popArg();
+      if (vm.peekArg().type() != Type.INT)
+        throw new TypeMismatch();
+      var start = (Int) vm.popArg();
+      if (vm.peekArg().type() != Type.INT)
+        throw new TypeMismatch();
+      var end = (Int) vm.popArg();
+      vm.result = text.substring(start.value, end.value);
       vm.popFrame();
     }
   };

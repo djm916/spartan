@@ -1,8 +1,5 @@
 package spartan.data;
 
-import java.util.Map;
-import java.util.EnumMap;
-
 public enum Type
 {
   NIL("type/nil"),
