@@ -1,6 +1,7 @@
 package spartan.data;
 
 import spartan.errors.Error;
+import java.nio.charset.Charset;
 
 public final class Text extends Datum
 {
@@ -44,15 +45,9 @@ public final class Text extends Datum
     return this.value.compareTo(other.value);
   }
   
-  public Bytes encode(String encoding)
+  public Bytes encode(Charset encoding)
   {
-    try {
-      var bytes = value.getBytes(encoding);
-      return new Bytes(bytes);
-    }
-    catch (java.io.UnsupportedEncodingException ex) {
-      throw new Error("unsupported encoding " + encoding);
-    }
+    return new Bytes(value.getBytes(encoding));
   }
     
   private final String value;

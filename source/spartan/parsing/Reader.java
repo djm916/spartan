@@ -3,6 +3,7 @@ package spartan.parsing;
 import java.io.*;
 import spartan.data.*;
 import spartan.errors.Error;
+import spartan.Config;
 
 class MutablePosition
 {
@@ -17,19 +18,19 @@ class MutablePosition
 
 public class Reader implements AutoCloseable
 {
-  public static Reader forFile(String fileName) throws FileNotFoundException, UnsupportedEncodingException
+  public static Reader forFile(String fileName) throws FileNotFoundException
   {
     return new Reader(fileName, new FileInputStream(fileName));
   }
 
-  public static Reader forConsole() throws UnsupportedEncodingException
+  public static Reader forConsole()
   {
     return new Reader("interactive input", System.in);
   }
 
-  public static Reader forString(String s) throws UnsupportedEncodingException
+  public static Reader forString(String s)
   {
-    return new Reader("unknown source", new ByteArrayInputStream(s.getBytes()));
+    return new Reader("unknown source", new ByteArrayInputStream(s.getBytes(Config.DEFAULT_ENCODING)));
   }
 
   public SourceDatum read() throws IOException
@@ -47,7 +48,7 @@ public class Reader implements AutoCloseable
     input.close();
   }
 
-  private Reader(String source, InputStream input) throws UnsupportedEncodingException
+  private Reader(String source, InputStream input)
   {
     this.source = source;
     this.input = new PushbackReader(new BufferedReader(new InputStreamReader(input, spartan.Config.DEFAULT_ENCODING)));
@@ -164,6 +165,11 @@ public class Reader implements AutoCloseable
     return new Error(message, getTokenPosition());
   }
 
+  private Error malformedNumeric()
+  {
+    return syntaxError("malformed numeric literal");
+  }
+  
   private void discardRemainingInput()
   {
     try {
@@ -255,7 +261,7 @@ public class Reader implements AutoCloseable
     
   */
     
-  private Datum readNumber() throws IOException
+  private Numeric readNumber() throws IOException
   {
     var text = new StringBuilder();
 
@@ -309,7 +315,7 @@ public class Reader implements AutoCloseable
       return new BigInt(text);
     }
     catch (NumberFormatException ex) {
-      throw syntaxError("malformed numeric literal");
+      throw malformedNumeric();
     }
   }
   
@@ -319,7 +325,7 @@ public class Reader implements AutoCloseable
       return new Ratio(numer, denom);
     }
     catch (NumberFormatException ex) {
-      throw syntaxError("malformed numeric literal");
+      throw malformedNumeric();
     }
   }
   
@@ -329,7 +335,7 @@ public class Reader implements AutoCloseable
       return new Real(text);
     }
     catch (NumberFormatException ex) {
-      throw syntaxError("malformed numeric literal");
+      throw malformedNumeric();
     }
   }
   
@@ -339,11 +345,11 @@ public class Reader implements AutoCloseable
       return new Complex(real, imag);
     }
     catch (NumberFormatException ex) {
-      throw syntaxError("malformed numeric literal");
+      throw malformedNumeric();
     }
   }
   
-  private Datum readSymbol() throws IOException
+  private Symbol readSymbol() throws IOException
   {
     var text = new StringBuilder();
     var position = getTokenPosition();
@@ -358,7 +364,7 @@ public class Reader implements AutoCloseable
     return Symbol.of(text.toString());
   }
   
-  private Datum readText() throws IOException
+  private Text readText() throws IOException
   {
     var text = new StringBuilder();
 
@@ -393,7 +399,7 @@ public class Reader implements AutoCloseable
     };
   }
   
-  private Datum readList() throws IOException
+  private List readList() throws IOException
   {
     var builder = new List.Builder();
     var position = getTokenPosition();
@@ -410,7 +416,7 @@ public class Reader implements AutoCloseable
     return result;
   }
 
-  private Datum readVector() throws IOException
+  private Vector readVector() throws IOException
   {
     var result = new Vector();
     var position = getTokenPosition();
@@ -425,26 +431,26 @@ public class Reader implements AutoCloseable
     return result;
   }
   
-  private Datum readQuote() throws IOException
+  private List readQuote() throws IOException
   {
     skipSpace();
     return List.of(Symbol.QUOTE, readDatum());
   }
   
-  private Datum readUnquote() throws IOException
+  private List readUnquote() throws IOException
   {
     skipSpace();
     return List.of(Symbol.UNQUOTE, readDatum());
   }
 
-  private Datum readUnquoteSplicing() throws IOException
+  private List readUnquoteSplicing() throws IOException
   {
     getChar();
     skipSpace();
     return List.of(Symbol.UNQUOTE_SPLICING, readDatum());
   }
 
-  private Datum readQuasiQuote() throws IOException
+  private List readQuasiQuote() throws IOException
   {
     skipSpace();
     return List.of(Symbol.QUASIQUOTE, readDatum());

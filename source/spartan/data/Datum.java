@@ -23,7 +23,7 @@ permits Nil, Bool, Numeric, Callable, List, Vector, Symbol, Text, Port, Bytes
   */
   public String repr()
   {
-    return String.format("#<%s @ 0x%x>", type().getName(), System.identityHashCode(this));
+    return String.format("#<%s @ 0x%x>", type(), System.identityHashCode(this));
   }
   
   /* Returns a String representation of this object, intended to be human-readable.

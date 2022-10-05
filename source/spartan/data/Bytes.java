@@ -5,6 +5,7 @@ import spartan.errors.NoSuchElement;
 import spartan.errors.TypeMismatch;
 import java.nio.ByteBuffer;
 import java.nio.BufferUnderflowException;
+import java.nio.charset.Charset;
 
 public final class Bytes extends Datum
 {
@@ -110,14 +111,9 @@ public final class Bytes extends Datum
     buffer.flip();
   }
   
-  public Text decode(String encoding)
+  public Text decode(Charset encoding)
   {
-    try {
-      return new Text(new String(buffer.array(), 0, buffer.remaining(), encoding));
-    }
-    catch (java.io.UnsupportedEncodingException ex) {
-      throw new Error("unsupported encoding " + encoding);
-    }
+    return new Text(new String(buffer.array(), 0, buffer.remaining(), encoding));
   }
   
   private final ByteBuffer buffer;

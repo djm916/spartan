@@ -27,7 +27,7 @@
       next-prime)))
 
 (def primes (stream/new (make-prime-generator)))
-(def N 100)
+(def N 1000)
 
 (print-line "The first " N " primes are:")
 

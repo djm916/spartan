@@ -4,7 +4,7 @@
 ; e.g., if the structure name is 'point, generate 'make-point
 
 (defun generate-constructor-name (name)
-  (text->symbol (text/concat "make-" (symbol->text name))))
+  (string->symbol (string/concat "make-" (symbol->string name))))
 
 ; Generate the name of a structure accessor ("getter") function
 ;
@@ -12,15 +12,15 @@
 ; generate 'point-x
 
 (defun generate-getter-name (name field)
-  (text->symbol (text/concat (symbol->text name) "-" (symbol->text field))))
+  (string->symbol (string/concat (symbol->string name) "-" (symbol->string field))))
 
 ; Generate the name of a structure mutator ("setter") function
 ;
 ; e.g., if the structure name is 'point, and the field is 'x,
-; generate 'point-x
+; generate 'set-point-x!
 
 (defun generate-setter-name (name field)
-  (text->symbol (text/concat "set-" (symbol->text name) "-" (symbol->text field) "!")))
+  (string->symbol (string/concat "set-" (symbol->string name) "-" (symbol->string field) "!")))
 
 ; Generate the name of a structure predicate function to distinguish
 ; different structure types.
@@ -28,7 +28,7 @@
 ; e.g., if the structure name is 'point, generate 'point?
 
 (defun generate-predicate-name (name)
-  (text->symbol (text/concat (symbol->text name) "?")))
+  (string->symbol (string/concat (symbol->string name) "?")))
 
 ; Generate a structure constructor function
 ;

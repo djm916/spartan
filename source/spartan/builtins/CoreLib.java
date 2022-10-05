@@ -5,6 +5,7 @@ import spartan.errors.Error;
 import spartan.errors.TypeMismatch;
 import spartan.runtime.VirtualMachine;
 import spartan.Config;
+import spartan.parsing.Reader;
 import java.util.Map;
 import java.util.EnumMap;
 
@@ -397,13 +398,8 @@ public final class CoreLib
   
   public static final Primitive TYPE = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
-      vm.result = typeSymbolMap.get(vm.popArg().type());
+      vm.result = vm.popArg().type().toSymbol();
       vm.popFrame();
-    }
-    private Map<Type, Symbol> typeSymbolMap = new EnumMap<>(Type.class);
-    {
-      for (Type t : Type.values())
-        typeSymbolMap.put(t, Symbol.of(t.getName()));
     }
   };
   
@@ -479,6 +475,25 @@ public final class CoreLib
       vm.popFrame();
     }
   };
+  
+  /*
+  public static final Primitive TEXT_TO_NUMBER = new Primitive(1, false) {
+    public void apply(VirtualMachine vm) {
+      if (vm.peekArg().type() != Type.TEXT)
+        throw new TypeMismatch();
+      var text = (Text) vm.popArg();
+      try {
+        vm.result = Reader.forString(text.str()).readNumber();
+      }
+      catch (java.io.IOException ex) {
+        // ignore exception
+      }
+      finally {
+        vm.popFrame();
+      }
+    }
+  };
+  */
   
   public static final Primitive ERROR = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {

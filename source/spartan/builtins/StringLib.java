@@ -8,7 +8,7 @@ import spartan.data.Int;
 import spartan.runtime.VirtualMachine;
 import spartan.errors.TypeMismatch;
 
-public final class TextLib
+public final class StringLib
 {  
   public static Text concat(List args)
   {
@@ -21,14 +21,14 @@ public final class TextLib
     return new Text(buffer.toString());
   }
   
-  public static final Primitive Concat = new Primitive(2, true) {
+  public static final Primitive CONCAT = new Primitive(2, true) {
     public void apply(VirtualMachine vm) {
       vm.result = concat(vm.popRestArgs());
       vm.popFrame();
     }
   };
   
-  public static final Primitive Hash = new Primitive(1, false) {
+  public static final Primitive HASH = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
       if (vm.peekArg().type() != Type.TEXT)
         throw new TypeMismatch();

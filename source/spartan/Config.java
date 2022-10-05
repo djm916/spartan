@@ -4,6 +4,8 @@ import spartan.errors.Error;
 import java.text.NumberFormat;
 import java.nio.file.Path;
 import java.nio.file.InvalidPathException;
+import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 import java.util.stream.Stream;
 import java.util.List;
 import java.util.random.RandomGenerator;
@@ -13,7 +15,7 @@ public final class Config
 {
   /** The default character encoding for converting to and from binary data.
       This encoding is assumed when reading source code files. */
-  public static final String DEFAULT_ENCODING = "UTF-8";
+  public static final Charset DEFAULT_ENCODING = StandardCharsets.UTF_8;
   
   /** The default decimal display precision */
   public static final int DEFAULT_DECIMAL_PRECISION = 3;

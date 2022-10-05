@@ -5,7 +5,7 @@ import spartan.builtins.CoreLib;
 import spartan.builtins.MathLib;
 import spartan.builtins.ListLib;
 import spartan.builtins.VectorLib;
-import spartan.builtins.TextLib;
+import spartan.builtins.StringLib;
 import spartan.builtins.PortLib;
 import spartan.builtins.BytesLib;
 import java.util.Map;
@@ -132,10 +132,11 @@ public final class GlobalEnv
     
     /* Conversion procedures */
     
-    bind(Symbol.of("text->symbol"), CoreLib.TEXT_TO_SYMBOL);
-    bind(Symbol.of("symbol->text"), CoreLib.SYMBOL_TO_TEXT); 
-    bind(Symbol.of("text->bytes"), CoreLib.TEXT_TO_BYTES); // encode
-    bind(Symbol.of("bytes->text"), CoreLib.BYTES_TO_TEXT); // decode
+    bind(Symbol.of("string->symbol"), CoreLib.TEXT_TO_SYMBOL);
+    bind(Symbol.of("symbol->string"), CoreLib.SYMBOL_TO_TEXT); 
+    bind(Symbol.of("string->bytes"), CoreLib.TEXT_TO_BYTES); // encode
+    bind(Symbol.of("bytes->string"), CoreLib.BYTES_TO_TEXT); // decode
+    //bind(Symbol.of("string->number"), CoreLib.TEXT_TO_NUMBER);
     
     /* List procedures */
 
@@ -164,10 +165,10 @@ public final class GlobalEnv
     bind(Symbol.of("vector/set!"), VectorLib.Set);
     bind(Symbol.of("vector/append!"), VectorLib.Append);
        
-    /* Text procedures */
+    /* String procedures */
     
-    bind(Symbol.of("text/concat"), TextLib.Concat);
-    bind(Symbol.of("text/hash"), TextLib.Hash);
+    bind(Symbol.of("string/concat"), StringLib.CONCAT);
+    bind(Symbol.of("string/hash"), StringLib.HASH);
         
     /* Port procedures */
     

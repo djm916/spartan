@@ -1,5 +1,8 @@
 package spartan.data;
 
+import java.util.Map;
+import java.util.EnumMap;
+
 public enum Type
 {
   NIL("type/nil"),
@@ -20,7 +23,13 @@ public enum Type
   CONTINUE("type/continuation"),
   PORT("type/port");
   
-  public String getName()
+  public Symbol toSymbol()
+  {
+    return Symbol.of(name);
+  }
+  
+  @Override
+  public String toString()
   {
     return name;
   }

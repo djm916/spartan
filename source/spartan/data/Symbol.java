@@ -2,10 +2,14 @@ package spartan.data;
 
 import java.util.Map;
 import java.util.HashMap;
+import java.lang.ref.WeakReference;
+import java.lang.ref.Reference;
+import java.lang.ref.ReferenceQueue;
 
 public final class Symbol extends Datum
 {
-  private static final Map<String, Symbol> interned = new HashMap<>();
+  private static final Map<String, WeakReference<Symbol>> interned = new HashMap<>();
+  private static final ReferenceQueue unused = new ReferenceQueue();
   
   public static final Symbol DEF = Symbol.of("def");
   public static final Symbol DEFUN = Symbol.of("defun");
@@ -32,10 +36,14 @@ public final class Symbol extends Datum
 
   public static Symbol of(String id)
   {
-    if (!interned.containsKey(id)) {
-      interned.put(id, new Symbol(id));
+    var result = interned.get(id);
+    if (result == null || result.get() == null) {
+      var symbol = new Symbol(id);
+      interned.put(id, new WeakReference<>(symbol, unused));
+      purgeUnreferencedSymbols();
+      return symbol;
     }
-    return interned.get(id);
+    return result.get();
   }
   
   public static Symbol generateUnique()
@@ -56,6 +64,17 @@ public final class Symbol extends Datum
   private Symbol(String id)
   {
     this.id = id;
+  }
+  
+  private static void purgeUnreferencedSymbols()
+  {
+    //var beforeSize = interned.size();
+    var used = interned.values();
+    Reference<Symbol> ref = null;
+    while ((ref = unused.poll()) != null)
+      used.remove(ref);
+    //var afterSize = interned.size();
+    //System.out.println(String.format("purged symbol table (before: %d, after: %d)", beforeSize, afterSize));
   }
   
   private static int nextSymbolNum;
