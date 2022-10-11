@@ -41,9 +41,9 @@ public final class PortLib
       
       if (vm.peekArg().type() != Type.BYTES)
         throw new TypeMismatch();
-      var byteBuffer = (Bytes) vm.popArg();
+      var bytes = (Bytes) vm.popArg();
             
-      vm.result = new Int(port.read(byteBuffer));
+      vm.result = new Int(port.read(bytes));
       vm.popFrame();
     }
   };
@@ -56,9 +56,9 @@ public final class PortLib
       
       if (vm.peekArg().type() != Type.BYTES)
         throw new TypeMismatch();
-      var byteBuffer = (Bytes) vm.popArg();
+      var bytes = (Bytes) vm.popArg();
             
-      vm.result = new Int(port.write(byteBuffer));
+      vm.result = new Int(port.write(bytes));
       vm.popFrame();
     }
   };

@@ -1,7 +1,7 @@
 package spartan.data;
 
 public abstract sealed class Datum
-permits Nil, Bool, Numeric, Callable, List, Vector, Symbol, Text, Port, Bytes
+permits Nil, Bool, Numeric, Callable, List, Vector, Map, Symbol, Text, Port, Bytes
 {
   public abstract Type type();
   

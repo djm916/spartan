@@ -15,14 +15,22 @@ public final class Int extends Integral
     this.value = Integer.parseInt(value);
   }
   
+  @Override
   public Type type()
   {
     return Type.INT;
   }
   
+  @Override
   public String repr()
   {
     return Integer.toString(value);
+  }
+  
+  @Override
+  public int intValue()
+  {
+    return value;
   }
   
   public BigInt toBigInt()

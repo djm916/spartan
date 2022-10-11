@@ -14,6 +14,7 @@ public enum Type
   BYTES("type/bytes"),
   LIST("type/list"),
   VECTOR("type/vector"),
+  MAP("type/map"),
   PRIMITIVE("type/procedure"),
   CLOSURE("type/procedure"),
   MACRO("type/macro"),

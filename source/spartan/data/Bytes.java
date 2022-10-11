@@ -13,9 +13,10 @@ public final class Bytes extends Datum
   {
     var result = new Bytes(elems.length());
     for (; !elems.empty(); elems = elems.cdr()) {
-      if (elems.car().type() != Type.INT)
+      if (!elems.car().type().isInt())
         throw new TypeMismatch();
-      result.push((byte)((Int)elems.car()).value);
+      var value = ((Integral) elems.car()).intValue();
+      result.push((byte) value);
     }
     result.flip();
     return result;
@@ -34,6 +35,11 @@ public final class Bytes extends Datum
   public Bytes(byte[] bytes)
   {
     this.buffer = ByteBuffer.wrap(bytes);
+  }
+  
+  public Bytes(ByteBuffer bytes)
+  {
+    this.buffer = bytes;
   }
   
   public byte[] array()
@@ -113,7 +119,7 @@ public final class Bytes extends Datum
   
   public Text decode(Charset encoding)
   {
-    return new Text(new String(buffer.array(), 0, buffer.remaining(), encoding));
+    return new Text(encoding.decode(buffer).toString());
   }
   
   private final ByteBuffer buffer;

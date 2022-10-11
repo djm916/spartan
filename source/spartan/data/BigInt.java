@@ -21,16 +21,19 @@ public final class BigInt extends Integral
     this(new BigInteger(value));
   }
   
+  @Override
   public Type type()
   {
     return Type.BIGINT;
   }
   
+  @Override
   public String repr()
   {
     return value.toString();
   }
-    
+  
+  @Override
   public int intValue()
   {
     try {

@@ -1,6 +1,6 @@
 package spartan.data;
 
-import spartan.errors.NoSuchElement;
+import spartan.errors.IndexOutOfBounds;
 import java.util.stream.Stream;
 import java.util.stream.Collectors;
 import java.util.function.BiPredicate;
@@ -20,13 +20,8 @@ public final class Vector extends Datum
   {
     var result = new Vector(length);
     for (int i = 0; i < length; ++i)
-      result.elems.add(init);
+      result.append(init);
     return result;
-  }
-  
-  public static Vector create(Int length, Datum init)
-  {
-    return create(length.value, init);
   }
   
   public Vector()
@@ -34,14 +29,9 @@ public final class Vector extends Datum
     this(DEFAULT_INITIAL_SIZE);
   }
   
-  public Vector(int length)
+  public Vector(int initialCapacity)
   {
-    elems = new ArrayList<Datum>(length);
-  }
-  
-  public Vector(Int length)
-  {
-    this(length.value);
+    elems = new ArrayList<>(initialCapacity);
   }
   
   public Vector(Vector that)
@@ -55,11 +45,13 @@ public final class Vector extends Datum
     return new Vector(this);
   }
   
+  @Override
   public Type type()
   {
     return Type.VECTOR;
   }
   
+  @Override
   public String repr()
   {
     return elems.stream()
@@ -72,18 +64,13 @@ public final class Vector extends Datum
     return elems.size();
   }
   
-  public Datum get(Int index)
-  {
-    return get(index.value);
-  }
-  
   public Datum get(int index)
   {
     try {
       return elems.get(index);
     }
     catch (IndexOutOfBoundsException ex) {
-      throw new NoSuchElement();
+      throw new IndexOutOfBounds();
     }
   }
   
@@ -93,13 +80,8 @@ public final class Vector extends Datum
       elems.set(index, value);
     }
     catch (IndexOutOfBoundsException ex) {
-      throw new NoSuchElement();
+      throw new IndexOutOfBounds();
     }
-  }
-  
-  public void set(Int index, Datum value)
-  {
-    set(index.value, value);
   }
   
   public void append(Datum x)

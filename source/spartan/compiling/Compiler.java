@@ -1153,22 +1153,6 @@ public class Compiler
     return vm.globals.lookup(s).map(v -> v.type() == Type.MACRO).orElse(false);
   }
   
-  private Inst compileVector(Vector vector, Scope scope, Inst next)
-  {
-    return compileVectorElements(vector, scope, vector.length(),
-           new MakeVector(next));
-  }
-  
-  private Inst compileVectorElements(Vector v, Scope scope, int i, Inst next)
-  {
-    if (i == 0)
-      return next;
-    
-    return compile(v.get(i - 1), scope, false,
-           new PushArg(
-           compileVectorElements(v, scope, i - 1, next)));
-  }
-  
   /* Compile an s-expression (a list), handling special forms, macro expansion, and procedure application. */
   
   private Inst compileList(List exp, Scope scope, boolean tail, Inst next)
@@ -1226,8 +1210,6 @@ public class Compiler
       return compileSelfEval(exp, next);
     else if (exp.type() == Type.SYMBOL)
       return compileVarRef((Symbol)exp, scope, next);
-    else if (exp.type() == Type.VECTOR)
-      return compileVector((Vector)exp, scope, next);
     else
       return compileList((List)exp, scope, tail, next);
   }

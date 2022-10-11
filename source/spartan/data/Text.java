@@ -1,6 +1,7 @@
 package spartan.data;
 
 import java.nio.charset.Charset;
+import java.nio.CharBuffer;
 import spartan.errors.TypeMismatch;
 import spartan.errors.IndexOutOfBounds;
 
@@ -10,17 +11,20 @@ public final class Text extends Datum
   {
     this.value = value;
   }
-  
+    
+  @Override
   public Type type()
   {
     return Type.TEXT;
   }
   
+  @Override
   public String repr()
   {
     return "\"" + value + "\"";
   }
   
+  @Override
   public String str()
   {
     return value;
@@ -48,41 +52,33 @@ public final class Text extends Datum
   
   public Bytes encode(Charset encoding)
   {
-    return new Bytes(value.getBytes(encoding));
+    //return new Bytes(encoding.encode(CharBuffer.wrap(value)));
+    return new Bytes(encoding.encode(value));
   }
   
   public Text join(List args)
   {
-    return join(this, args);
-  }
-  
-  private static Text join(Text delimiter, List args)
-  {
-    var buffer = new StringBuilder();
+    var result = new StringBuilder();
     for (; !args.empty(); args = args.cdr()) {
       if (args.car().type() != Type.TEXT)
         throw new TypeMismatch();
-      buffer.append(((Text)args.car()).str());
+      result.append(((Text)args.car()).value);
       if (args.cdr() != List.EMPTY)
-        buffer.append(delimiter.str());
+        result.append(this.value);
     }
-    return new Text(buffer.toString());
+    return new Text(result.toString());
   }
-  
+    
   public Text concat(List args)
   {
-    return concat(this, args);
-  }
-  
-  private static Text concat(Text first, List args)
-  {
-    var buffer = new StringBuilder(first.value);
+    var result = new StringBuilder();
+    result.append(this.value);
     for (; !args.empty(); args = args.cdr()) {
       if (args.car().type() != Type.TEXT)
         throw new TypeMismatch();
-      buffer.append(((Text)args.car()).str());
+      result.append(((Text)args.car()).value);
     }
-    return new Text(buffer.toString());
+    return new Text(result.toString());
   }
   
   public Text substring(int start, int end)
@@ -95,5 +91,11 @@ public final class Text extends Datum
     }
   }
   
+  public Text reverse()
+  {
+    return new Text(new StringBuilder(value).reverse().toString());
+  }
+  
   private final String value;
 }
+  

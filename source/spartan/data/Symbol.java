@@ -51,11 +51,13 @@ public final class Symbol extends Datum
     return Symbol.of(String.format("#%d", nextUniqueId++));
   }
   
+  @Override
   public Type type()
   {
     return Type.SYMBOL;
   }
   
+  @Override
   public String repr()
   {
     return id;

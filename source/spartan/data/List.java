@@ -150,6 +150,11 @@ public final class List extends Datum
     return remove(this, pred);
   }
   
+  public List removed(Predicate<Datum> pred)
+  {
+    return removed(this, pred);
+  }
+  
   public void forEach(Consumer<Datum> f)
   {
     for (var list = this; list != EMPTY; list = list.rest)
@@ -188,13 +193,29 @@ public final class List extends Datum
     return result;
   }
   
-  private static List remove(List self, Predicate<Datum> pred)
+  private static List removed(List self, Predicate<Datum> pred)
   {
     var result = new Builder();
     for (; self != EMPTY; self = self.rest)
       if (!pred.test(self.first))
         result.add(self.first);
     return result.build();
+  }
+  
+  private static List remove(List list, Predicate<Datum> pred)
+  {
+    List prev = null;
+    List cur = list;
+    for (; cur != EMPTY; prev = cur, cur = cur.cdr()) {
+      if (pred.test(cur.first)) {
+        if (prev == null)
+          list = list.rest;
+        else
+          prev.rest = cur.rest;
+        break;
+      }
+    }
+    return list;
   }
   
   private static int indexOf(List list, Datum x, Predicate<Datum> pred)

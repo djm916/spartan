@@ -5,6 +5,7 @@ import spartan.builtins.CoreLib;
 import spartan.builtins.MathLib;
 import spartan.builtins.ListLib;
 import spartan.builtins.VectorLib;
+import spartan.builtins.MapLib;
 import spartan.builtins.StringLib;
 import spartan.builtins.PortLib;
 import spartan.builtins.BytesLib;
@@ -152,24 +153,31 @@ public final class GlobalEnv
     bind(Symbol.of("concat"), ListLib.CONCAT);
     bind(Symbol.of("append"), ListLib.APPEND);
     bind(Symbol.of("reverse"), ListLib.REVERSE);
+    //bind(Symbol.of("remove!"), ListLib.REMOVE);
+    //bind(Symbol.of("remove"), ListLib.REMOVED);
     bind(Symbol.of("set-car!"), ListLib.SET_CAR);
     bind(Symbol.of("set-cdr!"), ListLib.SET_CDR);
     
     /* Vector procedures */
     
-    bind(Symbol.of("vector"), VectorLib.MakeVector);
-    bind(Symbol.of("vector/new"), VectorLib.New);
-    bind(Symbol.of("vector/length"), VectorLib.Length);
-    bind(Symbol.of("vector/copy"), VectorLib.Copy);
-    bind(Symbol.of("vector/ref"), VectorLib.Ref);
-    bind(Symbol.of("vector/set!"), VectorLib.Set);
-    bind(Symbol.of("vector/append!"), VectorLib.Append);
-       
+    bind(Symbol.of("vector/of"), VectorLib.FROM_LIST);
+    bind(Symbol.of("vector/new"), VectorLib.NEW);
+    bind(Symbol.of("vector/length"), VectorLib.LENGTH);
+    bind(Symbol.of("vector/copy"), VectorLib.COPY);
+    bind(Symbol.of("vector/ref"), VectorLib.REF);
+    bind(Symbol.of("vector/set!"), VectorLib.SET);
+    bind(Symbol.of("vector/append!"), VectorLib.APPEND);
+    
+    /* Map procedures */
+    
+    bind(Symbol.of("map/of"), MapLib.FROM_LIST);
+    
     /* String procedures */
     
     bind(Symbol.of("string/concat"), StringLib.CONCAT);
     bind(Symbol.of("string/join"), StringLib.JOIN);
     bind(Symbol.of("string/substr"), StringLib.SUBSTR);
+    bind(Symbol.of("string/reverse"), StringLib.REVERSE);
     bind(Symbol.of("string/hash"), StringLib.HASH);
     
     /* Port procedures */

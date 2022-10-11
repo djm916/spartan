@@ -6,34 +6,35 @@ import spartan.runtime.VirtualMachine;
 
 public final class VectorLib
 {  
-  public static final Primitive MakeVector = new Primitive(0, true) {
+  public static final Primitive FROM_LIST = new Primitive(0, true) {
     public void apply(VirtualMachine vm) {
       vm.result = Vector.fromList(vm.popRestArgs());
       vm.popFrame();
     }
   };
   
-  public static final Primitive Length = new Primitive(1, false) {
+  public static final Primitive LENGTH = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
       if (vm.peekArg().type() != Type.VECTOR)
         throw new TypeMismatch();
-      vm.result = new Int(((Vector)vm.popArg()).length());
+      var vector = (Vector) vm.popArg();
+      vm.result = new Int(vector.length());
       vm.popFrame();
     }
   };
   
-  public static final Primitive New = new Primitive(2, false) {
+  public static final Primitive NEW = new Primitive(2, false) {
     public void apply(VirtualMachine vm) {
-      if (vm.peekArg().type() != Type.INT)
+      if (!vm.peekArg().type().isInt())
         throw new TypeMismatch();
-      var length = (Int) vm.popArg();
+      var length = ((Integral) vm.popArg()).intValue();
       var init = vm.popArg();
       vm.result = Vector.create(length, init);
       vm.popFrame();
     }
   };
   
-  public static final Primitive Copy = new Primitive(1, false) {
+  public static final Primitive COPY = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
       if (vm.peekArg().type() != Type.VECTOR)
         throw new TypeMismatch();
@@ -42,27 +43,27 @@ public final class VectorLib
     }
   };
   
-  public static final Primitive Ref = new Primitive(2, false) {
+  public static final Primitive REF = new Primitive(2, false) {
     public void apply(VirtualMachine vm) {
       if (vm.peekArg().type() != Type.VECTOR)
         throw new TypeMismatch();
       var vector = (Vector) vm.popArg();
-      if (vm.peekArg().type() != Type.INT)
+      if (!vm.peekArg().type().isInt())
         throw new TypeMismatch();
-      var index = (Int) vm.popArg();
+      var index = ((Integral) vm.popArg()).intValue();
       vm.result = vector.get(index);
       vm.popFrame();
     }
   };
   
-  public static final Primitive Set = new Primitive(3, false) {
+  public static final Primitive SET = new Primitive(3, false) {
     public void apply(VirtualMachine vm) {
       if (vm.peekArg().type() != Type.VECTOR)
         throw new TypeMismatch();
       var vector = (Vector) vm.popArg();
-      if (vm.peekArg().type() != Type.INT)
+      if (!vm.peekArg().type().isInt())
         throw new TypeMismatch();
-      var index = (Int) vm.popArg();
+      var index = ((Integral) vm.popArg()).intValue();
       var value = vm.popArg();
       vector.set(index, value);
       vm.result = Nil.VALUE;
@@ -70,7 +71,7 @@ public final class VectorLib
     }
   };
   
-  public static final Primitive Append = new Primitive(2, false) {
+  public static final Primitive APPEND = new Primitive(2, false) {
     public void apply(VirtualMachine vm) {
       if (vm.peekArg().type() != Type.VECTOR)
         throw new TypeMismatch();

@@ -5,6 +5,7 @@ import spartan.data.Primitive;
 import spartan.data.Text;
 import spartan.data.List;
 import spartan.data.Int;
+import spartan.data.Integral;
 import spartan.runtime.VirtualMachine;
 import spartan.errors.TypeMismatch;
 
@@ -35,13 +36,23 @@ public final class StringLib
       if (vm.peekArg().type() != Type.TEXT)
         throw new TypeMismatch();
       var text = (Text) vm.popArg();
-      if (vm.peekArg().type() != Type.INT)
+      if (!vm.peekArg().type().isInt())
         throw new TypeMismatch();
-      var start = (Int) vm.popArg();
-      if (vm.peekArg().type() != Type.INT)
+      var start = ((Integral) vm.popArg()).intValue();
+      if (!vm.peekArg().type().isInt())
         throw new TypeMismatch();
-      var end = (Int) vm.popArg();
-      vm.result = text.substring(start.value, end.value);
+      var end = ((Integral) vm.popArg()).intValue();
+      vm.result = text.substring(start, end);
+      vm.popFrame();
+    }
+  };
+  
+  public static final Primitive REVERSE = new Primitive(1, false) {
+    public void apply(VirtualMachine vm) {
+      if (vm.peekArg().type() != Type.TEXT)
+        throw new TypeMismatch();
+      var text = (Text) vm.popArg();
+      vm.result = text.reverse();
       vm.popFrame();
     }
   };

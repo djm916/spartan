@@ -416,18 +416,37 @@ public class Reader implements AutoCloseable
     return result;
   }
 
-  private Vector readVector() throws IOException
+  private List readVector() throws IOException
   {
-    var result = new Vector();
+    var builder = new List.Builder();
     var position = getTokenPosition();
-
+    
     skipSpace();
 
     while (lastChar != -1 && lastChar != ']') {
-      result.append(readDatum());
+      builder.add(readDatum());
+      skipSpace();
+    }
+    
+    var result = List.cons(Symbol.of("vector/of"), builder.build());
+    positionMap.put(result, position);
+    return result;
+  }
+  
+  private List readMap() throws IOException
+  {
+    var builder = new List.Builder();
+    var position = getTokenPosition();
+    
+    skipSpace();
+
+    while (lastChar != -1 && lastChar != '}') {
+      builder.add(readDatum());
       skipSpace();
     }
 
+    var result = List.cons(Symbol.of("map/of"), builder.build());
+    positionMap.put(result, position);
     return result;
   }
   
@@ -466,6 +485,8 @@ public class Reader implements AutoCloseable
       return readList();
     if (lastChar == '[')
       return readVector();
+    if (lastChar == '{')
+      return readMap();
     if (isSign(lastChar) && isDigit(peekChar()))
       return readNumber();
     if (isDigit(lastChar))
