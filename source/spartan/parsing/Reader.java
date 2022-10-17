@@ -361,7 +361,23 @@ public class Reader implements AutoCloseable
       text.append((char)lastChar);
     }
     
-    return Symbol.of(text.toString());
+    var symbol = new Symbol(text.toString());
+    positionMap.put(symbol, position);
+    return symbol;
+  }
+  
+  private Keyword readKeyword() throws IOException
+  {
+    var text = new StringBuilder();
+    
+    text.append((char)lastChar);
+
+    while (isSymbol(peekChar())) {
+      getChar();
+      text.append((char)lastChar);
+    }
+    
+    return Keyword.of(text.toString());
   }
   
   private Text readText() throws IOException
@@ -428,7 +444,7 @@ public class Reader implements AutoCloseable
       skipSpace();
     }
     
-    var result = List.cons(Symbol.of("vector/of"), builder.build());
+    var result = List.cons(new Symbol("vector/of"), builder.build());
     positionMap.put(result, position);
     return result;
   }
@@ -445,7 +461,7 @@ public class Reader implements AutoCloseable
       skipSpace();
     }
 
-    var result = List.cons(Symbol.of("map/of"), builder.build());
+    var result = List.cons(new Symbol("map/of"), builder.build());
     positionMap.put(result, position);
     return result;
   }
@@ -491,6 +507,8 @@ public class Reader implements AutoCloseable
       return readNumber();
     if (isDigit(lastChar))
       return readNumber();
+    if (lastChar == ':')
+      return readKeyword();
     if (isSymbol(lastChar))
       return readSymbol();
     if (lastChar == '\"')

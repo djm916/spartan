@@ -10,6 +10,7 @@ public enum Type
   REAL("type/real"),
   COMPLEX("type/complex"),
   SYMBOL("type/symbol"),
+  KEYWORD("type/keyword"),
   TEXT("type/text"),
   BYTES("type/bytes"),
   LIST("type/list"),
@@ -23,7 +24,7 @@ public enum Type
   
   public Symbol toSymbol()
   {
-    return Symbol.of(name);
+    return new Symbol(name);
   }
   
   @Override

@@ -10,8 +10,9 @@ import spartan.builtins.StringLib;
 import spartan.builtins.PortLib;
 import spartan.builtins.BytesLib;
 import java.util.Map;
-import java.util.IdentityHashMap;
+import java.util.HashMap;
 import java.util.Optional;
+import spartan.errors.UnboundVariable;
 
 public final class GlobalEnv
 {
@@ -47,159 +48,167 @@ public final class GlobalEnv
     return globals.getOrDefault(name, defaultValue);
   }
   
+  public Datum lookupOrThrow(Symbol name)
+  {
+    var value = globals.get(name);
+    if (value == null)
+      throw new UnboundVariable(name);
+    return value;
+  }
+  
   private GlobalEnv() {}
   
-  private final Map<Symbol, Datum> globals = new IdentityHashMap<>();
+  private final Map<Symbol, Datum> globals = new HashMap<>();
   
   {
     /* General values & procedures */
     
-    bind(Symbol.of("nil"), Nil.VALUE);
-    bind(Symbol.of("true"), Bool.TRUE);
-    bind(Symbol.of("false"), Bool.FALSE);    
-    bind(Symbol.of("apply"), CoreLib.APPLY);
-    bind(Symbol.of("print"), CoreLib.PRINT);
-    bind(Symbol.of("print-line"), CoreLib.PRINT_LINE);
-    bind(Symbol.of("type"), CoreLib.TYPE);
-    bind(Symbol.of("length"), CoreLib.LENGTH);
-    bind(Symbol.of("load"), CoreLib.LOAD);
-    bind(Symbol.of("="), CoreLib.EQ);
-    bind(Symbol.of("/="), CoreLib.NE);
-    bind(Symbol.of("<"), CoreLib.LT);
-    bind(Symbol.of(">"), CoreLib.GT);
-    bind(Symbol.of("<="), CoreLib.LE);
-    bind(Symbol.of(">="), CoreLib.GE);
-    bind(Symbol.of("not"), CoreLib.NOT);    
-    bind(Symbol.of("gensym"), CoreLib.GENSYM);
-    bind(Symbol.of("identity-hash"), CoreLib.IDENTITY_HASH);
-    bind(Symbol.of("error"), CoreLib.ERROR);    
-    bind(Symbol.of("format-decimal"), CoreLib.FORMAT_DECIMAL);
-    bind(Symbol.of("max"), CoreLib.MAX);
-    bind(Symbol.of("min"), CoreLib.MIN);
+    bind(new Symbol("nil"), Nil.VALUE);
+    bind(new Symbol("true"), Bool.TRUE);
+    bind(new Symbol("false"), Bool.FALSE);    
+    bind(new Symbol("apply"), CoreLib.APPLY);
+    bind(new Symbol("print"), CoreLib.PRINT);
+    bind(new Symbol("print-line"), CoreLib.PRINT_LINE);
+    bind(new Symbol("type"), CoreLib.TYPE);
+    bind(new Symbol("length"), CoreLib.LENGTH);
+    bind(new Symbol("load"), CoreLib.LOAD);
+    bind(new Symbol("="), CoreLib.EQ);
+    bind(new Symbol("/="), CoreLib.NE);
+    bind(new Symbol("<"), CoreLib.LT);
+    bind(new Symbol(">"), CoreLib.GT);
+    bind(new Symbol("<="), CoreLib.LE);
+    bind(new Symbol(">="), CoreLib.GE);
+    bind(new Symbol("not"), CoreLib.NOT);    
+    bind(new Symbol("gensym"), CoreLib.GENSYM);
+    bind(new Symbol("identity-hash"), CoreLib.IDENTITY_HASH);
+    bind(new Symbol("error"), CoreLib.ERROR);    
+    bind(new Symbol("format-decimal"), CoreLib.FORMAT_DECIMAL);
+    bind(new Symbol("max"), CoreLib.MAX);
+    bind(new Symbol("min"), CoreLib.MIN);
     
     /* Type predicates */
     
-    bind(Symbol.of("nil?"), CoreLib.IS_NIL);
-    bind(Symbol.of("empty?"), CoreLib.IS_EMPTY_LIST);
-    bind(Symbol.of("boolean?"), CoreLib.IS_BOOL);
-    bind(Symbol.of("integer?"), CoreLib.IS_INT);
-    bind(Symbol.of("real?"), CoreLib.IS_REAL);
-    bind(Symbol.of("complex?"), CoreLib.IS_COMPLEX);
-    bind(Symbol.of("number?"), CoreLib.IS_NUMBER);
-    bind(Symbol.of("symbol?"), CoreLib.IS_SYMBOL);
-    bind(Symbol.of("text?"), CoreLib.IS_TEXT);
-    //bind(Symbol.of("bytes?"), CoreLib.IsBytes);
-    //bind(Symbol.of("list?"), CoreLib.IsList);
-    //bind(Symbol.of("vector?"), CoreLib.IsVector);
-    bind(Symbol.of("callable?"), CoreLib.IS_CALLABLE);
+    bind(new Symbol("nil?"), CoreLib.IS_NIL);
+    bind(new Symbol("empty?"), CoreLib.IS_EMPTY_LIST);
+    bind(new Symbol("boolean?"), CoreLib.IS_BOOL);
+    bind(new Symbol("integer?"), CoreLib.IS_INT);
+    bind(new Symbol("real?"), CoreLib.IS_REAL);
+    bind(new Symbol("complex?"), CoreLib.IS_COMPLEX);
+    bind(new Symbol("number?"), CoreLib.IS_NUMBER);
+    bind(new Symbol("symbol?"), CoreLib.IS_SYMBOL);
+    bind(new Symbol("text?"), CoreLib.IS_TEXT);
+    //bind(new Symbol("bytes?"), CoreLib.IsBytes);
+    //bind(new Symbol("list?"), CoreLib.IsList);
+    //bind(new Symbol("vector?"), CoreLib.IsVector);
+    bind(new Symbol("callable?"), CoreLib.IS_CALLABLE);
     
     /* Math constants & procedures */
     
-    bind(Symbol.of("E"), Real.E);
-    bind(Symbol.of("PI"), Real.PI);
-    bind(Symbol.of("+inf"), Real.POS_INF);
-    bind(Symbol.of("-inf"), Real.NEG_INF);
-    bind(Symbol.of("NaN"), Real.NAN);
-    bind(Symbol.of("I"), Complex.I);    
-    bind(Symbol.of("+"), MathLib.ADD);
-    bind(Symbol.of("-"), MathLib.SUB);
-    bind(Symbol.of("*"), MathLib.MUL);
-    bind(Symbol.of("/"), MathLib.DIV);
-    bind(Symbol.of("~"), MathLib.NEG);
-    bind(Symbol.of("abs"), MathLib.ABS);
-    bind(Symbol.of("floor"), MathLib.FLOOR);
-    bind(Symbol.of("ceiling"), MathLib.CEILING);
-    bind(Symbol.of("round"), MathLib.ROUND);
-    bind(Symbol.of("truncate"), MathLib.TRUNCATE);
-    bind(Symbol.of("quotient"), MathLib.QUOTIENT);
-    bind(Symbol.of("remainder"), MathLib.REMAINDER);
-    bind(Symbol.of("exp"), MathLib.EXP);
-    bind(Symbol.of("log"), MathLib.LOG);
-    bind(Symbol.of("sin"), MathLib.SIN);
-    bind(Symbol.of("cos"), MathLib.COS);
-    bind(Symbol.of("tan"), MathLib.TAN);
-    bind(Symbol.of("asin"), MathLib.ASIN);
-    bind(Symbol.of("acos"), MathLib.ACOS);
-    bind(Symbol.of("atan"), MathLib.ATAN);    
-    bind(Symbol.of("rand"), MathLib.RAND);
-    bind(Symbol.of("complex"), MathLib.MAKE_COMPLEX);
-    bind(Symbol.of("real-part"), MathLib.REAL_PART);
-    bind(Symbol.of("imag-part"), MathLib.IMAG_PART);
-    bind(Symbol.of("rect->polar"), MathLib.RECT_TO_POLAR);
-    bind(Symbol.of("polar->rect"), MathLib.POLAR_TO_RECT);
-    bind(Symbol.of("ratio"), MathLib.MAKE_RATIO);
-    bind(Symbol.of("numerator"), MathLib.NUMERATOR);
-    bind(Symbol.of("denominator"), MathLib.DENOMINATOR);
+    bind(new Symbol("E"), Real.E);
+    bind(new Symbol("PI"), Real.PI);
+    bind(new Symbol("+inf"), Real.POS_INF);
+    bind(new Symbol("-inf"), Real.NEG_INF);
+    bind(new Symbol("NaN"), Real.NAN);
+    bind(new Symbol("I"), Complex.I);    
+    bind(new Symbol("+"), MathLib.ADD);
+    bind(new Symbol("-"), MathLib.SUB);
+    bind(new Symbol("*"), MathLib.MUL);
+    bind(new Symbol("/"), MathLib.DIV);
+    bind(new Symbol("~"), MathLib.NEG);
+    bind(new Symbol("abs"), MathLib.ABS);
+    bind(new Symbol("floor"), MathLib.FLOOR);
+    bind(new Symbol("ceiling"), MathLib.CEILING);
+    bind(new Symbol("round"), MathLib.ROUND);
+    bind(new Symbol("truncate"), MathLib.TRUNCATE);
+    bind(new Symbol("quotient"), MathLib.QUOTIENT);
+    bind(new Symbol("remainder"), MathLib.REMAINDER);
+    bind(new Symbol("exp"), MathLib.EXP);
+    bind(new Symbol("log"), MathLib.LOG);
+    bind(new Symbol("sin"), MathLib.SIN);
+    bind(new Symbol("cos"), MathLib.COS);
+    bind(new Symbol("tan"), MathLib.TAN);
+    bind(new Symbol("asin"), MathLib.ASIN);
+    bind(new Symbol("acos"), MathLib.ACOS);
+    bind(new Symbol("atan"), MathLib.ATAN);    
+    bind(new Symbol("rand"), MathLib.RAND);
+    bind(new Symbol("complex"), MathLib.MAKE_COMPLEX);
+    bind(new Symbol("real-part"), MathLib.REAL_PART);
+    bind(new Symbol("imag-part"), MathLib.IMAG_PART);
+    bind(new Symbol("rect->polar"), MathLib.RECT_TO_POLAR);
+    bind(new Symbol("polar->rect"), MathLib.POLAR_TO_RECT);
+    bind(new Symbol("ratio"), MathLib.MAKE_RATIO);
+    bind(new Symbol("numerator"), MathLib.NUMERATOR);
+    bind(new Symbol("denominator"), MathLib.DENOMINATOR);
     
     /* Conversion procedures */
     
-    bind(Symbol.of("string->symbol"), CoreLib.TEXT_TO_SYMBOL);
-    bind(Symbol.of("symbol->string"), CoreLib.SYMBOL_TO_TEXT); 
-    bind(Symbol.of("string->bytes"), CoreLib.TEXT_TO_BYTES); // encode
-    bind(Symbol.of("bytes->string"), CoreLib.BYTES_TO_TEXT); // decode
-    //bind(Symbol.of("string->number"), CoreLib.TEXT_TO_NUMBER);
+    bind(new Symbol("string->symbol"), CoreLib.TEXT_TO_SYMBOL);
+    bind(new Symbol("symbol->string"), CoreLib.SYMBOL_TO_TEXT); 
+    bind(new Symbol("string->bytes"), CoreLib.TEXT_TO_BYTES); // encode
+    bind(new Symbol("bytes->string"), CoreLib.BYTES_TO_TEXT); // decode
+    //bind(new Symbol("string->number"), CoreLib.TEXT_TO_NUMBER);
     
     /* List procedures */
 
-    bind(Symbol.of("list"), ListLib.MAKE_LIST);
-    bind(Symbol.of("cons"), ListLib.CONS);
-    bind(Symbol.of("car"), ListLib.CAR);
-    bind(Symbol.of("caar"), ListLib.CAAR);
-    bind(Symbol.of("cadr"), ListLib.CADR);
-    bind(Symbol.of("caddr"), ListLib.CADDR);
-    bind(Symbol.of("cdr"), ListLib.CDR);
-    bind(Symbol.of("cddr"), ListLib.CDDR);
-    bind(Symbol.of("cdddr"), ListLib.CDDDR);
-    bind(Symbol.of("concat"), ListLib.CONCAT);
-    bind(Symbol.of("append"), ListLib.APPEND);
-    bind(Symbol.of("reverse"), ListLib.REVERSE);
-    //bind(Symbol.of("remove!"), ListLib.REMOVE);
-    //bind(Symbol.of("remove"), ListLib.REMOVED);
-    bind(Symbol.of("set-car!"), ListLib.SET_CAR);
-    bind(Symbol.of("set-cdr!"), ListLib.SET_CDR);
+    bind(new Symbol("list"), ListLib.MAKE_LIST);
+    bind(new Symbol("cons"), ListLib.CONS);
+    bind(new Symbol("car"), ListLib.CAR);
+    bind(new Symbol("caar"), ListLib.CAAR);
+    bind(new Symbol("cadr"), ListLib.CADR);
+    bind(new Symbol("caddr"), ListLib.CADDR);
+    bind(new Symbol("cdr"), ListLib.CDR);
+    bind(new Symbol("cddr"), ListLib.CDDR);
+    bind(new Symbol("cdddr"), ListLib.CDDDR);
+    bind(new Symbol("concat"), ListLib.CONCAT);
+    bind(new Symbol("append"), ListLib.APPEND);
+    bind(new Symbol("reverse"), ListLib.REVERSE);
+    //bind(new Symbol("remove!"), ListLib.REMOVE);
+    //bind(new Symbol("remove"), ListLib.REMOVED);
+    bind(new Symbol("set-car!"), ListLib.SET_CAR);
+    bind(new Symbol("set-cdr!"), ListLib.SET_CDR);
     
     /* Vector procedures */
     
-    bind(Symbol.of("vector/of"), VectorLib.FROM_LIST);
-    bind(Symbol.of("vector/new"), VectorLib.NEW);
-    bind(Symbol.of("vector/length"), VectorLib.LENGTH);
-    bind(Symbol.of("vector/copy"), VectorLib.COPY);
-    bind(Symbol.of("vector/ref"), VectorLib.REF);
-    bind(Symbol.of("vector/set!"), VectorLib.SET);
-    bind(Symbol.of("vector/append!"), VectorLib.APPEND);
+    bind(new Symbol("vector/of"), VectorLib.FROM_LIST);
+    bind(new Symbol("vector/new"), VectorLib.NEW);
+    bind(new Symbol("vector/length"), VectorLib.LENGTH);
+    bind(new Symbol("vector/copy"), VectorLib.COPY);
+    bind(new Symbol("vector/ref"), VectorLib.REF);
+    bind(new Symbol("vector/set!"), VectorLib.SET);
+    bind(new Symbol("vector/append!"), VectorLib.APPEND);
     
     /* Map procedures */
     
-    bind(Symbol.of("map/of"), MapLib.FROM_LIST);
+    bind(new Symbol("map/of"), MapLib.FROM_LIST);
     
     /* String procedures */
     
-    bind(Symbol.of("string/concat"), StringLib.CONCAT);
-    bind(Symbol.of("string/join"), StringLib.JOIN);
-    bind(Symbol.of("string/substr"), StringLib.SUBSTR);
-    bind(Symbol.of("string/reverse"), StringLib.REVERSE);
-    bind(Symbol.of("string/hash"), StringLib.HASH);
+    bind(new Symbol("string/concat"), StringLib.CONCAT);
+    bind(new Symbol("string/join"), StringLib.JOIN);
+    bind(new Symbol("string/substr"), StringLib.SUBSTR);
+    bind(new Symbol("string/reverse"), StringLib.REVERSE);
+    bind(new Symbol("string/hash"), StringLib.HASH);
     
     /* Port procedures */
     
-    bind(Symbol.of("port/open"), PortLib.OPEN);
-    bind(Symbol.of("port/close"), PortLib.CLOSE);
-    bind(Symbol.of("port/read"), PortLib.READ);
-    bind(Symbol.of("port/write"), PortLib.WRITE);
-    bind(Symbol.of("port/stdin"), InputPort.STDIN);
-    bind(Symbol.of("port/stdout"), OutputPort.STDOUT);
+    bind(new Symbol("port/open"), PortLib.OPEN);
+    bind(new Symbol("port/close"), PortLib.CLOSE);
+    bind(new Symbol("port/read"), PortLib.READ);
+    bind(new Symbol("port/write"), PortLib.WRITE);
+    bind(new Symbol("port/stdin"), InputPort.STDIN);
+    bind(new Symbol("port/stdout"), OutputPort.STDOUT);
     
     /* Bytes procedures */
     
-    bind(Symbol.of("bytes"), BytesLib.FROM_LIST);
-    bind(Symbol.of("bytes/new"), BytesLib.MAKE_BYTES);
-    bind(Symbol.of("bytes/ref"), BytesLib.REF);
-    bind(Symbol.of("bytes/set!"), BytesLib.SET);
-    bind(Symbol.of("bytes/push!"), BytesLib.PUSH);
-    bind(Symbol.of("bytes/pop!"), BytesLib.POP);
-    bind(Symbol.of("bytes/flip!"), BytesLib.FLIP);
-    bind(Symbol.of("bytes/clear!"), BytesLib.FLIP);
-    bind(Symbol.of("bytes/remaining"), BytesLib.REMAINING);
-    bind(Symbol.of("bytes/empty?"), BytesLib.IS_EMPTY);
+    bind(new Symbol("bytes"), BytesLib.FROM_LIST);
+    bind(new Symbol("bytes/new"), BytesLib.MAKE_BYTES);
+    bind(new Symbol("bytes/ref"), BytesLib.REF);
+    bind(new Symbol("bytes/set!"), BytesLib.SET);
+    bind(new Symbol("bytes/push!"), BytesLib.PUSH);
+    bind(new Symbol("bytes/pop!"), BytesLib.POP);
+    bind(new Symbol("bytes/flip!"), BytesLib.FLIP);
+    bind(new Symbol("bytes/clear!"), BytesLib.FLIP);
+    bind(new Symbol("bytes/remaining"), BytesLib.REMAINING);
+    bind(new Symbol("bytes/empty?"), BytesLib.IS_EMPTY);
   }
 }

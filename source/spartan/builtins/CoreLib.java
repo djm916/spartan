@@ -104,7 +104,13 @@ public final class CoreLib
         }
         break;
       }
-      case SYMBOL:
+      case SYMBOL: {
+        switch (y.type()) {
+          case SYMBOL: return ((Symbol)x).eq((Symbol)y);
+        }
+        break;
+      }
+      case KEYWORD:
       case BOOL:
       case NIL: return x == y;
     }
@@ -437,7 +443,7 @@ public final class CoreLib
     public void apply(VirtualMachine vm) {
       if (vm.peekArg().type() != Type.TEXT)
         throw new TypeMismatch();
-      vm.result = Symbol.of(((Text)vm.popArg()).str());
+      vm.result = new Symbol(((Text)vm.popArg()).str());
       vm.popFrame();
     }
   };

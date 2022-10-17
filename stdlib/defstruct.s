@@ -49,7 +49,7 @@
 (defun generate-constructor (struct-name fields)
   `(defun ,(generate-constructor-name struct-name)
           ,fields
-          (vector ',struct-name ,@fields)))
+          (vector/of ',struct-name ,@fields)))
 
 (defun generate-getter (name)
   (fun (field index)

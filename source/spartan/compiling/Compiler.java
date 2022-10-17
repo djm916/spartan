@@ -40,7 +40,12 @@ public class Compiler
   {
     return new MalformedExpression(positionMap.get(exp));
   }
-
+  
+  private boolean isSymbol(Datum maybeSymbol, Symbol compareTo)
+  {
+    return maybeSymbol.type() == Type.SYMBOL && ((Symbol)maybeSymbol).eq(compareTo);
+  }
+  
   /* Determine if an expression is self-evaluating. */
   
   private static boolean isSelfEval(Datum exp)
@@ -52,6 +57,7 @@ public class Compiler
         || exp.type() == Type.COMPLEX
         || exp.type() == Type.BOOL
         || exp.type() == Type.TEXT
+        || exp.type() == Type.KEYWORD
         || exp == List.EMPTY
         || exp == Nil.VALUE;
   }
@@ -87,7 +93,7 @@ public class Compiler
   
   private Inst compileGlobalVarRef(Symbol symb, Inst next)
   {
-    return new LoadGlobal(symb, next);
+    return new LoadGlobal(symb, positionMap.get(symb), next);
   }
   
   /* Compile a variable assignment.
@@ -116,7 +122,8 @@ public class Compiler
   
   private Inst compileLocalVarSet(DeBruijnIndex index, Inst next)
   {
-    return new StoreLocal(index.depth(), index.offset(), new LoadConst(Nil.VALUE, next));
+    return new StoreLocal(index.depth(), index.offset(),
+           new LoadConst(Nil.VALUE, next));
   }
   
   private Inst compileGlobalVarSet(Symbol symb, Inst next)
@@ -259,7 +266,7 @@ public class Compiler
     var test = clause.car();
     var body = clause.cdr();
 
-    if (test == Symbol.ELSE)
+    if (isSymbol(test, Symbol.ELSE))
       return compileSequence(body, scope, tail, next);
 
     return compile(test, scope, false,
@@ -564,7 +571,7 @@ public class Compiler
       if (params.car().type() != Type.SYMBOL)
         return false;
       // The symbol & appearing in the parameter list must occur immediately before the final parameter
-      if (params.car() == Symbol.AMPERSAND && (params.cdr() == List.EMPTY || params.cddr() != List.EMPTY))
+      if (isSymbol(params.car(), Symbol.AMPERSAND) && (params.cdr() == List.EMPTY || params.cddr() != List.EMPTY))
         return false;
     }
     return true;
@@ -579,7 +586,7 @@ public class Compiler
       if (clause.length() < 2)
         return false;
       // The symbol "else" must occur in the final clause
-      if (clause.car() == Symbol.ELSE && clauses.cdr() != List.EMPTY)
+      if (isSymbol(clause.car(), Symbol.ELSE) && clauses.cdr() != List.EMPTY)
         return false;
     }
     return true;
@@ -798,7 +805,7 @@ public class Compiler
 
     while (body != List.EMPTY && isInnerDef(body.car())) {
       var exp = (List) body.car();
-      if (exp.car() == Symbol.DEFUN)
+      if (isSymbol(exp.car(), Symbol.DEFUN))
         exp = transformDefun(exp);
       bindings.add(exp.cdr());
       body = body.cdr();
@@ -815,7 +822,7 @@ public class Compiler
     if (exp.type() != Type.LIST || exp == List.EMPTY)
       return false;
     var car = ((List)exp).car();
-    return car == Symbol.DEF || car == Symbol.DEFUN;
+    return isSymbol(car, Symbol.DEF) || isSymbol(car, Symbol.DEFUN);
   }
 
   /* Compiles the "or" special form, a logical disjunction.
@@ -981,7 +988,7 @@ public class Compiler
       if (car.car() == Symbol.UNQUOTE) {
         if (car.length() != 2)
           throw malformedExp(exp);
-        return List.cons(Symbol.of("cons"),
+        return List.cons(new Symbol("cons"),
                List.cons(car.cadr(),
                List.cons(transformQuasiquote(list.cdr()),
                List.EMPTY)));
@@ -992,7 +999,7 @@ public class Compiler
       if (car.car() == Symbol.UNQUOTE_SPLICING) {
         if (car.length() != 2)
           throw malformedExp(exp);
-        return List.cons(Symbol.of("concat"),
+        return List.cons(new Symbol("concat"),
                List.cons(car.cadr(),
                List.cons(transformQuasiquote(list.cdr()),
                List.EMPTY)));
@@ -1003,7 +1010,7 @@ public class Compiler
     
     // (quasiquote x xs...) => (cons (quasiquote x) (quasiquote xs...))
 
-    return List.cons(Symbol.of("cons"),
+    return List.cons(new Symbol("cons"),
            List.cons(transformQuasiquote(list.car()),
            List.cons(transformQuasiquote(list.cdr()),
            List.EMPTY)));
@@ -1012,11 +1019,11 @@ public class Compiler
   private ProcTemplate makeProcTemplate(List params, List body, Scope scope)
   {
     var numParams = params.length();
-    var isVariadic = numParams > 1 && params.at(numParams - 2) == Symbol.AMPERSAND;
+    var isVariadic = numParams > 1 && isSymbol(params.at(numParams - 2), Symbol.AMPERSAND);
     var requiredArgs = isVariadic ? numParams - 2 : numParams;
     
     if (isVariadic)
-      params = params.remove((x) -> x == Symbol.AMPERSAND);
+      params = params.remove(x -> isSymbol(x, Symbol.AMPERSAND));
     
     var extendedScope = scope.extend(params);
     
@@ -1159,41 +1166,41 @@ public class Compiler
   {
     if (exp.car().type() == Type.SYMBOL) {
       var car = (Symbol) exp.car();
-      if (car == Symbol.IF)
+      if (car.eq(Symbol.IF))
         return compileIf(exp, scope, tail, next);
-      if (car == Symbol.LET)
+      if (car.eq(Symbol.LET))
         return compileLet(exp, scope, tail, next);
-      if (car == Symbol.LETSTAR)
+      if (car.eq(Symbol.LETSTAR))
         return compileLetStar(exp, scope, tail, next);
-      if (car == Symbol.LETREC)
+      if (car.eq(Symbol.LETREC))
         return compileLetRec(exp, scope, tail, next);
-      if (car == Symbol.DO)
+      if (car.eq(Symbol.DO))
         return compileDo(exp, scope, tail, next);
-      if (car == Symbol.DEF)
+      if (car.eq(Symbol.DEF))
         return compileDef(exp, scope, next);
-      if (car == Symbol.DEFUN)
+      if (car.eq(Symbol.DEFUN))
         return compileDefun(exp, scope, next);
-      if (car == Symbol.DEFMACRO)
+      if (car.eq(Symbol.DEFMACRO))
         return compileDefMacro(exp, scope, next);
-      if (car == Symbol.FUN)
+      if (car.eq(Symbol.FUN))
         return compileFun(exp, scope, next);
-      if (car == Symbol.QUOTE)
+      if (car.eq(Symbol.QUOTE))
         return compileQuote(exp, next);
-      if (car == Symbol.QUASIQUOTE)
+      if (car.eq(Symbol.QUASIQUOTE))
         return compileQuasiquote(exp, scope, next);
-      if (car == Symbol.OR)
+      if (car.eq(Symbol.OR))
         return compileOr(exp, scope, tail, next);
-      if (car == Symbol.AND)
+      if (car.eq(Symbol.AND))
         return compileAnd(exp, scope, tail, next);
-      if (car == Symbol.COND)
+      if (car.eq(Symbol.COND))
         return compileCond(exp, scope, tail, next);      
-      if (car == Symbol.SET)
+      if (car.eq(Symbol.SET))
         return compileSet(exp, scope, next);
-      if (car == Symbol.WHILE)
+      if (car.eq(Symbol.WHILE))
         return compileWhile(exp, scope, tail, next);
-      if (car == Symbol.FOR)
+      if (car.eq(Symbol.FOR))
         return compileForLoop(exp, scope, tail, next);
-      if (car == Symbol.CALL_CC)
+      if (car.eq(Symbol.CALL_CC))
         return compileCallCC(exp, scope, tail, next);
       if (isMacro(car))
         return compileApplyMacro(exp, scope, tail, next);

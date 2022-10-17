@@ -38,7 +38,7 @@ public final class VectorLib
     public void apply(VirtualMachine vm) {
       if (vm.peekArg().type() != Type.VECTOR)
         throw new TypeMismatch();
-      vm.result = ((Vector) vm.popArg()).copy();
+      vm.result = new Vector((Vector) vm.popArg());
       vm.popFrame();
     }
   };

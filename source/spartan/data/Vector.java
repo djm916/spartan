@@ -1,12 +1,13 @@
 package spartan.data;
 
-import spartan.errors.IndexOutOfBounds;
 import java.util.stream.Stream;
 import java.util.stream.Collectors;
 import java.util.function.BiPredicate;
 import java.util.ArrayList;
+import spartan.errors.IndexOutOfBounds;
+import spartan.runtime.VirtualMachine;
 
-public final class Vector extends Datum
+public final class Vector extends Callable
 {
   public static Vector fromList(List elems)
   {
@@ -24,14 +25,15 @@ public final class Vector extends Datum
     return result;
   }
   
-  public Vector()
-  {
-    this(DEFAULT_INITIAL_SIZE);
-  }
-  
   public Vector(int initialCapacity)
   {
+    super(1, false);
     elems = new ArrayList<>(initialCapacity);
+  }
+  
+  public Vector()
+  {
+    this(DEFAULT_INITIAL_CAPACITY);
   }
   
   public Vector(Vector that)
@@ -39,12 +41,7 @@ public final class Vector extends Datum
     this(that.length());
     elems.addAll(that.elems);
   }
-  
-  public Vector copy()
-  {
-    return new Vector(this);
-  }
-  
+    
   @Override
   public Type type()
   {
@@ -102,6 +99,12 @@ public final class Vector extends Datum
     return true;
   }
   
-  private static final int DEFAULT_INITIAL_SIZE = 8;
+  @Override
+  public void apply(VirtualMachine vm)
+  {
+    
+  }
+  
+  private static final int DEFAULT_INITIAL_CAPACITY = 8;
   private final ArrayList<Datum> elems;
 }

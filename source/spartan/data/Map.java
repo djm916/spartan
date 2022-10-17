@@ -1,6 +1,5 @@
 package spartan.data;
 
-//import java.util.Map;
 import java.util.IdentityHashMap;
 import java.util.stream.Collectors;
 import spartan.errors.InvalidArgument;
@@ -39,9 +38,9 @@ public final class Map extends Datum
   
   public void put(Datum key, Datum value)
   {
-    if (key.type() != Type.SYMBOL)
+    if (key.type() != Type.KEYWORD)
       throw new InvalidArgument();
-    elems.put((Symbol)key, value);
+    elems.put((Keyword)key, value);
   }
   
   public Map()
@@ -55,5 +54,5 @@ public final class Map extends Datum
   }
   
   private static final int DEFAULT_CAPACITY = 8;
-  private final java.util.Map<Symbol, Datum> elems;
+  private final java.util.Map<Keyword, Datum> elems;
 }

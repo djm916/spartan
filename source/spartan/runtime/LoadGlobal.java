@@ -1,21 +1,30 @@
 package spartan.runtime;
 
 import spartan.data.Symbol;
-import spartan.data.Nil;
+import spartan.parsing.Position;
+import spartan.errors.UnboundVariable;
 
 public final class LoadGlobal extends Inst
 {
-  public LoadGlobal(Symbol name, Inst next)
+  public LoadGlobal(Symbol name, Position position, Inst next)
   {
     super(next);
     this.name = name;
+    this.position = position;
   }
   
   public final void eval(VirtualMachine vm)
   {
-    vm.result = vm.globals.lookupOrElse(name, Nil.VALUE);
-    vm.control = next;
+    try {
+      vm.result = vm.globals.lookupOrThrow(name);
+      vm.control = next;
+    }
+    catch (UnboundVariable err) {
+      err.setPosition(position);
+      throw err;
+    }
   }
 
   private final Symbol name;
+  private final Position position;
 }

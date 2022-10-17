@@ -4,7 +4,7 @@ import spartan.runtime.VirtualMachine;
 import spartan.errors.Error;
 
 public abstract sealed class Callable extends Datum
-permits Primitive, Closure, Macro, Continuation
+permits Primitive, Closure, Macro, Continuation, Vector
 {
   protected Callable(int requiredArgs, boolean isVariadic)
   {

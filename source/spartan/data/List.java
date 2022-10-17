@@ -161,9 +161,9 @@ public final class List extends Datum
       f.accept(list.first);
   }
   
-  public int indexOf(Datum x, Predicate<Datum> pred)
+  public int indexOf(Predicate<Datum> pred)
   {
-    return indexOf(this, x, pred);
+    return indexOf(this, pred);
   }
     
   private static List concat(List x, List y)
@@ -218,7 +218,7 @@ public final class List extends Datum
     return list;
   }
   
-  private static int indexOf(List list, Datum x, Predicate<Datum> pred)
+  private static int indexOf(List list, Predicate<Datum> pred)
   {
     for (int i = 0; list != EMPTY; list = list.rest, ++i)
       if (pred.test(list.first))
