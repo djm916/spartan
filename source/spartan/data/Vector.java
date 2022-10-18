@@ -5,9 +5,10 @@ import java.util.stream.Collectors;
 import java.util.function.BiPredicate;
 import java.util.ArrayList;
 import spartan.errors.IndexOutOfBounds;
+import spartan.errors.InvalidArgument;
 import spartan.runtime.VirtualMachine;
 
-public final class Vector extends Callable
+public final class Vector implements Datum, Callable
 {
   public static Vector fromList(List elems)
   {
@@ -27,7 +28,6 @@ public final class Vector extends Callable
   
   public Vector(int initialCapacity)
   {
-    super(1, false);
     elems = new ArrayList<>(initialCapacity);
   }
   
@@ -55,6 +55,22 @@ public final class Vector extends Callable
       .map(e -> e.repr())
       .collect(Collectors.joining(" ", "[", "]"));
   }  
+  
+  @Override
+  public void apply(VirtualMachine vm)
+  {
+    if (!vm.peekArg().type().isInt())
+      throw new InvalidArgument();
+    int index = ((Integral)vm.popArg()).intValue();
+    vm.result = get(index);
+    vm.popFrame();
+  }
+  
+  @Override
+  public boolean arityMatches(int numArgs)
+  {
+    return numArgs == 1;
+  }
   
   public int length()
   {
@@ -98,13 +114,7 @@ public final class Vector extends Callable
     
     return true;
   }
-  
-  @Override
-  public void apply(VirtualMachine vm)
-  {
     
-  }
-  
   private static final int DEFAULT_INITIAL_CAPACITY = 8;
   private final ArrayList<Datum> elems;
 }

@@ -3,25 +3,32 @@ package spartan.data;
 import spartan.runtime.Frame;
 import spartan.runtime.VirtualMachine;
 
-public final class Continuation extends Callable
+public final class Continuation implements Datum, Callable
 {
   public Continuation(Frame frame)
   {
-    super(1, false);
-    this.frame = frame;
+    this.savedFrame = frame;
   }
   
+  @Override
   public Type type()
   {
     return Type.CONTINUE;
   }
   
+  @Override
   public void apply(VirtualMachine vm)
   {    
-    vm.frame = frame;
+    vm.frame = savedFrame;
     vm.result = vm.popArg();
     vm.popFrame();
   }
-
-  private final Frame frame;
+  
+  @Override
+  public boolean arityMatches(int numArgs)
+  {
+    return numArgs == 1;
+  }
+  
+  private final Frame savedFrame;
 }

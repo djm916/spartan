@@ -1,6 +1,6 @@
 package spartan.data;
 
-public final class Real extends Numeric
+public final class Real implements Datum, Numeric
 {
   public static final Real PI = new Real(Math.PI);
   public static final Real E = new Real(Math.E);

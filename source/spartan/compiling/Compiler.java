@@ -4,7 +4,8 @@ import spartan.runtime.*;
 import spartan.data.*;
 import spartan.parsing.SourceDatum;
 import spartan.parsing.PositionMap;
-import spartan.parsing.Position;
+import spartan.common.Procedure;
+import spartan.common.Signature;
 import spartan.errors.Error;
 import spartan.errors.MalformedExpression;
 import spartan.runtime.VirtualMachine;
@@ -775,7 +776,7 @@ public class Compiler
     if (!checkParamListForm(params))
       throw malformedExp(exp);
     
-    return new MakeClosure(makeProcTemplate(params, body, scope), next);
+    return new MakeClosure(makeProcedure(params, body, scope), next);
   }
 
   /* Transforms a sequence of inner definitions at the beginning
@@ -1016,7 +1017,7 @@ public class Compiler
            List.EMPTY)));
   }
   
-  private ProcTemplate makeProcTemplate(List params, List body, Scope scope)
+  private Procedure makeProcedure(List params, List body, Scope scope)
   {
     var numParams = params.length();
     var isVariadic = numParams > 1 && isSymbol(params.at(numParams - 2), Symbol.AMPERSAND);
@@ -1030,7 +1031,7 @@ public class Compiler
     var code = isVariadic ? compileVariadicProc(body, extendedScope, requiredArgs)
                           : compileFixedProc(body, extendedScope, requiredArgs);
     
-    return new ProcTemplate(code, requiredArgs, isVariadic);
+    return new Procedure(code, new Signature(requiredArgs, isVariadic));
   }
   
   /* Compile the body of a procedure with a fixed number of arguments N
@@ -1109,7 +1110,7 @@ public class Compiler
     if (!checkParamListForm(params))
       throw malformedExp(exp);
     
-    vm.globals.bind(symb, new Macro(makeProcTemplate(params, body, Scope.Empty)));
+    vm.globals.bind(symb, new Macro(makeProcedure(params, body, Scope.Empty)));
     return new LoadConst(Nil.VALUE, next);
   }
   

@@ -4,7 +4,7 @@ import java.util.function.Predicate;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 
-public final class List extends Datum
+public final class List implements Datum
 {
   public static final List EMPTY = new List(null, null);
   

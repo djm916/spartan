@@ -5,7 +5,7 @@ import java.nio.CharBuffer;
 import spartan.errors.TypeMismatch;
 import spartan.errors.IndexOutOfBounds;
 
-public final class Text extends Datum
+public final class Text implements Datum
 {
   public Text(String value)
   {

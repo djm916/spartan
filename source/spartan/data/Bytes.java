@@ -7,7 +7,7 @@ import java.nio.ByteBuffer;
 import java.nio.BufferUnderflowException;
 import java.nio.charset.Charset;
 
-public final class Bytes extends Datum
+public final class Bytes implements Datum
 {
   public static Bytes fromList(List elems)
   {

@@ -1,6 +1,6 @@
 package spartan.data;
 
-public final class Symbol extends Datum
+public final class Symbol implements Datum
 {
   public static final Symbol DEF = new Symbol("def");
   public static final Symbol DEFUN = new Symbol("defun");

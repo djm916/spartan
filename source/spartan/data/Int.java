@@ -3,7 +3,7 @@ package spartan.data;
 import spartan.errors.DivisionByZero;
 import spartan.errors.IntegerOverflow;
 
-public final class Int extends Integral
+public final class Int implements Datum, Integral
 {
   public Int(int value)
   {

@@ -1,7 +1,6 @@
 package spartan.data;
 
-public abstract sealed class Integral extends Numeric
-permits Int, BigInt
+public interface Integral extends Numeric
 {
-  public abstract int intValue();
+  int intValue();
 }

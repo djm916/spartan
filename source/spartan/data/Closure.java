@@ -1,30 +1,40 @@
 package spartan.data;
 
-import spartan.runtime.Inst;
+import spartan.common.Procedure;
+import spartan.common.Signature;
 import spartan.runtime.LocalEnv;
+import spartan.runtime.Inst;
 import spartan.runtime.VirtualMachine;
-import spartan.compiling.ProcTemplate;
 
-public final class Closure extends Callable
+public final class Closure implements Datum, Callable
 {
-  public Closure(ProcTemplate template, LocalEnv locals)
+  public Closure(Procedure proc, LocalEnv locals)
   {
-    super(template.requiredArgs(), template.isVariadic());
-    this.code = template.code();
+    this.body = proc.body();
+    this.sig = proc.sig();
     this.locals = locals;
   }
   
+  @Override
   public Type type()
   {
     return Type.CLOSURE;
   }
   
+  @Override
   public void apply(VirtualMachine vm)
   {    
     vm.locals = locals;
-    vm.control = code;
+    vm.control = body;
   }
   
-  private final Inst code;
-  private final LocalEnv locals;
+  @Override
+  public boolean arityMatches(int numArgs)
+  {
+    return sig.matches(numArgs);
+  }
+  
+  private final Inst body;
+  private final Signature sig;
+  private final LocalEnv locals;  
 }

@@ -1,6 +1,6 @@
 package spartan.data;
 
-public final class Complex extends Numeric
+public final class Complex implements Datum, Numeric
 {
   public static final Complex I = new Complex(0.0, 1.0);
   

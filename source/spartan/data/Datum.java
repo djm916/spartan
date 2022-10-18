@@ -1,9 +1,8 @@
 package spartan.data;
 
-public abstract sealed class Datum
-permits Nil, Bool, Numeric, Callable, List, Map, Symbol, Keyword, Text, Port, Bytes
+public interface Datum
 {
-  public abstract Type type();
+  Type type();
   
   /* Returns a String representation of this object, intended to be machine-readable.
   
@@ -21,7 +20,7 @@ permits Nil, Bool, Numeric, Callable, List, Map, Symbol, Keyword, Text, Port, By
      At the REPL, the repr() of the result of evaluating an expression is what is displayed to
      the user.
   */
-  public String repr()
+  default String repr()
   {
     return String.format("#<%s @ 0x%x>", type(), System.identityHashCode(this));
   }
@@ -32,7 +31,7 @@ permits Nil, Bool, Numeric, Callable, List, Map, Symbol, Keyword, Text, Port, By
      
      By default, writing an object via an I/O function writes the str() of the object.
    */
-  public String str()
+  default String str()
   {
     return repr();
   }

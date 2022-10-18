@@ -6,7 +6,7 @@ import java.lang.ref.WeakReference;
 import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
 
-public final class Keyword extends Datum
+public final class Keyword implements Datum
 {
   private static final Map<String, WeakReference<Keyword>> interned = new HashMap<>();
   private static final ReferenceQueue unused = new ReferenceQueue();

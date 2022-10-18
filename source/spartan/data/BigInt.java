@@ -4,7 +4,7 @@ import java.math.BigInteger;
 import spartan.errors.DivisionByZero;
 import spartan.errors.IntegerOverflow;
 
-public final class BigInt extends Integral
+public final class BigInt implements Datum, Integral
 {
   public BigInt(long value)
   {

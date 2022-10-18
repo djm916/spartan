@@ -3,7 +3,7 @@ package spartan.data;
 import java.math.BigInteger;
 import spartan.errors.InvalidArgument;
 
-public final class Ratio extends Numeric
+public final class Ratio implements Datum, Numeric
 {
   public Ratio(BigInteger numer, BigInteger denom)
   {

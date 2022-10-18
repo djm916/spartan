@@ -3,7 +3,7 @@ package spartan.data;
 import spartan.errors.IOError;
 import spartan.errors.InvalidArgument;
 
-public abstract sealed class Port extends Datum
+public abstract sealed class Port implements Datum
 permits InputPort, OutputPort, FilePort
 {
   public static final Int EOF = new Int(-1);

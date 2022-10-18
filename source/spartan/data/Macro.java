@@ -2,25 +2,35 @@ package spartan.data;
 
 import spartan.runtime.Inst;
 import spartan.runtime.VirtualMachine;
-import spartan.compiling.ProcTemplate;
+import spartan.common.Procedure;
+import spartan.common.Signature;
 
-public final class Macro extends Callable
+public final class Macro implements Datum, Callable
 { 
-  public Macro(ProcTemplate template)
+  public Macro(Procedure proc)
   {
-    super(template.requiredArgs(), template.isVariadic());
-    this.code = template.code();
+    this.body = proc.body();
+    this.sig = proc.sig();
   }
   
+  @Override
   public Type type()
   {
     return Type.MACRO;
   }
   
+  @Override
   public void apply(VirtualMachine vm)
   {
-    vm.control = code;
+    vm.control = body;
   }
   
-  private final Inst code;
+  @Override
+  public boolean arityMatches(int numArgs)
+  {
+    return sig.matches(numArgs);
+  }
+  
+  private final Inst body;
+  private final Signature sig;
 }

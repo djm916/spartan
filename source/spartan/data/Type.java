@@ -75,7 +75,7 @@ public enum Type
   
   public boolean isCallable()
   {
-    return this == PRIMITIVE || this == CLOSURE || this == MACRO || this == CONTINUE;
+    return this == PRIMITIVE || this == CLOSURE || this == MACRO || this == CONTINUE || this == VECTOR || this == MAP;
   }
   
   private Type(String name)

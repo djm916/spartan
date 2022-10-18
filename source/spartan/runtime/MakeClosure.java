@@ -1,21 +1,21 @@
 package spartan.runtime;
 
 import spartan.data.Closure;
-import spartan.compiling.ProcTemplate;
+import spartan.common.Procedure;
 
 public final class MakeClosure extends Inst
 {  
-  public MakeClosure(ProcTemplate template, Inst next)
+  public MakeClosure(Procedure proc, Inst next)
   {
     super(next);
-    this.template = template;
+    this.proc = proc;
   }
   
   public final void eval(VirtualMachine vm)
   {
-    vm.result = new Closure(template, vm.locals);
+    vm.result = new Closure(proc, vm.locals);
     vm.control = next;
   }
 
-  private final ProcTemplate template;
+  private final Procedure proc;
 }

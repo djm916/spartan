@@ -4,19 +4,21 @@ import java.util.IdentityHashMap;
 import java.util.stream.Collectors;
 import spartan.errors.InvalidArgument;
 import spartan.errors.WrongNumberArgs;
+import spartan.errors.NoSuchElement;
+import spartan.runtime.VirtualMachine;
 
-public final class Map extends Datum
+public final class Map implements Datum, Callable
 {
-  public static Map fromList(List elems)
+  public static Map fromList(List map)
   {
-    int numElems = elems.length();
+    int numElems = map.length();
     if (numElems % 2 != 0)
       throw new WrongNumberArgs();
     var result = new Map(numElems);
-    for (; !elems.empty(); elems = elems.cdr()) {
-      var key = elems.car();
-      elems = elems.cdr();
-      var val = elems.car();
+    for (; !map.empty(); map = map.cdr()) {
+      var key = map.car();
+      map = map.cdr();
+      var val = map.car();
       result.put(key, val);
     }
     return result;
@@ -31,16 +33,39 @@ public final class Map extends Datum
   @Override
   public String repr()
   {
-    return elems.entrySet().stream()      
+    return map.entrySet().stream()      
       .map(e -> e.getKey().repr() + " " + e.getValue().repr())
       .collect(Collectors.joining(" ", "{", "}"));
+  }
+  
+  @Override
+  public void apply(VirtualMachine vm)
+  {
+    vm.result = get(vm.popArg());
+    vm.popFrame();
+  }
+  
+  @Override
+  public boolean arityMatches(int numArgs)
+  {
+    return numArgs == 1;
   }
   
   public void put(Datum key, Datum value)
   {
     if (key.type() != Type.KEYWORD)
       throw new InvalidArgument();
-    elems.put((Keyword)key, value);
+    map.put((Keyword)key, value);
+  }
+  
+  public Datum get(Datum key)
+  {
+    if (key.type() != Type.KEYWORD)
+      throw new InvalidArgument();
+    var value = map.get((Keyword)key);
+    if (value == null)
+      throw new NoSuchElement();
+    return value;
   }
   
   public Map()
@@ -50,9 +75,9 @@ public final class Map extends Datum
   
   public Map(int capacity)
   {
-    this.elems = new IdentityHashMap<>(capacity);
+    this.map = new IdentityHashMap<>(capacity);
   }
   
   private static final int DEFAULT_CAPACITY = 8;
-  private final java.util.Map<Keyword, Datum> elems;
+  private final java.util.Map<Keyword, Datum> map;
 }
