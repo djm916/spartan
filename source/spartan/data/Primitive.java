@@ -1,6 +1,6 @@
 package spartan.data;
 
-import spartan.common.Signature;
+import spartan.compiling.Signature;
 
 public abstract class Primitive implements Datum, Callable
 {

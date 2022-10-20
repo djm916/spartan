@@ -2,8 +2,8 @@ package spartan.data;
 
 import spartan.runtime.Inst;
 import spartan.runtime.VirtualMachine;
-import spartan.common.Procedure;
-import spartan.common.Signature;
+import spartan.compiling.Procedure;
+import spartan.compiling.Signature;
 
 public final class Macro implements Datum, Callable
 { 

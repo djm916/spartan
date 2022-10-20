@@ -4,8 +4,10 @@ import java.util.Map;
 import java.util.IdentityHashMap;
 import spartan.data.Datum;
 
-/** A map that provides a source position (filename, line, and column) data
-  associated with a source expression. */
+/**
+  A source map that provides a source position (filename, line, and column)
+  associated with a given source expression (lists and symbols).
+*/
 public class PositionMap
 {  
   public void put(Datum x, Position p)

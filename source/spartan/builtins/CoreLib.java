@@ -404,7 +404,7 @@ public final class CoreLib
   
   public static final Primitive TYPE = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
-      vm.result = vm.popArg().type().toSymbol();
+      vm.result = vm.popArg().type().toKeyword();
       vm.popFrame();
     }
   };

@@ -1,7 +1,7 @@
 package spartan.runtime;
 
 import spartan.data.Closure;
-import spartan.common.Procedure;
+import spartan.compiling.Procedure;
 
 public final class MakeClosure extends Inst
 {  

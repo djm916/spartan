@@ -2,29 +2,29 @@ package spartan.data;
 
 public enum Type
 {
-  NIL("type/nil"),
-  BOOL("type/boolean"),
-  INT("type/integer"),
-  BIGINT("type/integer"),
-  RATIO("type/rational"),
-  REAL("type/real"),
-  COMPLEX("type/complex"),
-  SYMBOL("type/symbol"),
-  KEYWORD("type/keyword"),
-  TEXT("type/text"),
-  BYTES("type/bytes"),
-  LIST("type/list"),
-  VECTOR("type/vector"),
-  MAP("type/map"),
-  PRIMITIVE("type/procedure"),
-  CLOSURE("type/procedure"),
-  MACRO("type/macro"),
-  CONTINUE("type/continuation"),
-  PORT("type/port");
+  NIL(":type/nil"),
+  BOOL(":type/boolean"),
+  INT(":type/integer"),
+  BIGINT(":type/integer"),
+  RATIO(":type/rational"),
+  REAL(":type/real"),
+  COMPLEX(":type/complex"),
+  SYMBOL(":type/symbol"),
+  KEYWORD(":type/keyword"),
+  TEXT(":type/text"),
+  BYTES(":type/bytes"),
+  LIST(":type/list"),
+  VECTOR(":type/vector"),
+  MAP(":type/map"),
+  PRIMITIVE(":type/procedure"),
+  CLOSURE(":type/procedure"),
+  MACRO(":type/macro"),
+  CONTINUE(":type/continuation"),
+  PORT(":type/port");
   
-  public Symbol toSymbol()
+  public Keyword toKeyword()
   {
-    return new Symbol(name);
+    return Keyword.of(name);
   }
   
   @Override
