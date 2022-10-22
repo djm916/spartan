@@ -9,8 +9,8 @@ import java.lang.ref.ReferenceQueue;
 public final class Symbol implements Datum
 {
   private static final Map<String, WeakReference<Symbol>> interned = new HashMap<>();
-  private static final ReferenceQueue unused = new ReferenceQueue();
-  
+  private static final ReferenceQueue<Symbol> unused = new ReferenceQueue<>();
+
   public static final Symbol DEF = new Symbol("def");
   public static final Symbol DEFUN = new Symbol("defun");
   public static final Symbol DEFMACRO = new Symbol("defmacro");
@@ -34,18 +34,17 @@ public final class Symbol implements Datum
   public static final Symbol AMPERSAND = new Symbol("&");
   public static final Symbol CALL_CC = new Symbol("call/cc");
   
+  /**
+   * Returns an interned symbol.
+   */
   public static Symbol of(String id)
   {
-    var result = interned.get(id);
-    if (result == null || result.get() == null) {
-      var symbol = new Symbol(id);
-      interned.put(id, new WeakReference<>(symbol, unused));
-      purgeUnusedSymbols();
-      return symbol;
-    }
-    return result.get();
+    return intern(id, null);
   }
   
+  /**
+   * Generates a new, unique, uninterned symbol.
+   */
   public static Symbol generateUnique()
   {
     return new Symbol(String.format("#%d", nextUniqueId++));
@@ -68,24 +67,44 @@ public final class Symbol implements Datum
     return this.id.equals(that.id);
   }
   
+  /**
+   * Create a new, uninterned symbol for the given identifier
+   */
   public Symbol(String id)
   {
     this.id = id;
   }
   
+  /**
+   * Return an interned symbol. May return a new symbol or this (if previously interned)
+   */
   public Symbol intern()
   {
-    return of(id);
+    return intern(id, this);
+  }
+  
+  private static Symbol intern(String id, Symbol symbol)
+  {
+    var result = interned.get(id);
+    if (result == null || result.get() == null) {
+      if (symbol == null)
+        symbol = new Symbol(id);
+      interned.put(id, new WeakReference<Symbol>(symbol, unused));
+      purgeUnusedSymbols();
+      return symbol;
+    }
+    return result.get();
   }
   
   private static void purgeUnusedSymbols()
   {
     var used = interned.values();
-    Reference<Symbol> ref = null;
+    Reference<? extends Symbol> ref = null;
     while ((ref = unused.poll()) != null)
       used.remove(ref);
   }
   
   private static int nextUniqueId;
   private final String id;
+  
 }
