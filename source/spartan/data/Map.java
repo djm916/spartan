@@ -53,16 +53,16 @@ public final class Map implements Datum, Callable
   
   public void put(Datum key, Datum value)
   {
-    if (key.type() != Type.KEYWORD)
+    if (key.type() != Type.SYMBOL)
       throw new InvalidArgument();
-    map.put((Keyword)key, value);
+    map.put((Symbol)key, value);
   }
   
   public Datum get(Datum key)
   {
-    if (key.type() != Type.KEYWORD)
+    if (key.type() != Type.SYMBOL)
       throw new InvalidArgument();
-    var value = map.get((Keyword)key);
+    var value = map.get((Symbol)key);
     if (value == null)
       throw new NoSuchElement();
     return value;
@@ -79,5 +79,5 @@ public final class Map implements Datum, Callable
   }
   
   private static final int DEFAULT_CAPACITY = 8;
-  private final java.util.Map<Keyword, Datum> map;
+  private final java.util.Map<Symbol, Datum> map;
 }

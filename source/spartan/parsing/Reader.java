@@ -366,6 +366,7 @@ public class Reader implements AutoCloseable
     return symbol;
   }
   
+  /*
   private Keyword readKeyword() throws IOException
   {
     var text = new StringBuilder();
@@ -379,6 +380,7 @@ public class Reader implements AutoCloseable
     
     return Keyword.of(text.toString());
   }
+  */
   
   private Text readText() throws IOException
   {
@@ -507,8 +509,8 @@ public class Reader implements AutoCloseable
       return readNumber();
     if (isDigit(lastChar))
       return readNumber();
-    if (lastChar == ':')
-      return readKeyword();
+    //if (lastChar == ':')
+      //return readKeyword();
     if (isSymbol(lastChar))
       return readSymbol();
     if (lastChar == '\"')

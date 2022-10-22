@@ -57,7 +57,7 @@ public class Compiler
         || exp.type() == Type.COMPLEX
         || exp.type() == Type.BOOL
         || exp.type() == Type.TEXT
-        || exp.type() == Type.KEYWORD
+        //|| exp.type() == Type.KEYWORD
         || exp == List.EMPTY
         || exp == Nil.VALUE;
   }
@@ -93,7 +93,7 @@ public class Compiler
   
   private Inst compileGlobalVarRef(Symbol symb, Inst next)
   {
-    return new LoadGlobal(symb, positionMap.get(symb), next);
+    return new LoadGlobal(symb.intern(), positionMap.get(symb), next);
   }
   
   /* Compile a variable assignment.
@@ -128,7 +128,7 @@ public class Compiler
   
   private Inst compileGlobalVarSet(Symbol symb, Inst next)
   {
-    return new StoreGlobal(symb, new LoadConst(Nil.VALUE, next));
+    return new StoreGlobal(symb.intern(), new LoadConst(Nil.VALUE, next));
   }
   
   /* Compile a "def" special form.
@@ -152,7 +152,7 @@ public class Compiler
     var init = exp.caddr();
 
     return compile(init, scope, false,
-           new StoreGlobal(symb,
+           new StoreGlobal(symb.intern(),
            new LoadConst(Nil.VALUE,
            next)));
   }
@@ -935,8 +935,13 @@ public class Compiler
   {
     if (exp.length() != 2)
       throw malformedExp(exp);
-
-    return new LoadConst(exp.cadr(), next);
+    
+    var x = exp.cadr();
+    
+    if (x.type() == Type.SYMBOL)
+      x = ((Symbol)x).intern();
+    
+    return new LoadConst(x, next);
   }
 
   // Compile a (quasiquote x) form by reducing it to an equivalent
@@ -1109,7 +1114,7 @@ public class Compiler
     if (!checkParamListForm(params))
       throw malformedExp(exp);
     
-    vm.globals.bind(symb, new Macro(makeProcedure(params, body, Scope.Empty)));
+    vm.globals.bind(symb.intern(), new Macro(makeProcedure(params, body, Scope.Empty)));
     return new LoadConst(Nil.VALUE, next);
   }
   
@@ -1124,7 +1129,8 @@ public class Compiler
   */
   private Inst compileApplyMacro(List exp, Scope scope, boolean tail, Inst next)
   {
-    var f = (Macro) vm.globals.lookup((Symbol) exp.car()).get();
+    var symb = (Symbol)exp.car();
+    var f = (Macro) vm.globals.lookup(symb.intern()).get();
     var args = exp.cdr();
     
     try {
@@ -1157,7 +1163,7 @@ public class Compiler
   
   private boolean isMacro(Symbol s)
   {
-    return vm.globals.lookup(s).map(v -> v.type() == Type.MACRO).orElse(false);
+    return vm.globals.lookup(s.intern()).map(v -> v.type() == Type.MACRO).orElse(false);
   }
   
   /* Compile an s-expression (a list), handling special forms, macro expansion, and procedure application. */

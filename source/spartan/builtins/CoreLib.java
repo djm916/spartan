@@ -104,13 +104,7 @@ public final class CoreLib
         }
         break;
       }
-      case SYMBOL: {
-        switch (y.type()) {
-          case SYMBOL: return ((Symbol)x).eq((Symbol)y);
-        }
-        break;
-      }
-      case KEYWORD:
+      case SYMBOL:
       case BOOL:
       case NIL: return x == y;
     }
@@ -404,7 +398,7 @@ public final class CoreLib
   
   public static final Primitive TYPE = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
-      vm.result = vm.popArg().type().toKeyword();
+      vm.result = vm.popArg().type().toSymbol();
       vm.popFrame();
     }
   };

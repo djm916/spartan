@@ -1,7 +1,16 @@
 package spartan.data;
 
+import java.util.Map;
+import java.util.HashMap;
+import java.lang.ref.WeakReference;
+import java.lang.ref.Reference;
+import java.lang.ref.ReferenceQueue;
+
 public final class Symbol implements Datum
 {
+  private static final Map<String, WeakReference<Symbol>> interned = new HashMap<>();
+  private static final ReferenceQueue unused = new ReferenceQueue();
+  
   public static final Symbol DEF = new Symbol("def");
   public static final Symbol DEFUN = new Symbol("defun");
   public static final Symbol DEFMACRO = new Symbol("defmacro");
@@ -25,6 +34,18 @@ public final class Symbol implements Datum
   public static final Symbol AMPERSAND = new Symbol("&");
   public static final Symbol CALL_CC = new Symbol("call/cc");
   
+  public static Symbol of(String id)
+  {
+    var result = interned.get(id);
+    if (result == null || result.get() == null) {
+      var symbol = new Symbol(id);
+      interned.put(id, new WeakReference<>(symbol, unused));
+      purgeUnusedSymbols();
+      return symbol;
+    }
+    return result.get();
+  }
+  
   public static Symbol generateUnique()
   {
     return new Symbol(String.format("#%d", nextUniqueId++));
@@ -42,26 +63,27 @@ public final class Symbol implements Datum
     return id;
   }
   
-  public Symbol(String id)
-  {
-    this.id = id;
-  }
-  
   public boolean eq(Symbol that)
   {
     return this.id.equals(that.id);
   }
   
-  @Override // for use as HashMap key
-  public boolean equals(Object that)
+  public Symbol(String id)
   {
-    return (that instanceof Symbol s) && id.equals(s.id);
+    this.id = id;
   }
   
-  @Override // for use as HashMap key
-  public int hashCode()
+  public Symbol intern()
   {
-    return id.hashCode();
+    return of(id);
+  }
+  
+  private static void purgeUnusedSymbols()
+  {
+    var used = interned.values();
+    Reference<Symbol> ref = null;
+    while ((ref = unused.poll()) != null)
+      used.remove(ref);
   }
   
   private static int nextUniqueId;
