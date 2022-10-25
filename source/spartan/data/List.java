@@ -2,9 +2,16 @@ package spartan.data;
 
 import java.util.function.Predicate;
 import java.util.function.BiPredicate;
-import java.util.function.Consumer;
+import java.util.Iterator;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.NoSuchElementException;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+import java.util.stream.Collectors;
+import spartan.errors.TypeMismatch;
 
-public final class List implements Datum
+public final class List implements Datum, Iterable<Datum>
 {
   public static final List EMPTY = new List(null, null);
   
@@ -22,6 +29,13 @@ public final class List implements Datum
       return this;
     }
     
+    public Builder add(Datum... xs)
+    {
+      for (var x : xs)
+        add(x);
+      return this;
+    }
+    
     public List build()
     {
       return head;
@@ -35,28 +49,38 @@ public final class List implements Datum
   
   public static List of(Datum... elems)
   {
-    var result = EMPTY;
-    for (int i = elems.length - 1; i >= 0; --i)
-      result = cons(elems[i], result);
-    return result;
+    return new Builder().add(elems).build();
   }
-
+  
+  /**
+   * Concatenates the given lists
+   *
+   * This is a not a member function in order to avoid a "Shlemiel The Painter" algorithm.
+   */
+  public static List concat(List lists)
+  {
+    var builder = new List.Builder();
+    for (var list : lists) {
+      if (list.type() != Type.LIST)
+        throw new TypeMismatch();
+      for (var elem : (List) list)
+        builder.add(elem);
+    }
+    return builder.build();
+  }
+  
+  @Override
   public Type type()
   {
     return Type.LIST;
   }
   
+  @Override
   public String repr()
   {
-    var result = new StringBuilder();
-    result.append("(");
-    for (var list = this; list != List.EMPTY; list = list.cdr()) {
-      result.append(list.car().repr());
-      if (list.cdr() != EMPTY)
-        result.append(" ");
-    }
-    result.append(")");
-    return result.toString();
+    return stream()
+      .map(e -> e.repr())
+      .collect(Collectors.joining(" ", "(", ")"));
   }
   
   public boolean empty()
@@ -129,12 +153,7 @@ public final class List implements Datum
   {
     return eq(this, other, eq);
   }
-  
-  public List concat(List that)
-  {
-    return concat(this, that);
-  }
-  
+    
   public List append(Datum x)
   {
     return append(this, x);
@@ -150,30 +169,47 @@ public final class List implements Datum
     return remove(this, pred);
   }
   
-  public List removed(Predicate<Datum> pred)
+  public List removeInplace(Predicate<Datum> pred)
   {
-    return removed(this, pred);
+    return removeInplace(this, pred);
   }
-  
-  public void forEach(Consumer<Datum> f)
-  {
-    for (var list = this; list != EMPTY; list = list.rest)
-      f.accept(list.first);
-  }
-  
+    
   public int indexOf(Predicate<Datum> pred)
   {
     return indexOf(this, pred);
   }
-    
-  private static List concat(List x, List y)
+  
+  @Override // Iterable
+  public Iterator<Datum> iterator()
   {
-    var result = new Builder();
-    for (; x != EMPTY; x = x.rest)
-      result.add(x.first);
-    for (; y != EMPTY; y = y.rest)
-      result.add(y.first);
-    return result.build();
+    return new Iterator<>() {
+      private List cur = List.this;
+      
+      @Override
+      public boolean hasNext() {
+        return cur != EMPTY;
+      }
+      
+      @Override
+      public Datum next() {
+        if (cur == EMPTY)
+          throw new NoSuchElementException();
+        var val = cur.first;
+        cur = cur.rest;
+        return val;
+      }
+    };
+  }
+  
+  @Override // Iterable
+  public Spliterator<Datum> spliterator()
+  {
+    return Spliterators.spliteratorUnknownSize(iterator(), Spliterator.ORDERED | Spliterator.NONNULL);
+  }
+  
+  public Stream<Datum> stream()
+  {
+    return StreamSupport.stream(spliterator(), false);
   }
   
   private static List append(List x, Datum y)
@@ -193,7 +229,7 @@ public final class List implements Datum
     return result;
   }
   
-  private static List removed(List self, Predicate<Datum> pred)
+  private static List remove(List self, Predicate<Datum> pred)
   {
     var result = new Builder();
     for (; self != EMPTY; self = self.rest)
@@ -202,7 +238,7 @@ public final class List implements Datum
     return result.build();
   }
   
-  private static List remove(List list, Predicate<Datum> pred)
+  private static List removeInplace(List list, Predicate<Datum> pred)
   {
     List prev = null;
     List cur = list;

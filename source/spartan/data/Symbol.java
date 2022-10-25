@@ -8,9 +8,6 @@ import java.lang.ref.ReferenceQueue;
 
 public final class Symbol implements Datum
 {
-  private static final Map<String, WeakReference<Symbol>> interned = new HashMap<>();
-  private static final ReferenceQueue<Symbol> unused = new ReferenceQueue<>();
-
   public static final Symbol DEF = new Symbol("def");
   public static final Symbol DEFUN = new Symbol("defun");
   public static final Symbol DEFMACRO = new Symbol("defmacro");
@@ -39,7 +36,7 @@ public final class Symbol implements Datum
    */
   public static Symbol of(String id)
   {
-    return intern(id, null);
+    return cache.get(id, () -> new Symbol(id));
   }
   
   /**
@@ -65,7 +62,7 @@ public final class Symbol implements Datum
   public boolean eq(Symbol that)
   {
     return this.id.equals(that.id);
-  }
+  }  
   
   /**
    * Create a new, uninterned symbol for the given identifier
@@ -80,31 +77,10 @@ public final class Symbol implements Datum
    */
   public Symbol intern()
   {
-    return intern(id, this);
+    return cache.get(this.id, () -> this);
   }
-  
-  private static Symbol intern(String id, Symbol symbol)
-  {
-    var result = interned.get(id);
-    if (result == null || result.get() == null) {
-      if (symbol == null)
-        symbol = new Symbol(id);
-      interned.put(id, new WeakReference<Symbol>(symbol, unused));
-      purgeUnusedSymbols();
-      return symbol;
-    }
-    return result.get();
-  }
-  
-  private static void purgeUnusedSymbols()
-  {
-    var used = interned.values();
-    Reference<? extends Symbol> ref = null;
-    while ((ref = unused.poll()) != null)
-      used.remove(ref);
-  }
-  
+
+  private static WeakCache<String, Symbol> cache = new WeakCache<>();
   private static int nextUniqueId;
   private final String id;
-  
 }

@@ -1,6 +1,6 @@
 package spartan.data;
 
-import java.util.IdentityHashMap;
+import java.util.HashMap;
 import java.util.stream.Collectors;
 import spartan.errors.InvalidArgument;
 import spartan.errors.WrongNumberArgs;
@@ -9,16 +9,16 @@ import spartan.runtime.VirtualMachine;
 
 public final class Map implements Datum, Callable
 {
-  public static Map fromList(List map)
+  public static Map fromList(List elems)
   {
-    int numElems = map.length();
+    int numElems = elems.length();
     if (numElems % 2 != 0)
       throw new WrongNumberArgs();
     var result = new Map(numElems);
-    for (; !map.empty(); map = map.cdr()) {
-      var key = map.car();
-      map = map.cdr();
-      var val = map.car();
+    for (; !elems.empty(); elems = elems.cdr()) {
+      var key = elems.car();
+      elems = elems.cdr();
+      var val = elems.car();
       result.put(key, val);
     }
     return result;
@@ -53,16 +53,12 @@ public final class Map implements Datum, Callable
   
   public void put(Datum key, Datum value)
   {
-    if (key.type() != Type.SYMBOL)
-      throw new InvalidArgument();
-    map.put((Symbol)key, value);
+    map.put(key, value);
   }
   
   public Datum get(Datum key)
   {
-    if (key.type() != Type.SYMBOL)
-      throw new InvalidArgument();
-    var value = map.get((Symbol)key);
+    var value = map.get(key);
     if (value == null)
       throw new NoSuchElement();
     return value;
@@ -75,9 +71,9 @@ public final class Map implements Datum, Callable
   
   public Map(int capacity)
   {
-    this.map = new IdentityHashMap<>(capacity);
+    this.map = new HashMap<>(capacity);
   }
   
   private static final int DEFAULT_CAPACITY = 8;
-  private final java.util.Map<Symbol, Datum> map;
+  private final java.util.Map<Datum, Datum> map;
 }

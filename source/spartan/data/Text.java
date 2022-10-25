@@ -35,7 +35,14 @@ public final class Text implements Datum
     return value.length();
   }
   
-  public int hash()
+  @Override
+  public boolean equals(Object other)
+  {
+    return (other instanceof Text that) && this.value.equals(that.value);
+  }
+  
+  @Override
+  public int hashCode()
   {
     return value.hashCode();
   }

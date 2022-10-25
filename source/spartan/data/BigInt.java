@@ -44,6 +44,18 @@ public final class BigInt implements Datum, Integral
     }
   }
   
+  @Override
+  public boolean equals(Object other)
+  {
+    return (other instanceof BigInt that) && this.value.equals(that.value);
+  }
+  
+  @Override
+  public int hashCode()
+  {
+    return value.hashCode();
+  }
+  
   public Ratio toRatio()
   {
     return new Ratio(value, BigInteger.ONE);

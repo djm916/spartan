@@ -33,6 +33,18 @@ public final class Int implements Datum, Integral
     return value;
   }
   
+  @Override
+  public boolean equals(Object other)
+  {
+    return (other instanceof Int that) && this.value == that.value;
+  }
+  
+  @Override
+  public int hashCode()
+  {
+    return Integer.hashCode(value);
+  }
+  
   public BigInt toBigInt()
   {
     return new BigInt(value);

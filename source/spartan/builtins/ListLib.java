@@ -54,25 +54,6 @@ public final class ListLib
     ((List)x).setCdr((List)y);
   }
   
-  public static List append(Datum x, Datum y)
-  {
-    if (x.type() != Type.LIST)
-      throw new TypeMismatch();
-    return ((List)x).append(y);
-  }
-  
-  public static List concat(List args)
-  {
-    var builder = new List.Builder();
-    for (; args != List.EMPTY; args = args.cdr()) {
-      if (args.car().type() != Type.LIST)
-        throw new TypeMismatch();
-      for (var list = (List)args.car(); list != List.EMPTY; list = list.cdr())
-        builder.add(list.car());
-    }
-    return builder.build();
-  }
-  
   public static final Primitive MAKE_LIST = new Primitive(0, true) {
     public void apply(VirtualMachine vm) {
       vm.result = vm.popRestArgs();
@@ -138,14 +119,18 @@ public final class ListLib
   
   public static final Primitive APPEND = new Primitive(2, false) {
     public void apply(VirtualMachine vm) {
-      vm.result = append(vm.popArg(), vm.popArg());
+      if (vm.peekArg().type() != Type.LIST)
+        throw new TypeMismatch();
+      var list = (List) vm.popArg();
+      var elem = vm.popArg();
+      vm.result = list.append(elem);
       vm.popFrame();
     }
   };
-    
+  
   public static final Primitive CONCAT = new Primitive(0, true) {
     public void apply(VirtualMachine vm) {
-      vm.result = concat(vm.popRestArgs());
+      vm.result = List.concat(vm.popRestArgs());
       vm.popFrame();
     }
   };  

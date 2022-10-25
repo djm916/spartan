@@ -61,7 +61,7 @@ public final class StringLib
     public void apply(VirtualMachine vm) {
       if (vm.peekArg().type() != Type.TEXT)
         throw new TypeMismatch();
-      vm.result = new Int(((Text)vm.popArg()).hash());
+      vm.result = new Int(((Text)vm.popArg()).hashCode());
       vm.popFrame();
     }
   };
