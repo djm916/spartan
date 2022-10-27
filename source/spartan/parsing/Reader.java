@@ -371,19 +371,23 @@ public class Reader implements AutoCloseable
   }
   
   /*
-   * Reads a qualified symbol of the form a.b
-   * Converts to a chain of map lookups
+   * Reads a qualified symbol of the form a.b and converts
+   * it to a map lookup, e.g.:
    *
    * a.b => (a 'b)
    * a.b.c => ((a 'b) 'c)
+   * a.b.c.d => (((a 'b) 'c) 'd)
    */
   private List readQualifiedSymbol(Datum seed) throws IOException
-  {
+  {    
     getChar(); // eat '.'
     getChar();
     if (!isSymbol(lastChar))
       throw syntaxError("malformed qualified symbol");
     var result = List.of(seed, List.of(Symbol.QUOTE, readSymbol(false)));
+    setTokenPosition();
+    var position = getTokenPosition();
+    positionMap.put(result, position);
     if (peekChar() == '.')
       return readQualifiedSymbol(result);
     else
