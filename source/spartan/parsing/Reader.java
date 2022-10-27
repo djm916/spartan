@@ -79,7 +79,7 @@ public class Reader implements AutoCloseable
     return ch == '~' || ch == '!' || ch == '@' || ch == '#' || ch == '$' || ch == '%'
         || ch == '^' || ch == '&' || ch == '*' || ch == '-' || ch == '_' || ch == '+'
         || ch == '=' || ch == '|' || ch == '\\' || ch == ':' || ch == '<' || ch == '>'
-        || ch == '.' || ch == '?' || ch ==  '/';
+        || ch == '?' || ch ==  '/';
   }
 
   private static boolean isSymbol(int ch)
@@ -349,7 +349,7 @@ public class Reader implements AutoCloseable
     }
   }
   
-  private Symbol readSymbol() throws IOException
+  private Datum readSymbol(boolean readQualified) throws IOException
   {
     var text = new StringBuilder();
     var position = getTokenPosition();
@@ -363,7 +363,31 @@ public class Reader implements AutoCloseable
     
     var symbol = new Symbol(text.toString());
     positionMap.put(symbol, position);
-    return symbol;
+    
+    if (readQualified && peekChar() == '.')
+      return readQualifiedSymbol(symbol);
+    else
+      return symbol;
+  }
+  
+  /*
+   * Reads a qualified symbol of the form a.b
+   * Converts to a chain of map lookups
+   *
+   * a.b => (a 'b)
+   * a.b.c => ((a 'b) 'c)
+   */
+  private List readQualifiedSymbol(Datum seed) throws IOException
+  {
+    getChar(); // eat '.'
+    getChar();
+    if (!isSymbol(lastChar))
+      throw syntaxError("malformed qualified symbol");
+    var result = List.of(seed, List.of(Symbol.QUOTE, readSymbol(false)));
+    if (peekChar() == '.')
+      return readQualifiedSymbol(result);
+    else
+      return result;
   }
   
   /*
@@ -512,7 +536,7 @@ public class Reader implements AutoCloseable
     //if (lastChar == ':')
       //return readKeyword();
     if (isSymbol(lastChar))
-      return readSymbol();
+      return readSymbol(true);
     if (lastChar == '\"')
       return readText();
     if (lastChar == '\'')
