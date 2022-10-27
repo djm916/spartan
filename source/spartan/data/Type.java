@@ -14,7 +14,7 @@ public enum Type
   BYTES("type/bytes"),
   LIST("type/list"),
   VECTOR("type/vector"),
-  MAP("type/map"),
+  MAPPING("type/mapping"),
   PRIMITIVE("type/procedure"),
   CLOSURE("type/procedure"),
   MACRO("type/macro"),
@@ -74,7 +74,7 @@ public enum Type
   
   public boolean isCallable()
   {
-    return this == PRIMITIVE || this == CLOSURE || this == MACRO || this == CONTINUE || this == VECTOR || this == MAP;
+    return this == PRIMITIVE || this == CLOSURE || this == MACRO || this == CONTINUE || this == VECTOR || this == MAPPING;
   }
   
   private Type(String name)

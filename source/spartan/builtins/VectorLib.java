@@ -43,7 +43,7 @@ public final class VectorLib
     }
   };
   
-  public static final Primitive REF = new Primitive(2, false) {
+  public static final Primitive GET = new Primitive(2, false) {
     public void apply(VirtualMachine vm) {
       if (vm.peekArg().type() != Type.VECTOR)
         throw new TypeMismatch();

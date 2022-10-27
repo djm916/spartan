@@ -5,7 +5,7 @@ import spartan.builtins.CoreLib;
 import spartan.builtins.MathLib;
 import spartan.builtins.ListLib;
 import spartan.builtins.VectorLib;
-import spartan.builtins.MapLib;
+import spartan.builtins.MappingLib;
 import spartan.builtins.StringLib;
 import spartan.builtins.PortLib;
 import spartan.builtins.BytesLib;
@@ -169,17 +169,24 @@ public final class GlobalEnv
     
     /* Vector procedures */
     
-    bind(Symbol.of("vector/of"), VectorLib.FROM_LIST);
+    bind(Symbol.of("vector"), VectorLib.FROM_LIST);
     bind(Symbol.of("vector/new"), VectorLib.NEW);
     bind(Symbol.of("vector/length"), VectorLib.LENGTH);
     bind(Symbol.of("vector/copy"), VectorLib.COPY);
-    bind(Symbol.of("vector/ref"), VectorLib.REF);
+    bind(Symbol.of("vector/get"), VectorLib.GET);
     bind(Symbol.of("vector/set!"), VectorLib.SET);
     bind(Symbol.of("vector/append!"), VectorLib.APPEND);
     
-    /* Map procedures */
+    /* Mapping procedures */
     
-    bind(Symbol.of("map/of"), MapLib.FROM_LIST);
+    bind(Symbol.of("mapping"), MappingLib.FROM_LIST);
+    bind(Symbol.of("mapping/get"), MappingLib.GET);
+    bind(Symbol.of("mapping/set!"), MappingLib.SET);
+    bind(Symbol.of("mapping/length"), MappingLib.LENGTH);
+    bind(Symbol.of("mapping/keys"), MappingLib.KEYS);
+    bind(Symbol.of("mapping/values"), MappingLib.VALUES);
+    bind(Symbol.of("mapping/entries"), MappingLib.ENTRIES);
+    
     
     /* String procedures */
     

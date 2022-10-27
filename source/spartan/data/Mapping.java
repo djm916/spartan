@@ -1,5 +1,6 @@
 package spartan.data;
 
+import java.util.Map;
 import java.util.HashMap;
 import java.util.stream.Collectors;
 import spartan.errors.InvalidArgument;
@@ -7,14 +8,14 @@ import spartan.errors.WrongNumberArgs;
 import spartan.errors.NoSuchElement;
 import spartan.runtime.VirtualMachine;
 
-public final class Map implements Datum, Callable
+public final class Mapping implements Datum, Callable
 {
-  public static Map fromList(List elems)
+  public static Mapping fromList(List elems)
   {
     int numElems = elems.length();
     if (numElems % 2 != 0)
       throw new WrongNumberArgs();
-    var result = new Map(numElems);
+    var result = new Mapping(numElems);
     for (; !elems.empty(); elems = elems.cdr()) {
       var key = elems.car();
       elems = elems.cdr();
@@ -27,7 +28,7 @@ public final class Map implements Datum, Callable
   @Override
   public Type type()
   {
-    return Type.MAP;
+    return Type.MAPPING;
   }
   
   @Override
@@ -63,17 +64,39 @@ public final class Map implements Datum, Callable
       throw new NoSuchElement();
     return value;
   }
+    
+  public int length()
+  {
+    return map.size();
+  }
   
-  public Map()
+  public List keys()
+  {
+    return List.of(map.keySet());
+  }
+  
+  public List values()
+  {
+    return List.of(map.values());
+  }
+  
+  public List entries()
+  {
+    var builder = new List.Builder();
+    map.entrySet().forEach((e) -> builder.add(List.of(e.getKey(), e.getValue())));
+    return builder.build();
+  }
+  
+  public Mapping()
   {
     this(DEFAULT_CAPACITY);
   }
   
-  public Map(int capacity)
+  public Mapping(int capacity)
   {
     this.map = new HashMap<>(capacity);
   }
   
   private static final int DEFAULT_CAPACITY = 8;
-  private final java.util.Map<Datum, Datum> map;
+  private final Map<Datum, Datum> map;
 }

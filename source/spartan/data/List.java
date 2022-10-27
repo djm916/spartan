@@ -52,6 +52,14 @@ public final class List implements Datum, Iterable<Datum>
     return new Builder().add(elems).build();
   }
   
+  public static List of(Iterable<Datum> elems)
+  {
+    var builder = new List.Builder();
+    for (var elem : elems)
+      builder.add(elem);
+    return builder.build();
+  }
+  
   /**
    * Concatenates the given lists
    *
@@ -270,13 +278,13 @@ public final class List implements Datum, Iterable<Datum>
     
     return x == EMPTY && y == EMPTY;
   }
-    
-  private List(Datum first, List rest)
+  
+  public List(Datum first, List rest)
   {
     this.first = first;
     this.rest = rest;
   }
-    
+  
   private Datum first;
   private List rest;  
 }

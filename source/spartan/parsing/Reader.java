@@ -446,7 +446,7 @@ public class Reader implements AutoCloseable
       skipSpace();
     }
     
-    var result = List.cons(new Symbol("vector/of"), builder.build());
+    var result = List.cons(new Symbol("vector"), builder.build());
     positionMap.put(result, position);
     return result;
   }
@@ -463,7 +463,7 @@ public class Reader implements AutoCloseable
       skipSpace();
     }
 
-    var result = List.cons(new Symbol("map/of"), builder.build());
+    var result = List.cons(new Symbol("mapping"), builder.build());
     positionMap.put(result, position);
     return result;
   }
