@@ -8,7 +8,6 @@ import spartan.errors.LoadError;
 import java.io.FileNotFoundException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.InvalidPathException;
 import java.util.logging.Logger;
 
 /** This class is responsible for locating, reading, and evaluating source code files. */
@@ -36,28 +35,23 @@ public final class Loader
       }
     }
     catch (FileNotFoundException ex) {
-      // cannot occur in this context, as resolvePath will detect this condition
+      throw new LoadError(path.toString()); // No file was found
     }
   }
   
   private static Path resolvePath(Path path)
   {
-    try {      
-      // Absolute path doesn't require search
-      if (path.isAbsolute())
+    // Absolute path doesn't require search of SPARTAN_PATH
+    if (path.isAbsolute())
+      return path;
+    
+    // Search paths in environment variable SPARTAN_PATH
+    for (var searchDir : Config.LOAD_SEARCH_DIRS) {
+      var tryPath = searchDir.resolve(path);
+      if (Config.LOG_DEBUG)
+        log.info(() -> "Searching for \"" + tryPath + "\"");
+      if (Files.exists(path))
         return path;
-      
-      // Search paths in environment variable SPARTAN_PATH
-      for (var searchDir : Config.LOAD_SEARCH_DIRS) {
-        var tryPath = searchDir.resolve(path);
-        if (Config.LOG_DEBUG)
-          log.info(() -> "Attempting to load \"" + path + "\"");
-        if (Files.exists(path))
-          return path;
-      }
-    }
-    catch (InvalidPathException ex) {
-      throw new LoadError(path.toString()); // The given path was invalid
     }
     
     throw new LoadError(path.toString()); // No file was found
