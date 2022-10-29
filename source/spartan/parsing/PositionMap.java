@@ -5,22 +5,40 @@ import java.util.IdentityHashMap;
 import spartan.data.Datum;
 
 /**
-  A source map that provides a source position (filename, line, and column)
-  associated with a given source expression (lists and symbols).
-*/
+ * A mapping of {@code Datum}s to their corresponding source {@code Position}s.
+ * 
+ * Only includes {@code Symbol}s and {@code List} literals returned by {@link Reader#read}.
+ */
 public class PositionMap
-{  
-  public void put(Datum x, Position p)
+{
+  /**
+   * Creates a new, empty instance.
+   */
+  PositionMap()
+  {}
+  
+  /**
+   * Retrieves the source position of the given expression.
+   *
+   * @return the source position of the given expression, or {@code null} if no position is known
+   */
+  public Position get(Datum exp)
   {
-    map.put(x, p);
+    return map.get(exp);
   }
   
-  public Position get(Datum x)
+  /**
+   * Sets the position of the given expression.
+   */
+  void put(Datum exp, Position pos)
   {
-    return map.get(x);
+    map.put(exp, pos);
   }
   
-  public void clear()
+  /**
+   * Removes all entries.
+   */
+  void clear()
   {
     map.clear();
   }

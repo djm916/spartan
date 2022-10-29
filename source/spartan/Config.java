@@ -25,7 +25,7 @@ public final class Config
   
   /** This source file (which is pre-loaded) bootstraps the initial environment with
       a core set of built-in procedures and macros. */
-  public static final String BUILTINS_FILE_PATH = "stdlib/builtins.s";
+  public static final Path BUILTINS_FILE_PATH = Path.of("stdlib/builtins.s");
   
   /** The list of directories to search when loading a file. Populated from the environment variable
       SPARTANPATH. SPARTANPATH must contain a list of directories, separated by a (system-specific) delimiter.

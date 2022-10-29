@@ -54,7 +54,7 @@ public class Main implements Callable<Integer>
       Repl.start(globals);      
     }
     else {      
-      Loader.load(scriptPath, globals);
+      Loader.load(Path.of(scriptPath), globals);
     }
     
     return 0;

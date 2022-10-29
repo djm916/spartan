@@ -9,13 +9,39 @@ import spartan.errors.WrongNumberArgs;
 import spartan.errors.TypeMismatch;
 import spartan.parsing.Position;
 
+/**
+ * Represents state of the virtual machine.
+ */
 public final class VirtualMachine
 {
+  /**
+   * Value of the last evaluated expression.
+   */
   public Datum result;
+  
+  /**
+   * Procedure argument list.
+   */
   public List args = List.EMPTY;
+  
+  /**
+   * The next instruction to evaluate.
+   */
   public Inst control;
+  
+  /**
+   * The local environment.
+   */
   public LocalEnv locals;
+  
+  /**
+   * The global environment.
+   */
   public GlobalEnv globals;
+  
+  /**
+   * The call stack.
+   */
   public Frame frame;
   
   public VirtualMachine(GlobalEnv globals)

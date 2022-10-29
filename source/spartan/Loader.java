@@ -5,7 +5,7 @@ import spartan.compiling.Compiler;
 import spartan.runtime.VirtualMachine;
 import spartan.errors.Error;
 import spartan.errors.LoadError;
-import java.io.IOException;
+import java.io.FileNotFoundException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.InvalidPathException;
@@ -14,24 +14,20 @@ import java.util.logging.Logger;
 /** This class is responsible for locating, reading, and evaluating source code files. */
 public final class Loader
 {
-  public static void load(String fileName, GlobalEnv globals)
-  throws IOException
+  public static void load(Path file, GlobalEnv globals)
   {
-    var path = resolvePath(fileName);
+    var path = resolvePath(file);
     
     if (Config.LOG_DEBUG)
       log.info(() -> "loading \"" + path + "\"");
     
-    try (Reader reader = Reader.forFile(path)) {
+    try (var reader = Reader.forFile(path)) {
       var vm = new VirtualMachine(globals);
       var compiler = new Compiler(vm);
       
       //TODO: Better handling of errors bubbling up from loaded file
       try {
-        while (true) {
-          var exp = reader.read();
-          if (exp == null)
-            return;
+        for (var exp : reader) {
           vm.eval(compiler.compile(exp));
         }
       }
@@ -39,30 +35,32 @@ public final class Loader
         System.err.println(err);
       }
     }
+    catch (FileNotFoundException ex) {
+      // cannot occur in this context, as resolvePath will detect this condition
+    }
   }
   
-  private static String resolvePath(String fileName)
+  private static Path resolvePath(Path path)
   {
-    try {
-      var givenPath = Path.of(fileName);
-      
+    try {      
       // Absolute path doesn't require search
-      if (givenPath.isAbsolute())
-        return givenPath.toString();
+      if (path.isAbsolute())
+        return path;
       
+      // Search paths in environment variable SPARTAN_PATH
       for (var searchDir : Config.LOAD_SEARCH_DIRS) {
-        var tryPath = searchDir.resolve(givenPath);
+        var tryPath = searchDir.resolve(path);
         if (Config.LOG_DEBUG)
-          log.info(() -> "Attempting to load \"" + tryPath + "\"");
-        if (Files.exists(tryPath))
-          return tryPath.toString();
+          log.info(() -> "Attempting to load \"" + path + "\"");
+        if (Files.exists(path))
+          return path;
       }
     }
     catch (InvalidPathException ex) {
-      throw new LoadError(fileName);
+      throw new LoadError(path.toString()); // The given path was invalid
     }
     
-    throw new LoadError(fileName);
+    throw new LoadError(path.toString()); // No file was found
   }
   
   private static final Logger log = Logger.getLogger(Loader.class.getName());

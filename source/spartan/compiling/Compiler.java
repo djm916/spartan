@@ -6,48 +6,60 @@ import spartan.parsing.SourceDatum;
 import spartan.parsing.PositionMap;
 import spartan.parsing.Position;
 import spartan.errors.Error;
-import spartan.errors.MalformedExpression;
+import spartan.errors.SyntaxError;
 import spartan.runtime.VirtualMachine;
 import spartan.Config;
 import java.util.logging.Logger;
 
-/** This class is responsible for compiling source expressions into executable bytecode. */
+/**
+ * Compiles source expressions into executable bytecodes.
+ */
 public class Compiler
 {
-  /** Create a compiler.
-      @param vm A VirtualMachine instance, used for macro expansion during compilation
-      @return A new compiler
-  */
+  /**
+   * @param vm the {@code VirtualMachine} used for macro expansion.
+   */
   public Compiler(VirtualMachine vm)
   {
     this.vm = vm;
   }
   
   /** Compile a source expression.
-      @param sourceExp An expression with source position data, as returned by a Reader
-      @return An instruction graph representing the compiled bytecode, executable by a VirtualMachine
-      @throws MalformedExpression If the given sourceExp is not syntactically valid
-  */
-  public Inst compile(SourceDatum sourceExp)
+   *
+   * @param exp the expression to compile
+   * @return the compiled bytecode (an instruction graph)
+   * @throws SyntaxError if the given exp is not syntactically valid
+   */
+  public Inst compile(SourceDatum exp)
   {
-    positionMap = sourceExp.positionMap();
-    return compile(sourceExp.datum(), Scope.Empty, false, null);
+    positionMap = exp.positionMap();
+    return compile(exp.datum(), Scope.Empty, false, null);
   }
 
-  /* Convienence method for creating instances of MalformedExpression. */
-  
-  private MalformedExpression malformedExp(Datum exp)
+  /** Convenience method for creating instances of SyntaxError for malformed expressions. */
+  private SyntaxError malformedExp(Datum exp)
   {
-    return new MalformedExpression(positionMap.get(exp));
+    return new SyntaxError("malformed expression", positionMap.get(exp));
   }
   
+  /**
+   * Compares a (possible) symbol to another symbol.
+   *
+   * @param maybeSymbol (possibly) a symbol
+   * @param compareTo a symbol
+   * @return {@code true} if maybeSymbol is a symbol and is equal to compareTo
+   */
   private boolean isSymbol(Datum maybeSymbol, Symbol compareTo)
   {
     return maybeSymbol.type() == Type.SYMBOL && ((Symbol)maybeSymbol).eq(compareTo);
   }
   
-  /* Determine if an expression is self-evaluating. */
-  
+  /**
+   * Determines if an expression is self-evaluating.
+   *
+   * @param exp an expression
+   * @return {@code true} if the given expression is self-evaluating
+   */
   private static boolean isSelfEval(Datum exp)
   {
     return exp.type() == Type.INT
@@ -57,7 +69,6 @@ public class Compiler
         || exp.type() == Type.COMPLEX
         || exp.type() == Type.BOOL
         || exp.type() == Type.TEXT
-        //|| exp.type() == Type.KEYWORD
         || exp == List.EMPTY
         || exp == Nil.VALUE;
   }
@@ -69,16 +80,16 @@ public class Compiler
     return new LoadConst(exp, next);
   }
 
-  /* Compile a variable reference.
-     
-     Syntax: an unquoted symbol
-     
-     If the symbol is a bound local variable, look up its DeBruijn index (a 
-     depth, offset pair), and generate a load-local instruction.
-
-     Otherwise, assume the symbol is a global variable, and generate a load-global instruction.
-  */
-
+  /**
+   * Compile a variable reference (local or global).
+   * 
+   * Syntax: an unquoted symbol
+   *  
+   * If the symbol is a bound local variable, look up its DeBruijn index (a 
+   * depth, offset pair), and generate a load-local instruction.
+   *
+   * Otherwise, assume the symbol is a global variable, and generate a load-global instruction.
+   */
   private Inst compileVarRef(Symbol symb, Scope scope, Inst next)
   {
     return scope.lookup(symb)

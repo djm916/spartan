@@ -8,6 +8,7 @@ import spartan.Config;
 import spartan.parsing.Reader;
 import java.util.Map;
 import java.util.EnumMap;
+import java.nio.file.Path;
 
 public final class CoreLib
 {
@@ -358,7 +359,7 @@ public final class CoreLib
       vm.apply(vm.args.length());
     }
   };
-  
+    
   public static final Primitive PRINT = new Primitive(1, true) {
     public void apply(VirtualMachine vm) {
       while (!vm.args.empty())
@@ -407,15 +408,12 @@ public final class CoreLib
     public void apply(VirtualMachine vm) {
       if (vm.peekArg().type() != Type.TEXT)
         throw new TypeMismatch();
-      var fileName = ((Text) vm.popArg()).str();
+      var file = ((Text) vm.popArg()).str();
       
       //TODO: Better handling of errors bubbling up from loaded file
       
       try {
-        spartan.Loader.load(fileName, vm.globals);
-      }
-      catch (java.io.IOException ex) {
-        throw new Error(ex.getMessage());
+        spartan.Loader.load(Path.of(file), vm.globals);
       }
       finally {
         vm.result = Nil.VALUE;

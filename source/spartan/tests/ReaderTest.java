@@ -16,7 +16,7 @@ public class ReaderTest
     try (Reader r = Reader.forString("")) {
       assertNull(r.read());
     }
-    catch (IOException | Error ex) {
+    catch (Error ex) {
       fail(ex.getMessage());
     }
   }
@@ -28,7 +28,7 @@ public class ReaderTest
     try (Reader r = Reader.forString(null)) {
       r.read();
     }
-    catch (IOException | Error ex) {
+    catch (Error ex) {
       fail(ex.getMessage());
     }
   }
@@ -42,7 +42,7 @@ public class ReaderTest
       assertTrue(output.type().isInt());
       assertEquals(output.repr(), "123");
     }
-    catch (IOException | Error ex) {
+    catch (Error ex) {
       fail(ex.getMessage());
     }
   }

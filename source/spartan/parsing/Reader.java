@@ -1,8 +1,11 @@
 package spartan.parsing;
 
 import java.io.*;
+import java.nio.file.Path;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 import spartan.data.*;
-import spartan.errors.Error;
+import spartan.errors.SyntaxError;
 import spartan.Config;
 
 class MutablePosition
@@ -16,24 +19,82 @@ class MutablePosition
   }
 }
 
-public class Reader implements AutoCloseable
+/**
+ * Converts source code text into {@code Datum}s.
+ * 
+ * The input source can be a file, the terminal, or a string.
+ * It provides a stream-like interface via {@link #read}.
+ * Each time {@link #read} is called, the next {@code Datum} will be consumed from the input
+ * and returned, along with source code position data.
+ * When the input source is fully consumed, {@link #read} will return {@code null}.
+ */
+public class Reader implements AutoCloseable, Iterable<SourceDatum>
 {
-  public static Reader forFile(String fileName) throws FileNotFoundException
+  /**
+   * Creates a {@code Reader} whose input source is the file located at the given {@code Path}.
+   *
+   * @param path the full file path
+   * @return a {@code Reader} for the given file
+   * @throws FileNotFoundException if the file doesn't exist
+   */
+  public static Reader forFile(Path path) throws FileNotFoundException
   {
-    return new Reader(fileName, new FileInputStream(fileName));
+    var file = path.toString();
+    return new Reader(file, new FileInputStream(file));
   }
 
+  /**
+   * Creates a {@code Reader} whose input source is the standard input (e.g., {@link System#in}).
+   *
+   * @return a reader for the standard input
+   */
   public static Reader forConsole()
   {
     return new Reader("interactive input", System.in);
   }
 
-  public static Reader forString(String s)
+  /**
+   * Creates a reader whose input source is the given string.
+   *
+   * @return a {@code Reader} for the given {@code String}
+   */
+  public static Reader forString(String str)
   {
-    return new Reader("unknown source", new ByteArrayInputStream(s.getBytes(Config.DEFAULT_ENCODING)));
+    return new Reader("unknown source", new ByteArrayInputStream(str.getBytes(Config.DEFAULT_ENCODING)));
   }
-
-  public SourceDatum read() throws IOException
+  
+  /**
+   * Creates an iterator over this reader.
+   */
+  @Override
+  public Iterator<SourceDatum> iterator()
+  {
+    return new Iterator<>()
+    {
+      private SourceDatum lastRead = null;
+      
+      public boolean hasNext()
+      {
+        lastRead = read();
+        return lastRead != null;
+      }
+      
+      public SourceDatum next()
+      {
+        if (lastRead == null)
+          throw new NoSuchElementException();
+        return lastRead;
+      }
+    };
+  }
+  
+  /**
+   * Reads the next {@code SourceDatum} from the input stream.
+   *
+   * @return the next {@code SourceDatum}, or {@code null} if the input source is exhausted
+   * @throws SyntaxError if the input is syntactially invalid
+   */
+  public SourceDatum read()
   {
     positionMap.clear();
     skipSpace();
@@ -43,9 +104,14 @@ public class Reader implements AutoCloseable
     return new SourceDatum(result, positionMap);
   }
 
-  public void close() throws IOException
+  public void close()
   {
-    input.close();
+    try {
+      input.close();
+    }
+    catch (IOException ex) {
+      throw new UncheckedIOException(ex);
+    }
   }
 
   private Reader(String source, InputStream input)
@@ -107,9 +173,31 @@ public class Reader implements AutoCloseable
     return ch == '.';
   }
   
-  private void getChar() throws IOException
+  // Wrapper over input.read() to convert IOException to UncheckedIOException
+  private int _read()
   {
-    lastChar = input.read();
+    try {
+      return input.read();
+    }
+    catch (IOException ex) {
+      throw new UncheckedIOException(ex);
+    }
+  }
+  
+  // Wrapper over input.unread() to convert IOException to UncheckedIOException
+  private void _unread(int ch)
+  {
+    try {
+      input.unread(ch);
+    }
+    catch (IOException ex) {
+      throw new UncheckedIOException(ex);
+    }
+  }
+  
+  private void getChar()
+  {
+    lastChar = _read();
 
     if (lastChar == -1)
       return;
@@ -123,22 +211,22 @@ public class Reader implements AutoCloseable
     }
   }
 
-  private int peekChar() throws IOException
+  private int peekChar()
   {
-    int ch = input.read();
+    int ch = _read();
     if (ch != -1)
-      input.unread(ch);
+      _unread(ch);
     return ch;
   }
 
-  private void skipComment() throws IOException
+  private void skipComment()
   {
     do {
       getChar();
     } while (lastChar != -1 && lastChar != '\n');
   }
 
-  private void skipSpace() throws IOException
+  private void skipSpace()
   {
     do {
       getChar();
@@ -159,15 +247,23 @@ public class Reader implements AutoCloseable
     return new Position(source, tokenStart.line, tokenStart.column);
   }
   
-  private Error syntaxError(String message)
+  private SyntaxError syntaxError(String message)
   {
     discardRemainingInput();    
-    return new Error(message, getTokenPosition());
+    return new SyntaxError(message, getTokenPosition());
   }
 
-  private Error malformedNumeric()
+  private SyntaxError malformedNumeric()
   {
     return syntaxError("malformed numeric literal");
+  }
+  
+  // Convenience method to map values to source positions.
+  // Takes a value, enters it into the position map, and returns it.
+  private <T extends Datum> T withPosition(T val, Position pos)
+  {
+    positionMap.put(val, pos);
+    return val;
   }
   
   private void discardRemainingInput()
@@ -181,7 +277,7 @@ public class Reader implements AutoCloseable
     }
   }
   
-  private void scanDigits(StringBuilder text) throws IOException
+  private void scanDigits(StringBuilder text)
   {
     if (!isDigit(lastChar))
       throw syntaxError("malformed numeric literal");
@@ -194,7 +290,7 @@ public class Reader implements AutoCloseable
     }
   }
   
-  private void scanFractionAndExponent(StringBuilder text) throws IOException
+  private void scanFractionAndExponent(StringBuilder text)
   {
     // add the "." character
     getChar();
@@ -209,7 +305,7 @@ public class Reader implements AutoCloseable
       scanExponent(text);
   }
   
-  private void scanExponent(StringBuilder text) throws IOException
+  private void scanExponent(StringBuilder text)
   {
     // add the "e" or "E" character
     getChar();
@@ -226,7 +322,7 @@ public class Reader implements AutoCloseable
     scanDigits(text);
   }
     
-  private void scanImaginaryPart(StringBuilder text) throws IOException
+  private void scanImaginaryPart(StringBuilder text)
   {
     // add the sign character
     getChar();
@@ -261,10 +357,11 @@ public class Reader implements AutoCloseable
     
   */
     
-  private Numeric readNumber() throws IOException
+  private Numeric readNumber()
   {
     var text = new StringBuilder();
-
+    var position = getTokenPosition();
+    
     if (isSign(lastChar)) {
       text.append((char)lastChar);
       getChar();
@@ -349,7 +446,7 @@ public class Reader implements AutoCloseable
     }
   }
   
-  private Datum readSymbol(boolean readQualified) throws IOException
+  private Datum readSymbol(boolean readQualified)
   {
     var text = new StringBuilder();
     var position = getTokenPosition();
@@ -361,8 +458,7 @@ public class Reader implements AutoCloseable
       text.append((char)lastChar);
     }
     
-    var symbol = new Symbol(text.toString());
-    positionMap.put(symbol, position);
+    var symbol = withPosition(new Symbol(text.toString()), position);
     
     if (readQualified && peekChar() == '.')
       return readQualifiedSymbol(symbol);
@@ -378,39 +474,24 @@ public class Reader implements AutoCloseable
    * a.b.c => ((a 'b) 'c)
    * a.b.c.d => (((a 'b) 'c) 'd)
    */
-  private List readQualifiedSymbol(Datum seed) throws IOException
-  {    
+  private List readQualifiedSymbol(Datum seed)
+  {
     getChar(); // eat '.'
     getChar();
     if (!isSymbol(lastChar))
       throw syntaxError("malformed qualified symbol");
-    var result = List.of(seed, List.of(Symbol.QUOTE, readSymbol(false)));
-    setTokenPosition();
-    var position = getTokenPosition();
-    positionMap.put(result, position);
+    
+    var result = withPosition(
+      List.of(seed, List.of(Symbol.QUOTE, readSymbol(false))),
+      getTokenPosition());
+    
     if (peekChar() == '.')
       return readQualifiedSymbol(result);
     else
       return result;
   }
   
-  /*
-  private Keyword readKeyword() throws IOException
-  {
-    var text = new StringBuilder();
-    
-    text.append((char)lastChar);
-
-    while (isSymbol(peekChar())) {
-      getChar();
-      text.append((char)lastChar);
-    }
-    
-    return Keyword.of(text.toString());
-  }
-  */
-  
-  private Text readText() throws IOException
+  private Text readText()
   {
     var text = new StringBuilder();
 
@@ -445,7 +526,7 @@ public class Reader implements AutoCloseable
     };
   }
   
-  private List readList() throws IOException
+  private List readList()
   {
     var builder = new List.Builder();
     var position = getTokenPosition();
@@ -457,12 +538,10 @@ public class Reader implements AutoCloseable
       skipSpace();
     }
 
-    var result = builder.build();
-    positionMap.put(result, position);
-    return result;
+    return withPosition(builder.build(), position);
   }
 
-  private List readVector() throws IOException
+  private List readVector()
   {
     var builder = new List.Builder();
     var position = getTokenPosition();
@@ -474,12 +553,10 @@ public class Reader implements AutoCloseable
       skipSpace();
     }
     
-    var result = List.cons(new Symbol("vector"), builder.build());
-    positionMap.put(result, position);
-    return result;
+    return withPosition(List.cons(new Symbol("vector"), builder.build()), position);
   }
   
-  private List readMap() throws IOException
+  private List readMap()
   {
     var builder = new List.Builder();
     var position = getTokenPosition();
@@ -491,37 +568,35 @@ public class Reader implements AutoCloseable
       skipSpace();
     }
 
-    var result = List.cons(new Symbol("mapping"), builder.build());
-    positionMap.put(result, position);
-    return result;
+    return withPosition(List.cons(new Symbol("mapping"), builder.build()), position);
   }
   
-  private List readQuote() throws IOException
+  private List readQuote()
   {
     skipSpace();
     return List.of(Symbol.QUOTE, readDatum());
   }
   
-  private List readUnquote() throws IOException
+  private List readUnquote()
   {
     skipSpace();
     return List.of(Symbol.UNQUOTE, readDatum());
   }
 
-  private List readUnquoteSplicing() throws IOException
+  private List readUnquoteSplicing()
   {
     getChar();
     skipSpace();
     return List.of(Symbol.UNQUOTE_SPLICING, readDatum());
   }
 
-  private List readQuasiQuote() throws IOException
+  private List readQuasiQuote()
   {
     skipSpace();
     return List.of(Symbol.QUASIQUOTE, readDatum());
   }
   
-  private Datum readDatum() throws IOException
+  private Datum readDatum()
   {
     setTokenPosition();
 
@@ -537,8 +612,6 @@ public class Reader implements AutoCloseable
       return readNumber();
     if (isDigit(lastChar))
       return readNumber();
-    //if (lastChar == ':')
-      //return readKeyword();
     if (isSymbol(lastChar))
       return readSymbol(true);
     if (lastChar == '\"')

@@ -6,8 +6,9 @@ public final class Branch extends Inst
 {  
   public Branch(Inst ifTrue, Inst ifFalse)
   {
-    super(ifFalse);
+    super(null);
     this.ifTrue = ifTrue;
+    this.ifFalse = ifFalse;
   }
   
   public void eval(VirtualMachine vm)
@@ -15,8 +16,9 @@ public final class Branch extends Inst
     if (CoreLib.truth(vm.result))
       vm.control = ifTrue;
     else
-      vm.control = next;
+      vm.control = ifFalse;
   }
 
   private final Inst ifTrue;
+  private final Inst ifFalse;
 }

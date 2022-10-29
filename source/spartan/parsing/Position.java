@@ -1,9 +1,8 @@
 package spartan.parsing;
 
 /**
-  Records the position (input source, line, and column number)
-  of expressions returned by the reader.
-*/
+ * Records a source code position (input source, line, and column number).
+ */
 public record Position(String source, int line, int column)
 {
   public String toString()
