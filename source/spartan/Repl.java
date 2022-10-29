@@ -4,13 +4,11 @@ import spartan.parsing.Reader;
 import spartan.compiling.Compiler;
 import spartan.runtime.VirtualMachine;
 import spartan.errors.Error;
-import java.io.IOException;
 
 /** This class implements the interactive REPL (Read, Eval, Print Loop) */
 public final class Repl
 {
   public static void start(GlobalEnv globals)
-  throws IOException
   {
     System.out.println(INTRO_MESSAGE);
     

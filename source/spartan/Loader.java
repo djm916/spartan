@@ -8,11 +8,49 @@ import spartan.errors.LoadError;
 import java.io.FileNotFoundException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.InvalidPathException;
 import java.util.logging.Logger;
 
-/** This class is responsible for locating, reading, and evaluating source code files. */
+/**
+ * Loads source files.
+ *
+ * Loading a file includes locating, reading, and evaluating source code files.
+ * Files are evaluated using a new virtual machine, distinct from the calling
+ * virtual machine.
+ * Definitions in the loaded file will be stored in the given global environment.
+ * Normally, the global environment should be shared between virtual machine
+ * instances.
+ */
 public final class Loader
 {
+  /**
+   * Loads the given file.
+   *
+   * This method should be used when the file is not known to be a valid path.
+   *
+   * @param file the file to load
+   * @param globals the global environment
+   * @throws LoadError if the file cannot be located or does not constitute a valid path
+   */
+  public static void load(String file, GlobalEnv globals)
+  {
+    try {
+      load(Path.of(file), globals);
+    }
+    catch (InvalidPathException ex) {
+      throw new LoadError(file); // Path is invalid
+    }
+  }
+  
+  /**
+   * Loads the given file.
+   *
+   * This method should be used when the file is known to be a valid path.
+   *
+   * @param file the file to load
+   * @param globals the global environment
+   * @throws LoadError if the file cannot be located
+   */
   public static void load(Path file, GlobalEnv globals)
   {
     var path = resolvePath(file);

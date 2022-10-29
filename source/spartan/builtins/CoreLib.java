@@ -6,9 +6,6 @@ import spartan.errors.TypeMismatch;
 import spartan.runtime.VirtualMachine;
 import spartan.Config;
 import spartan.parsing.Reader;
-import java.util.Map;
-import java.util.EnumMap;
-import java.nio.file.Path;
 
 public final class CoreLib
 {
@@ -413,7 +410,7 @@ public final class CoreLib
       //TODO: Better handling of errors bubbling up from loaded file
       
       try {
-        spartan.Loader.load(Path.of(file), vm.globals);
+        spartan.Loader.load(file, vm.globals);
       }
       finally {
         vm.result = Nil.VALUE;
