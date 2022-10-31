@@ -64,7 +64,10 @@ public final class Loader
       
       //TODO: Better handling of errors bubbling up from loaded file
       try {
-        for (var exp : reader) {
+        while (true) {
+          var exp = reader.read();
+          if (exp == null)
+            break;
           vm.eval(compiler.compile(exp));
         }
       }

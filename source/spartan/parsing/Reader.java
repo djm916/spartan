@@ -2,8 +2,6 @@ package spartan.parsing;
 
 import java.io.*;
 import java.nio.file.Path;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
 import spartan.data.*;
 import spartan.errors.SyntaxError;
 import spartan.Config;
@@ -28,7 +26,7 @@ class MutablePosition
  * and returned, along with source code position data.
  * When the input source is fully consumed, {@link #read} will return {@code null}.
  */
-public class Reader implements AutoCloseable, Iterable<SourceDatum>
+public class Reader implements AutoCloseable
 {
   /**
    * Creates a {@code Reader} whose input source is the file located at the given {@code Path}.
@@ -62,32 +60,7 @@ public class Reader implements AutoCloseable, Iterable<SourceDatum>
   {
     return new Reader("unknown source", new ByteArrayInputStream(str.getBytes(Config.DEFAULT_ENCODING)));
   }
-  
-  /**
-   * Creates an iterator over this reader.
-   */
-  @Override
-  public Iterator<SourceDatum> iterator()
-  {
-    return new Iterator<>()
-    {
-      private SourceDatum lastRead = null;
-      
-      public boolean hasNext()
-      {
-        lastRead = read();
-        return lastRead != null;
-      }
-      
-      public SourceDatum next()
-      {
-        if (lastRead == null)
-          throw new NoSuchElementException();
-        return lastRead;
-      }
-    };
-  }
-  
+    
   /**
    * Reads the next {@code SourceDatum} from the input stream.
    *

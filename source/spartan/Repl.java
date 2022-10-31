@@ -16,8 +16,11 @@ public final class Repl
       var vm = new VirtualMachine(globals);
       var compiler = new Compiler(vm);
             
-      for (var exp : reader) {
-        try {          
+      while (true) {
+        try {
+          var exp = reader.read();
+          if (exp == null)
+            break;
           var result = vm.eval(compiler.compile(exp));
           System.out.println(result.repr());
         }
