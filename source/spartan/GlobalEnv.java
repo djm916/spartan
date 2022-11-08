@@ -138,9 +138,7 @@ public final class GlobalEnv
     bind(Symbol.of("ratio"), MathLib.MAKE_RATIO);
     bind(Symbol.of("numerator"), MathLib.NUMERATOR);
     bind(Symbol.of("denominator"), MathLib.DENOMINATOR);
-    bind(Symbol.of("inc!"), MathLib.INC);
-    bind(Symbol.of("dec!"), MathLib.DEC);
-    
+        
     /* Conversion procedures */
     
     bind(Symbol.of("string->symbol"), CoreLib.TEXT_TO_SYMBOL);

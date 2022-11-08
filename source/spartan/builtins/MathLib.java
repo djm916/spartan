@@ -789,22 +789,4 @@ public final class MathLib
       vm.popFrame();
     }
   };
-  
-  public static final Primitive INC = new Primitive(1, false) {
-    public void apply(VirtualMachine vm) {
-      if (!vm.peekArg().type().isInt())
-        throw new TypeMismatch();
-      vm.result = add(vm.popArg(), new Int(1));
-      vm.popFrame();
-    }
-  };
-  
-  public static final Primitive DEC = new Primitive(1, false) {
-    public void apply(VirtualMachine vm) {
-      if (!vm.peekArg().type().isInt())
-        throw new TypeMismatch();
-      vm.result = add(vm.popArg(), new Int(-1));
-      vm.popFrame();
-    }
-  };
 }

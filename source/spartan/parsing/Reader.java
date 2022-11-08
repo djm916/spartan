@@ -71,10 +71,9 @@ public class Reader implements AutoCloseable
   {
     positionMap.clear();
     skipSpace();
-    var result = readDatum();
-    if (result == null)
+    if (lastChar == -1)
       return null;
-    return new SourceDatum(result, positionMap);
+    return new SourceDatum(readDatum(), positionMap);
   }
 
   public void close()
@@ -219,7 +218,7 @@ public class Reader implements AutoCloseable
   {
     return new Position(source, tokenStart.line, tokenStart.column);
   }
-  
+    
   private SyntaxError syntaxError(String message)
   {
     discardRemainingInput();    
@@ -229,6 +228,11 @@ public class Reader implements AutoCloseable
   private SyntaxError malformedNumeric()
   {
     return syntaxError("malformed numeric literal");
+  }
+  
+  private SyntaxError unexpectedEOF()
+  {
+    return syntaxError("unexpected end of input");
   }
   
   // Convenience method to map values to source positions.
@@ -499,49 +503,39 @@ public class Reader implements AutoCloseable
     };
   }
   
-  private List readList()
+  private List readDatums(char delimiter)
   {
     var builder = new List.Builder();
-    var position = getTokenPosition();
 
     skipSpace();
 
-    while (lastChar != -1 && lastChar != ')') {
+    while (lastChar != -1 && lastChar != delimiter) {
       builder.add(readDatum());
       skipSpace();
     }
-
-    return withPosition(builder.build(), position);
+    
+    if (lastChar != delimiter)
+      throw unexpectedEOF();
+    
+    return builder.build();
+  }
+  
+  private List readList()
+  {
+    var position = getTokenPosition();
+    return withPosition(readDatums(')'), position);
   }
 
   private List readVector()
   {
-    var builder = new List.Builder();
     var position = getTokenPosition();
-    
-    skipSpace();
-
-    while (lastChar != -1 && lastChar != ']') {
-      builder.add(readDatum());
-      skipSpace();
-    }
-    
-    return withPosition(List.cons(new Symbol("vector"), builder.build()), position);
+    return withPosition(List.cons(new Symbol("vector"), readDatums(']')), position);
   }
   
   private List readMap()
   {
-    var builder = new List.Builder();
     var position = getTokenPosition();
-    
-    skipSpace();
-
-    while (lastChar != -1 && lastChar != '}') {
-      builder.add(readDatum());
-      skipSpace();
-    }
-
-    return withPosition(List.cons(new Symbol("mapping"), builder.build()), position);
+    return withPosition(List.cons(new Symbol("mapping"), readDatums('}')), position);
   }
   
   private List readQuote()
@@ -569,12 +563,18 @@ public class Reader implements AutoCloseable
     return List.of(Symbol.QUASIQUOTE, readDatum());
   }
   
+  /**
+   * Reads a single {@code Datum} from the input stream.
+   *
+   * @return The next {@code Datum}
+   * @throws SyntaxError if the input is syntactially invalid or the input stream is exhausted
+   */
   private Datum readDatum()
   {
     setTokenPosition();
 
     if (lastChar == -1)
-      return null;
+      throw unexpectedEOF();
     if (lastChar == '(')
       return readList();
     if (lastChar == '[')
