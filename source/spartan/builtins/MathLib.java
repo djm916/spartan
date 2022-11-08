@@ -364,8 +364,6 @@ public final class MathLib
   public static Datum floor(Datum x)
   {
     return switch (x.type()) {
-      case INT     -> ((Int)x).floor();
-      case BIGINT  -> ((BigInt)x).floor();
       case RATIO   -> ((Ratio)x).floor();
       case REAL    -> ((Real)x).floor();
       default      -> throw new TypeMismatch();
@@ -382,8 +380,6 @@ public final class MathLib
   public static Datum ceiling(Datum x)
   {
     return switch (x.type()) {
-      case INT     -> ((Int)x).ceiling();
-      case BIGINT  -> ((BigInt)x).ceiling();
       case RATIO   -> ((Ratio)x).ceiling();
       case REAL    -> ((Real)x).ceiling();
       default      -> throw new TypeMismatch();
@@ -400,8 +396,6 @@ public final class MathLib
   public static Datum round(Datum x)
   {
     return switch (x.type()) {
-      case INT     -> ((Int)x).round();
-      case BIGINT  -> ((BigInt)x).round();
       case RATIO   -> ((Ratio)x).round();
       case REAL    -> ((Real)x).round();
       default      -> throw new TypeMismatch();
@@ -414,25 +408,7 @@ public final class MathLib
       vm.popFrame();
     }
   };
-  
-  public static Datum truncate(Datum x)
-  {
-    return switch (x.type()) {
-      case INT     -> ((Int)x).truncate();
-      case BIGINT  -> ((BigInt)x).truncate();
-      case RATIO   -> ((Ratio)x).truncate();
-      case REAL    -> ((Real)x).truncate();
-      default      -> throw new TypeMismatch();
-    };
-  }
-  
-  public static final Primitive TRUNCATE = new Primitive(1, false) {
-    public void apply(VirtualMachine vm) {
-      vm.result = truncate(vm.popArg());
-      vm.popFrame();
-    }
-  };
-  
+    
   public static Datum exp(Datum x, Datum y)
   {
     switch (x.type()) {
@@ -810,6 +786,24 @@ public final class MathLib
       if (vm.peekArg().type() != Type.RATIO)
         throw new TypeMismatch();
       vm.result = ((Ratio)vm.popArg()).denominator();
+      vm.popFrame();
+    }
+  };
+  
+  public static final Primitive INC = new Primitive(1, false) {
+    public void apply(VirtualMachine vm) {
+      if (!vm.peekArg().type().isInt())
+        throw new TypeMismatch();
+      vm.result = add(vm.popArg(), new Int(1));
+      vm.popFrame();
+    }
+  };
+  
+  public static final Primitive DEC = new Primitive(1, false) {
+    public void apply(VirtualMachine vm) {
+      if (!vm.peekArg().type().isInt())
+        throw new TypeMismatch();
+      vm.result = add(vm.popArg(), new Int(-1));
       vm.popFrame();
     }
   };

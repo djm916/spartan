@@ -7,7 +7,7 @@ import java.util.Optional;
 /** This class implements a lexical environment for local variables. */
 class Scope
 {
-  static final Scope Empty = new Scope(null);
+  static final Scope EMPTY = new Scope(null);
  
   /** Create a new empty, scope that extends this. */
   Scope extend()

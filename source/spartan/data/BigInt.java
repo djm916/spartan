@@ -80,80 +80,60 @@ public final class BigInt implements Datum, Integral
   {
     return new BigInt(value.abs());
   }
-  
-  public BigInt floor()
+    
+  public BigInt add(BigInt that)
   {
-    return this;
+    return new BigInt(this.value.add(that.value));
   }
   
-  public BigInt ceiling()
+  public BigInt sub(BigInt that)
   {
-    return this;
+    return new BigInt(this.value.subtract(that.value));
   }
   
-  public BigInt truncate()
+  public BigInt mul(BigInt that)
   {
-    return this;
-  }
-  
-  public BigInt round()
-  {
-    return this;
-  }
-  
-  public BigInt add(BigInt other)
-  {
-    return new BigInt(this.value.add(other.value));
-  }
-  
-  public BigInt sub(BigInt other)
-  {
-    return new BigInt(this.value.subtract(other.value));
-  }
-  
-  public BigInt mul(BigInt other)
-  {
-    return new BigInt(this.value.multiply(other.value));
+    return new BigInt(this.value.multiply(that.value));
   }
     
-  public Ratio div(BigInt other)
+  public Ratio div(BigInt that)
   {
     try {
-      return new Ratio(this.value, other.value);
+      return new Ratio(this.value, that.value);
     }
     catch (ArithmeticException ex) {
       throw new DivisionByZero();
     }
   }
   
-  public BigInt quotient(BigInt other)
+  public BigInt quotient(BigInt that)
   {
     try {
-      return new BigInt(this.value.divide(other.value));
+      return new BigInt(this.value.divide(that.value));
     }
     catch (ArithmeticException ex) {
       throw new DivisionByZero();
     }
   }
   
-  public BigInt remainder(BigInt other)
+  public BigInt remainder(BigInt that)
   {
     try {
-      return new BigInt(this.value.remainder(other.value));
+      return new BigInt(this.value.remainder(that.value));
     }
     catch (ArithmeticException ex) {
       throw new DivisionByZero();
     }
   }
   
-  public boolean eq(BigInt other)
+  public boolean eq(BigInt that)
   {
-    return this.value.equals(other.value);
+    return this.value.equals(that.value);
   }
   
-  public int compare(BigInt other)
+  public int compare(BigInt that)
   {
-    return this.value.compareTo(other.value);
+    return this.value.compareTo(that.value);
   }
   
   public final BigInteger value;

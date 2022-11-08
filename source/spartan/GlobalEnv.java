@@ -89,7 +89,6 @@ public final class GlobalEnv
     /* Type predicates */
     
     bind(Symbol.of("nil?"), CoreLib.IS_NIL);
-    bind(Symbol.of("empty?"), CoreLib.IS_EMPTY_LIST);
     bind(Symbol.of("boolean?"), CoreLib.IS_BOOL);
     bind(Symbol.of("integer?"), CoreLib.IS_INT);
     bind(Symbol.of("real?"), CoreLib.IS_REAL);
@@ -98,8 +97,9 @@ public final class GlobalEnv
     bind(Symbol.of("symbol?"), CoreLib.IS_SYMBOL);
     bind(Symbol.of("text?"), CoreLib.IS_TEXT);
     //bind(Symbol.of("bytes?"), CoreLib.IsBytes);
-    //bind(Symbol.of("list?"), CoreLib.IsList);
-    //bind(Symbol.of("vector?"), CoreLib.IsVector);
+    bind(Symbol.of("empty?"), CoreLib.IS_EMPTY_LIST);
+    bind(Symbol.of("list?"), CoreLib.IS_LIST);
+    bind(Symbol.of("vector?"), CoreLib.IS_VECTOR);
     bind(Symbol.of("callable?"), CoreLib.IS_CALLABLE);
     
     /* Math constants & procedures */
@@ -119,7 +119,6 @@ public final class GlobalEnv
     bind(Symbol.of("floor"), MathLib.FLOOR);
     bind(Symbol.of("ceiling"), MathLib.CEILING);
     bind(Symbol.of("round"), MathLib.ROUND);
-    bind(Symbol.of("truncate"), MathLib.TRUNCATE);
     bind(Symbol.of("quotient"), MathLib.QUOTIENT);
     bind(Symbol.of("remainder"), MathLib.REMAINDER);
     bind(Symbol.of("exp"), MathLib.EXP);
@@ -139,6 +138,8 @@ public final class GlobalEnv
     bind(Symbol.of("ratio"), MathLib.MAKE_RATIO);
     bind(Symbol.of("numerator"), MathLib.NUMERATOR);
     bind(Symbol.of("denominator"), MathLib.DENOMINATOR);
+    bind(Symbol.of("inc!"), MathLib.INC);
+    bind(Symbol.of("dec!"), MathLib.DEC);
     
     /* Conversion procedures */
     

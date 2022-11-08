@@ -12,7 +12,7 @@ public final class Int implements Datum, Integral
   
   public Int(String value)
   {
-    this.value = Integer.parseInt(value);
+    this(Integer.parseInt(value));
   }
   
   @Override
@@ -71,7 +71,7 @@ public final class Int implements Datum, Integral
       return new Int(Math.negateExact(value));
     }
     catch (ArithmeticException ex) {
-      return new BigInt(this.value).neg();
+      return toBigInt().neg();
     }
   }
   
@@ -81,99 +81,72 @@ public final class Int implements Datum, Integral
       return new Int(Math.absExact(value));
     }
     catch (ArithmeticException ex) {
-      return new BigInt(this.value).abs();
+      return toBigInt().abs();
     }
   }
   
-  public Int floor()
-  {
-    return this;
-  }
-  
-  public Int ceiling()
-  {
-    return this;
-  }
-  
-  public Int truncate()
-  {
-    return this;
-  }
-  
-  public Int round()
-  {
-    return this;
-  }
-  
-  public Integral add(Int other)
+  public Integral add(Int that)
   {
     try {
-      return new Int(Math.addExact(this.value, other.value));
+      return new Int(Math.addExact(this.value, that.value));
     }
     catch (ArithmeticException ex) {
-      return new BigInt(this.value).add(new BigInt(other.value));
+      return this.toBigInt().add(that.toBigInt());
     }
   }
   
-  public Integral sub(Int other)
+  public Integral sub(Int that)
   {
     try {
-      return new Int(Math.subtractExact(this.value, other.value));
+      return new Int(Math.subtractExact(this.value, that.value));
     }
     catch (ArithmeticException ex) {
-      return new BigInt(this.value).sub(new BigInt(other.value));
+      return this.toBigInt().sub(that.toBigInt());
     }
   }
   
-  public Integral mul(Int other)
+  public Integral mul(Int that)
   {
     try {
-      return new Int(Math.multiplyExact(this.value, other.value));
+      return new Int(Math.multiplyExact(this.value, that.value));
     }
     catch (ArithmeticException ex) {
-      return new BigInt(this.value).mul(new BigInt(other.value));
+      return this.toBigInt().mul(that.toBigInt());
     }
   }
   
-  /*
-  public Real div(Int other)
+  public Ratio div(Int that)
   {
-    return new Real((double)this.value / (double)other.value);
-  }
-  */
-  public Ratio div(Int other)
-  {
-    return new Ratio(this.value, other.value);
+    return new Ratio(this.value, that.value);
   }
   
-  public Int quotient(Int other)
+  public Integral quotient(Int that)
+  {
+    if (that.value == 0)
+      throw new DivisionByZero();
+    if (this.value == Integer.MIN_VALUE && that.value == -1)
+      return this.toBigInt().quotient(that.toBigInt());
+    return new Int(this.value / that.value);
+  }
+  
+  public Int remainder(Int that)
   {
     try {
-      return new Int(this.value / other.value);
+      return new Int(this.value % that.value);
     }
     catch (ArithmeticException ex) {
       throw new DivisionByZero();
     }
   }
   
-  public Int remainder(Int other)
+  public boolean eq(Int that)
   {
-    try {
-      return new Int(this.value % other.value);
-    }
-    catch (ArithmeticException ex) {
-      throw new DivisionByZero();
-    }
+    return this.value == that.value;
   }
   
-  public boolean eq(Int other)
+  public int compare(Int that)
   {
-    return this.value == other.value;
-  }
-  
-  public int compare(Int other)
-  {
-    return Integer.compare(this.value, other.value);
+    return Integer.compare(this.value, that.value);
   }
   
   public final int value;

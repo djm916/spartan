@@ -516,13 +516,6 @@ public final class CoreLib
     }
   };
   
-  public static final Primitive IS_EMPTY_LIST = new Primitive(1, false) {
-    public void apply(VirtualMachine vm) {
-      vm.result = truth(vm.popArg() == List.EMPTY);
-      vm.popFrame();
-    }
-  };
-  
   public static final Primitive IS_BOOL = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
       vm.result = truth(vm.popArg().type().isBool());
@@ -575,6 +568,27 @@ public final class CoreLib
   public static final Primitive IS_CALLABLE = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
       vm.result = truth(vm.popArg().type().isCallable());
+      vm.popFrame();
+    }
+  };
+  
+  public static final Primitive IS_VECTOR = new Primitive(1, false) {
+    public void apply(VirtualMachine vm) {
+      vm.result = truth(vm.popArg().type().isVector());
+      vm.popFrame();
+    }
+  };
+  
+  public static final Primitive IS_LIST = new Primitive(1, false) {
+    public void apply(VirtualMachine vm) {
+      vm.result = truth(vm.popArg().type().isList());
+      vm.popFrame();
+    }
+  };
+  
+  public static final Primitive IS_EMPTY_LIST = new Primitive(1, false) {
+    public void apply(VirtualMachine vm) {
+      vm.result = truth(vm.popArg() == List.EMPTY);
       vm.popFrame();
     }
   };

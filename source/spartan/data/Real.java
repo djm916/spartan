@@ -1,5 +1,7 @@
 package spartan.data;
 
+import spartan.errors.IntegerOverflow;
+
 public final class Real implements Datum, Numeric
 {
   public static final Real PI = new Real(Math.PI);
@@ -27,11 +29,19 @@ public final class Real implements Datum, Numeric
   {
     if (value == Double.POSITIVE_INFINITY)
       return "+inf";
-    if (value == Double.NEGATIVE_INFINITY)
+    else if (value == Double.NEGATIVE_INFINITY)
       return "-inf";
-    if (value == Double.NaN)
+    else if (value == Double.NaN)
       return "NaN";
-    return Double.toString(value);
+    else
+      return Double.toString(value);
+  }
+  
+  public Int toInt()
+  {
+    if (value < Integer.MIN_VALUE || value > Integer.MAX_VALUE)
+      throw new IntegerOverflow();
+    return new Int((int)value);
   }
   
   public Complex toComplex()
@@ -49,26 +59,21 @@ public final class Real implements Datum, Numeric
     return new Real(Math.abs(value));
   }
   
-  public Int floor()
+  public Real floor()
   {
-    return new Int((int) Math.floor(value));
+    return new Real(Math.floor(value));
   }
   
-  public Int ceiling()
+  public Real ceiling()
   {
-    return new Int((int) Math.ceil(value));
+    return new Real(Math.ceil(value));
   }
   
-  public Int round()
+  public Real round()
   {
-    return new Int((int) Math.round(value));
+    return new Real(Math.round(value));
   }
-  
-  public Int truncate()
-  {
-    return new Int((int) value);
-  }
-  
+    
   public Real exp(Real that)
   {
     return new Real(Math.pow(this.value, that.value));
@@ -111,34 +116,34 @@ public final class Real implements Datum, Numeric
     return new Real(Math.atan(value));
   }
   
-  public Real add(Real other)
+  public Real add(Real that)
   {
-    return new Real(this.value + other.value);
+    return new Real(this.value + that.value);
   }
   
-  public Real sub(Real other)
+  public Real sub(Real that)
   {
-    return new Real(this.value - other.value);
+    return new Real(this.value - that.value);
   }
   
-  public Real mul(Real other)
+  public Real mul(Real that)
   {
-    return new Real(this.value * other.value);
+    return new Real(this.value * that.value);
   }
   
-  public Real div(Real other)
+  public Real div(Real that)
   {
-    return new Real(this.value / other.value);
+    return new Real(this.value / that.value);
   }
     
-  public boolean eq(Real other)
+  public boolean eq(Real that)
   {
-    return this.value == other.value;
+    return this.value == that.value;
   }
   
-  public int compare(Real other)
+  public int compare(Real that)
   {
-    return Double.compare(this.value, other.value);
+    return Double.compare(this.value, that.value);
   }
   
   public final double value;

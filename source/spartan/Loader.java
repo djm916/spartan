@@ -90,7 +90,7 @@ public final class Loader
     for (var searchDir : Config.LOAD_SEARCH_DIRS) {
       var tryPath = searchDir.resolve(path);
       if (Config.LOG_DEBUG)
-        log.info(() -> "Searching for \"" + tryPath + "\"");
+        log.info(() -> String.format("trying %s", tryPath));
       if (Files.exists(path))
         return path;
     }

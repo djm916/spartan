@@ -67,7 +67,7 @@ public final class Ratio implements Datum, Numeric
   {
     return numer.doubleValue() / denom.doubleValue();
   }
-
+  
   public Real toReal()
   {
     return new Real(approx());

@@ -33,7 +33,7 @@ public class Compiler
   public Inst compile(SourceDatum exp)
   {
     positionMap = exp.positionMap();
-    return compile(exp.datum(), Scope.Empty, false, null);
+    return compile(exp.datum(), Scope.EMPTY, false, null);
   }
 
   /** Convenience method for creating instances of SyntaxError for malformed expressions. */
@@ -1125,7 +1125,7 @@ public class Compiler
     if (!checkParamListForm(params))
       throw malformedExp(exp);
     
-    vm.globals.bind(symb.intern(), new Macro(makeProcedure(params, body, Scope.Empty)));
+    vm.globals.bind(symb.intern(), new Macro(makeProcedure(params, body, Scope.EMPTY)));
     return new LoadConst(Nil.VALUE, next);
   }
   

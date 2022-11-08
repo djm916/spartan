@@ -76,6 +76,16 @@ public enum Type
   {
     return this == PRIMITIVE || this == CLOSURE || this == MACRO || this == CONTINUE || this == VECTOR || this == MAPPING;
   }
+    
+  public boolean isList()
+  {
+    return this == LIST;
+  }
+  
+  public boolean isVector()
+  {
+    return this == VECTOR;
+  }
   
   private Type(String name)
   {

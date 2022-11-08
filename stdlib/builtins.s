@@ -80,3 +80,9 @@
       (unless (contains? filename *files-loaded*)
         (set! *files-loaded* (cons filename *files-loaded*))
         (load filename)))))
+
+(defmacro inc! (var)
+  `(set! ,var (+ 1 ,var)))
+
+(defmacro dec! (var)
+  `(set! ,var (- ,var 1)))
