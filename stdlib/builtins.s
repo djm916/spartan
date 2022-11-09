@@ -4,13 +4,15 @@
 ; This file is pre-loaded when the interpreter starts and
 ; itself loads several other files.
 
-(load "stdlib/lists.s")
-(load "stdlib/vectors.s")
-(load "stdlib/streams.s")
-(load "stdlib/defstruct.s")
-
 (defun even? (x) (= 0 (remainder x 2)))
+
 (defun odd?  (x) (not (even? x)))
+
+(defmacro inc! (var)
+  `(set! ,var (+ 1 ,var)))
+
+(defmacro dec! (var)
+  `(set! ,var (- ,var 1)))
 
 (defmacro when (test & body)
   `(if ,test
@@ -81,8 +83,7 @@
         (set! *files-loaded* (cons filename *files-loaded*))
         (load filename)))))
 
-(defmacro inc! (var)
-  `(set! ,var (+ 1 ,var)))
-
-(defmacro dec! (var)
-  `(set! ,var (- ,var 1)))
+(load "stdlib/lists.s")
+(load "stdlib/vectors.s")
+(load "stdlib/defstruct.s")
+(load "stdlib/streams.s")

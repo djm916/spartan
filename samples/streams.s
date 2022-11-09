@@ -1,4 +1,4 @@
-; Examples of stream usage
+; Example of stream usage
 
 (require "stdlib/streams.s")
 
