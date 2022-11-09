@@ -15,7 +15,7 @@ public final class Repl
     try (Reader reader = Reader.forConsole()) {
       var vm = new VirtualMachine(globals);
       var compiler = new Compiler(vm);
-            
+      
       while (true) {
         try {
           var exp = reader.read();

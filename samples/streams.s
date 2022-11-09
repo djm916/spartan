@@ -10,7 +10,7 @@
         (set! from (+ 1 from))
         next))))
 
-(def nats (stream/new (int-range 1 10)))
+(def nats (stream (int-range 1 10)))
 
 (def squares (stream/map (fun (x) (* x x)) nats))
 

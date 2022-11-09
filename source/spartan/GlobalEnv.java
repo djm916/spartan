@@ -169,7 +169,7 @@ public final class GlobalEnv
     /* Vector procedures */
     
     bind(Symbol.of("vector"), VectorLib.FROM_LIST);
-    bind(Symbol.of("vector/new"), VectorLib.NEW);
+    bind(Symbol.of("vector/fill"), VectorLib.FILL);
     bind(Symbol.of("vector/length"), VectorLib.LENGTH);
     bind(Symbol.of("vector/copy"), VectorLib.COPY);
     bind(Symbol.of("vector/get"), VectorLib.GET);

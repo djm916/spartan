@@ -1,8 +1,7 @@
 
-; Demonstration of the famous Sieve of Eratosthenes algorithm, using streams.
+; Demonstration of the Sieve of Eratosthenes using streams.
 ;
-; We define "primes" as an infinite stream of prime numbers, and display the
-; first N prime numbers.
+; We define an infinite stream of prime numbers, and display the first N prime numbers.
 
 (require "stdlib/streams.s")
 
@@ -19,15 +18,15 @@
 ; Generate the primes using the Sieve of Eratosthenes algorithm
 (defun make-prime-generator ()
   ; Begin with the stream of all natural numbers from 2 (as 0 and 1 are not prime)
-  (def nats (stream/new (make-int-generator 2)))
+  (def nats (stream (make-int-generator 2)))
   (fun ()
     (let ((next-prime (stream/car nats))) ; The first value is a prime
       ; Filter out all the rest of the numbers that are a multiple of this prime
       (set! nats (stream/filter (not-factor? next-prime) nats))
       next-prime)))
 
-(def primes (stream/new (make-prime-generator)))
-(def N 1000)
+(def primes (stream (make-prime-generator)))
+(def N 10)
 
 (print-line "The first " N " primes are:")
 

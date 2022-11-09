@@ -23,13 +23,13 @@ public final class VectorLib
     }
   };
   
-  public static final Primitive NEW = new Primitive(2, false) {
+  public static final Primitive FILL = new Primitive(2, false) {
     public void apply(VirtualMachine vm) {
       if (!vm.peekArg().type().isInt())
         throw new TypeMismatch();
       var length = ((Integral) vm.popArg()).intValue();
       var init = vm.popArg();
-      vm.result = Vector.create(length, init);
+      vm.result = new Vector(length, init);
       vm.popFrame();
     }
   };

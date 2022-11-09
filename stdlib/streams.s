@@ -24,11 +24,11 @@
 ; gen   A generator procedure that produces succesive stream values
 ;       each time it is called.
 
-(defun stream/new (gen)
+(defun stream (gen)
   (delay
     (let ((next (gen)))
       (if (nil? next) ()
-        (list next (stream/new gen))))))
+        (list next (stream gen))))))
 
 ; Return the next element of a stream
 
@@ -48,7 +48,7 @@
       (let ((next (f (stream/car s))))
         (set! s (stream/cdr s))
         next)))
-  (stream/new gen))
+  (stream gen))
 
 (defun stream/for-each (f s)
   (cond ((stream/empty? s) nil)
@@ -63,7 +63,7 @@
         (if (f next)
           next
           (gen)))))
-  (stream/new gen))
+  (stream gen))
 
 (defun stream/take (n s)
   (defun gen ()
@@ -72,7 +72,7 @@
         (set! s (stream/cdr s))
         (set! n (- n 1))
         next)))
-  (stream/new gen))
+  (stream gen))
 
 (defun stream/reduce (f i s)
   (if (stream/empty? s) i
@@ -90,4 +90,4 @@
         (set! s (stream/cdr s))
         (set! i (+ 1 i))
         next)))
-  (stream/new gen))
+  (stream gen))

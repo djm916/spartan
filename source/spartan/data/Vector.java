@@ -17,20 +17,19 @@ public final class Vector implements Datum, Callable
       result.append(elems.car());
     return result;
   }
-  
-  public static Vector create(int length, Datum init)
-  {
-    var result = new Vector(length);
-    for (int i = 0; i < length; ++i)
-      result.append(init);
-    return result;
-  }
-  
+    
   public Vector(int initialCapacity)
   {
     elems = new ArrayList<>(initialCapacity);
   }
   
+  public Vector(int length, Datum init)
+  {
+    this(length);
+    for (int i = 0; i < length; ++i)
+      elems.add(init);
+  }
+
   public Vector()
   {
     this(DEFAULT_INITIAL_CAPACITY);
@@ -102,6 +101,12 @@ public final class Vector implements Datum, Callable
     elems.add(x);
   }
   
+  public void fill(Datum x)
+  {
+    for (int i = 0; i < elems.size(); ++i)
+      elems.set(i, x);
+  }
+
   public boolean eq(Vector other, BiPredicate<Datum, Datum> eq)
   {
     if (this.length() != other.length())
