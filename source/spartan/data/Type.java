@@ -44,22 +44,22 @@ public enum Type
   
   public boolean isRatio()
   {
-    return this == RATIO;
+    return isInt() || this == RATIO;
   }
   
   public boolean isReal()
   {
-    return this == REAL;
+    return isRatio() || this == REAL;
   }
   
   public boolean isComplex()
   {
-    return this == COMPLEX;
+    return isReal() || this == COMPLEX;
   }
   
   public boolean isNumber()
   {
-    return this == INT || this == BIGINT || this == RATIO || this == REAL || this == COMPLEX;
+    return isComplex();
   }
   
   public boolean isSymbol()
