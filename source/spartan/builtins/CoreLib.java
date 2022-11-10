@@ -396,7 +396,12 @@ public final class CoreLib
   
   public static final Primitive TYPE = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
-      vm.result = vm.popArg().type().toSymbol();
+      var value = vm.popArg();
+      var type = value.type();
+      if (type == Type.WRAPPED)
+        vm.result = ((Wrapped)value).tag();
+      else
+        vm.result = type.toSymbol();
       vm.popFrame();
     }
   };
@@ -629,6 +634,26 @@ public final class CoreLib
   public static final Primitive MIN = new Primitive(1, true) {
     public void apply(VirtualMachine vm) {
       vm.result = min(vm.popRestArgs());
+      vm.popFrame();
+    }
+  };
+  
+  public static final Primitive WRAP_TYPE = new Primitive(2, false) {
+    public void apply(VirtualMachine vm) {
+      if (!vm.peekArg().type().isSymbol())
+        throw new TypeMismatch();
+      var type = (Symbol) vm.popArg();
+      var value = vm.popArg();
+      vm.result = new Wrapped(type, value);
+      vm.popFrame();
+    }
+  };
+  
+  public static final Primitive UNWRAP_TYPE = new Primitive(1, false) {
+    public void apply(VirtualMachine vm) {
+      if (vm.peekArg().type() != Type.WRAPPED)
+        throw new TypeMismatch();      
+      vm.result = ((Wrapped) vm.popArg()).value();
       vm.popFrame();
     }
   };

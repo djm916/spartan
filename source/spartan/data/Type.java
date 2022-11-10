@@ -19,7 +19,8 @@ public enum Type
   CLOSURE("type/procedure"),
   MACRO("type/macro"),
   CONTINUE("type/continuation"),
-  PORT("type/port");
+  PORT("type/port"),
+  WRAPPED(null);
   
   public Symbol toSymbol()
   {
