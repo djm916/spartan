@@ -1,14 +1,19 @@
 package spartan.data;
 
-import java.util.stream.Stream;
-import java.util.stream.Collectors;
 import java.util.function.BiPredicate;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.NoSuchElementException;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+import java.util.stream.Collectors;
 import spartan.errors.IndexOutOfBounds;
 import spartan.errors.InvalidArgument;
 import spartan.runtime.VirtualMachine;
 
-public final class Vector implements Datum, Callable
+public final class Vector implements Datum, Callable, Iterable<Datum>
 {
   public static Vector fromList(List elems)
   {
@@ -119,7 +124,24 @@ public final class Vector implements Datum, Callable
     
     return true;
   }
-    
+  
+  @Override // Iterable
+  public Iterator<Datum> iterator()
+  {
+    return elems.iterator();
+  }
+  
+  @Override // Iterable
+  public Spliterator<Datum> spliterator()
+  {
+    return Spliterators.spliteratorUnknownSize(iterator(), Spliterator.ORDERED | Spliterator.NONNULL);
+  }
+  
+  public Stream<Datum> stream()
+  {
+    return StreamSupport.stream(spliterator(), false);
+  }
+  
   private static final int DEFAULT_INITIAL_CAPACITY = 8;
   private final ArrayList<Datum> elems;
 }

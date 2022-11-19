@@ -279,7 +279,7 @@ public final class List implements Datum, Iterable<Datum>
     return x == EMPTY && y == EMPTY;
   }
   
-  public List(Datum first, List rest)
+  private List(Datum first, List rest)
   {
     this.first = first;
     this.rest = rest;
