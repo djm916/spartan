@@ -32,6 +32,7 @@
     true
     `(if (not ,(car xs)) false (all? ,@(cdr xs)))))
 
+(print-line "(any?) = " (any?))
 (print-line "(any? false) = " (any? false))
 (print-line "(any? true) = " (any? true))
 (print-line "(any? false true) = " (any? false true))
@@ -39,6 +40,7 @@
 (print-line "(any? false false) = " (any? false false))
 (print-line "(any? true true) = " (any? true true))
 
+(print-line "(all?) = " (all?))
 (print-line "(all? false) = " (all? false))
 (print-line "(all? true) = " (all? true))
 (print-line "(all? false true) = " (all? false true))

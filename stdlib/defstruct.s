@@ -54,7 +54,7 @@
 
 (defun generate-constructor (name fields)
   `(defun ,name ,fields
-     (vector ,name ,@fields)))
+     (vector ',name ,@fields)))
 
 (defun generate-accessor (name)
   (fun (field index)

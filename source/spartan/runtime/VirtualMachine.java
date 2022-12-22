@@ -20,7 +20,7 @@ public final class VirtualMachine
   public Datum result;
   
   /**
-   * Procedure argument list.
+   * List of procedure arguments.
    */
   public List args = List.EMPTY;
   

@@ -5,15 +5,35 @@ import java.util.function.BiPredicate;
 import java.util.Iterator;
 import java.util.Spliterator;
 import java.util.Spliterators;
-import java.util.NoSuchElementException;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import java.util.stream.Collectors;
 import spartan.errors.TypeMismatch;
+import spartan.errors.NoSuchElement;
 
-public final class List implements Datum, Iterable<Datum>
+public class List implements Datum, Iterable<Datum>
 {
-  public static final List EMPTY = new List(null, null);
+  public static final List EMPTY = new List(null, null) {
+    public boolean empty() {
+      return true;
+    }
+
+    public Datum car() {
+      throw new NoSuchElement();
+    }
+
+    public void setCar(Datum x) {
+      throw new NoSuchElement();
+    }
+
+    public List cdr() {
+      throw new NoSuchElement();
+    }
+
+    public void setCdr(List x) {
+      throw new NoSuchElement();
+    }
+  };
   
   public static class Builder
   {
@@ -63,7 +83,7 @@ public final class List implements Datum, Iterable<Datum>
   /**
    * Concatenates the given lists
    *
-   * This is a not a member function in order to avoid a "Shlemiel The Painter" algorithm.
+   * This is a not a member function in order to avoid a "Shlemiel The Painter" O(N^2) algorithm.
    */
   public static List concat(List lists)
   {
@@ -93,7 +113,7 @@ public final class List implements Datum, Iterable<Datum>
   
   public boolean empty()
   {
-    return this == EMPTY;
+    return false;
   }
   
   public Datum car()
@@ -118,33 +138,33 @@ public final class List implements Datum, Iterable<Datum>
   
   public Datum cadr()
   {
-    return rest.first;
+    return cdr().car();
   }
   
   public Datum caddr()
   {
-    return rest.rest.first;
+    return cdr().cdr().car();
   }
   
   public Datum cadddr()
   {
-    return rest.rest.rest.first;
+    return cdr().cdr().cdr().car();
   }
   
   public List cddr()
   {
-    return rest.rest;
+    return cdr().cdr();
   }
   
   public List cdddr()
   {
-    return rest.rest.rest;
+    return cdr().cdr().cdr();
   }
   
   public int length()
   {
     int length = 0;
-    for (var list = this; list != EMPTY; list = list.rest)
+    for (var list = this; !list.empty(); list = list.cdr())
       ++length;
     return length;
   }
@@ -152,9 +172,9 @@ public final class List implements Datum, Iterable<Datum>
   public Datum at(int index)
   {
     var list = this;
-    while (index-- > 0)
-      list = list.rest;
-    return list.first;
+    for (; !list.empty() && index > 0; --index, list = list.cdr())
+      ;
+    return list.car();
   }
   
   public boolean eq(List other, BiPredicate<Datum, Datum> eq)
@@ -195,15 +215,13 @@ public final class List implements Datum, Iterable<Datum>
       
       @Override
       public boolean hasNext() {
-        return cur != EMPTY;
+        return !cur.empty();
       }
       
       @Override
       public Datum next() {
-        if (cur == EMPTY)
-          throw new NoSuchElementException();
-        var val = cur.first;
-        cur = cur.rest;
+        var val = cur.car();
+        cur = cur.cdr();
         return val;
       }
     };
@@ -220,43 +238,49 @@ public final class List implements Datum, Iterable<Datum>
     return StreamSupport.stream(spliterator(), false);
   }
   
-  private static List append(List x, Datum y)
+  private static List append(List list, Datum x)
   {
     var result = new Builder();
-    for (; x != EMPTY; x = x.rest)
-      result.add(x.first);
-    result.add(y);
+    for (; !list.empty(); list = list.cdr())
+      result.add(list.car());
+    result.add(x);
     return result.build();
   }
   
-  private static List reverse(List x)
+  private static List reverse(List list)
   {
     var result = List.EMPTY;
-    for (; x != EMPTY; x = x.rest)
-      result = cons(x.car(), result);
+    for (; !list.empty(); list = list.cdr())
+      result = cons(list.car(), result);
     return result;
   }
   
-  private static List remove(List self, Predicate<Datum> pred)
+  private static List remove(List list, Predicate<Datum> pred)
   {
     var result = new Builder();
-    for (; self != EMPTY; self = self.rest)
-      if (!pred.test(self.first))
-        result.add(self.first);
+    for (; !list.empty(); list = list.cdr())
+      if (!pred.test(list.car()))
+        result.add(list.car());
     return result.build();
   }
   
   private static List removeInplace(List list, Predicate<Datum> pred)
   {
-    List prev = null;
-    List cur = list;
-    for (; cur != EMPTY; prev = cur, cur = cur.cdr()) {
-      if (pred.test(cur.first)) {
-        if (prev == null)
-          list = list.rest;
-        else
-          prev.rest = cur.rest;
-        break;
+    var cur = list;
+    // Remove leading elements
+    while (cur != EMPTY && pred.test(cur.first))
+      list = cur = cur.rest;
+    if (cur == EMPTY)
+      return EMPTY;
+    var prev = cur;
+    cur = cur.rest;
+    while (cur != EMPTY) {
+      if (pred.test(cur.first))
+        cur = cur.rest;
+      else {
+        prev.rest = cur;
+        prev = cur;
+        cur = cur.rest;
       }
     }
     return list;

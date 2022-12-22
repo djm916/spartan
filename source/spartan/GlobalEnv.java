@@ -174,7 +174,7 @@ public final class GlobalEnv
     bind(Symbol.of("vector/fill"), VectorLib.FILL);
     bind(Symbol.of("vector/length"), VectorLib.LENGTH);
     bind(Symbol.of("vector/copy"), VectorLib.COPY);
-    bind(Symbol.of("vector/get"), VectorLib.GET);
+    bind(Symbol.of("vector/ref"), VectorLib.REF);
     bind(Symbol.of("vector/set!"), VectorLib.SET);
     bind(Symbol.of("vector/append!"), VectorLib.APPEND);
     

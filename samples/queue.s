@@ -3,34 +3,37 @@
 
 (require "stdlib/defstruct.s")
 
-(defstruct queue (front back))
+(defstruct __queue-impl (front back))
 
-(defun queue/new ()
-  (make-queue () ()))
+(defun queue ()
+  (__queue-impl () ()))
 
-(defun queue/empty? (q)
-  (and (empty? (queue-front q)) 
-       (empty? (queue-back q))))
+(defun queue? (self)
+  __queue-impl?)
 
-(defun queue/push (q x)
-  (let ((node (cons x ())))
-    (cond ((queue/empty? q)
-             (set-queue-front! q node)
-             (set-queue-back! q node))
+(defun queue/empty? (self)
+  (and (empty? (__queue-impl/front self)) 
+       (empty? (__queue-impl/back self))))
+
+(defun queue/push (self item)
+  (let ((node (cons item ())))
+    (cond ((queue/empty? self)
+             (__queue-impl/set-front! self node)
+             (__queue-impl/set-back! self node))
           (else
-             (set-cdr! (queue-back q) node)
-             (set-queue-back! q node)))))
+             (set-cdr! (__queue-impl/back self) node)
+             (__queue-impl/set-back! self node)))))
 
-(defun queue/pop (q)
-  (cond ((queue/empty? q) nil)
+(defun queue/pop (self)
+  (cond ((queue/empty? self) nil)
         (else
-          (let ((node (queue-front q)))
-            (set-queue-front! q (cdr node))
-            (if (empty? (queue-front q))
-              (set-queue-back! q ()))
+          (let ((node (__queue-impl/front self)))
+            (__queue-impl/set-front! self (cdr node))
+            (if (empty? (__queue-impl/front self))
+              (__queue-impl/set-back! self ()))
             (car node)))))
 
-(def q (queue/new))
+(def q (queue))
 (queue/push q 1)
 (queue/push q 2)
 (queue/push q 3)

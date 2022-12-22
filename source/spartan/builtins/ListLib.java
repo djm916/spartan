@@ -63,7 +63,9 @@ public final class ListLib
     
   public static final Primitive CAR = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
-      vm.result = car(vm.popArg());
+      if (vm.peekArg().type() != Type.LIST)
+        throw new TypeMismatch();
+      vm.result = ((List)vm.popArg()).car();
       vm.popFrame();
     }
   };

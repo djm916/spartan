@@ -7,8 +7,12 @@ import java.util.Optional;
 /** This class implements a lexical environment for local variables. */
 class Scope
 {
-  static final Scope EMPTY = new Scope(null);
- 
+  static final Scope EMPTY = new Scope(null) {
+    protected DeBruijnIndex lookup(Symbol name, int depth) {
+      return null;
+    }
+  };
+  
   /** Create a new empty, scope that extends this. */
   Scope extend()
   {
@@ -39,15 +43,13 @@ class Scope
     return Optional.ofNullable(lookup(name, 0));
   }
   
-  private DeBruijnIndex lookup(Symbol name, int depth)
+  protected DeBruijnIndex lookup(Symbol name, int depth)
   {
     int offset = vars.indexOf(s -> ((Symbol)s).eq(name));
     if (offset >= 0)
       return new DeBruijnIndex(depth, offset);
-    else if (parent != null)
-      return parent.lookup(name, depth + 1);
     else
-      return null;
+      return parent.lookup(name, depth + 1);
   }  
 
   private Scope(Scope parent)

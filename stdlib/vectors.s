@@ -92,5 +92,5 @@
         (set! k (+ 1 k)))))
       
    (let* ((n (length v))
-          (temp (vector/new n nil)))
+          (temp (vector/fill n nil)))
      (sort v 0 n temp)))

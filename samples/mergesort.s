@@ -2,7 +2,7 @@
 (require "stdlib/vectors.s")
 
 (defun create-random-vector (n)
-  (let ((v (vector/new n 0.0))
+  (let ((v (vector/fill n 0.0))
         (i 0))
     (while (< i n)
       (vector/set! v i (rand))
