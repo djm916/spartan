@@ -40,19 +40,7 @@ public class Compiler
   private SyntaxError malformedExp(Datum exp)
   {
     return new SyntaxError("malformed expression", positionMap.get(exp));
-  }
-  
-  /**
-   * Compares a (possible) symbol to another symbol.
-   *
-   * @param maybeSymbol (possibly) a symbol
-   * @param compareTo a symbol
-   * @return {@code true} if maybeSymbol is a symbol and is equal to compareTo
-   */
-  private boolean isSymbol(Datum maybeSymbol, Symbol compareTo)
-  {
-    return maybeSymbol.type() == Type.SYMBOL && ((Symbol)maybeSymbol).eq(compareTo);
-  }
+  }  
   
   /**
    * Determines if an expression is self-evaluating.
@@ -277,7 +265,7 @@ public class Compiler
     var test = clause.car();
     var body = clause.cdr();
 
-    if (isSymbol(test, Symbol.ELSE))
+    if (test.type().isSymbol() && ((Symbol)test).isEqual(Symbol.ELSE))
       return compileSequence(body, scope, tail, next);
 
     return compile(test, scope, false,
@@ -582,7 +570,7 @@ public class Compiler
       if (params.car().type() != Type.SYMBOL)
         return false;
       // The symbol & appearing in the parameter list must occur immediately before the final parameter
-      if (isSymbol(params.car(), Symbol.AMPERSAND) && (params.cdr() == List.EMPTY || params.cddr() != List.EMPTY))
+      if (((Symbol)params.car()).isEqual(Symbol.AMPERSAND) && (params.cdr() == List.EMPTY || params.cddr() != List.EMPTY))
         return false;
     }
     return true;
@@ -597,7 +585,7 @@ public class Compiler
       if (clause.length() < 2)
         return false;
       // The symbol "else" must occur in the final clause
-      if (isSymbol(clause.car(), Symbol.ELSE) && clauses.cdr() != List.EMPTY)
+      if (clause.car().type().isSymbol() && ((Symbol)clause.car()).isEqual(Symbol.ELSE) && clauses.cdr() != List.EMPTY)
         return false;
     }
     return true;
@@ -816,7 +804,7 @@ public class Compiler
 
     while (body != List.EMPTY && isInnerDef(body.car())) {
       var exp = (List) body.car();
-      if (isSymbol(exp.car(), Symbol.DEFUN))
+      if (exp.car().type().isSymbol() && ((Symbol)exp.car()).isEqual(Symbol.DEFUN))
         exp = transformDefun(exp);
       bindings.add(exp.cdr());
       body = body.cdr();
@@ -833,7 +821,7 @@ public class Compiler
     if (exp.type() != Type.LIST || exp == List.EMPTY)
       return false;
     var car = ((List)exp).car();
-    return isSymbol(car, Symbol.DEF) || isSymbol(car, Symbol.DEFUN);
+    return car.type().isSymbol() && (((Symbol)car).isEqual(Symbol.DEF) || ((Symbol)car).isEqual(Symbol.DEFUN));
   }
 
   /* Compiles the "or" special form, a logical disjunction.
@@ -1035,11 +1023,11 @@ public class Compiler
   private Procedure makeProcedure(List params, List body, Scope scope)
   {
     var numParams = params.length();
-    var isVariadic = numParams > 1 && isSymbol(params.at(numParams - 2), Symbol.AMPERSAND);
+    var isVariadic = numParams > 1 && Symbol.AMPERSAND.isEqual(params.at(numParams - 2));
     var requiredArgs = isVariadic ? numParams - 2 : numParams;
     
     if (isVariadic)
-      params = params.remove(x -> isSymbol(x, Symbol.AMPERSAND));
+      params = params.remove(x -> Symbol.AMPERSAND.isEqual(x));
     
     var extendedScope = scope.extend(params);
     
@@ -1181,43 +1169,43 @@ public class Compiler
   
   private Inst compileList(List exp, Scope scope, boolean tail, Inst next)
   {
-    if (exp.car().type() == Type.SYMBOL) {
+    if (exp.car().type().isSymbol()) {
       var car = (Symbol) exp.car();
-      if (car.eq(Symbol.IF))
+      if (car.isEqual(Symbol.IF))
         return compileIf(exp, scope, tail, next);
-      if (car.eq(Symbol.LET))
+      if (car.isEqual(Symbol.LET))
         return compileLet(exp, scope, tail, next);
-      if (car.eq(Symbol.LETSTAR))
+      if (car.isEqual(Symbol.LETSTAR))
         return compileLetStar(exp, scope, tail, next);
-      if (car.eq(Symbol.LETREC))
+      if (car.isEqual(Symbol.LETREC))
         return compileLetRec(exp, scope, tail, next);
-      if (car.eq(Symbol.DO))
+      if (car.isEqual(Symbol.DO))
         return compileDo(exp, scope, tail, next);
-      if (car.eq(Symbol.DEF))
+      if (car.isEqual(Symbol.DEF))
         return compileDef(exp, scope, next);
-      if (car.eq(Symbol.DEFUN))
+      if (car.isEqual(Symbol.DEFUN))
         return compileDefun(exp, scope, next);
-      if (car.eq(Symbol.DEFMACRO))
+      if (car.isEqual(Symbol.DEFMACRO))
         return compileDefMacro(exp, scope, next);
-      if (car.eq(Symbol.FUN))
+      if (car.isEqual(Symbol.FUN))
         return compileFun(exp, scope, next);
-      if (car.eq(Symbol.QUOTE))
+      if (car.isEqual(Symbol.QUOTE))
         return compileQuote(exp, next);
-      if (car.eq(Symbol.QUASIQUOTE))
+      if (car.isEqual(Symbol.QUASIQUOTE))
         return compileQuasiquote(exp, scope, next);
-      if (car.eq(Symbol.OR))
+      if (car.isEqual(Symbol.OR))
         return compileOr(exp, scope, tail, next);
-      if (car.eq(Symbol.AND))
+      if (car.isEqual(Symbol.AND))
         return compileAnd(exp, scope, tail, next);
-      if (car.eq(Symbol.COND))
+      if (car.isEqual(Symbol.COND))
         return compileCond(exp, scope, tail, next);      
-      if (car.eq(Symbol.SET))
+      if (car.isEqual(Symbol.SET))
         return compileSet(exp, scope, next);
-      if (car.eq(Symbol.WHILE))
+      if (car.isEqual(Symbol.WHILE))
         return compileWhile(exp, scope, tail, next);
-      if (car.eq(Symbol.FOR))
+      if (car.isEqual(Symbol.FOR))
         return compileForLoop(exp, scope, tail, next);
-      if (car.eq(Symbol.CALL_CC))
+      if (car.isEqual(Symbol.CALL_CC))
         return compileCallCC(exp, scope, tail, next);
       if (isMacro(car))
         return compileApplyMacro(exp, scope, tail, next);

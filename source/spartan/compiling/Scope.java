@@ -8,6 +8,7 @@ import java.util.Optional;
 class Scope
 {
   static final Scope EMPTY = new Scope(null) {
+    @Override
     protected DeBruijnIndex lookup(Symbol name, int depth) {
       return null;
     }
@@ -45,7 +46,7 @@ class Scope
   
   protected DeBruijnIndex lookup(Symbol name, int depth)
   {
-    int offset = vars.indexOf(s -> ((Symbol)s).eq(name));
+    int offset = vars.indexOf(s -> name.isEqual(s));
     if (offset >= 0)
       return new DeBruijnIndex(depth, offset);
     else

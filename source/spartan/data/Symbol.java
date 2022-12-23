@@ -6,8 +6,12 @@ import java.lang.ref.WeakReference;
 import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
 
-public final class Symbol implements Datum
+public final class Symbol implements Datum, IEq<Symbol>   
 {
+  private static WeakCache<String, Symbol> cache = new WeakCache<>();
+  private static int nextUniqueId;
+  private final String id;
+
   public static final Symbol DEF = new Symbol("def");
   public static final Symbol DEFUN = new Symbol("defun");
   public static final Symbol DEFMACRO = new Symbol("defmacro");
@@ -59,10 +63,17 @@ public final class Symbol implements Datum
     return id;
   }
   
-  public boolean eq(Symbol that)
+  @Override // IEq
+  public boolean isEqual(Symbol that)
   {
     return this.id.equals(that.id);
-  }  
+  }
+  
+  @Override // IEq
+  public boolean isEqual(Datum that)
+  {
+    return that.type().isSymbol() && isEqual((Symbol)that);
+  }
   
   /**
    * Create a new, uninterned symbol for the given identifier
@@ -79,8 +90,4 @@ public final class Symbol implements Datum
   {
     return cache.get(this.id, () -> this);
   }
-
-  private static WeakCache<String, Symbol> cache = new WeakCache<>();
-  private static int nextUniqueId;
-  private final String id;
 }

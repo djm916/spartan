@@ -32,7 +32,7 @@ public final class CoreLib
   };
 
   public static boolean eq(Datum x, Datum y)
-  {
+  {    
     switch (x.type()) {
       case INT: {
         switch (y.type()) {
@@ -437,7 +437,7 @@ public final class CoreLib
     public void apply(VirtualMachine vm) {
       if (vm.peekArg().type() != Type.TEXT)
         throw new TypeMismatch();
-      vm.result = new Symbol(((Text)vm.popArg()).str());
+      vm.result = new Symbol(((Text)vm.popArg()).str()).intern();
       vm.popFrame();
     }
   };

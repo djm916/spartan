@@ -9,7 +9,7 @@
   (__queue-impl () ()))
 
 (defun queue? (self)
-  __queue-impl?)
+  (__queue-impl? self))
 
 (defun queue/empty? (self)
   (and (empty? (__queue-impl/front self)) 
@@ -34,6 +34,7 @@
             (car node)))))
 
 (def q (queue))
+(print-line "is queue? " (queue? q))
 (queue/push q 1)
 (queue/push q 2)
 (queue/push q 3)
