@@ -68,13 +68,7 @@ public final class Symbol implements Datum, IEq<Symbol>
   {
     return this.id.equals(that.id);
   }
-  
-  @Override // IEq
-  public boolean isEqual(Datum that)
-  {
-    return that.type().isSymbol() && isEqual((Symbol)that);
-  }
-  
+    
   /**
    * Create a new, uninterned symbol for the given identifier
    */

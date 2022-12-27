@@ -1,7 +1,7 @@
 package spartan.data;
 
 import java.util.function.Predicate;
-import java.util.function.BiPredicate;
+//import java.util.function.BiPredicate;
 import java.util.Iterator;
 import java.util.Spliterator;
 import java.util.Spliterators;
@@ -10,8 +10,9 @@ import java.util.stream.StreamSupport;
 import java.util.stream.Collectors;
 import spartan.errors.TypeMismatch;
 import spartan.errors.NoSuchElement;
+import spartan.builtins.Core;
 
-public class List implements Datum, Iterable<Datum>
+public class List implements Datum, IEq<List>, ISize, Iterable<Datum>
 {
   public static final List EMPTY = new List(null, null) {
     public boolean empty() {
@@ -161,6 +162,7 @@ public class List implements Datum, Iterable<Datum>
     return cdr().cdr().cdr();
   }
   
+  @Override // ISize
   public int length()
   {
     int length = 0;
@@ -177,9 +179,10 @@ public class List implements Datum, Iterable<Datum>
     return list.car();
   }
   
-  public boolean eq(List other, BiPredicate<Datum, Datum> eq)
+  @Override // IEq
+  public boolean isEqual(List other)
   {
-    return eq(this, other, eq);
+    return isEqual(this, other);
   }
     
   public List append(Datum x)
@@ -294,10 +297,10 @@ public class List implements Datum, Iterable<Datum>
     return -1;
   }
   
-  private static boolean eq(List x, List y, BiPredicate<Datum, Datum> eq)
+  private static boolean isEqual(List x, List y)
   {
     for (; x != EMPTY && y != EMPTY; x = x.rest, y = y.rest)
-      if (!eq.test(x.first, y.first))
+      if (! Core.isEqual(x.first, y.first))
         return false;
     
     return x == EMPTY && y == EMPTY;

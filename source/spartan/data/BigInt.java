@@ -4,7 +4,7 @@ import java.math.BigInteger;
 import spartan.errors.DivisionByZero;
 import spartan.errors.IntegerOverflow;
 
-public final class BigInt implements Datum, Integral
+public final class BigInt implements Datum, Integral, IEq<BigInt>, IOrd<BigInt>
 {
   public BigInt(long value)
   {
@@ -21,19 +21,19 @@ public final class BigInt implements Datum, Integral
     this(new BigInteger(value));
   }
   
-  @Override
+  @Override // Datum
   public Type type()
   {
     return Type.BIGINT;
   }
   
-  @Override
+  @Override // Datum
   public String repr()
   {
     return value.toString();
   }
   
-  @Override
+  @Override // Integral
   public int intValue()
   {
     try {
@@ -44,16 +44,28 @@ public final class BigInt implements Datum, Integral
     }
   }
   
-  @Override
+  @Override // Object
   public boolean equals(Object other)
   {
     return (other instanceof BigInt that) && this.value.equals(that.value);
   }
   
-  @Override
+  @Override // Object
   public int hashCode()
   {
     return value.hashCode();
+  }
+  
+  @Override // IEq
+  public boolean isEqual(BigInt that)
+  {
+    return this.value.equals(that.value);
+  }
+  
+  @Override // IOrd
+  public int compareTo(BigInt that)
+  {
+    return this.value.compareTo(that.value);
   }
   
   public Ratio toRatio()
@@ -124,16 +136,6 @@ public final class BigInt implements Datum, Integral
     catch (ArithmeticException ex) {
       throw new DivisionByZero();
     }
-  }
-  
-  public boolean eq(BigInt that)
-  {
-    return this.value.equals(that.value);
-  }
-  
-  public int compare(BigInt that)
-  {
-    return this.value.compareTo(that.value);
   }
   
   public final BigInteger value;

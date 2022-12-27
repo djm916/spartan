@@ -121,6 +121,7 @@ public final class GlobalEnv
     bind(Symbol.of("floor"), MathLib.FLOOR);
     bind(Symbol.of("ceiling"), MathLib.CEILING);
     bind(Symbol.of("round"), MathLib.ROUND);
+    //bind(Symbol.of("truncate"), MathLib.TRUNC);
     bind(Symbol.of("quotient"), MathLib.QUOTIENT);
     bind(Symbol.of("remainder"), MathLib.REMAINDER);
     bind(Symbol.of("exp"), MathLib.EXP);
@@ -133,13 +134,13 @@ public final class GlobalEnv
     bind(Symbol.of("atan"), MathLib.ATAN);    
     bind(Symbol.of("rand"), MathLib.RAND);
     bind(Symbol.of("complex"), MathLib.MAKE_COMPLEX);
-    bind(Symbol.of("real-part"), MathLib.REAL_PART);
-    bind(Symbol.of("imag-part"), MathLib.IMAG_PART);
+    bind(Symbol.of("real"), MathLib.REAL_PART);
+    bind(Symbol.of("imag"), MathLib.IMAG_PART);
     bind(Symbol.of("rect->polar"), MathLib.RECT_TO_POLAR);
     bind(Symbol.of("polar->rect"), MathLib.POLAR_TO_RECT);
     bind(Symbol.of("ratio"), MathLib.MAKE_RATIO);
-    bind(Symbol.of("numerator"), MathLib.NUMERATOR);
-    bind(Symbol.of("denominator"), MathLib.DENOMINATOR);
+    bind(Symbol.of("numer"), MathLib.NUMERATOR);
+    bind(Symbol.of("denom"), MathLib.DENOMINATOR);
         
     /* Conversion procedures */
     

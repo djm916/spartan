@@ -46,7 +46,7 @@ class Scope
   
   protected DeBruijnIndex lookup(Symbol name, int depth)
   {
-    int offset = vars.indexOf(s -> name.isEqual(s));
+    int offset = vars.indexOf(s -> name.isEqual((Symbol)s));
     if (offset >= 0)
       return new DeBruijnIndex(depth, offset);
     else

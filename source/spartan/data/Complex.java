@@ -1,6 +1,6 @@
 package spartan.data;
 
-public final class Complex implements Datum, Numeric
+public final class Complex implements Datum, Numeric, IEq<Complex>
 {
   public static final Complex I = new Complex(0.0, 1.0);
   
@@ -71,7 +71,8 @@ public final class Complex implements Datum, Numeric
     return new Real(Math.hypot(real, imag));
   }
   
-  public boolean eq(Complex that)
+  @Override // IEq
+  public boolean isEqual(Complex that)
   {
     return this.real == that.real && this.imag == that.imag;
   }

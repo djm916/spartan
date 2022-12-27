@@ -1,6 +1,6 @@
 package spartan.data;
 
-import java.util.function.BiPredicate;
+//import java.util.function.BiPredicate;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Spliterator;
@@ -12,8 +12,9 @@ import java.util.stream.Collectors;
 import spartan.errors.IndexOutOfBounds;
 import spartan.errors.InvalidArgument;
 import spartan.runtime.VirtualMachine;
+import spartan.builtins.Core;
 
-public final class Vector implements Datum, Callable, Iterable<Datum>
+public final class Vector implements Datum, Callable, IEq<Vector>, ISize, Iterable<Datum>
 {
   public static Vector fromList(List elems)
   {
@@ -46,13 +47,13 @@ public final class Vector implements Datum, Callable, Iterable<Datum>
     elems.addAll(that.elems);
   }
     
-  @Override
+  @Override // Datum
   public Type type()
   {
     return Type.VECTOR;
   }
   
-  @Override
+  @Override // Datum
   public String repr()
   {
     return elems.stream()
@@ -60,7 +61,7 @@ public final class Vector implements Datum, Callable, Iterable<Datum>
       .collect(Collectors.joining(" ", "[", "]"));
   }  
   
-  @Override
+  @Override // Callable
   public void apply(VirtualMachine vm)
   {
     if (!vm.peekArg().type().isInt())
@@ -70,12 +71,13 @@ public final class Vector implements Datum, Callable, Iterable<Datum>
     vm.popFrame();
   }
   
-  @Override
+  @Override // Callable
   public boolean arityMatches(int numArgs)
   {
     return numArgs == 1;
   }
   
+  @Override // ISize
   public int length()
   {
     return elems.size();
@@ -112,14 +114,15 @@ public final class Vector implements Datum, Callable, Iterable<Datum>
       elems.set(i, x);
   }
 
-  public boolean eq(Vector other, BiPredicate<Datum, Datum> eq)
+  @Override // IEq
+  public boolean isEqual(Vector other)
   {
     if (this.length() != other.length())
       return false;
     
     var n = this.elems.size();
     for (int i = 0; i < n; ++i)
-      if (!eq.test(this.elems.get(i), other.elems.get(i)))
+      if (! Core.isEqual(this.elems.get(i), other.elems.get(i)))
         return false;
     
     return true;

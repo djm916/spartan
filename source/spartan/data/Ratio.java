@@ -3,7 +3,7 @@ package spartan.data;
 import java.math.BigInteger;
 import spartan.errors.InvalidArgument;
 
-public final class Ratio implements Datum, Numeric
+public final class Ratio implements Datum, Numeric, IEq<Ratio>, IOrd<Ratio>
 {
   public Ratio(BigInteger numer, BigInteger denom)
   {
@@ -180,7 +180,8 @@ public final class Ratio implements Datum, Numeric
      
      x = y iff b = d ^ a = c
   */
-  public boolean eq(Ratio other)
+  @Override // IEq
+  public boolean isEqual(Ratio other)
   {
     var a = this.numer;
     var b = this.denom;
@@ -197,7 +198,8 @@ public final class Ratio implements Datum, Numeric
            => (a*d)/(b*d) < (b*c)/(b*d)
            => (a*d) < (b*c)
   */
-  public int compare(Ratio other)
+  @Override // IEq
+  public int compareTo(Ratio other)
   {
     var a = this.numer;
     var b = this.denom;

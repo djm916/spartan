@@ -2,7 +2,7 @@ package spartan.data;
 
 import spartan.errors.IntegerOverflow;
 
-public final class Real implements Datum, Numeric
+public final class Real implements Datum, Numeric, IEq<Real>, IOrd<Real>
 {
   public static final Real PI = new Real(Math.PI);
   public static final Real E = new Real(Math.E);
@@ -135,13 +135,15 @@ public final class Real implements Datum, Numeric
   {
     return new Real(this.value / that.value);
   }
-    
-  public boolean eq(Real that)
+  
+  @Override // IEq
+  public boolean isEqual(Real that)
   {
     return this.value == that.value;
   }
   
-  public int compare(Real that)
+  @Override // IOrd
+  public int compareTo(Real that)
   {
     return Double.compare(this.value, that.value);
   }

@@ -3,7 +3,7 @@ package spartan.data;
 import spartan.errors.DivisionByZero;
 import spartan.errors.IntegerOverflow;
 
-public final class Int implements Datum, Integral
+public final class Int implements Datum, Integral, IEq<Int>, IOrd<Int>
 {
   public Int(int value)
   {
@@ -15,31 +15,31 @@ public final class Int implements Datum, Integral
     this(Integer.parseInt(value));
   }
   
-  @Override
+  @Override // Datum
   public Type type()
   {
     return Type.INT;
   }
   
-  @Override
+  @Override // Datum
   public String repr()
   {
     return Integer.toString(value);
   }
   
-  @Override
+  @Override // Integral
   public int intValue()
   {
     return value;
   }
   
-  @Override
+  @Override // Object
   public boolean equals(Object other)
   {
     return (other instanceof Int that) && this.value == that.value;
   }
   
-  @Override
+  @Override // Object
   public int hashCode()
   {
     return Integer.hashCode(value);
@@ -139,12 +139,14 @@ public final class Int implements Datum, Integral
     }
   }
   
-  public boolean eq(Int that)
+  @Override // IEq
+  public boolean isEqual(Int that)
   {
     return this.value == that.value;
   }
   
-  public int compare(Int that)
+  @Override // IOrd
+  public int compareTo(Int that)
   {
     return Integer.compare(this.value, that.value);
   }

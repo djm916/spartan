@@ -1,6 +1,6 @@
 package spartan.runtime;
 
-import spartan.builtins.CoreLib;
+import static spartan.builtins.Core.truth;
 
 public final class Branch extends Inst
 {  
@@ -13,7 +13,7 @@ public final class Branch extends Inst
   
   public void eval(VirtualMachine vm)
   {
-    if (CoreLib.truth(vm.result))
+    if (truth(vm.result))
       vm.control = ifTrue;
     else
       vm.control = ifFalse;

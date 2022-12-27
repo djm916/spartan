@@ -443,35 +443,43 @@ public class Compiler
   /* Compiles the "for" special form.
   
   Syntax:
-    (for ((var1 init1 step1)
-          ...
-          (varN initN stepN))
+    (iter ((var init step) ...)
       (pred result)
       body...)
   
   Compilation:
   
-    push-env N                   ; Evaluate init expressions
-    <<init1>>
-    store-local 0 0
-    ...
-    <<initN>>
-    store-local 0 N-1
-    loop:
-    <<pred>>
-    branch done update           ; Evaluate predicate
-    update:                      ; If predicate false,
-    <<body>>                     ; Evaluate body
-    <<step1>>                    ; Evaluate step expressions
-    store-local 0 0
-    ...
+     <<initN>>                   ; Evaluate init expressions
+     push-arg
+     ...
+     <<init1>>
+     push-arg
+     push-env N
+     pop-arg
+     store-local 0 0
+     ...
+     pop-arg
+     store-local 0 N-1
+  loop:
+    <<pred>>                     ; Evaluate predicate
+    branch done step           
+  step:                          ; Evaluate body and step expressions
+    <<body>>
     <<stepN>>
+    push-arg
+    ...
+    <<step1>>
+    push-arg
+    pop-arg
+    store-local 0 0
+    ...
+    pop-arg
     store-local 0 N-1
-    jump loop                    ; repeat loop
-    done:                        ; If predicate true,
-    <<result>>                   ; Evaluate result
+    jump loop                    ; Repeat loop
+  done:                          ; Evaluate result expression
+    <<result>>                   
     pop-env                      ; Exit loop
-    next: ...
+  next: ...
   
   */
   
@@ -481,52 +489,39 @@ public class Compiler
       throw malformedExp(exp);
     
     var bindings = (List) exp.cadr();
+    int numBindings = bindings.length();
     var vars = extractFirst(bindings);
+    var inits = extractSecond(bindings);
+    var steps = extractThird(bindings);
     var test = (List) exp.caddr();
     var body = exp.cdddr();        
     var extendedScope = scope.extend(vars);
     var done = compile(test.cadr(), extendedScope, tail, new PopEnv(next));
     var jump = new Jump();
-    var update = compileSequence(body, extendedScope, false,
-                 compileForLoopUpdateStep(bindings, extendedScope, 0,
-                 jump));
+    var step = compileSequence(body, extendedScope, false,
+               compilePushArgs(steps, extendedScope,
+               compileBindLocals(0, numBindings,
+               jump)));
     var loop = compile(test.car(), extendedScope, false,
-               new Branch(done, update));
+               new Branch(done, step));
     jump.setTarget(loop);
-    return new PushEnv(bindings.length(),
-           compileSequentialBindings(bindings, 0, scope.extend(),
-           loop));
+    return compilePushArgs(inits, scope,
+           new PushEnv(numBindings,
+           compileBindLocals(0, numBindings,
+           loop)));
   }
   
-  private Inst compileForLoopUpdateStep(List bindings, Scope scope, int offset, Inst next)
-  {
-    if (bindings == List.EMPTY)
-      return next;
-    
-    var binding = (List) bindings.car();
-    
-    return compile(binding.caddr(), scope, false,
-           new StoreLocal(0, offset,
-           compileForLoopUpdateStep(bindings.cdr(), scope, offset + 1, next)));
-  }
-      
   private boolean checkForLoopForm(List exp)
   {
-    var length = exp.length();
-        
+    var length = exp.length();        
     if (length < 3)
-      return false;
-    
-    var bindings = exp.cadr();
-    
+      return false;    
+    var bindings = exp.cadr();    
     if (bindings.type() != Type.LIST || !checkForLoopBindingListForm((List)bindings))
-      return false;
-    
-    var test = exp.caddr();
-    
+      return false;    
+    var test = exp.caddr();    
     if (test.type() != Type.LIST || ((List)test).length() != 2)
-      return false;
-    
+      return false;    
     return true;
   }
   
@@ -591,34 +586,42 @@ public class Compiler
     return true;
   }
 
-  /* Extract the 1st of each element in a list of pairs:
+  /* Extract the 1st element of each list in a list of lists
 
-     ((x1 y1) (x2 y2)...) => (x1 x2...)
+     ((x1 ...) (x2 ...) ...) => (x1 x2 ...)
   */
-  private List extractFirst(List pairs)
+  private List extractFirst(List list)
   {
     var result = new List.Builder();
-
-    for (; pairs != List.EMPTY; pairs = pairs.cdr())
-      result.add(((List)pairs.car()).car());
-
+    for (; !list.empty(); list = list.cdr())
+      result.add(((List)list.car()).car());
     return result.build();
   }
 
-  /* Extract the 2nd of each element in a list of pairs:
+  /* Extract the 2nd element of each list in a list of lists
 
-     ((x1 y1) (x2 y2)...) => (y1 y2...)
+     ((x1 y1 ...) (x2 y2 ...) ...) => (y1 y2 ...)
   */
-  private List extractSecond(List pairs)
+  private List extractSecond(List list)
   {
     var result = new List.Builder();
-
-    for (; pairs != List.EMPTY; pairs = pairs.cdr())
-      result.add(((List)pairs.car()).cadr());
-
+    for (; !list.empty(); list = list.cdr())
+      result.add(((List)list.car()).cadr());
     return result.build();
   }
 
+  /* Extract the 3rd element of each list in a list of lists
+
+     ((x1 y1 z1 ...) (x2 y2 z2 ...) ...) => (z1 z2 ...)
+  */
+  private List extractThird(List list)
+  {
+    var result = new List.Builder();
+    for (; !list.empty(); list = list.cdr())
+      result.add(((List)list.car()).caddr());
+    return result.build();
+  }
+  
   private Inst compilePushArgs(List args, Scope scope, Inst next)
   {
     if (args == List.EMPTY)
@@ -1023,11 +1026,11 @@ public class Compiler
   private Procedure makeProcedure(List params, List body, Scope scope)
   {
     var numParams = params.length();
-    var isVariadic = numParams > 1 && Symbol.AMPERSAND.isEqual(params.at(numParams - 2));
+    var isVariadic = numParams > 1 && ((Symbol)params.at(numParams - 2)).isEqual(Symbol.AMPERSAND);
     var requiredArgs = isVariadic ? numParams - 2 : numParams;
     
     if (isVariadic)
-      params = params.remove(x -> Symbol.AMPERSAND.isEqual(x));
+      params = params.remove(x -> ((Symbol)x).isEqual(Symbol.AMPERSAND));
     
     var extendedScope = scope.extend(params);
     
