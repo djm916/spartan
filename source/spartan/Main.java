@@ -57,6 +57,8 @@ public class Main implements Callable<Integer>
       Loader.load(scriptPath, globals);
     }
     
+    System.err.println(Symbol.NUM_INTERNED);
+    
     return 0;
   }
   

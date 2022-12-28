@@ -119,7 +119,21 @@ public final class VirtualMachine
       throw new WrongNumberArgs();
     f.apply(this);
   }
-    
+  
+  public Datum apply(Callable f, List args)
+  {
+    int numArgs = args.length();
+    if (!f.arityMatches(numArgs))
+      throw new WrongNumberArgs();
+    pushFrame(null, null);
+    this.result = f;
+    this.args = args;
+    f.apply(this);
+    while (this.control != null)
+      this.control.eval(this);
+    return this.result;
+  }
+  
   public void reset()
   {
     control = null;

@@ -238,7 +238,7 @@ public class Compiler
              branch body1 pred2
      body1:  <<body1>>
              jump next
-     pred2:  ...
+             ...
      predN:  <<predN>>
              branch bodyN none
      bodyN:  <<bodyN>>
@@ -1131,7 +1131,7 @@ public class Compiler
   */
   private Inst compileApplyMacro(List exp, Scope scope, boolean tail, Inst next)
   {
-    var symb = (Symbol)exp.car();
+    var symb = (Symbol) exp.car();
     var f = (Macro) vm.globals.lookup(symb.intern()).get();
     var args = exp.cdr();
     
@@ -1144,6 +1144,7 @@ public class Compiler
       return compile(xform, scope, tail, next);
     }
     catch (Error err) {
+      // Either the evaluation of the macro procedure or the compilation of its resulting transformation threw an exception
       err.setPosition(positionMap.get(exp));
       throw err;
     }
@@ -1151,14 +1152,15 @@ public class Compiler
   
   private Datum applyMacroTransform(Macro f, List args)
   {
-    return vm.eval(new PushFrame(null, null,
-                   compilePushArgsUneval(args,
-                   new LoadConst(f,
-                   new Apply(args.length(), null)))));
+    //return vm.eval(new PushFrame(null, null,
+    //               compilePushArgsUneval(args,
+    //               new LoadConst(f,
+    //               new Apply(args.length(), null)))));
     //vm.pushFrame(null, null);
     //vm.result = f;
     //vm.args = args;
     //return vm.eval(new Apply(args.length(), null));
+    return vm.apply(f, args);
   }
   
   /* Determine if a symbol is bound to a macro in the global environment. */
@@ -1168,10 +1170,11 @@ public class Compiler
     return vm.globals.lookup(s.intern()).map(v -> v.type() == Type.MACRO).orElse(false);
   }
   
-  /* Compile an s-expression (a list), handling special forms, macro expansion, and procedure application. */
+  /* Compile a combination, handling special forms, procedure application, and macro expansion. */
   
-  private Inst compileList(List exp, Scope scope, boolean tail, Inst next)
+  private Inst compileCombo(List exp, Scope scope, boolean tail, Inst next)
   {
+    // Handle special forms
     if (exp.car().type().isSymbol()) {
       var car = (Symbol) exp.car();
       if (car.isEqual(Symbol.IF))
@@ -1210,10 +1213,12 @@ public class Compiler
         return compileForLoop(exp, scope, tail, next);
       if (car.isEqual(Symbol.CALL_CC))
         return compileCallCC(exp, scope, tail, next);
+      // Handle macro expansion
       if (isMacro(car))
         return compileApplyMacro(exp, scope, tail, next);
     }
     
+    // Handle procedure application
     return compileApply(exp, scope, tail, next);
   }
 
@@ -1226,7 +1231,7 @@ public class Compiler
     else if (exp.type() == Type.SYMBOL)
       return compileVarRef((Symbol)exp, scope, next);
     else
-      return compileList((List)exp, scope, tail, next);
+      return compileCombo((List)exp, scope, tail, next);
   }
 
   private PositionMap positionMap;

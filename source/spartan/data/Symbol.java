@@ -11,7 +11,9 @@ public final class Symbol implements Datum, IEq<Symbol>
   private static WeakCache<String, Symbol> cache = new WeakCache<>();
   private static int nextUniqueId;
   private final String id;
-
+  
+  public static int NUM_INTERNED = 0;
+  
   public static final Symbol DEF = new Symbol("def");
   public static final Symbol DEFUN = new Symbol("defun");
   public static final Symbol DEFMACRO = new Symbol("defmacro");
@@ -82,6 +84,7 @@ public final class Symbol implements Datum, IEq<Symbol>
    */
   public Symbol intern()
   {
+    ++NUM_INTERNED;
     return cache.get(this.id, () -> this);
   }
 }
