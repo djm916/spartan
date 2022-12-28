@@ -17,7 +17,6 @@ public enum Type
   MAPPING("type/mapping"),
   PRIMITIVE("type/procedure"),
   CLOSURE("type/procedure"),
-  MACRO("type/macro"),
   CONTINUE("type/continuation"),
   PORT("type/port"),
   WRAPPED(null);
@@ -75,7 +74,7 @@ public enum Type
   
   public boolean isCallable()
   {
-    return this == PRIMITIVE || this == CLOSURE || this == MACRO || this == CONTINUE || this == VECTOR || this == MAPPING;
+    return this == PRIMITIVE || this == CLOSURE || this == CONTINUE || this == VECTOR || this == MAPPING;
   }
     
   public boolean isList()

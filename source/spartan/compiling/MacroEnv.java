@@ -1,22 +1,38 @@
-package spartan;
+package spartan.compiling;
 
-import spartan.data.*;
+import spartan.data.Symbol;
+import spartan.data.Callable;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Optional;
 
 public final class MacroEnv
 {
-  private final Map<Symbol, Macro> macros = new HashMap<>();
+  private final Map<String, Callable> macros = new HashMap<>();
+  private static final MacroEnv instance = new MacroEnv();
   
-  public void bind(Symbol name, Macro val)
+  private MacroEnv() {}
+  
+  public static MacroEnv instance()
   {
-    macros.put(name, val);
+    return instance;
   }
   
-  public Optional<Datum> lookup(Symbol name)
+  /** Bind a variable to a given value.
+      If the variable is already bound, its value is replaced.
+      @param name The variable to bind
+  */
+  public void bind(Symbol name, Callable val)
   {
-    return Optional.ofNullable(macros.get(name));
+    macros.put(name.str(), val);
+  }
+  
+  /** Lookup a variable by name, optionally returning its bound value.
+      @param name The variable to look up
+      @return The (optional) value of the variable
+  */
+  public Optional<Callable> lookup(Symbol name)
+  {
+    return Optional.ofNullable(macros.get(name.str()));
   }
 }
- 

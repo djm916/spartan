@@ -1116,7 +1116,7 @@ public class Compiler
     if (!checkParamListForm(params))
       throw malformedExp(exp);
     
-    vm.globals.bind(symb.intern(), new Macro(makeProcedure(params, body, Scope.EMPTY)));
+    MacroEnv.instance().bind(symb, new Closure(makeProcedure(params, body, Scope.EMPTY), null));
     return new LoadConst(Nil.VALUE, next);
   }
   
@@ -1132,7 +1132,7 @@ public class Compiler
   private Inst compileApplyMacro(List exp, Scope scope, boolean tail, Inst next)
   {
     var symb = (Symbol) exp.car();
-    var f = (Macro) vm.globals.lookup(symb.intern()).get();
+    var f = MacroEnv.instance().lookup(symb).get();
     var args = exp.cdr();
     
     try {
@@ -1150,7 +1150,7 @@ public class Compiler
     }
   }
   
-  private Datum applyMacroTransform(Macro f, List args)
+  private Datum applyMacroTransform(Callable f, List args)
   {
     //return vm.eval(new PushFrame(null, null,
     //               compilePushArgsUneval(args,
@@ -1163,11 +1163,11 @@ public class Compiler
     return vm.apply(f, args);
   }
   
-  /* Determine if a symbol is bound to a macro in the global environment. */
+  /* Determine if a symbol is bound to a macro */
   
   private boolean isMacro(Symbol s)
   {
-    return vm.globals.lookup(s.intern()).map(v -> v.type() == Type.MACRO).orElse(false);
+    return MacroEnv.instance().lookup(s).isPresent();
   }
   
   /* Compile a combination, handling special forms, procedure application, and macro expansion. */
