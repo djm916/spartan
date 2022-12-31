@@ -5,11 +5,13 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 import java.util.concurrent.Callable;
-import java.nio.file.Path;
+import java.util.logging.Logger;
 import spartan.data.List;
 import spartan.data.Text;
 import spartan.data.Symbol;
+import spartan.runtime.GlobalEnv;
 import spartan.errors.Error;
+import spartan.errors.LoadError;
 
 @Command(name = "Spartan",
          description = "The Spartan interpreter CLI",
@@ -18,7 +20,9 @@ import spartan.errors.Error;
          sortOptions = false)
 
 public class Main implements Callable<Integer>
-{  
+{
+  private static final Logger log = Logger.getLogger(Main.class.getName());
+  
   // Path to the script file to execute (or null if none given)
   @Option(names = "--file", paramLabel = "path", description = "path to script file")
   private String scriptPath;
@@ -27,16 +31,6 @@ public class Main implements Callable<Integer>
   @Parameters(paramLabel = "args", description = "script arguments")
   private String[] scriptArgs;
   
-  static
-  {
-    //System.getProperties().list(System.out);
-    // Load JNI native code libraries
-    var spartanHome = System.getenv("SPARTANHOME");
-    var osName = System.getProperty("os.name").toLowerCase();
-    if (osName.startsWith("win"))
-      System.load(Path.of(spartanHome, "libspartan.dll").toString());
-  }
-  
   public static void main(String[] args) //throws java.io.IOException
   {
     System.exit(new CommandLine(new Main()).execute(args));
@@ -44,20 +38,38 @@ public class Main implements Callable<Integer>
   
   public Integer call() throws Exception
   {
-    var globals = GlobalEnv.createBasis();
+    // Load JNI Libraries
+    if (Config.OS_TYPE == Config.OSType.WINDOWS) {
+      try {
+        Loader.loadDLL("libspartan.dll");
+      }
+      catch (LoadError err) {
+        System.err.println(err.getMessage());
+      }
+    }
     
-    Loader.load(Config.BUILTINS_FILE_PATH, globals);
+    // Bootstrap global environment
+    try {
+      Loader.load(Config.BUILTINS_FILE_PATH);
+    }
+    catch (LoadError err) {
+      System.err.println(err.getMessage());
+    }
     
-    globals.bind(new Symbol("sys/args"), makeArgsList());
+    // Bind list of system arguments
+    GlobalEnv.bind(new Symbol("sys/args"), makeArgsList());
     
     if (scriptPath == null) {
-      Repl.start(globals);      
+      Repl.start();      
     }
-    else {      
-      Loader.load(scriptPath, globals);
+    else {
+      try {
+        Loader.load(scriptPath);
+      }
+      catch (LoadError err) {
+        System.err.println(err.getMessage());
+      }
     }
-    
-    System.err.println(Symbol.NUM_INTERNED);
     
     return 0;
   }

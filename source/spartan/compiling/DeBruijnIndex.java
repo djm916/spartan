@@ -7,4 +7,4 @@ package spartan.compiling;
   the number of intervening frames, and offset is the position of the
   variable within that frame.
 */
-public record DeBruijnIndex(int depth, int offset) {}
+record DeBruijnIndex(int depth, int offset) {}

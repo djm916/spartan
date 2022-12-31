@@ -1,7 +1,7 @@
 package spartan.data;
 
 import java.util.Map;
-import java.util.HashMap;
+import java.util.WeakHashMap;
 import java.lang.ref.WeakReference;
 import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
@@ -15,6 +15,11 @@ import java.util.function.Supplier;
  */
 class WeakCache<K, V>
 {
+  int size()
+  {
+    return cache.size();
+  }
+  
   /**
    * Retrieves the value associated with the given key.
    * If the key is not currently mapped to any value, the given supplier
@@ -48,6 +53,6 @@ class WeakCache<K, V>
       used.remove(ref);
   }
   
-  private final Map<K, WeakReference<V>> cache = new HashMap<>();
+  private final Map<K, WeakReference<V>> cache = new WeakHashMap<>();
   private final ReferenceQueue<V> unused = new ReferenceQueue<>();
 }

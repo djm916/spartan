@@ -12,7 +12,7 @@ public final class StoreGlobal extends Inst
   
   public final void eval(VirtualMachine vm)
   {
-    vm.globals.bind(name, vm.result);
+    GlobalEnv.bind(name, vm.result);
     vm.control = next;
   }
 

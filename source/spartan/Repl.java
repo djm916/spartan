@@ -8,12 +8,12 @@ import spartan.errors.Error;
 /** This class implements the interactive REPL (Read, Eval, Print Loop) */
 public final class Repl
 {
-  public static void start(GlobalEnv globals)
+  public static void start()
   {
     System.out.println(INTRO_MESSAGE);
     
     try (Reader reader = Reader.forConsole()) {
-      var vm = new VirtualMachine(globals);
+      var vm = new VirtualMachine();
       var compiler = new Compiler(vm);
       
       while (true) {

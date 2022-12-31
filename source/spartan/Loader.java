@@ -32,10 +32,10 @@ public final class Loader
    * @param globals the global environment
    * @throws LoadError if the file cannot be located or does not constitute a valid path
    */
-  public static void load(String file, GlobalEnv globals)
+  public static void load(String file)
   {
     try {
-      load(Path.of(file), globals);
+      load(Path.of(file));
     }
     catch (InvalidPathException ex) {
       throw new LoadError(file); // Path is invalid
@@ -51,7 +51,7 @@ public final class Loader
    * @param globals the global environment
    * @throws LoadError if the file cannot be located
    */
-  public static void load(Path file, GlobalEnv globals)
+  public static void load(Path file)
   {
     var path = resolvePath(file);
     
@@ -59,7 +59,7 @@ public final class Loader
       log.info(() -> "loading \"" + path + "\"");
     
     try (var reader = Reader.forFile(path)) {
-      var vm = new VirtualMachine(globals);
+      var vm = new VirtualMachine();
       var compiler = new Compiler(vm);
       
       //TODO: Better handling of errors bubbling up from loaded file
@@ -77,6 +77,21 @@ public final class Loader
     }
     catch (FileNotFoundException ex) {
       throw new LoadError(path.toString()); // No file was found
+    }
+  }
+  
+  public static void loadDLL(String file)
+  {
+    try {
+      var libPath = Config.HOME_DIR.resolve(file);
+      if (Config.LOG_DEBUG)
+        log.info(String.format("loading \"%s\"", libPath.toString()));
+      System.load(libPath.toString());
+    }
+    catch (UnsatisfiedLinkError | InvalidPathException ex) {
+      if (Config.LOG_DEBUG)
+        log.severe(String.format("unable to load \"%s\": %s", file, ex.toString()));
+      throw new LoadError(file);
     }
   }
   

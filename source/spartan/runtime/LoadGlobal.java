@@ -16,7 +16,7 @@ public final class LoadGlobal extends Inst
   public final void eval(VirtualMachine vm)
   {
     try {
-      vm.result = vm.globals.lookupOrThrow(name);
+      vm.result = GlobalEnv.lookupOrThrow(name);
       vm.control = next;
     }
     catch (UnboundVariable err) {

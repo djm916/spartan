@@ -632,16 +632,6 @@ public class Compiler
            new PushArg(next)));
   }
 
-  private Inst compilePushArgsUneval(List args, Inst next)
-  {
-    if (args == List.EMPTY)
-      return next;
-
-    return compilePushArgsUneval(args.cdr(),
-           new LoadConst(args.car(),
-           new PushArg(next)));
-  }
-  
   private Inst compileBindLocals(int offset, int numBindings, Inst next)
   {
     if (offset >= numBindings)
@@ -1116,7 +1106,7 @@ public class Compiler
     if (!checkParamListForm(params))
       throw malformedExp(exp);
     
-    MacroEnv.instance().bind(symb, new Closure(makeProcedure(params, body, Scope.EMPTY), null));
+    MacroEnv.bind(symb, new Macro(makeProcedure(params, body, Scope.EMPTY)));
     return new LoadConst(Nil.VALUE, next);
   }
   
@@ -1132,11 +1122,11 @@ public class Compiler
   private Inst compileApplyMacro(List exp, Scope scope, boolean tail, Inst next)
   {
     var symb = (Symbol) exp.car();
-    var f = MacroEnv.instance().lookup(symb).get();
     var args = exp.cdr();
+    var macro = MacroEnv.lookup(symb).get();
     
     try {
-      var xform = applyMacroTransform(f, args);
+      var xform = macro.apply(vm, args);
       
       if (Config.LOG_DEBUG)
         log.info(() -> String.format("macro transform: %s => %s", exp.repr(), xform.repr()));
@@ -1149,25 +1139,12 @@ public class Compiler
       throw err;
     }
   }
-  
-  private Datum applyMacroTransform(Callable f, List args)
-  {
-    //return vm.eval(new PushFrame(null, null,
-    //               compilePushArgsUneval(args,
-    //               new LoadConst(f,
-    //               new Apply(args.length(), null)))));
-    //vm.pushFrame(null, null);
-    //vm.result = f;
-    //vm.args = args;
-    //return vm.eval(new Apply(args.length(), null));
-    return vm.apply(f, args);
-  }
-  
+    
   /* Determine if a symbol is bound to a macro */
   
   private boolean isMacro(Symbol s)
   {
-    return MacroEnv.instance().lookup(s).isPresent();
+    return MacroEnv.lookup(s).isPresent();
   }
   
   /* Compile a combination, handling special forms, procedure application, and macro expansion. */

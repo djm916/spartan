@@ -3,7 +3,6 @@ package spartan.runtime;
 import spartan.data.Datum;
 import spartan.data.List;
 import spartan.data.Callable;
-import spartan.GlobalEnv;
 import spartan.errors.Error;
 import spartan.errors.WrongNumberArgs;
 import spartan.errors.TypeMismatch;
@@ -33,22 +32,12 @@ public final class VirtualMachine
    * The local environment.
    */
   public LocalEnv locals;
-  
-  /**
-   * The global environment.
-   */
-  public GlobalEnv globals;
-  
+    
   /**
    * The call stack.
    */
   public Frame frame;
-  
-  public VirtualMachine(GlobalEnv globals)
-  {
-    this.globals = globals;
-  }
-  
+    
   public Datum eval(Inst code)
   {
     control = code;
@@ -118,20 +107,6 @@ public final class VirtualMachine
     if (!f.arityMatches(numArgs))
       throw new WrongNumberArgs();
     f.apply(this);
-  }
-  
-  public Datum apply(Callable f, List args)
-  {
-    int numArgs = args.length();
-    if (!f.arityMatches(numArgs))
-      throw new WrongNumberArgs();
-    pushFrame(null, null);
-    this.result = f;
-    this.args = args;
-    f.apply(this);
-    while (this.control != null)
-      this.control.eval(this);
-    return this.result;
   }
   
   public void reset()

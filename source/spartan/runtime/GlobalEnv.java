@@ -1,4 +1,4 @@
-package spartan;
+package spartan.runtime;
 
 import spartan.data.*;
 import spartan.builtins.CoreLib;
@@ -16,50 +16,46 @@ import spartan.errors.UnboundVariable;
 
 public final class GlobalEnv
 {
-  public static GlobalEnv createBasis()
-  {
-    return new GlobalEnv();
-  }
-  
   /** Bind a variable to a given value.
       If the variable is already bound, its value is replaced.
       @param name The variable to bind
   */
-  public void bind(Symbol name, Datum val)
+  public static void bind(Symbol name, Datum val)
   {
-    globals.put(name, val);
+    bindings.put(name, val);
   }
   
   /** Lookup a variable by name, optionally returning its bound value.
       @param name The variable to look up
       @return The (optional) value of the variable
   */
-  public Optional<Datum> lookup(Symbol name)
+  public static Optional<Datum> lookup(Symbol name)
   {
-    return Optional.ofNullable(globals.get(name));
+    return Optional.ofNullable(bindings.get(name));
   }
   
   /** Lookup a variable by name, throwing an exception if it is not bound.
       @param name The variable to look up
       @return The value of the variable
   */
-  public Datum lookupOrElse(Symbol name, Datum defaultValue)
+  public static Datum lookupOrElse(Symbol name, Datum defaultValue)
   {
-    return globals.getOrDefault(name, defaultValue);
+    return bindings.getOrDefault(name, defaultValue);
   }
   
-  public Datum lookupOrThrow(Symbol name)
+  public static Datum lookupOrThrow(Symbol name)
   {
-    var value = globals.get(name);
+    var value = bindings.get(name);
     if (value == null)
       throw new UnboundVariable(name);
     return value;
   }
   
-  private GlobalEnv() {}
+  private GlobalEnv() { }
   
-  private final Map<Symbol, Datum> globals = new IdentityHashMap<>();
+  private static final Map<Symbol, Datum> bindings = new IdentityHashMap<>();
   
+  static
   {
     /* General values & procedures */
     

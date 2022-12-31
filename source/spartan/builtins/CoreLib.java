@@ -116,7 +116,7 @@ public final class CoreLib
       //TODO: Better handling of errors bubbling up from loaded file
       
       try {
-        spartan.Loader.load(file, vm.globals);
+        spartan.Loader.load(file);
       }
       finally {
         vm.result = Nil.VALUE;
