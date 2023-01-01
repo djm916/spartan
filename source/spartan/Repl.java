@@ -15,15 +15,19 @@ public final class Repl
     try (Reader reader = Reader.forConsole()) {
       var vm = new VirtualMachine();
       var compiler = new Compiler(vm);
-
-      reader.forEach(exp -> {
+      
+      do {
         try {
+          var exp = reader.read();
+          if (exp == null)
+            break;        
           System.out.println(vm.eval(compiler.compile(exp)).repr());
         }
         catch (Error err) {
           System.err.println(err);
         }
-      });
+      }
+      while (true);
     }
   }
   

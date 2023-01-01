@@ -63,7 +63,13 @@ public final class Loader
       var compiler = new Compiler(vm);
       
       try {
-        reader.forEach(exp -> vm.eval(compiler.compile(exp)));
+        do {
+          var exp = reader.read();
+          if (exp == null)
+            break;
+          vm.eval(compiler.compile(exp));
+        }
+        while (true);
       }
       catch (Error err) {
         System.err.println(err);
