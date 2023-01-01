@@ -81,10 +81,10 @@
   item-list)
 
 (defun hash-map/keys (self)
-  (map (fun (key value) key) (hash-map/items self)))
+  (map (fun (pair) (car pair)) (hash-map/items self)))
 
 (defun hash-map/values (self)
-  (map (fun (key value) value) (hash-map/items self)))
+  (map (fun (pair) (cadr pair)) (hash-map/items self)))
 
 (defun __find-node-with-key (table equal? index key)
   (def node-list (table index))
@@ -123,7 +123,7 @@
 (hash-map/insert h 4 "d")
 (hash-map/insert h 5 "e")
 
-
-(hash-map/for-each h 
-  (fun (key value)
-    (print-line key " = " value)))
+(print-line (hash-map/items h))
+(print-line (hash-map/keys h))
+(print-line (hash-map/values h))
+(print-line (hash-map/size h))

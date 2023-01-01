@@ -7,6 +7,7 @@ import spartan.parsing.PositionMap;
 import spartan.parsing.Position;
 import spartan.errors.Error;
 import spartan.errors.SyntaxError;
+import spartan.errors.WrongNumberArgs;
 import spartan.runtime.VirtualMachine;
 import spartan.Config;
 import java.util.logging.Logger;
@@ -265,7 +266,7 @@ public class Compiler
     var test = clause.car();
     var body = clause.cdr();
 
-    if (test.type().isSymbol() && ((Symbol)test).isEqual(Symbol.ELSE))
+    if (Symbol.ELSE.equals(test))
       return compileSequence(body, scope, tail, next);
 
     return compile(test, scope, false,
@@ -558,14 +559,14 @@ public class Compiler
   {
     return binding.length() == 2 && binding.car().type() == Type.SYMBOL;
   }
-
+  
   private boolean checkParamListForm(List params)
   {
     for (; params != List.EMPTY; params = params.cdr()) {
       if (params.car().type() != Type.SYMBOL)
         return false;
       // The symbol & appearing in the parameter list must occur immediately before the final parameter
-      if (((Symbol)params.car()).isEqual(Symbol.AMPERSAND) && (params.cdr() == List.EMPTY || params.cddr() != List.EMPTY))
+      if (Symbol.AMPERSAND.equals(params.car()) && (params.cdr() == List.EMPTY || params.cddr() != List.EMPTY))
         return false;
     }
     return true;
@@ -580,7 +581,7 @@ public class Compiler
       if (clause.length() < 2)
         return false;
       // The symbol "else" must occur in the final clause
-      if (clause.car().type().isSymbol() && ((Symbol)clause.car()).isEqual(Symbol.ELSE) && clauses.cdr() != List.EMPTY)
+      if (Symbol.ELSE.equals(clause.car()) && clauses.cdr() != List.EMPTY)
         return false;
     }
     return true;
@@ -797,7 +798,7 @@ public class Compiler
 
     while (body != List.EMPTY && isInnerDef(body.car())) {
       var exp = (List) body.car();
-      if (exp.car().type().isSymbol() && ((Symbol)exp.car()).isEqual(Symbol.DEFUN))
+      if (Symbol.DEFUN.equals(exp.car()))
         exp = transformDefun(exp);
       bindings.add(exp.cdr());
       body = body.cdr();
@@ -814,7 +815,7 @@ public class Compiler
     if (exp.type() != Type.LIST || exp == List.EMPTY)
       return false;
     var car = ((List)exp).car();
-    return car.type().isSymbol() && (((Symbol)car).isEqual(Symbol.DEF) || ((Symbol)car).isEqual(Symbol.DEFUN));
+    return Symbol.DEF.equals(car) || Symbol.DEFUN.equals(car);
   }
 
   /* Compiles the "or" special form, a logical disjunction.
@@ -1013,21 +1014,39 @@ public class Compiler
            List.EMPTY)));
   }
   
+  private Signature parseParams(List params)
+  {
+    var requiredArgs = 0;
+    var isVariadic = false;
+    
+    for (; !params.empty(); params = params.cdr()) {
+      var param = (Symbol) params.car();
+      if (param.equals(Symbol.AMPERSAND)) {
+        isVariadic = true;
+        break;
+      }
+      ++requiredArgs;
+    }
+    return new Signature(requiredArgs, isVariadic);
+  }
+  
+  /** Create a Procedure
+   *
+   * @param params list of the procedure's parameters
+   * @param body the procedure's body
+   * @param scope scope of definition
+   * @return 
+   */
   private Procedure makeProcedure(List params, List body, Scope scope)
   {
-    var numParams = params.length();
-    var isVariadic = numParams > 1 && ((Symbol)params.at(numParams - 2)).isEqual(Symbol.AMPERSAND);
-    var requiredArgs = isVariadic ? numParams - 2 : numParams;
-    
-    if (isVariadic)
-      params = params.remove(x -> ((Symbol)x).isEqual(Symbol.AMPERSAND));
-    
+    var sig = parseParams(params);
+    if (sig.isVariadic())
+      params = params.removeInplace(x -> Symbol.AMPERSAND.equals(x));
     var extendedScope = scope.extend(params);
-    
-    var code = isVariadic ? compileVariadicProc(body, extendedScope, requiredArgs)
-                          : compileFixedProc(body, extendedScope, requiredArgs);
-    
-    return new Procedure(code, new Signature(requiredArgs, isVariadic));
+    var procBody = sig.isVariadic()
+      ? compileVariadicProc(body, extendedScope, sig.requiredArgs())
+      : compileFixedProc(body, extendedScope, sig.requiredArgs());
+    return new Procedure(procBody, sig);
   }
   
   /* Compile the body of a procedure with a fixed number of arguments N
@@ -1106,7 +1125,7 @@ public class Compiler
     if (!checkParamListForm(params))
       throw malformedExp(exp);
     
-    MacroEnv.bind(symb, new Macro(makeProcedure(params, body, Scope.EMPTY)));
+    MacroEnv.bind(symb, makeProcedure(params, body, Scope.EMPTY));
     return new LoadConst(Nil.VALUE, next);
   }
   
@@ -1126,72 +1145,73 @@ public class Compiler
     var macro = MacroEnv.lookup(symb).get();
     
     try {
-      var xform = macro.apply(vm, args);
-      
+      var xform = applyMacro(macro, args);
       if (Config.LOG_DEBUG)
         log.info(() -> String.format("macro transform: %s => %s", exp.repr(), xform.repr()));
-      
       return compile(xform, scope, tail, next);
     }
     catch (Error err) {
-      // Either the evaluation of the macro procedure or the compilation of its resulting transformation threw an exception
       err.setPosition(positionMap.get(exp));
       throw err;
     }
   }
-    
-  /* Determine if a symbol is bound to a macro */
   
-  private boolean isMacro(Symbol s)
+  private Datum applyMacro(Procedure proc, List args)
   {
-    return MacroEnv.lookup(s).isPresent();
+    int numArgs = args.length();
+    if (!proc.sig().matches(numArgs))
+      throw new WrongNumberArgs();
+    vm.pushFrame(null, null);
+    vm.args = args;
+    vm.eval(proc.body());
+    return vm.result;
   }
   
-  /* Compile a combination, handling special forms, procedure application, and macro expansion. */
+  /* Compile a combination (i.e., special forms, procedure application, and macro expansion. */
   
   private Inst compileCombo(List exp, Scope scope, boolean tail, Inst next)
   {
     // Handle special forms
     if (exp.car().type().isSymbol()) {
       var car = (Symbol) exp.car();
-      if (car.isEqual(Symbol.IF))
+      if (car.equals(Symbol.IF))
         return compileIf(exp, scope, tail, next);
-      if (car.isEqual(Symbol.LET))
+      if (car.equals(Symbol.LET))
         return compileLet(exp, scope, tail, next);
-      if (car.isEqual(Symbol.LETSTAR))
+      if (car.equals(Symbol.LETSTAR))
         return compileLetStar(exp, scope, tail, next);
-      if (car.isEqual(Symbol.LETREC))
+      if (car.equals(Symbol.LETREC))
         return compileLetRec(exp, scope, tail, next);
-      if (car.isEqual(Symbol.DO))
+      if (car.equals(Symbol.DO))
         return compileDo(exp, scope, tail, next);
-      if (car.isEqual(Symbol.DEF))
+      if (car.equals(Symbol.DEF))
         return compileDef(exp, scope, next);
-      if (car.isEqual(Symbol.DEFUN))
+      if (car.equals(Symbol.DEFUN))
         return compileDefun(exp, scope, next);
-      if (car.isEqual(Symbol.DEFMACRO))
+      if (car.equals(Symbol.DEFMACRO))
         return compileDefMacro(exp, scope, next);
-      if (car.isEqual(Symbol.FUN))
+      if (car.equals(Symbol.FUN))
         return compileFun(exp, scope, next);
-      if (car.isEqual(Symbol.QUOTE))
+      if (car.equals(Symbol.QUOTE))
         return compileQuote(exp, next);
-      if (car.isEqual(Symbol.QUASIQUOTE))
+      if (car.equals(Symbol.QUASIQUOTE))
         return compileQuasiquote(exp, scope, next);
-      if (car.isEqual(Symbol.OR))
+      if (car.equals(Symbol.OR))
         return compileOr(exp, scope, tail, next);
-      if (car.isEqual(Symbol.AND))
+      if (car.equals(Symbol.AND))
         return compileAnd(exp, scope, tail, next);
-      if (car.isEqual(Symbol.COND))
+      if (car.equals(Symbol.COND))
         return compileCond(exp, scope, tail, next);      
-      if (car.isEqual(Symbol.SET))
+      if (car.equals(Symbol.SET))
         return compileSet(exp, scope, next);
-      if (car.isEqual(Symbol.WHILE))
+      if (car.equals(Symbol.WHILE))
         return compileWhile(exp, scope, tail, next);
-      if (car.isEqual(Symbol.FOR))
+      if (car.equals(Symbol.FOR))
         return compileForLoop(exp, scope, tail, next);
-      if (car.isEqual(Symbol.CALL_CC))
+      if (car.equals(Symbol.CALL_CC))
         return compileCallCC(exp, scope, tail, next);
       // Handle macro expansion
-      if (isMacro(car))
+      if (MacroEnv.contains(car))
         return compileApplyMacro(exp, scope, tail, next);
     }
     
