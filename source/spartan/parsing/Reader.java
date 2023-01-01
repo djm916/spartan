@@ -2,6 +2,7 @@ package spartan.parsing;
 
 import java.io.*;
 import java.nio.file.Path;
+import java.util.function.Consumer;
 import spartan.data.*;
 import spartan.errors.SyntaxError;
 import spartan.Config;
@@ -75,7 +76,14 @@ public class Reader implements AutoCloseable
       return null;
     return new SourceDatum(readDatum(), positionMap);
   }
-
+  
+  public void forEach(Consumer<SourceDatum> consumer)
+  {
+    SourceDatum exp = null;
+    while ((exp = read()) != null)
+      consumer.accept(exp);
+  }
+  
   public void close()
   {
     try {

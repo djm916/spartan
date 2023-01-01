@@ -62,14 +62,8 @@ public final class Loader
       var vm = new VirtualMachine();
       var compiler = new Compiler(vm);
       
-      //TODO: Better handling of errors bubbling up from loaded file
       try {
-        while (true) {
-          var exp = reader.read();
-          if (exp == null)
-            break;
-          vm.eval(compiler.compile(exp));
-        }
+        reader.forEach(exp -> vm.eval(compiler.compile(exp)));
       }
       catch (Error err) {
         System.err.println(err);
