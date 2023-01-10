@@ -15,12 +15,22 @@ public final class LocalEnv
     return parent;
   }
   
+  Datum load0(int offset)
+  {
+    return slots[offset];
+  }
+  
   Datum load(int depth, int offset)
   {
     LocalEnv self = this;
     for (; depth > 0; --depth)
       self = self.parent;
     return self.slots[offset];
+  }
+  
+  void store0(Datum x, int offset)
+  {
+    slots[offset] = x;
   }
   
   void store(Datum x, int depth, int offset)

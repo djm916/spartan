@@ -88,7 +88,10 @@ public class Compiler
   
   private Inst compileLocalVarRef(DeBruijnIndex index, Inst next)
   {
-    return new LoadLocal(index.depth(), index.offset(), next);
+    if (index.depth() == 0)
+      return new LoadLocal0(index.offset(), next);
+    else
+      return new LoadLocal(index.depth(), index.offset(), next);
   }
   
   private Inst compileGlobalVarRef(Symbol symb, Inst next)
@@ -122,8 +125,12 @@ public class Compiler
   
   private Inst compileLocalVarSet(DeBruijnIndex index, Inst next)
   {
-    return new StoreLocal(index.depth(), index.offset(),
-           new LoadConst(Nil.VALUE, next));
+    if (index.depth() == 0)
+      return new StoreLocal0(index.offset(),
+             new LoadConst(Nil.VALUE, next));
+    else
+      return new StoreLocal(index.depth(), index.offset(),
+             new LoadConst(Nil.VALUE, next));
   }
   
   private Inst compileGlobalVarSet(Symbol symb, Inst next)
@@ -373,7 +380,7 @@ public class Compiler
       return next;
 
     return compile(inits.car(), scope, false,
-                   new StoreLocal(0, offset,
+                   new StoreLocal0(offset,
                    compileRecursiveBindings(inits.cdr(), offset + 1, scope,
                    next)));
   }
@@ -383,7 +390,7 @@ public class Compiler
     if (offset >= numBindings)
       return next;
     else
-      return new StoreLocal(0, offset,
+      return new StoreLocal0(offset,
              compileInitEnv(offset + 1, numBindings, next));
   }
   
@@ -436,7 +443,7 @@ public class Compiler
     var init = binding.cadr();
 
     return compile(init, scope, false,
-                   new StoreLocal(0, offset,
+                   new StoreLocal0(offset,
                    compileSequentialBindings(bindings.cdr(), offset + 1, scope.bind(symb),
                    next)));
   }
@@ -639,7 +646,7 @@ public class Compiler
       return next;
 
     return new PopArg(
-           new StoreLocal(0, offset,
+           new StoreLocal0(offset,
            compileBindLocals(offset + 1, numBindings, next)));
   }
   
@@ -1097,7 +1104,7 @@ public class Compiler
     return new PushEnv(requiredArgs + 1,
                compileBindLocals(0, requiredArgs,
                new PopRestArgs(
-               new StoreLocal(0, requiredArgs,
+               new StoreLocal0(requiredArgs,
                compileBody(body, scope,
                new PopFrame())))));
   }

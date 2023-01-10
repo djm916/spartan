@@ -1,7 +1,7 @@
 package spartan.runtime;
 
 public final class LoadLocal extends Inst
-{  
+{
   public LoadLocal(int depth, int offset, Inst next)
   {
     super(next);
