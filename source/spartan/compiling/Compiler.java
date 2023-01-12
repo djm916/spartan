@@ -337,18 +337,18 @@ public class Compiler
 
      Compilation:
 
-     push-env N
-     load-const nil
+     push-env N                ; Extend local environment
+     load-const nil            ; Initialize bindings to NIL value
      store-local 0 0
      ...
      store-local 0 N-1
-     <<init1>>
-     store-local 0 0
+     <<init1>>                 ; Evaluate initializer expression
+     store-local 0 0           
      ...
      <<initN>>
      store-local 0 N-1
-     <<body>>
-     pop-env
+     <<body>>                  ; Evaluate body in extended environment
+     pop-env                   ; Discard local environment
   */
   private Inst compileLetRec(List exp, Scope scope, boolean tail, Inst next)
   {
@@ -368,30 +368,33 @@ public class Compiler
 
     return new PushEnv(numBindings,
            new LoadConst(Nil.VALUE,
-           compileInitEnv(0, numBindings,
+           compileInitRecEnv(0, numBindings,
            compileRecursiveBindings(inits, 0, extendedScope,
            compileSequence(body, extendedScope, tail,
            new PopEnv(next))))));
   }
-
+  
+  /* Compile the binding sequence of a letrec expression */
+  
   private Inst compileRecursiveBindings(List inits, int offset, Scope scope, Inst next)
   {
     if (inits == List.EMPTY)
       return next;
 
     return compile(inits.car(), scope, false,
-                   new StoreLocal0(offset,
-                   compileRecursiveBindings(inits.cdr(), offset + 1, scope,
-                   next)));
+           new StoreLocal0(offset,
+           compileRecursiveBindings(inits.cdr(), offset + 1, scope, next)));
   }
-
-  private static Inst compileInitEnv(int offset, int numBindings, Inst next)
+  
+  /* Compile the initiation sequence of a letrec expression. */
+  
+  private static Inst compileInitRecEnv(int offset, int numBindings, Inst next)
   {
     if (offset >= numBindings)
       return next;
     else
       return new StoreLocal0(offset,
-             compileInitEnv(offset + 1, numBindings, next));
+             compileInitRecEnv(offset + 1, numBindings, next));
   }
   
   /* Compiles the "let*" special form
@@ -1132,7 +1135,7 @@ public class Compiler
     if (!checkParamListForm(params))
       throw malformedExp(exp);
     
-    MacroEnv.bind(symb, makeProcedure(params, body, Scope.EMPTY));
+    MacroEnv.bind(symb, new Macro(makeProcedure(params, body, Scope.EMPTY)));
     return new LoadConst(Nil.VALUE, next);
   }
   
@@ -1152,7 +1155,7 @@ public class Compiler
     var macro = MacroEnv.lookup(symb).get();
     
     try {
-      var xform = applyMacro(macro, args);
+      var xform = macro.apply(vm, args);
       if (Config.LOG_DEBUG)
         log.info(() -> String.format("macro transform: %s => %s", exp.repr(), xform.repr()));
       return compile(xform, scope, tail, next);
@@ -1161,17 +1164,6 @@ public class Compiler
       err.setPosition(positionMap.get(exp));
       throw err;
     }
-  }
-  
-  private Datum applyMacro(Procedure proc, List args)
-  {
-    int numArgs = args.length();
-    if (!proc.sig().matches(numArgs))
-      throw new WrongNumberArgs();
-    vm.pushFrame(null, null);
-    vm.args = args;
-    vm.eval(proc.body());
-    return vm.result;
   }
   
   /* Compile a combination (i.e., special forms, procedure application, and macro expansion. */
