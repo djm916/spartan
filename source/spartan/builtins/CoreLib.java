@@ -3,6 +3,7 @@ package spartan.builtins;
 import spartan.data.*;
 import spartan.errors.Error;
 import spartan.errors.TypeMismatch;
+import spartan.errors.InvalidArgument;
 import spartan.runtime.VirtualMachine;
 import spartan.Config;
 import spartan.parsing.Reader;
@@ -163,6 +164,21 @@ public final class CoreLib
         throw new TypeMismatch();
       var text = (Text) vm.popArg();
       vm.result = text.encode(Config.DEFAULT_ENCODING);
+      vm.popFrame();
+    }
+  };
+  
+  public static final Primitive TEXT_TO_INT = new Primitive(1, false) {
+    public void apply(VirtualMachine vm) {
+      if (vm.peekArg().type() != Type.TEXT)
+        throw new TypeMismatch();
+      var text = (Text) vm.popArg();
+      try {
+        vm.result = new Int(text.str());
+      }
+      catch (NumberFormatException ex) {
+        throw new InvalidArgument();
+      }
       vm.popFrame();
     }
   };

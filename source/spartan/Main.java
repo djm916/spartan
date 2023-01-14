@@ -4,6 +4,7 @@ import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
+import picocli.CommandLine.ITypeConverter;
 import java.util.concurrent.Callable;
 import java.util.logging.Logger;
 import spartan.data.List;
@@ -13,8 +14,18 @@ import spartan.runtime.GlobalEnv;
 import spartan.errors.Error;
 import spartan.errors.LoadError;
 
-@Command(name = "Spartan",
-         description = "The Spartan interpreter CLI",
+class TextConverter implements ITypeConverter<Text> {
+  public Text convert(String arg) {
+    return new Text(arg);
+  }
+};
+
+@Command(name = "spartan",
+         description = """
+Invoke the Spartan interpreter.
+If no script is given, starts interactive mode.
+Otherwise, executes the given script, passing the given arguments.
+""",
          mixinStandardHelpOptions = true,
          showEndOfOptionsDelimiterInUsageHelp = true,
          sortOptions = false)
@@ -23,13 +34,13 @@ public class Main implements Callable<Integer>
 {
   private static final Logger log = Logger.getLogger(Main.class.getName());
   
-  // Path to the script file to execute (or null if none given)
-  @Option(names = "--file", paramLabel = "path", description = "path to script file")
+  // Optional script to execute
+  @Parameters(index = "0", arity = "0..1", paramLabel = "script", description = "script path")
   private String scriptPath;
   
   // List of arguments passed to the script (or null if none given)
-  @Parameters(paramLabel = "args", description = "script arguments")
-  private String[] scriptArgs;
+  @Parameters(index = "1", arity = "0..*", paramLabel = "args", description = "script arguments", converter = TextConverter.class)
+  private Text[] scriptArgs = new Text[0];
   
   public static void main(String[] args) //throws java.io.IOException
   {
@@ -56,13 +67,10 @@ public class Main implements Callable<Integer>
       System.err.println(err.getMessage());
     }
     
-    // Bind list of system arguments
-    GlobalEnv.bind(new Symbol("sys/args"), makeArgsList());
-    
-    if (scriptPath == null) {
-      Repl.start();      
-    }
-    else {
+    if (scriptPath != null) {
+      // Bind symbol containing the list of script arguments, as string/text values
+      GlobalEnv.bind(Symbol.of("sys/args"), List.of(scriptArgs));
+      
       try {
         Loader.load(scriptPath);
       }
@@ -70,20 +78,10 @@ public class Main implements Callable<Integer>
         System.err.println(err.getMessage());
       }
     }
-    
+    else {
+      Repl.start();
+    }
+
     return 0;
-  }
-  
-  private List makeArgsList()
-  {
-    if (scriptArgs == null)
-      return List.EMPTY;
-    
-    List args = List.EMPTY;
-    
-    for (int i = scriptArgs.length - 1; i >= 0; --i)
-      args = List.cons(new Text(scriptArgs[i]), args);
-    
-    return args;
   }
 }

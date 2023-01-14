@@ -145,6 +145,7 @@ public final class GlobalEnv
     bind(Symbol.of("string->bytes"), CoreLib.TEXT_TO_BYTES); // encode
     bind(Symbol.of("bytes->string"), CoreLib.BYTES_TO_TEXT); // decode
     //bind(Symbol.of("string->number"), CoreLib.TEXT_TO_NUMBER);
+    bind(Symbol.of("string->int"), CoreLib.TEXT_TO_INT);
     
     /* List procedures */
 
