@@ -1,6 +1,6 @@
 package spartan.data;
 
-public final class Symbol implements Datum, IEq<Symbol>   
+public final class Symbol implements Datum, IEq   
 {
   private static WeakCache<String, Symbol> cache = new WeakCache<>();
   private static int nextUniqueId;
@@ -58,9 +58,9 @@ public final class Symbol implements Datum, IEq<Symbol>
   }
   
   @Override // Object
-  public boolean equals(Object that)
+  public boolean equals(Object rhs)
   {
-    return (that instanceof Symbol) && this.id.equals(((Symbol)that).id);
+    return (rhs instanceof Symbol s) && id.equals(s.id);
   }
   
   @Override // Object
@@ -70,11 +70,11 @@ public final class Symbol implements Datum, IEq<Symbol>
   }
   
   @Override // IEq
-  public boolean isEqual(Symbol that)
+  public boolean isEqual(Symbol rhs)
   {
-    return this.id.equals(that.id);
+    return this == rhs;
   }
-    
+  
   /**
    * Create a new, uninterned symbol for the given identifier
    */

@@ -5,7 +5,7 @@ import java.nio.CharBuffer;
 import spartan.errors.TypeMismatch;
 import spartan.errors.IndexOutOfBounds;
 
-public final class Text implements Datum, IEq<Text>, IOrd<Text>, ISize
+public final class Text implements Datum, IEq, IOrd<Text>, ISize
 {
   public Text(String value)
   {
@@ -37,9 +37,9 @@ public final class Text implements Datum, IEq<Text>, IOrd<Text>, ISize
   }
   
   @Override // Object
-  public boolean equals(Object other)
+  public boolean equals(Object rhs)
   {
-    return (other instanceof Text that) && this.value.equals(that.value);
+    return (rhs instanceof Text s) && value.equals(s.value);
   }
   
   @Override // Object
@@ -49,15 +49,15 @@ public final class Text implements Datum, IEq<Text>, IOrd<Text>, ISize
   }
   
   @Override // IEq
-  public boolean isEqual(Text other)
+  public boolean isEqual(Text rhs)
   {
-    return this.value.equals(other.value);
+    return value.equals(rhs.value);
   }
   
   @Override // IEq
   public int compareTo(Text other)
   {
-    return this.value.compareTo(other.value);
+    return value.compareTo(other.value);
   }
   
   public Bytes encode(Charset encoding)

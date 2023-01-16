@@ -4,7 +4,7 @@ import java.math.BigInteger;
 import spartan.errors.DivisionByZero;
 import spartan.errors.IntegerOverflow;
 
-public final class Int implements Datum, INum, IInt, IReal, IEq<Int>, IOrd<Int>
+public final class Int implements Datum, INum, IInt, IReal, IEq, IOrd<Int>
 {
   public Int(int value)
   {
@@ -280,18 +280,6 @@ public final class Int implements Datum, INum, IInt, IReal, IEq<Int>, IOrd<Int>
     return this;
   }
   
-  @Override // IEq
-  public boolean isEqual(Int that)
-  {
-    return this.value == that.value;
-  }
-  
-  @Override // IOrd
-  public int compareTo(Int that)
-  {
-    return Integer.compare(this.value, that.value);
-  }
-  
   @Override
   public Real sin()
   {
@@ -387,6 +375,42 @@ public final class Int implements Datum, INum, IInt, IReal, IEq<Int>, IOrd<Int>
   {
     return toComplex().log(rhs);
   }
+    
+  @Override // IEq
+  public boolean isEqual(Int rhs)  
+  {
+    return this.value == rhs.value;
+  }
   
+  @Override // IEq
+  public boolean isEqual(BigInt rhs)
+  {
+    return toBigInt().isEqual(rhs);
+  }
+  
+  @Override // IEq
+  public boolean isEqual(Ratio rhs)  
+  {
+    return toRatio().isEqual(rhs);
+  }
+  
+  @Override // IEq
+  public boolean isEqual(Real rhs)  
+  {
+    return toReal().isEqual(rhs);
+  }
+  
+  @Override // IEq
+  public boolean isEqual(Complex rhs)  
+  {
+    return toComplex().isEqual(rhs);
+  }
+  
+  @Override // IOrd
+  public int compareTo(Int that)
+  {
+    return Integer.compare(this.value, that.value);
+  }
+    
   private final int value;
 }

@@ -1,6 +1,6 @@
 package spartan.data;
 
-public final class Complex implements Datum, INum, IEq<Complex>
+public final class Complex implements Datum, INum, IEq
 {
   public static final Complex I = new Complex(0.0, 1.0);
     
@@ -74,9 +74,33 @@ public final class Complex implements Datum, INum, IEq<Complex>
   }
   
   @Override // IEq
-  public boolean isEqual(Complex that)
+  public boolean isEqual(Int rhs)  
   {
-    return this.real == that.real && this.imag == that.imag;
+    return isEqual(rhs.toComplex());
+  }
+  
+  @Override // IEq
+  public boolean isEqual(BigInt rhs)
+  {
+    return isEqual(rhs.toComplex());
+  }
+  
+  @Override // IEq
+  public boolean isEqual(Ratio rhs)  
+  {
+    return isEqual(rhs.toComplex());
+  }
+  
+  @Override // IEq
+  public boolean isEqual(Real rhs)
+  {
+    return isEqual(rhs.toComplex());
+  }
+  
+  @Override // IEq
+  public boolean isEqual(Complex rhs)
+  {
+    return this.real == rhs.real && this.imag == rhs.imag;
   }
   
   @Override

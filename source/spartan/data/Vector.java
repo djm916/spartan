@@ -14,7 +14,7 @@ import spartan.errors.InvalidArgument;
 import spartan.runtime.VirtualMachine;
 import spartan.builtins.Core;
 
-public final class Vector implements Datum, Callable, IEq<Vector>, ISize, Iterable<Datum>
+public final class Vector implements Datum, Callable, ISize, Iterable<Datum>
 {
   public static Vector fromList(List elems)
   {
@@ -114,7 +114,7 @@ public final class Vector implements Datum, Callable, IEq<Vector>, ISize, Iterab
       elems.set(i, x);
   }
 
-  @Override // IEq
+  //@Override // IEq
   public boolean isEqual(Vector other)
   {
     if (this.length() != other.length())

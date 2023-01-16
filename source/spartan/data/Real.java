@@ -2,7 +2,7 @@ package spartan.data;
 
 import spartan.errors.IntegerOverflow;
 
-public final class Real implements Datum, INum, IReal, IEq<Real>, IOrd<Real>
+public final class Real implements Datum, INum, IReal, IEq, IOrd<Real>
 {
   public static final Real PI = new Real(Math.PI);
   public static final Real E = new Real(Math.E);
@@ -296,9 +296,33 @@ public final class Real implements Datum, INum, IReal, IEq<Real>, IOrd<Real>
   }
   
   @Override // IEq
-  public boolean isEqual(Real that)
+  public boolean isEqual(Int rhs)  
   {
-    return this.value == that.value;
+    return isEqual(rhs.toReal());
+  }
+  
+  @Override // IEq
+  public boolean isEqual(BigInt rhs)
+  {
+    return isEqual(rhs.toReal());
+  }
+  
+  @Override // IEq
+  public boolean isEqual(Ratio rhs)  
+  {
+    return isEqual(rhs.toReal());
+  }
+  
+  @Override // IEq
+  public boolean isEqual(Real rhs)
+  {
+    return this.value == rhs.value;
+  }
+  
+  @Override // IEq
+  public boolean isEqual(Complex rhs)  
+  {
+    return toComplex().isEqual(rhs);
   }
   
   @Override // IOrd

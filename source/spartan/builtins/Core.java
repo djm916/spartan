@@ -22,81 +22,10 @@ public final class Core
   }
   
   public static boolean isEqual(Datum x, Datum y)
-  {    
-    switch (x.type()) {
-      case INT: {
-        switch (y.type()) {
-          case INT:     return ((Int)x).isEqual((Int)y);
-          case BIGINT:  return ((Int)x).toBigInt().isEqual((BigInt)y);
-          case RATIO:   return ((Int)x).toRatio().isEqual((Ratio)y);
-          case REAL:    return ((Int)x).toReal().isEqual((Real)y);
-          case COMPLEX: return ((Int)x).toComplex().isEqual((Complex)y);
-        }
-        break;
-      }
-      case BIGINT: {
-        switch (y.type()) {
-          case INT:     return ((BigInt)x).isEqual(((Int)y).toBigInt());
-          case BIGINT:  return ((BigInt)x).isEqual((BigInt)y);
-          case RATIO:   return ((BigInt)x).toRatio().isEqual((Ratio)y);
-          case REAL:    return ((BigInt)x).toReal().isEqual((Real)y);
-          case COMPLEX: return ((BigInt)x).toComplex().isEqual((Complex)y);
-        }
-        break;
-      }
-      case RATIO: {
-        switch (y.type()) {
-          case INT:     return ((Ratio)x).isEqual(((Int)y).toRatio());
-          case BIGINT:  return ((Ratio)x).isEqual(((BigInt)y).toRatio());
-          case RATIO:   return ((Ratio)x).isEqual((Ratio)y);
-          case REAL:    return ((Ratio)x).toReal().isEqual((Real)y);
-          case COMPLEX: return ((Ratio)x).toComplex().isEqual((Complex)y);
-        }
-        break;
-      }
-      case REAL: {
-        switch (y.type()) {
-          case INT:     return ((Real)x).isEqual(((Int)y).toReal());
-          case BIGINT:  return ((Real)x).isEqual(((BigInt)y).toReal());
-          case RATIO:   return ((Real)x).isEqual(((Ratio)y).toReal());
-          case REAL:    return ((Real)x).isEqual((Real)y);
-          case COMPLEX: return ((Real)x).toComplex().isEqual((Complex)y);
-        }
-        break;
-      }
-      case COMPLEX: {
-        switch (y.type()) {
-          case INT:     return ((Complex)x).isEqual(((Int)y).toComplex());
-          case BIGINT:  return ((Complex)x).isEqual(((BigInt)y).toComplex());
-          case RATIO:   return ((Complex)x).isEqual(((Ratio)y).toComplex());
-          case REAL:    return ((Complex)x).isEqual(((Real)y).toComplex());
-          case COMPLEX: return ((Complex)x).isEqual((Complex)y);
-        }
-        break;
-      }
-      case TEXT: {
-        switch (y.type()) {
-          case TEXT: return ((Text)x).isEqual((Text)y);
-        }
-        break;
-      }
-      case VECTOR: {
-        switch (y.type()) {
-          case VECTOR: return ((Vector)x).isEqual((Vector)y);
-        }
-        break;
-      }
-      case LIST: {
-        switch (y.type()) {
-          case LIST: return ((List)x).isEqual((List)y);
-        }
-        break;
-      }
-      case SYMBOL:
-      case BOOL:
-      case NIL: return x == y;
-    }
-    return false;
+  {
+    if (x instanceof IEq lhs && y instanceof IEq rhs)
+      return lhs.isEqual(rhs);
+    throw new TypeMismatch();
   }
   
   public static int compareTo(Datum x, Datum y)

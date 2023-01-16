@@ -12,7 +12,7 @@ import spartan.errors.TypeMismatch;
 import spartan.errors.NoSuchElement;
 import spartan.builtins.Core;
 
-public class List implements Datum, IEq<List>, ISize, Iterable<Datum>
+public class List implements Datum, ISize, Iterable<Datum>
 {
   public static final List EMPTY = new List(null, null) {
     public boolean empty() {
@@ -178,13 +178,7 @@ public class List implements Datum, IEq<List>, ISize, Iterable<Datum>
       ;
     return list.car();
   }
-  
-  @Override // IEq
-  public boolean isEqual(List other)
-  {
-    return isEqual(this, other);
-  }
-    
+      
   public List append(Datum x)
   {
     return append(this, x);
