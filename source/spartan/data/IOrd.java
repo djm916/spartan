@@ -1,5 +1,43 @@
 package spartan.data;
 
-public interface IOrd<T> {
-  public int compareTo(T other);
+import spartan.errors.TypeMismatch;
+
+public sealed interface IOrd
+permits Int, BigInt, Ratio, Real, Text
+{
+  default int compareTo(IOrd rhs)
+  {
+    return switch (rhs) {
+      case Int z -> compareTo(z);
+      case BigInt z -> compareTo(z);
+      case Ratio q -> compareTo(q);
+      case Real r -> compareTo(r);
+      case Text s -> compareTo(s);
+    };
+  }
+  
+  default int compareTo(Int rhs)
+  {
+    throw new TypeMismatch();
+  }
+  
+  default int compareTo(BigInt rhs)
+  {
+    throw new TypeMismatch();
+  }
+  
+  default int compareTo(Ratio rhs)
+  {
+    throw new TypeMismatch();
+  }
+  
+  default int compareTo(Real rhs)
+  {
+    throw new TypeMismatch();
+  }
+  
+  default int compareTo(Text rhs)
+  {
+    throw new TypeMismatch();
+  }
 }

@@ -3,7 +3,7 @@
 
 (defun prime-sieve (n)
   (defun prime-sieve (xs)
-    (if (= () xs) ()
+    (if (empty? xs) ()
       (let* ((x (car xs))
              (xs (filter (not-factor? x) xs)))
         (cons x (prime-sieve xs)))))

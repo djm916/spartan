@@ -4,7 +4,7 @@ import java.math.BigInteger;
 import spartan.errors.DivisionByZero;
 import spartan.errors.IntegerOverflow;
 
-public final class BigInt implements Datum, INum, IInt, IReal, IEq, IOrd<BigInt>
+public final class BigInt implements Datum, INum, IInt, IReal, IEq, IOrd
 {
   public BigInt(long value)
   {
@@ -91,13 +91,31 @@ public final class BigInt implements Datum, INum, IInt, IReal, IEq, IOrd<BigInt>
   {
     return toComplex().isEqual(rhs);
   }
-    
+  
   @Override // IOrd
-  public int compareTo(BigInt that)
+  public int compareTo(Int rhs)
   {
-    return this.value.compareTo(that.value);
+    return compareTo(rhs.toBigInt());
   }
   
+  @Override // IOrd
+  public int compareTo(BigInt rhs)
+  {
+    return this.value.compareTo(rhs.value);
+  }
+  
+  @Override // IOrd
+  public int compareTo(Ratio rhs)
+  {
+    return toRatio().compareTo(rhs);
+  }
+  
+  @Override // IOrd
+  public int compareTo(Real rhs)
+  {
+    return toReal().compareTo(rhs);
+  }
+      
   public Ratio toRatio()
   {
     return new Ratio(value, BigInteger.ONE);

@@ -3,7 +3,7 @@ package spartan.data;
 import java.math.BigInteger;
 import spartan.errors.InvalidArgument;
 
-public final class Ratio implements Datum, INum, IReal, IEq, IOrd<Ratio>
+public final class Ratio implements Datum, INum, IReal, IEq, IOrd
 {
   public Ratio(BigInteger numer, BigInteger denom)
   {
@@ -318,6 +318,18 @@ public final class Ratio implements Datum, INum, IReal, IEq, IOrd<Ratio>
     return toComplex().isEqual(rhs);
   }
   
+  @Override // IEq
+  public int compareTo(Int rhs)
+  {
+    return compareTo(rhs.toRatio());
+  }
+  
+  @Override // IEq
+  public int compareTo(BigInt rhs)
+  {
+    return compareTo(rhs.toRatio());
+  }
+  
   /* Ordering function for rational numbers.     
   
      let x = a/b, y = c/d
@@ -327,12 +339,12 @@ public final class Ratio implements Datum, INum, IReal, IEq, IOrd<Ratio>
            => (a*d) < (b*c)
   */
   @Override // IEq
-  public int compareTo(Ratio other)
+  public int compareTo(Ratio rhs)
   {
     var a = this.numer;
     var b = this.denom;
-    var c = other.numer;
-    var d = other.denom;
+    var c = rhs.numer;
+    var d = rhs.denom;
     
     // Same denominator, compare by numerator
     if (b.equals(d))
@@ -341,7 +353,7 @@ public final class Ratio implements Datum, INum, IReal, IEq, IOrd<Ratio>
     return a.multiply(d).compareTo(b.multiply(c));
   }
     
-   @Override
+  @Override
   public Real sin()
   {
     return toReal().sin();
