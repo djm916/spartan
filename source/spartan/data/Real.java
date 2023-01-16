@@ -2,7 +2,7 @@ package spartan.data;
 
 import spartan.errors.IntegerOverflow;
 
-public final class Real implements Datum, Numeric, IEq<Real>, IOrd<Real>
+public final class Real implements Datum, INum, IReal, IEq<Real>, IOrd<Real>
 {
   public static final Real PI = new Real(Math.PI);
   public static final Real E = new Real(Math.E);
@@ -49,41 +49,40 @@ public final class Real implements Datum, Numeric, IEq<Real>, IOrd<Real>
     return new Complex(value, 0.0);
   }
   
+  @Override
+  public double doubleValue()
+  {
+    return value;
+  }
+  
+  @Override
   public Real neg()
   {
     return new Real(-value);
   }
   
+  @Override
   public Real abs()
   {
     return new Real(Math.abs(value));
   }
   
+  @Override
   public Real floor()
   {
     return new Real(Math.floor(value));
   }
   
+  @Override
   public Real ceiling()
   {
     return new Real(Math.ceil(value));
   }
   
+  @Override
   public Real round()
   {
     return new Real(Math.round(value));
-  }
-    
-  public Real exp(Real that)
-  {
-    return new Real(Math.pow(this.value, that.value));
-  }
-  
-  public Real log(Real that)
-  {
-    // log_b (x) = ln (x) / ln (b)
-    
-    return new Real(Math.log(this.value) / Math.log(that.value));
   }
   
   public Real sin()
@@ -116,14 +115,82 @@ public final class Real implements Datum, Numeric, IEq<Real>, IOrd<Real>
     return new Real(Math.atan(value));
   }
   
+  @Override
+  public Real add(Int rhs)
+  {
+    return add(rhs.toReal());
+  }
+  
+  @Override
+  public Real add(BigInt rhs)
+  {
+    return add(rhs.toReal());
+  }
+  
+  @Override
+  public Real add(Ratio rhs)
+  {
+    return add(rhs.toReal());
+  }
+  
+  @Override
   public Real add(Real that)
   {
     return new Real(this.value + that.value);
   }
   
+  @Override
+  public Complex add(Complex rhs)
+  {
+    return toComplex().add(rhs);
+  }
+  
+  @Override
+  public Real sub(Int rhs)
+  {
+    return sub(rhs.toReal());
+  }
+  
+  @Override
+  public Real sub(BigInt rhs)
+  {
+    return sub(rhs.toReal());
+  }
+  
+  @Override
+  public Real sub(Ratio rhs)
+  {
+    return sub(rhs.toReal());
+  }
+  
+  @Override
   public Real sub(Real that)
   {
     return new Real(this.value - that.value);
+  }
+  
+  @Override
+  public Complex sub(Complex rhs)
+  {
+    return toComplex().sub(rhs);
+  }
+  
+  @Override
+  public Real mul(Int rhs)
+  {
+    return mul(rhs.toReal());
+  }
+  
+  @Override
+  public Real mul(BigInt rhs)
+  {
+    return mul(rhs.toReal());
+  }
+  
+  @Override
+  public Real mul(Ratio rhs)
+  {
+    return mul(rhs.toReal());
   }
   
   public Real mul(Real that)
@@ -131,9 +198,101 @@ public final class Real implements Datum, Numeric, IEq<Real>, IOrd<Real>
     return new Real(this.value * that.value);
   }
   
-  public Real div(Real that)
+  @Override
+  public Complex mul(Complex rhs)
   {
-    return new Real(this.value / that.value);
+    return toComplex().mul(rhs);
+  }
+  
+  @Override
+  public Real div(Int rhs)
+  {
+    return div(rhs.toReal());
+  }
+  
+  @Override
+  public Real div(BigInt rhs)
+  {
+    return div(rhs.toReal());
+  }
+  
+  @Override
+  public Real div(Ratio rhs)
+  {
+    return div(rhs.toReal());
+  }
+  
+  @Override
+  public Real div(Real rhs)
+  {
+    return new Real(this.value / rhs.value);
+  }
+  
+  @Override
+  public Complex div(Complex rhs)
+  {
+    return toComplex().div(rhs);
+  }
+  
+  @Override
+  public Real exp(Int rhs)
+  {
+    return exp(rhs.toReal());
+  }
+  
+  @Override
+  public Real exp(BigInt rhs)
+  {
+    return exp(rhs.toReal());
+  }
+  
+  @Override
+  public Real exp(Ratio rhs)
+  {
+    return exp(rhs.toReal());
+  }
+  
+  @Override
+  public Real exp(Real rhs)
+  {
+    return new Real(Math.pow(this.value, rhs.value));
+  }
+  
+  @Override
+  public Complex exp(Complex rhs)
+  {
+    return toComplex().exp(rhs);
+  }
+  
+  @Override
+  public Real log(Int rhs)
+  {
+    return log(rhs.toReal());
+  }
+  
+  @Override
+  public Real log(BigInt rhs)
+  {
+    return log(rhs.toReal());
+  }
+  
+  @Override
+  public Real log(Ratio rhs)
+  {
+    return log(rhs.toReal());
+  }
+  
+  @Override
+  public Real log(Real rhs)
+  {
+    // log_b (x) = ln (x) / ln (b)
+    return new Real(Math.log(this.value) / Math.log(rhs.value));
+  }
+  
+  @Override
+  public Complex log(Complex rhs)
+  {
+    return toComplex().log(rhs);
   }
   
   @Override // IEq
@@ -148,5 +307,5 @@ public final class Real implements Datum, Numeric, IEq<Real>, IOrd<Real>
     return Double.compare(this.value, that.value);
   }
   
-  public final double value;
+  private final double value;
 }

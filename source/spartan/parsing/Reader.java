@@ -334,7 +334,7 @@ public class Reader implements AutoCloseable
     
   */
     
-  private Numeric readNumber()
+  private INum readNumber()
   {
     var text = new StringBuilder();
     var position = getTokenPosition();
@@ -373,7 +373,7 @@ public class Reader implements AutoCloseable
     return makeInt(text.toString());
   }
 
-  private Integral makeInt(String text)
+  private IInt makeInt(String text)
   {
     try {
       return new Int(text);

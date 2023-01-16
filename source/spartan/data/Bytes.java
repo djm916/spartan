@@ -13,9 +13,9 @@ public final class Bytes implements Datum
   {
     var result = new Bytes(elems.length());
     for (; !elems.empty(); elems = elems.cdr()) {
-      if (!elems.car().type().isInt())
+      if (! (elems.car() instanceof IInt))
         throw new TypeMismatch();
-      var value = ((Integral) elems.car()).intValue();
+      var value = ((IInt) elems.car()).intValue();
       result.push((byte) value);
     }
     result.flip();

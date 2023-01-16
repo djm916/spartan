@@ -5,7 +5,7 @@ import spartan.data.Type;
 import spartan.data.Primitive;
 import spartan.data.Bytes;
 import spartan.data.Int;
-import spartan.data.Integral;
+import spartan.data.IInt;
 import spartan.data.Nil;
 import spartan.data.Bool;
 import spartan.data.List;
@@ -22,9 +22,9 @@ public final class BytesLib
   
   public static final Primitive MAKE_BYTES = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
-      if (!vm.peekArg().type().isInt())
+      if (! (vm.peekArg() instanceof IInt))
         throw new TypeMismatch();
-      var capacity = ((Integral) vm.popArg()).intValue();
+      var capacity = ((IInt) vm.popArg()).intValue();
       vm.result = new Bytes(capacity);
       vm.popFrame();
     }
@@ -32,12 +32,12 @@ public final class BytesLib
   
   public static final Primitive REF = new Primitive(2, false) {
     public void apply(VirtualMachine vm) {
-      if (vm.peekArg().type() != Type.BYTES)
+      if (! (vm.peekArg() instanceof Bytes))
         throw new TypeMismatch();
       var bytes = (Bytes) vm.popArg();
-      if (!vm.peekArg().type().isInt())
+      if (! (vm.peekArg() instanceof IInt))
         throw new TypeMismatch();
-      var index = ((Integral) vm.popArg()).intValue();
+      var index = ((IInt) vm.popArg()).intValue();
       vm.result = new Int(bytes.get(index));
       vm.popFrame();
     }
@@ -45,15 +45,15 @@ public final class BytesLib
   
   public static final Primitive SET = new Primitive(3, false) {
     public void apply(VirtualMachine vm) {
-      if (vm.peekArg().type() != Type.BYTES)
+      if (! (vm.peekArg() instanceof Bytes))
         throw new TypeMismatch();
       var bytes = (Bytes) vm.popArg();
-      if (!vm.peekArg().type().isInt())
+      if (! (vm.peekArg() instanceof IInt))
         throw new TypeMismatch();
-      var index = ((Integral) vm.popArg()).intValue();
-      if (!vm.peekArg().type().isInt())
+      var index = ((IInt) vm.popArg()).intValue();
+      if (! (vm.peekArg() instanceof IInt))
         throw new TypeMismatch();
-      var value = (byte) ((Integral) vm.popArg()).intValue();
+      var value = (byte) ((IInt) vm.popArg()).intValue();
       bytes.set(index, value);
       vm.result = Nil.VALUE;
       vm.popFrame();
@@ -62,12 +62,12 @@ public final class BytesLib
   
   public static final Primitive PUSH = new Primitive(2, false) {
     public void apply(VirtualMachine vm) {
-      if (vm.peekArg().type() != Type.BYTES)
+      if (! (vm.peekArg() instanceof Bytes))
         throw new TypeMismatch();
       var bytes = (Bytes) vm.popArg();
-      if (!vm.peekArg().type().isInt())
+      if (! (vm.peekArg() instanceof IInt))
         throw new TypeMismatch();
-      var value = (byte) ((Integral) vm.popArg()).intValue();
+      var value = (byte) ((IInt) vm.popArg()).intValue();
       bytes.push(value);
       vm.result = Nil.VALUE;
       vm.popFrame();
@@ -76,7 +76,7 @@ public final class BytesLib
   
   public static final Primitive POP = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
-      if (vm.peekArg().type() != Type.BYTES)
+      if (! (vm.peekArg() instanceof Bytes))
         throw new TypeMismatch();
       var bytes = (Bytes) vm.popArg();      
       vm.result = new Int(bytes.pop());
@@ -86,7 +86,7 @@ public final class BytesLib
   
   public static final Primitive FLIP = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
-      if (vm.peekArg().type() != Type.BYTES)
+      if (! (vm.peekArg() instanceof Bytes))
         throw new TypeMismatch();
       var bytes = (Bytes) vm.popArg();
       bytes.flip();
@@ -97,7 +97,7 @@ public final class BytesLib
   
   public static final Primitive CLEAR = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
-      if (vm.peekArg().type() != Type.BYTES)
+      if (! (vm.peekArg() instanceof Bytes))
         throw new TypeMismatch();
       var bytes = (Bytes) vm.popArg();
       bytes.clear();
@@ -108,7 +108,7 @@ public final class BytesLib
   
   public static final Primitive REMAINING = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
-      if (vm.peekArg().type() != Type.BYTES)
+      if (! (vm.peekArg() instanceof Bytes))
         throw new TypeMismatch();
       var bytes = (Bytes) vm.popArg();
       vm.result = new Int(bytes.remaining());
@@ -118,7 +118,7 @@ public final class BytesLib
   
   public static final Primitive IS_EMPTY = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
-      if (vm.peekArg().type() != Type.BYTES)
+      if (! (vm.peekArg() instanceof Bytes))
         throw new TypeMismatch();
       var bytes = (Bytes) vm.popArg();
       vm.result = bytes.remaining() == 0 ? Bool.TRUE : Bool.FALSE;

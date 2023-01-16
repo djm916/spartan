@@ -7,575 +7,148 @@ public final class Math
 {
   public static Datum add(Datum x, Datum y)
   {
-    switch (x.type()) {
-      case INT: {
-        switch (y.type()) {
-          case INT:     return ((Int)x).add((Int)y);
-          case BIGINT:  return ((Int)x).toBigInt().add((BigInt)y);
-          case RATIO:   return ((Int)x).toRatio().add((Ratio)y);
-          case REAL:    return ((Int)x).toReal().add((Real)y);
-          case COMPLEX: return ((Int)x).toComplex().add((Complex)y);
-        }
-        break;
-      }
-      case BIGINT: {
-        switch (y.type()) {
-          case INT:     return ((BigInt)x).add(((Int)y).toBigInt());
-          case BIGINT:  return ((BigInt)x).add((BigInt)y);
-          case RATIO:   return ((BigInt)x).toRatio().add((Ratio)y);
-          case REAL:    return ((BigInt)x).toReal().add((Real)y);
-          case COMPLEX: return ((BigInt)x).toComplex().add((Complex)y);
-        }
-        break;
-      }
-      case RATIO: {
-        switch (y.type()) {
-          case INT:     return ((Ratio)x).add(((Int)y).toRatio());
-          case BIGINT:  return ((Ratio)x).add(((BigInt)y).toRatio());
-          case RATIO:   return ((Ratio)x).add((Ratio)y);
-          case REAL:    return ((Ratio)x).toReal().add((Real)y);
-          case COMPLEX: return ((Ratio)x).toComplex().add((Complex)y);
-        }
-        break;
-      }
-      case REAL: {
-        switch (y.type()) {
-          case INT:     return ((Real)x).add(((Int)y).toReal());
-          case BIGINT:  return ((Real)x).add(((BigInt)y).toReal());
-          case RATIO:   return ((Real)x).add(((Ratio)y).toReal());
-          case REAL:    return ((Real)x).add((Real)y);
-          case COMPLEX: return ((Real)x).toComplex().add((Complex)y);
-        }
-        break;
-      }
-      case COMPLEX: {
-        switch (y.type()) {
-          case INT:     return ((Complex)x).add(((Int)y).toComplex());
-          case BIGINT:  return ((Complex)x).add(((BigInt)y).toComplex());
-          case RATIO:   return ((Complex)x).add(((Ratio)y).toComplex());
-          case REAL:    return ((Complex)x).add(((Real)y).toComplex());
-          case COMPLEX: return ((Complex)x).add((Complex)y);
-        }
-        break;
-      }
-    }
+    if (x instanceof INum lhs && y instanceof INum rhs)
+      return lhs.add(rhs);
     throw new TypeMismatch();
   }
-  
+    
   public static Datum sub(Datum x, Datum y)
   {
-    switch (x.type()) {
-      case INT: {
-        switch (y.type()) {
-          case INT:     return ((Int)x).sub((Int)y);
-          case BIGINT:  return ((Int)x).toBigInt().sub((BigInt)y);
-          case RATIO:   return ((Int)x).toRatio().sub((Ratio)y);
-          case REAL:    return ((Int)x).toReal().sub((Real)y);
-          case COMPLEX: return ((Int)x).toComplex().sub((Complex)y);
-        }
-        break;
-      }
-      case BIGINT: {
-        switch (y.type()) {
-          case INT:     return ((BigInt)x).sub(((Int)y).toBigInt());
-          case BIGINT:  return ((BigInt)x).sub((BigInt)y);
-          case RATIO:   return ((BigInt)x).toRatio().sub((Ratio)y);
-          case REAL:    return ((BigInt)x).toReal().sub((Real)y);
-          case COMPLEX: return ((BigInt)x).toComplex().sub((Complex)y);
-        }
-        break;
-      }
-      case RATIO: {
-        switch (y.type()) {
-          case INT:     return ((Ratio)x).sub(((Int)y).toRatio());
-          case BIGINT:  return ((Ratio)x).sub(((BigInt)y).toRatio());
-          case RATIO:   return ((Ratio)x).sub((Ratio)y);
-          case REAL:    return ((Ratio)x).toReal().sub((Real)y);
-          case COMPLEX: return ((Ratio)x).toComplex().sub((Complex)y);
-        }
-        break;
-      }
-      case REAL: {
-        switch (y.type()) {
-          case INT:     return ((Real)x).sub(((Int)y).toReal());
-          case BIGINT:  return ((Real)x).sub(((BigInt)y).toReal());
-          case RATIO:   return ((Real)x).sub(((Ratio)y).toReal());
-          case REAL:    return ((Real)x).sub((Real)y);
-          case COMPLEX: return ((Real)x).toComplex().sub((Complex)y);
-        }
-        break;
-      }
-      case COMPLEX: {
-        switch (y.type()) {
-          case INT:     return ((Complex)x).sub(((Int)y).toComplex());
-          case BIGINT:  return ((Complex)x).sub(((BigInt)y).toComplex());
-          case RATIO:   return ((Complex)x).sub(((Ratio)y).toComplex());
-          case REAL:    return ((Complex)x).sub(((Real)y).toComplex());
-          case COMPLEX: return ((Complex)x).sub((Complex)y);
-        }
-        break;
-      }
-    }
+    if (x instanceof INum lhs && y instanceof INum rhs)
+      return lhs.sub(rhs);
     throw new TypeMismatch();
   }
   
   public static Datum mul(Datum x, Datum y)
   {
-    switch (x.type()) {
-      case INT: {
-        switch (y.type()) {
-          case INT:     return ((Int)x).mul((Int)y);
-          case BIGINT:  return ((Int)x).toBigInt().mul((BigInt)y);
-          case RATIO:   return ((Int)x).toRatio().mul((Ratio)y);
-          case REAL:    return ((Int)x).toReal().mul((Real)y);
-          case COMPLEX: return ((Int)x).toComplex().mul((Complex)y);
-        }
-        break;
-      }
-      case BIGINT: {
-        switch (y.type()) {
-          case INT:     return ((BigInt)x).mul(((Int)y).toBigInt());
-          case BIGINT:  return ((BigInt)x).mul((BigInt)y);
-          case RATIO:   return ((BigInt)x).toRatio().mul((Ratio)y);
-          case REAL:    return ((BigInt)x).toReal().mul((Real)y);
-          case COMPLEX: return ((BigInt)x).toComplex().mul((Complex)y);
-        }
-        break;
-      }
-      case RATIO: {
-        switch (y.type()) {
-          case INT:     return ((Ratio)x).mul(((Int)y).toRatio());
-          case BIGINT:  return ((Ratio)x).mul(((BigInt)y).toRatio());
-          case RATIO:   return ((Ratio)x).mul((Ratio)y);
-          case REAL:    return ((Ratio)x).toReal().mul((Real)y);
-          case COMPLEX: return ((Ratio)x).toComplex().mul((Complex)y);
-        }
-        break;
-      }
-      case REAL: {
-        switch (y.type()) {
-          case INT:     return ((Real)x).mul(((Int)y).toReal());
-          case BIGINT:  return ((Real)x).mul(((BigInt)y).toReal());
-          case RATIO:   return ((Real)x).mul(((Ratio)y).toReal());
-          case REAL:    return ((Real)x).mul((Real)y);
-          case COMPLEX: return ((Real)x).toComplex().mul((Complex)y);
-        }
-        break;
-      }
-      case COMPLEX: {
-        switch (y.type()) {
-          case INT:     return ((Complex)x).mul(((Int)y).toComplex());
-          case BIGINT:  return ((Complex)x).mul(((BigInt)y).toComplex());
-          case RATIO:   return ((Complex)x).mul(((Ratio)y).toComplex());
-          case REAL:    return ((Complex)x).mul(((Real)y).toComplex());
-          case COMPLEX: return ((Complex)x).mul((Complex)y);
-        }
-        break;
-      }
-    }
+    if (x instanceof INum lhs && y instanceof INum rhs)
+      return lhs.mul(rhs);
     throw new TypeMismatch();
   }
   
   public static Datum div(Datum x, Datum y)
   {
-    switch (x.type()) {
-      case INT: {
-        switch (y.type()) {
-          case INT:     return ((Int)x).div((Int)y);
-          case BIGINT:  return ((Int)x).toBigInt().div((BigInt)y);
-          case RATIO:   return ((Int)x).toRatio().div((Ratio)y);
-          case REAL:    return ((Int)x).toReal().div((Real)y);
-          case COMPLEX: return ((Int)x).toComplex().div((Complex)y);
-        }
-        break;
-      }
-      case BIGINT: {
-        switch (y.type()) {
-          case INT:     return ((BigInt)x).div(((Int)y).toBigInt());
-          case BIGINT:  return ((BigInt)x).div((BigInt)y);
-          case RATIO:   return ((BigInt)x).toRatio().div((Ratio)y);
-          case REAL:    return ((BigInt)x).toReal().div((Real)y);
-          case COMPLEX: return ((BigInt)x).toComplex().div((Complex)y);
-        }
-        break;
-      }
-      case RATIO: {
-        switch (y.type()) {
-          case INT:     return ((Ratio)x).div(((Int)y).toRatio());
-          case BIGINT:  return ((Ratio)x).div(((BigInt)y).toRatio());
-          case RATIO:   return ((Ratio)x).div((Ratio)y);
-          case REAL:    return ((Ratio)x).toReal().div((Real)y);
-          case COMPLEX: return ((Ratio)x).toComplex().div((Complex)y);
-        }
-        break;
-      }
-      case REAL: {
-        switch (y.type()) {
-          case INT:     return ((Real)x).div(((Int)y).toReal());
-          case BIGINT:  return ((Real)x).div(((BigInt)y).toReal());
-          case RATIO:   return ((Real)x).div(((Ratio)y).toReal());
-          case REAL:    return ((Real)x).div((Real)y);
-          case COMPLEX: return ((Real)x).toComplex().div((Complex)y);
-        }
-        break;
-      }
-      case COMPLEX: {
-        switch (y.type()) {
-          case INT:     return ((Complex)x).div(((Int)y).toComplex());
-          case BIGINT:  return ((Complex)x).div(((BigInt)y).toComplex());
-          case RATIO:   return ((Complex)x).div(((Ratio)y).toComplex());
-          case REAL:    return ((Complex)x).div(((Real)y).toComplex());
-          case COMPLEX: return ((Complex)x).div((Complex)y);
-        }
-        break;
-      }
-    }
+    if (x instanceof INum lhs && y instanceof INum rhs)
+      return lhs.div(rhs);
     throw new TypeMismatch();
   }
-  
-  
+    
   public static Datum quotient(Datum x, Datum y)
   {
-    switch (x.type()) {
-      case INT: {
-        switch (y.type()) {
-          case INT:     return ((Int)x).quotient((Int)y);
-          case BIGINT:  return ((Int)x).toBigInt().quotient((BigInt)y);
-        }
-        break;
-      }
-      case BIGINT: {
-        switch (y.type()) {
-          case INT:     return ((BigInt)x).quotient(((Int)y).toBigInt());
-          case BIGINT:  return ((BigInt)x).quotient((BigInt)y);
-        }
-        break;
-      }
-    }
-    throw new TypeMismatch();    
+    if (x instanceof IInt lhs && y instanceof IInt rhs)
+      return lhs.quotient(rhs);
+    throw new TypeMismatch();
   }
   
   public static Datum remainder(Datum x, Datum y)
   {
-    switch (x.type()) {
-      case INT: {
-        switch (y.type()) {
-          case INT:     return ((Int)x).remainder((Int)y);
-          case BIGINT:  return ((Int)x).toBigInt().remainder((BigInt)y);
-        }
-        break;
-      }
-      case BIGINT: {
-        switch (y.type()) {
-          case INT:     return ((BigInt)x).remainder(((Int)y).toBigInt());
-          case BIGINT:  return ((BigInt)x).remainder((BigInt)y);
-        }
-        break;
-      }
-    }
+    if (x instanceof IInt lhs && y instanceof IInt rhs)
+      return lhs.remainder(rhs);
     throw new TypeMismatch();    
   }
   
-    
   public static Datum neg(Datum x)
   {
-    return switch (x.type()) {
-      case INT     -> ((Int)x).neg();
-      case BIGINT  -> ((BigInt)x).neg();
-      case RATIO   -> ((Ratio)x).neg();
-      case REAL    -> ((Real)x).neg();
-      case COMPLEX -> ((Complex)x).neg();
-      default      -> throw new TypeMismatch();
-    };
+    if (x instanceof INum arg)
+      return arg.neg();
+    throw new TypeMismatch();
   }
   
   public static Datum abs(Datum x)
   {
-    return switch (x.type()) {
-      case INT     -> ((Int)x).abs();
-      case BIGINT  -> ((BigInt)x).abs();
-      case RATIO   -> ((Ratio)x).abs();
-      case REAL    -> ((Real)x).abs();
-      case COMPLEX -> ((Complex)x).abs();
-      default      -> throw new TypeMismatch();
-    };
+    if (x instanceof INum arg)
+      return arg.abs();
+    throw new TypeMismatch();
   }
   
   public static Datum floor(Datum x)
   {
-    return switch (x.type()) {
-      case RATIO   -> ((Ratio)x).floor();
-      case REAL    -> ((Real)x).floor();
-      default      -> throw new TypeMismatch();
-    };
+    if (x instanceof IReal arg)
+      return arg.floor();
+    throw new TypeMismatch();
   }
   
   public static Datum ceiling(Datum x)
   {
-    return switch (x.type()) {
-      case RATIO   -> ((Ratio)x).ceiling();
-      case REAL    -> ((Real)x).ceiling();
-      default      -> throw new TypeMismatch();
-    };
+    if (x instanceof IReal arg)
+      return arg.ceiling();
+    throw new TypeMismatch();
   }
   
   public static Datum round(Datum x)
   {
-    return switch (x.type()) {
-      case RATIO   -> ((Ratio)x).round();
-      case REAL    -> ((Real)x).round();
-      default      -> throw new TypeMismatch();
-    };
+    if (x instanceof IReal arg)
+      return arg.round();
+    throw new TypeMismatch();
   }
   
   public static Datum exp(Datum x, Datum y)
   {
-    switch (x.type()) {
-      case INT: {
-        switch (y.type()) {
-          case INT:     return ((Int)x).toReal().exp(((Int)y).toReal());
-          case BIGINT:  return ((Int)x).toReal().exp(((BigInt)y).toReal());
-          case RATIO:   return ((Int)x).toReal().exp(((Ratio)y).toReal());
-          case REAL:    return ((Int)x).toReal().exp((Real)y);
-          case COMPLEX: return ((Int)x).toComplex().add((Complex)y);
-        }
-        break;
-      }
-      case BIGINT: {
-        switch (y.type()) {
-          case INT:     return ((BigInt)x).toReal().exp(((Int)y).toReal());
-          case BIGINT:  return ((BigInt)x).toReal().exp(((BigInt)y).toReal());
-          case RATIO:   return ((BigInt)x).toReal().exp(((Ratio)y).toReal());
-          case REAL:    return ((BigInt)x).toReal().exp((Real)y);
-          case COMPLEX: return ((BigInt)x).toComplex().add((Complex)y);
-        }
-        break;
-      }
-      case RATIO: {
-        switch (y.type()) {
-          case INT:     return ((Ratio)x).toReal().exp(((Int)y).toReal());
-          case BIGINT:  return ((Ratio)x).toReal().exp(((BigInt)y).toReal());
-          case RATIO:   return ((Ratio)x).toReal().exp(((Ratio)y).toReal());
-          case REAL:    return ((Ratio)x).toReal().exp((Real)y);
-          case COMPLEX: return ((Ratio)x).toComplex().exp((Complex)y);
-        }
-        break;
-      }
-      case REAL: {
-        switch (y.type()) {
-          case INT:     return ((Real)x).exp(((Int)y).toReal());
-          case BIGINT:  return ((Real)x).exp(((BigInt)y).toReal());
-          case RATIO:   return ((Real)x).exp(((Ratio)y).toReal());
-          case REAL:    return ((Real)x).exp((Real)y);
-          case COMPLEX: return ((Real)x).toComplex().exp((Complex)y);
-        }
-        break;
-      }
-      case COMPLEX: {
-        switch (y.type()) {
-          case INT:     return ((Complex)x).exp(((Int)y).toComplex());
-          case BIGINT:  return ((Complex)x).exp(((BigInt)y).toComplex());
-          case RATIO:   return ((Complex)x).exp(((Ratio)y).toComplex());
-          case REAL:    return ((Complex)x).exp(((Real)y).toComplex());
-          case COMPLEX: return ((Complex)x).exp((Complex)y);
-        }
-        break;
-      }
-    }
+    if (x instanceof INum base && y instanceof INum power)
+      return base.exp(power);
     throw new TypeMismatch();
   }
   
   public static Datum log(Datum x, Datum y)
   {
-    switch (x.type()) {
-      case INT: {
-        switch (y.type()) {
-          case INT:     return ((Int)x).toReal().log(((Int)y).toReal());
-          case BIGINT:  return ((Int)x).toReal().log(((BigInt)y).toReal());
-          case RATIO:   return ((Int)x).toReal().log(((Ratio)y).toReal());
-          case REAL:    return ((Int)x).toReal().log((Real)y);
-          case COMPLEX: return ((Int)x).toComplex().add((Complex)y);
-        }
-        break;
-      }
-      case BIGINT: {
-        switch (y.type()) {
-          case INT:     return ((BigInt)x).toReal().log(((Int)y).toReal());
-          case BIGINT:  return ((BigInt)x).toReal().log(((BigInt)y).toReal());
-          case RATIO:   return ((BigInt)x).toReal().log(((Ratio)y).toReal());
-          case REAL:    return ((BigInt)x).toReal().log((Real)y);
-          case COMPLEX: return ((BigInt)x).toComplex().add((Complex)y);
-        }
-        break;
-      }
-      case RATIO: {
-        switch (y.type()) {
-          case INT:     return ((Ratio)x).toReal().log(((Int)y).toReal());
-          case BIGINT:  return ((Ratio)x).toReal().log(((BigInt)y).toReal());
-          case RATIO:   return ((Ratio)x).toReal().log(((Ratio)y).toReal());
-          case REAL:    return ((Ratio)x).toReal().log((Real)y);
-          case COMPLEX: return ((Ratio)x).toComplex().log((Complex)y);
-        }
-        break;
-      }
-      case REAL: {
-        switch (y.type()) {
-          case INT:     return ((Real)x).log(((Int)y).toReal());
-          case BIGINT:  return ((Real)x).log(((BigInt)y).toReal());
-          case RATIO:   return ((Real)x).log(((Ratio)y).toReal());
-          case REAL:    return ((Real)x).log((Real)y);
-          case COMPLEX: return ((Real)x).toComplex().log((Complex)y);
-        }
-        break;
-      }
-      case COMPLEX: {
-        switch (y.type()) {
-          case INT:     return ((Complex)x).log(((Int)y).toComplex());
-          case BIGINT:  return ((Complex)x).log(((BigInt)y).toComplex());
-          case RATIO:   return ((Complex)x).log(((Ratio)y).toComplex());
-          case REAL:    return ((Complex)x).log(((Real)y).toComplex());
-          case COMPLEX: return ((Complex)x).log((Complex)y);
-        }
-        break;
-      }
-    }
+    if (x instanceof INum arg && y instanceof INum base)
+      return arg.log(base);
+    throw new TypeMismatch();
+  }
+      
+  public static INum sin(Datum x)
+  {
+    if (x instanceof INum arg)
+      return arg.sin();
     throw new TypeMismatch();
   }
   
-    
-  public static Datum sin(Datum x)
+  public static INum cos(Datum x)
   {
-    return switch (x.type()) {
-      case INT     -> ((Int)x).toReal().sin();
-      case BIGINT  -> ((BigInt)x).toReal().sin();
-      case RATIO   -> ((Ratio)x).toReal().sin();
-      case REAL    -> ((Real)x).sin();
-      case COMPLEX -> ((Complex)x).sin();
-      default      -> throw new TypeMismatch();
-    };
-  }
-  
-  public static Datum cos(Datum x)
-  {
-    return switch (x.type()) {
-      case INT     -> ((Int)x).toReal().cos();
-      case BIGINT  -> ((BigInt)x).toReal().cos();
-      case RATIO   -> ((Ratio)x).toReal().cos();
-      case REAL    -> ((Real)x).cos();
-      case COMPLEX -> ((Complex)x).cos();
-      default      -> throw new TypeMismatch();
-    };
+    if (x instanceof INum arg)
+      return arg.cos();
+    throw new TypeMismatch();
   }
   
   public static Datum tan(Datum x)
   {
-    return switch (x.type()) {
-      case INT     -> ((Int)x).toReal().tan();
-      case BIGINT  -> ((BigInt)x).toReal().tan();
-      case RATIO   -> ((Ratio)x).toReal().tan();
-      case REAL    -> ((Real)x).tan();
-      case COMPLEX -> ((Complex)x).tan();
-      default      -> throw new TypeMismatch();
-    };
+    if (x instanceof INum arg)
+      return arg.tan();
+    throw new TypeMismatch();
   }
   
   public static Datum asin(Datum x)
   {
-    return switch (x.type()) {
-      case INT     -> ((Int)x).toReal().asin();
-      case BIGINT  -> ((BigInt)x).toReal().asin();
-      case RATIO   -> ((Ratio)x).toReal().asin();
-      case REAL    -> ((Real)x).asin();
-      case COMPLEX -> ((Complex)x).asin();
-      default      -> throw new TypeMismatch();
-    };
+    if (x instanceof INum arg)
+      return arg.asin();
+    throw new TypeMismatch();
   }
   
   public static Datum acos(Datum x)
   {
-    return switch (x.type()) {
-      case INT     -> ((Int)x).toReal().acos();
-      case BIGINT  -> ((BigInt)x).toReal().acos();
-      case RATIO   -> ((Ratio)x).toReal().acos();
-      case REAL    -> ((Real)x).acos();
-      case COMPLEX -> ((Complex)x).acos();
-      default      -> throw new TypeMismatch();
-    };
+    if (x instanceof INum arg)
+      return arg.acos();
+    throw new TypeMismatch();
   }
   
   public static Datum atan(Datum x)
   {
-    return switch (x.type()) {
-      case INT     -> ((Int)x).toReal().atan();
-      case BIGINT  -> ((BigInt)x).toReal().atan();
-      case RATIO   -> ((Ratio)x).toReal().atan();
-      case REAL    -> ((Real)x).atan();
-      case COMPLEX -> ((Complex)x).atan();
-      default      -> throw new TypeMismatch();
-    };
+    if (x instanceof INum arg)
+      return arg.atan();
+    throw new TypeMismatch();
   }
   
   public static final Complex makeComplex(Datum x, Datum y)
   {
-    switch (x.type()) {
-      case INT: {
-        switch (y.type()) {
-          case INT:     return new Complex(((Int)x).toReal(), ((Int)y).toReal());
-          case BIGINT:  return new Complex(((Int)x).toReal(), ((BigInt)y).toReal());
-          case RATIO:   return new Complex(((Int)x).toReal(), ((Ratio)y).toReal());
-          case REAL:    return new Complex(((Int)x).toReal(), (Real)y);
-        }
-        break;
-      }
-      case BIGINT: {
-        switch (y.type()) {
-          case INT:     return new Complex(((BigInt)x).toReal(), ((Int)y).toReal());
-          case BIGINT:  return new Complex(((BigInt)x).toReal(), ((BigInt)y).toReal());
-          case RATIO:   return new Complex(((BigInt)x).toReal(), ((Ratio)y).toReal());
-          case REAL:    return new Complex(((BigInt)x).toReal(), (Real)y);
-        }
-        break;
-      }
-      case RATIO: {
-        switch (y.type()) {
-          case INT:     return new Complex(((Ratio)x).toReal(), ((Int)y).toReal());
-          case BIGINT:  return new Complex(((Ratio)x).toReal(), ((BigInt)y).toReal());
-          case RATIO:   return new Complex(((Ratio)x).toReal(), ((Ratio)y).toReal());
-          case REAL:    return new Complex(((Ratio)x).toReal(), (Real)y);
-        }
-        break;
-      }
-      case REAL: {
-        switch (y.type()) {
-          case INT:     return new Complex((Real)x, ((Int)y).toReal());
-          case BIGINT:  return new Complex((Real)x, ((BigInt)y).toReal());
-          case RATIO:   return new Complex((Real)x, ((Ratio)y).toReal());
-          case REAL:    return new Complex((Real)x, (Real)y);
-        }
-        break;
-      }
-    }
+    if (x instanceof IReal real && y instanceof IReal imag)
+      return new Complex(real.doubleValue(), imag.doubleValue());
     throw new TypeMismatch();
   }
   
   public static final Ratio makeRatio(Datum x, Datum y)
   {
-    switch (x.type()) {
-      case INT: {
-        switch (y.type()) {
-          case INT:     return new Ratio(((Int)x).toBigInt(), ((Int)y).toBigInt());
-          case BIGINT:  return new Ratio(((Int)x).toBigInt(), (BigInt)y);
-        }
-        break;
-      }
-      case BIGINT: {
-        switch (y.type()) {
-          case INT:     return new Ratio((BigInt)x, ((Int)y).toBigInt());
-          case BIGINT:  return new Ratio((BigInt)x, (BigInt)y);
-        }
-        break;
-      }
-    }
+    if (x instanceof IInt numer && y instanceof IInt denom)
+      return (Ratio) numer.div(denom);
     throw new TypeMismatch();
   }
 }

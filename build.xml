@@ -19,6 +19,7 @@
            nativeheaderdir="native">
       <!-- <compilerarg value="-Xlint"/> -->
       <compilerarg value="--source=17"/>
+      <compilerarg value="--enable-preview"/>
     </javac>
     <jar destfile="Spartan.jar"
          basedir="build"

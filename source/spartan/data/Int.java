@@ -1,9 +1,10 @@
 package spartan.data;
 
+import java.math.BigInteger;
 import spartan.errors.DivisionByZero;
 import spartan.errors.IntegerOverflow;
 
-public final class Int implements Datum, Integral, IEq<Int>, IOrd<Int>
+public final class Int implements Datum, INum, IInt, IReal, IEq<Int>, IOrd<Int>
 {
   public Int(int value)
   {
@@ -27,10 +28,16 @@ public final class Int implements Datum, Integral, IEq<Int>, IOrd<Int>
     return Integer.toString(value);
   }
   
-  @Override // Integral
+  @Override // IInt
   public int intValue()
   {
     return value;
+  }  
+  
+  @Override
+  public double doubleValue()
+  {
+    return (double)value;
   }
   
   @Override // Object
@@ -65,7 +72,8 @@ public final class Int implements Datum, Integral, IEq<Int>, IOrd<Int>
     return new Complex((double)value, 0.0);
   }
   
-  public Integral neg()
+  @Override
+  public IInt neg()
   {
     try {
       return new Int(Math.negateExact(value));
@@ -75,7 +83,8 @@ public final class Int implements Datum, Integral, IEq<Int>, IOrd<Int>
     }
   }
   
-  public Integral abs()
+  @Override
+  public IInt abs()
   {
     try {
       return new Int(Math.absExact(value));
@@ -85,50 +94,158 @@ public final class Int implements Datum, Integral, IEq<Int>, IOrd<Int>
     }
   }
   
-  public Integral add(Int that)
+  @Override
+  public IInt add(Int rhs)
   {
     try {
-      return new Int(Math.addExact(this.value, that.value));
+      return new Int(Math.addExact(this.value, rhs.value));
     }
     catch (ArithmeticException ex) {
-      return this.toBigInt().add(that.toBigInt());
+      return add(rhs.toBigInt());
     }
   }
   
-  public Integral sub(Int that)
+  @Override
+  public BigInt add(BigInt rhs)
+  {
+    return toBigInt().add(rhs);
+  }
+  
+  @Override
+  public Ratio add(Ratio rhs)
+  {
+    return toRatio().add(rhs);
+  }
+  
+  @Override
+  public Real add(Real rhs)
+  {
+    return toReal().add(rhs);
+  }
+  
+  @Override
+  public Complex add(Complex rhs)
+  {
+    return toComplex().add(rhs);
+  }
+  
+  @Override
+  public IInt sub(Int rhs)
   {
     try {
-      return new Int(Math.subtractExact(this.value, that.value));
+      return new Int(Math.subtractExact(this.value, rhs.value));
     }
     catch (ArithmeticException ex) {
-      return this.toBigInt().sub(that.toBigInt());
+      return sub(rhs.toBigInt());
     }
   }
   
-  public Integral mul(Int that)
+  @Override
+  public BigInt sub(BigInt rhs)
+  {
+    return toBigInt().sub(rhs);
+  }
+  
+  @Override
+  public Ratio sub(Ratio rhs)
+  {
+    return toRatio().sub(rhs);
+  }
+  
+  @Override
+  public Real sub(Real rhs)
+  {
+    return toReal().sub(rhs);
+  }
+  
+  @Override
+  public Complex sub(Complex rhs)
+  {
+    return toComplex().sub(rhs);
+  }
+  
+  @Override
+  public IInt mul(Int rhs)
   {
     try {
-      return new Int(Math.multiplyExact(this.value, that.value));
+      return new Int(Math.multiplyExact(this.value, rhs.value));
     }
     catch (ArithmeticException ex) {
-      return this.toBigInt().mul(that.toBigInt());
+      return mul(rhs.toBigInt());
     }
   }
   
-  public Ratio div(Int that)
+  @Override
+  public BigInt mul(BigInt rhs)
   {
-    return new Ratio(this.value, that.value);
+    return toBigInt().mul(rhs);
   }
   
-  public Integral quotient(Int that)
+  @Override
+  public Ratio mul(Ratio rhs)
   {
-    if (that.value == 0)
+    return toRatio().mul(rhs);
+  }
+  
+  @Override
+  public Real mul(Real rhs)
+  {
+    return toReal().mul(rhs);
+  }
+  
+  @Override
+  public Complex mul(Complex rhs)
+  {
+    return toComplex().mul(rhs);
+  }
+  
+  @Override
+  public Ratio div(Int rhs)
+  {
+    return new Ratio(this.value, rhs.value);
+  }
+  
+  @Override
+  public Ratio div(BigInt rhs)
+  {
+    return toBigInt().div(rhs);
+  }
+  
+  @Override
+  public Ratio div(Ratio rhs)
+  {
+    return toRatio().div(rhs);
+  }
+  
+  @Override
+  public Real div(Real rhs)
+  {
+    return toReal().div(rhs);
+  }
+  
+  @Override
+  public Complex div(Complex rhs)
+  {
+    return toComplex().div(rhs);
+  }
+  
+  @Override
+  public IInt quotient(Int rhs)
+  {
+    if (rhs.value == 0)
       throw new DivisionByZero();
-    if (this.value == Integer.MIN_VALUE && that.value == -1)
-      return this.toBigInt().quotient(that.toBigInt());
-    return new Int(this.value / that.value);
+    if (this.value == Integer.MIN_VALUE && rhs.value == -1)
+      return quotient(rhs.toBigInt());
+    return new Int(this.value / rhs.value);
   }
   
+  @Override
+  public BigInt quotient(BigInt rhs)
+  {
+    return toBigInt().quotient(rhs);
+  }
+  
+  @Override
   public Int remainder(Int that)
   {
     try {
@@ -137,6 +254,30 @@ public final class Int implements Datum, Integral, IEq<Int>, IOrd<Int>
     catch (ArithmeticException ex) {
       throw new DivisionByZero();
     }
+  }
+  
+  @Override
+  public BigInt remainder(BigInt rhs)
+  {
+    return toBigInt().remainder(rhs);
+  }
+  
+  @Override
+  public Int floor()
+  {
+    return this;
+  }
+  
+  @Override
+  public Int ceiling()
+  {
+    return this;
+  }
+  
+  @Override
+  public Int round()
+  {
+    return this;
   }
   
   @Override // IEq
@@ -151,5 +292,101 @@ public final class Int implements Datum, Integral, IEq<Int>, IOrd<Int>
     return Integer.compare(this.value, that.value);
   }
   
-  public final int value;
+  @Override
+  public Real sin()
+  {
+    return toReal().sin();
+  }
+  
+  @Override
+  public Real cos()
+  {
+    return toReal().cos();
+  }
+  
+  @Override
+  public Real tan()
+  {
+    return toReal().tan();
+  }
+  
+  @Override
+  public Real asin()
+  {
+    return toReal().asin();
+  }
+  
+  @Override
+  public Real acos()
+  {
+    return toReal().acos();
+  }
+  
+  @Override
+  public Real atan()
+  {
+    return toReal().atan();
+  }
+  
+  @Override
+  public Real exp(Int rhs)
+  {
+    return toReal().exp(rhs);
+  }
+  
+  @Override
+  public Real exp(BigInt rhs)
+  {
+    return toReal().exp(rhs);
+  }
+  
+  @Override
+  public Real exp(Ratio rhs)
+  {
+    return toReal().exp(rhs);
+  }
+  
+  @Override
+  public Real exp(Real rhs)
+  {
+    return toReal().exp(rhs);
+  }
+  
+  @Override
+  public Complex exp(Complex rhs)
+  {
+    return toComplex().exp(rhs);
+  }
+  
+  @Override
+  public Real log(Int rhs)
+  {
+    return toReal().log(rhs);
+  }
+  
+  @Override
+  public Real log(BigInt rhs)
+  {
+    return toReal().log(rhs);
+  }
+  
+  @Override
+  public Real log(Ratio rhs)
+  {
+    return toReal().log(rhs);
+  }
+  
+  @Override
+  public Real log(Real rhs)
+  {
+    return toReal().log(rhs);
+  }
+  
+  @Override
+  public Complex log(Complex rhs)
+  {
+    return toComplex().log(rhs);
+  }
+  
+  private final int value;
 }

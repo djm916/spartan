@@ -3,7 +3,7 @@ package spartan.data;
 import java.math.BigInteger;
 import spartan.errors.InvalidArgument;
 
-public final class Ratio implements Datum, Numeric, IEq<Ratio>, IOrd<Ratio>
+public final class Ratio implements Datum, INum, IReal, IEq<Ratio>, IOrd<Ratio>
 {
   public Ratio(BigInteger numer, BigInteger denom)
   {
@@ -32,11 +32,7 @@ public final class Ratio implements Datum, Numeric, IEq<Ratio>, IOrd<Ratio>
     this(new BigInteger(numer), new BigInteger(denom));
   }
   
-  public Ratio(BigInt numer, BigInt denom)
-  {
-    this(numer.value, denom.value);
-  }
-  
+    
   public Ratio(int numer, int denom)
   {
     this(BigInteger.valueOf(numer),
@@ -68,6 +64,12 @@ public final class Ratio implements Datum, Numeric, IEq<Ratio>, IOrd<Ratio>
     return numer.doubleValue() / denom.doubleValue();
   }
   
+  @Override
+  public double doubleValue()
+  {
+    return approx();
+  }
+  
   public Real toReal()
   {
     return new Real(approx());
@@ -78,38 +80,52 @@ public final class Ratio implements Datum, Numeric, IEq<Ratio>, IOrd<Ratio>
     return new Complex(approx(), 0.0);
   }
   
-  /* Take the absolute value of a fraction */
-  
+  @Override
   public Ratio abs()
   {
     return new Ratio(numer.abs(), denom.abs());
   }
   
-  /* Negate a fraction */
-  
+  @Override
   public Ratio neg()
   {
     return new Ratio(numer.negate(), denom);
   }
   
+  @Override
   public Int floor()
   {
     return new Int((int) Math.floor(approx()));
   }
   
+  @Override
   public Int ceiling()
   {
     return new Int((int) Math.ceil(approx()));
   }
+  
   
   public Int truncate()
   {
     return new Int((int) approx());
   }
   
+  @Override
   public Int round()
   {
     return new Int((int) Math.round(approx()));
+  }
+  
+  @Override
+  public Ratio add(Int rhs)
+  {
+    return add(rhs.toRatio());
+  }
+  
+  @Override
+  public Ratio add(BigInt rhs)
+  {
+    return add(rhs.toRatio());
   }
   
   /* Add two rational numbers
@@ -120,6 +136,7 @@ public final class Ratio implements Datum, Numeric, IEq<Ratio>, IOrd<Ratio>
            = (a*d)/(b*d) + (c*b)/(d*b)
            = ((a*d)+(c*b))/(b*d)
   */
+  @Override
   public Ratio add(Ratio other)
   {
     var a = this.numer;
@@ -129,12 +146,37 @@ public final class Ratio implements Datum, Numeric, IEq<Ratio>, IOrd<Ratio>
     return new Ratio(a.multiply(d).add(c.multiply(b)), b.multiply(d));
   }
   
+  @Override
+  public Real add(Real rhs)
+  {
+    return toReal().add(rhs);
+  }
+  
+  @Override
+  public Complex add(Complex rhs)
+  {
+    return toComplex().add(rhs);
+  }
+
+  @Override
+  public Ratio sub(Int rhs)
+  {
+    return sub(rhs.toRatio());
+  }
+  
+  @Override
+  public Ratio sub(BigInt rhs)
+  {
+    return sub(rhs.toRatio());
+  }
+  
   /* Subtract two rational numbers
   
      let x = a/b, y = c/d
      
      x - y = x + (-y)
   */
+  @Override
   public Ratio sub(Ratio other)
   {
     var a = this.numer;
@@ -142,6 +184,30 @@ public final class Ratio implements Datum, Numeric, IEq<Ratio>, IOrd<Ratio>
     var c = other.numer;
     var d = other.denom;
     return new Ratio(a.multiply(d).subtract(c.multiply(b)), b.multiply(d));
+  }
+  
+  @Override
+  public Real sub(Real rhs)
+  {
+    return toReal().sub(rhs);
+  }
+  
+  @Override
+  public Complex sub(Complex rhs)
+  {
+    return toComplex().sub(rhs);
+  }
+
+  @Override
+  public Ratio mul(Int rhs)
+  {
+    return mul(rhs.toRatio());
+  }
+  
+  @Override
+  public Ratio mul(BigInt rhs)
+  {
+    return mul(rhs.toRatio());
   }
   
   /* Multiply two rational numbers
@@ -158,6 +224,30 @@ public final class Ratio implements Datum, Numeric, IEq<Ratio>, IOrd<Ratio>
     var d = other.denom;
     return new Ratio(a.multiply(c), b.multiply(d));
   }
+
+  @Override
+  public Real mul(Real rhs)
+  {
+    return toReal().mul(rhs);
+  }
+  
+  @Override
+  public Complex mul(Complex rhs)
+  {
+    return toComplex().mul(rhs);
+  }
+
+  @Override
+  public Ratio div(Int rhs)
+  {
+    return div(rhs.toRatio());
+  }
+  
+  @Override
+  public Ratio div(BigInt rhs)
+  {
+    return div(rhs.toRatio());
+  }
   
   /* Divide two rational numbers
   
@@ -165,13 +255,26 @@ public final class Ratio implements Datum, Numeric, IEq<Ratio>, IOrd<Ratio>
      
      x / y = x * (1/y) = (a*d)/(b*c)
   */
-  public Ratio div(Ratio other)
+  @Override
+  public Ratio div(Ratio rhs)
   {
     var a = this.numer;
     var b = this.denom;
-    var c = other.numer;
-    var d = other.denom;
+    var c = rhs.numer;
+    var d = rhs.denom;
     return new Ratio(a.multiply(d), b.multiply(c));
+  }
+  
+  @Override
+  public Real div(Real rhs)
+  {
+    return toReal().div(rhs);
+  }
+  
+  @Override
+  public Complex div(Complex rhs)
+  {
+    return toComplex().div(rhs);
   }
   
   /* Equivalence predicate for rational numbers.     
@@ -213,6 +316,102 @@ public final class Ratio implements Datum, Numeric, IEq<Ratio>, IOrd<Ratio>
     return a.multiply(d).compareTo(b.multiply(c));
   }
     
+   @Override
+  public Real sin()
+  {
+    return toReal().sin();
+  }
+  
+  @Override
+  public Real cos()
+  {
+    return toReal().cos();
+  }
+  
+  @Override
+  public Real tan()
+  {
+    return toReal().tan();
+  }
+  
+  @Override
+  public Real asin()
+  {
+    return toReal().asin();
+  }
+  
+  @Override
+  public Real acos()
+  {
+    return toReal().acos();
+  }
+  
+  @Override
+  public Real atan()
+  {
+    return toReal().atan();
+  }
+  
+  @Override
+  public Real exp(Int rhs)
+  {
+    return toReal().exp(rhs);
+  }
+  
+  @Override
+  public Real exp(BigInt rhs)
+  {
+    return toReal().exp(rhs);
+  }
+  
+  @Override
+  public Real exp(Ratio rhs)
+  {
+    return toReal().exp(rhs);
+  }
+  
+  @Override
+  public Real exp(Real rhs)
+  {
+    return toReal().exp(rhs);
+  }
+  
+  @Override
+  public Complex exp(Complex rhs)
+  {
+    return toComplex().exp(rhs);
+  }
+  
+  @Override
+  public Real log(Int rhs)
+  {
+    return toReal().log(rhs);
+  }
+  
+  @Override
+  public Real log(BigInt rhs)
+  {
+    return toReal().log(rhs);
+  }
+  
+  @Override
+  public Real log(Ratio rhs)
+  {
+    return toReal().log(rhs);
+  }
+  
+  @Override
+  public Real log(Real rhs)
+  {
+    return toReal().log(rhs);
+  }
+  
+  @Override
+  public Complex log(Complex rhs)
+  {
+    return toComplex().log(rhs);
+  }
+  
   private final BigInteger numer;
   private final BigInteger denom;
 }

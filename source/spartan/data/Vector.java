@@ -64,9 +64,9 @@ public final class Vector implements Datum, Callable, IEq<Vector>, ISize, Iterab
   @Override // Callable
   public void apply(VirtualMachine vm)
   {
-    if (!vm.peekArg().type().isInt())
+    if (! (vm.peekArg() instanceof IInt))
       throw new InvalidArgument();
-    int index = ((Integral)vm.popArg()).intValue();
+    int index = ((IInt)vm.popArg()).intValue();
     vm.result = get(index);
     vm.popFrame();
   }

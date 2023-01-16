@@ -223,10 +223,10 @@ public final class CoreLib
   
   public static final Primitive FORMAT_DECIMAL = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
-      if (vm.peekArg().type() != Type.REAL)
+      if (! (vm.peekArg() instanceof IReal))
         throw new TypeMismatch();
-      var number = (Real) vm.popArg();
-      vm.result = new Text(Config.NUMERIC_FORMATTER.format(number.value));
+      var number = (IReal) vm.popArg();
+      vm.result = new Text(Config.NUMERIC_FORMATTER.format(number.doubleValue()));
       vm.popFrame();
     }
   };
