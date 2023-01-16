@@ -152,12 +152,11 @@ public final class GlobalEnv
     bind(Symbol.of("list"), ListLib.MAKE_LIST);
     bind(Symbol.of("cons"), ListLib.CONS);
     bind(Symbol.of("car"), ListLib.CAR);
-    bind(Symbol.of("caar"), ListLib.CAAR);
-    bind(Symbol.of("cadr"), ListLib.CADR);
-    bind(Symbol.of("caddr"), ListLib.CADDR);
     bind(Symbol.of("cdr"), ListLib.CDR);
     bind(Symbol.of("cddr"), ListLib.CDDR);
     bind(Symbol.of("cdddr"), ListLib.CDDDR);
+    bind(Symbol.of("cadr"), ListLib.CADR);
+    bind(Symbol.of("caddr"), ListLib.CADDR);
     bind(Symbol.of("concat"), ListLib.CONCAT);
     bind(Symbol.of("append"), ListLib.APPEND);
     bind(Symbol.of("reverse"), ListLib.REVERSE);
@@ -170,7 +169,6 @@ public final class GlobalEnv
     
     bind(Symbol.of("vector"), VectorLib.FROM_LIST);
     bind(Symbol.of("vector/fill"), VectorLib.FILL);
-    bind(Symbol.of("vector/length"), VectorLib.LENGTH);
     bind(Symbol.of("vector/copy"), VectorLib.COPY);
     bind(Symbol.of("vector/ref"), VectorLib.REF);
     bind(Symbol.of("vector/set!"), VectorLib.SET);

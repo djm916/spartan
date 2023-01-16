@@ -5,7 +5,7 @@ import java.nio.CharBuffer;
 import spartan.errors.TypeMismatch;
 import spartan.errors.IndexOutOfBounds;
 
-public final class Text implements Datum, IEq, IOrd, ISize
+public final class Text implements Datum, IEq, IOrd, ISize, ISeq
 {
   public Text(String value)
   {
@@ -66,27 +66,27 @@ public final class Text implements Datum, IEq, IOrd, ISize
     return new Bytes(encoding.encode(value));
   }
   
-  public Text join(List args)
+  public static Text join(Text delim, List args)
   {
     var result = new StringBuilder();
     for (; !args.empty(); args = args.cdr()) {
-      if (args.car().type() != Type.TEXT)
-        throw new TypeMismatch();
-      result.append(((Text)args.car()).value);
-      if (args.cdr() != List.EMPTY)
-        result.append(this.value);
+      if (args.car() instanceof Text text) {
+        result.append(text.value);
+        if (! args.cdr().empty())
+          result.append(delim.value);
+      }
+      else throw new TypeMismatch();
     }
     return new Text(result.toString());
   }
-    
-  public Text concat(List args)
+  
+  public static Text concat(List args)
   {
     var result = new StringBuilder();
-    result.append(this.value);
-    for (; !args.empty(); args = args.cdr()) {
-      if (args.car().type() != Type.TEXT)
-        throw new TypeMismatch();
-      result.append(((Text)args.car()).value);
+    for (var arg : args) {
+      if (arg instanceof Text text)
+        result.append(text.value);
+      else throw new TypeMismatch();
     }
     return new Text(result.toString());
   }
@@ -104,6 +104,12 @@ public final class Text implements Datum, IEq, IOrd, ISize
   public Text reverse()
   {
     return new Text(new StringBuilder(value).reverse().toString());
+  }
+  
+  @Override
+  public Text at(int index)
+  {
+    return substring(index, index + 1);
   }
   
   private final String value;
