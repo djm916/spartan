@@ -1,5 +1,7 @@
 package spartan.data;
 
-public interface ISize {
+public sealed interface ISize
+permits List, Vector, Text
+{
   int length();
 }

@@ -37,13 +37,9 @@ public final class Core
   
   public static int length(Datum x)
   {
-    return switch (x.type()) {
-      case LIST   -> ((List)x).length();
-      case VECTOR -> ((Vector)x).length();
-      case TEXT   -> ((Text)x).length();
-      //case BYTES  -> ((Bytes)x).length();
-      default     -> throw new TypeMismatch();
-    };
+    if (x instanceof ISize arg)
+      return arg.length();
+    throw new TypeMismatch();
   }
   
   public static Datum max(List xs)

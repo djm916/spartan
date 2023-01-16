@@ -1,7 +1,7 @@
 package spartan.data;
 
 public sealed interface IEq
-permits Nil, Bool, Symbol, Text, Int, BigInt, Ratio, Real, Complex
+permits Nil, Bool, Symbol, Text, Int, BigInt, Ratio, Real, Complex, List, Vector
 {
   default boolean isEqual(IEq rhs)
   {
@@ -15,6 +15,8 @@ permits Nil, Bool, Symbol, Text, Int, BigInt, Ratio, Real, Complex
       case Text s -> isEqual(s);
       case Bool b -> isEqual(b);
       case Nil x -> isEqual(x);
+      case List x -> isEqual(x);
+      case Vector x -> isEqual(x);
     };
   }
   
@@ -59,6 +61,16 @@ permits Nil, Bool, Symbol, Text, Int, BigInt, Ratio, Real, Complex
   }
   
   default boolean isEqual(Nil rhs)
+  {
+    return false;
+  }
+  
+  default boolean isEqual(List rhs)
+  {
+    return false;
+  }
+  
+  default boolean isEqual(Vector rhs)
   {
     return false;
   }

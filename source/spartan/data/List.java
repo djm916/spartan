@@ -1,7 +1,6 @@
 package spartan.data;
 
 import java.util.function.Predicate;
-//import java.util.function.BiPredicate;
 import java.util.Iterator;
 import java.util.Spliterator;
 import java.util.Spliterators;
@@ -12,29 +11,9 @@ import spartan.errors.TypeMismatch;
 import spartan.errors.NoSuchElement;
 import spartan.builtins.Core;
 
-public class List implements Datum, ISize, Iterable<Datum>
+public final class List implements Datum, ISize, IEq, Iterable<Datum>
 {
-  public static final List EMPTY = new List(null, null) {
-    public boolean empty() {
-      return true;
-    }
-
-    public Datum car() {
-      throw new NoSuchElement();
-    }
-
-    public void setCar(Datum x) {
-      throw new NoSuchElement();
-    }
-
-    public List cdr() {
-      throw new NoSuchElement();
-    }
-
-    public void setCdr(List x) {
-      throw new NoSuchElement();
-    }
-  };
+  public static final List EMPTY = new List(null, null);
   
   public static class Builder
   {
@@ -114,26 +93,34 @@ public class List implements Datum, ISize, Iterable<Datum>
   
   public boolean empty()
   {
-    return false;
+    return this == EMPTY;
   }
   
   public Datum car()
   {
+    if (empty())
+      throw new NoSuchElement();
     return first;
   }
   
   public void setCar(Datum x)
   {
+    if (empty())
+      throw new NoSuchElement();
     first = x;
   }
   
   public List cdr()
   {
+    if (empty())
+      throw new NoSuchElement();
     return rest;
   }
   
   public void setCdr(List x)
   {
+    if (empty())
+      throw new NoSuchElement();
     rest = x;
   }
   
@@ -169,6 +156,12 @@ public class List implements Datum, ISize, Iterable<Datum>
     for (var list = this; !list.empty(); list = list.cdr())
       ++length;
     return length;
+  }
+  
+  @Override // IEq
+  public boolean isEqual(List rhs)
+  {
+    return isEqual(this, rhs);
   }
   
   public Datum at(int index)
@@ -291,13 +284,13 @@ public class List implements Datum, ISize, Iterable<Datum>
     return -1;
   }
   
-  private static boolean isEqual(List x, List y)
+  private static boolean isEqual(List lhs, List rhs)
   {
-    for (; x != EMPTY && y != EMPTY; x = x.rest, y = y.rest)
-      if (! Core.isEqual(x.first, y.first))
-        return false;
-    
-    return x == EMPTY && y == EMPTY;
+    for (; lhs != EMPTY && rhs != EMPTY; lhs = lhs.rest, rhs = rhs.rest)
+      if (lhs.car() instanceof IEq x && rhs.car() instanceof IEq y)
+        if (! x.isEqual(y))
+          return false;    
+    return lhs == EMPTY && rhs == EMPTY;
   }
   
   private List(Datum first, List rest)

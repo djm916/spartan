@@ -1,6 +1,5 @@
 package spartan.data;
 
-//import java.util.function.BiPredicate;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Spliterator;
@@ -14,7 +13,7 @@ import spartan.errors.InvalidArgument;
 import spartan.runtime.VirtualMachine;
 import spartan.builtins.Core;
 
-public final class Vector implements Datum, Callable, ISize, Iterable<Datum>
+public final class Vector implements Datum, Callable, ISize, IEq, Iterable<Datum>
 {
   public static Vector fromList(List elems)
   {
@@ -114,18 +113,10 @@ public final class Vector implements Datum, Callable, ISize, Iterable<Datum>
       elems.set(i, x);
   }
 
-  //@Override // IEq
-  public boolean isEqual(Vector other)
+  @Override // IEq
+  public boolean isEqual(Vector rhs)
   {
-    if (this.length() != other.length())
-      return false;
-    
-    var n = this.elems.size();
-    for (int i = 0; i < n; ++i)
-      if (! Core.isEqual(this.elems.get(i), other.elems.get(i)))
-        return false;
-    
-    return true;
+    return isEqual(this, rhs);
   }
   
   @Override // Iterable
@@ -143,6 +134,18 @@ public final class Vector implements Datum, Callable, ISize, Iterable<Datum>
   public Stream<Datum> stream()
   {
     return StreamSupport.stream(spliterator(), false);
+  }
+  
+  private static boolean isEqual(Vector lhs, Vector rhs)
+  {
+    if (lhs.length() != rhs.length())
+      return false;    
+    var n = lhs.length();
+    for (int i = 0; i < n; ++i)
+      if (lhs.elems.get(i) instanceof IEq x && rhs.elems.get(i) instanceof IEq y)
+        if (! x.isEqual(y))
+          return false;    
+    return true;
   }
   
   private static final int DEFAULT_INITIAL_CAPACITY = 8;
