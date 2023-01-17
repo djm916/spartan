@@ -13,9 +13,9 @@ public final class Bytes implements Datum
   {
     var result = new Bytes(elems.length());
     for (; !elems.empty(); elems = elems.cdr()) {
-      if (! (elems.car() instanceof IInt))
+      if (!(elems.car() instanceof IInt elem))
         throw new TypeMismatch();
-      var value = ((IInt) elems.car()).intValue();
+      var value = elem.intValue();
       result.push((byte) value);
     }
     result.flip();
@@ -105,6 +105,11 @@ public final class Bytes implements Datum
   public int remaining()
   {
     return buffer.remaining();
+  }
+  
+  public boolean isEmpty()
+  {
+    return remaining() == 0;
   }
   
   public void clear()

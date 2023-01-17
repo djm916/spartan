@@ -1,21 +1,19 @@
 package spartan.data;
 
-import java.util.Map;
-import java.util.HashMap;
 import java.util.stream.Collectors;
 import spartan.errors.InvalidArgument;
 import spartan.errors.WrongNumberArgs;
 import spartan.errors.NoSuchElement;
 import spartan.runtime.VirtualMachine;
 
-public final class Mapping implements Datum, Callable
+public final class Map implements Datum, Callable
 {
-  public static Mapping fromList(List elems)
+  public static Map fromList(List elems)
   {
     int numElems = elems.length();
     if (numElems % 2 != 0)
       throw new WrongNumberArgs();
-    var result = new Mapping(numElems);
+    var result = new Map(numElems);
     for (; !elems.empty(); elems = elems.cdr()) {
       var key = elems.car();
       elems = elems.cdr();
@@ -87,16 +85,16 @@ public final class Mapping implements Datum, Callable
     return builder.build();
   }
   
-  public Mapping()
+  public Map()
   {
     this(DEFAULT_CAPACITY);
   }
   
-  public Mapping(int capacity)
+  public Map(int capacity)
   {
-    this.map = new HashMap<>(capacity);
+    this.map = new java.util.HashMap<>(capacity);
   }
   
   private static final int DEFAULT_CAPACITY = 8;
-  private final Map<Datum, Datum> map;
+  private final java.util.Map<Datum, Datum> map;
 }

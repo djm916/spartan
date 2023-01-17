@@ -161,36 +161,36 @@ public final class MathLib
     
   public static final Primitive REAL_PART = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
-      if (vm.peekArg().type() != Type.COMPLEX)
+      if (!(vm.popArg() instanceof Complex c))
         throw new TypeMismatch();
-      vm.result = ((Complex)vm.popArg()).real();
+      vm.result = c.real();
       vm.popFrame();
     }
   };
   
   public static final Primitive IMAG_PART = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
-      if (vm.peekArg().type() != Type.COMPLEX)
+      if (!(vm.popArg() instanceof Complex c))
         throw new TypeMismatch();
-      vm.result = ((Complex)vm.popArg()).imag();
+      vm.result = c.imag();
       vm.popFrame();
     }
   };
   
   public static final Primitive RECT_TO_POLAR = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
-      if (vm.peekArg().type() != Type.COMPLEX)
+      if (!(vm.popArg() instanceof Complex c))
         throw new TypeMismatch();
-      vm.result = ((Complex)vm.popArg()).toPolar();
+      vm.result = c.toPolar();
       vm.popFrame();
     }
   };
   
   public static final Primitive POLAR_TO_RECT = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
-      if (vm.peekArg().type() != Type.COMPLEX)
+      if (!(vm.popArg() instanceof Complex c))
         throw new TypeMismatch();
-      vm.result = ((Complex)vm.popArg()).toRect();
+      vm.result = c.toRect();
       vm.popFrame();
     }
   };
@@ -204,18 +204,18 @@ public final class MathLib
   
   public static final Primitive NUMERATOR = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
-      if (vm.peekArg().type() != Type.RATIO)
+      if (!(vm.popArg() instanceof Ratio q))
         throw new TypeMismatch();
-      vm.result = ((Ratio)vm.popArg()).numerator();
+      vm.result = q.numerator();
       vm.popFrame();
     }
   };
   
   public static final Primitive DENOMINATOR = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
-      if (vm.peekArg().type() != Type.RATIO)
+      if (!(vm.popArg() instanceof Ratio q))
         throw new TypeMismatch();
-      vm.result = ((Ratio)vm.popArg()).denominator();
+      vm.result = q.denominator();
       vm.popFrame();
     }
   };

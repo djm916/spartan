@@ -5,6 +5,11 @@ public final class Bool implements Datum, IEq
   public static final Bool TRUE = new Bool(true);  
   public static final Bool FALSE = new Bool(false);
   
+  public static Bool of(boolean value)
+  {
+    return value ? TRUE : FALSE;
+  }
+  
   @Override
   public Type type()
   {

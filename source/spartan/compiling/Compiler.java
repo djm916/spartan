@@ -51,13 +51,9 @@ public class Compiler
    */
   private static boolean isSelfEval(Datum exp)
   {
-    return exp.type() == Type.INT
-        || exp.type() == Type.BIGINT
-        || exp.type() == Type.RATIO
-        || exp.type() == Type.REAL
-        || exp.type() == Type.COMPLEX
-        || exp.type() == Type.BOOL
-        || exp.type() == Type.TEXT
+    return exp instanceof INum
+        || exp instanceof Bool
+        || exp instanceof Text
         || exp == List.EMPTY
         || exp == Nil.VALUE;
   }
@@ -111,16 +107,13 @@ public class Compiler
 
   private Inst compileSet(List exp, Scope scope, Inst next)
   {
-    if (exp.length() != 3 || exp.cadr().type() != Type.SYMBOL)
+    if (!(exp.length() == 3 && exp.cadr() instanceof Symbol variable))
       throw malformedExp(exp);
-
-    var symb = (Symbol) exp.cadr();
     var init = exp.caddr();
-    
     return compile(init, scope, false,
-           scope.lookup(symb)
+           scope.lookup(variable)
                 .map((index) -> compileLocalVarSet(index, next))
-                .orElseGet(() -> compileGlobalVarSet(symb, next)));
+                .orElseGet(() -> compileGlobalVarSet(variable, next)));
   }
   
   private Inst compileLocalVarSet(DeBruijnIndex index, Inst next)
@@ -152,16 +145,12 @@ public class Compiler
 
   private Inst compileDef(List exp, Scope scope, Inst next)
   {
-    if (exp.length() != 3 || exp.cadr().type() != Type.SYMBOL)
+    if (!(exp.length() == 3 && exp.cadr() instanceof Symbol variable))
       throw malformedExp(exp);
-
-    var symb = (Symbol) exp.cadr();
     var init = exp.caddr();
-
     return compile(init, scope, false,
-           new StoreGlobal(symb.intern(),
-           new LoadConst(Nil.VALUE,
-           next)));
+           new StoreGlobal(variable.intern(),
+           new LoadConst(Nil.VALUE, next)));
   }
 
   /* Compile "defun" special form
@@ -266,7 +255,7 @@ public class Compiler
 
   private Inst compileCondClauses(List clauses, Scope scope, boolean tail, Inst next)
   {
-    if (clauses == List.EMPTY)
+    if (clauses.empty())
       return new LoadConst(Nil.VALUE, next);
 
     var clause = (List) clauses.car();
@@ -307,7 +296,7 @@ public class Compiler
 
   private Inst compileLet(List exp, Scope scope, boolean tail, Inst next)
   {
-    if (exp.length() < 3 || exp.cadr().type() != Type.LIST)
+    if (exp.length() < 3 || !(exp.cadr() instanceof List))
       throw malformedExp(exp);
 
     var bindings = (List) exp.cadr();
@@ -352,7 +341,7 @@ public class Compiler
   */
   private Inst compileLetRec(List exp, Scope scope, boolean tail, Inst next)
   {
-    if (exp.length() < 3 || exp.cadr().type() != Type.LIST)
+    if (exp.length() < 3 || !(exp.cadr() instanceof List))
       throw malformedExp(exp);
 
     var bindings = (List) exp.cadr();
@@ -417,7 +406,7 @@ public class Compiler
   */
   private Inst compileLetStar(List exp, Scope scope, boolean tail, Inst next)
   {
-    if (exp.length() < 3 || exp.cadr().type() != Type.LIST)
+    if (exp.length() < 3 || !(exp.cadr() instanceof List))
       throw malformedExp(exp);
 
     var bindings = (List) exp.cadr();
@@ -524,76 +513,42 @@ public class Compiler
   
   private boolean checkForLoopForm(List exp)
   {
-    var length = exp.length();        
-    if (length < 3)
-      return false;    
-    var bindings = exp.cadr();    
-    if (bindings.type() != Type.LIST || !checkForLoopBindingListForm((List)bindings))
-      return false;    
-    var test = exp.caddr();    
-    if (test.type() != Type.LIST || ((List)test).length() != 2)
-      return false;    
-    return true;
+    return exp.length() >= 3
+           && exp.cadr() instanceof List bindings
+           && checkForLoopBindingListForm(bindings)
+           && exp.caddr() instanceof List test
+           && test.length() == 2;
   }
   
   private boolean checkForLoopBindingListForm(List bindings)
   {
-    if (bindings == List.EMPTY)
-      return false;
-
-    for (; bindings != List.EMPTY; bindings = bindings.cdr())
-      if (bindings.car().type() != Type.LIST || !checkForLoopBindingPairForm((List) bindings.car()))
+    for (var binding : bindings)
+      if (!(binding instanceof List triple && triple.length() == 3 && triple.car() instanceof Symbol))
         return false;
-
     return true;
   }
-  
-  private boolean checkForLoopBindingPairForm(List binding)
-  {
-    return binding.length() == 3 && binding.car().type() == Type.SYMBOL;
-  }
-    
+      
   private boolean checkBindingListForm(List bindings)
   {
-    if (bindings == List.EMPTY)
-      return false;
-
-    for (; bindings != List.EMPTY; bindings = bindings.cdr())
-      if (bindings.car().type() != Type.LIST || !checkBindingPairForm((List) bindings.car()))
+    for (var binding : bindings)
+      if (!(binding instanceof List pair && pair.length() == 2 && pair.car() instanceof Symbol))
         return false;
-
     return true;
   }
-  
-  private boolean checkBindingPairForm(List binding)
-  {
-    return binding.length() == 2 && binding.car().type() == Type.SYMBOL;
-  }
-  
+    
   private boolean checkParamListForm(List params)
   {
-    for (; params != List.EMPTY; params = params.cdr()) {
-      if (params.car().type() != Type.SYMBOL)
+    for (; !params.empty(); params = params.cdr())
+      if (!(params.car() instanceof Symbol param) || (param.equals(Symbol.AMPERSAND) && (params.cdr().empty() || !params.cddr().empty())))
         return false;
-      // The symbol & appearing in the parameter list must occur immediately before the final parameter
-      if (Symbol.AMPERSAND.equals(params.car()) && (params.cdr() == List.EMPTY || params.cddr() != List.EMPTY))
-        return false;
-    }
     return true;
   }
 
   private boolean checkClauseListForm(List clauses)
   {
-    for (; clauses != List.EMPTY; clauses = clauses.cdr()) {
-      if (clauses.car().type() != Type.LIST)
+    for (; !clauses.empty(); clauses = clauses.cdr())
+      if (!(clauses.car() instanceof List clause) || clause.length() < 2 || (Symbol.ELSE.equals(clause.car()) && !clauses.cdr().empty()))
         return false;
-      var clause = (List) clauses.car();
-      if (clause.length() < 2)
-        return false;
-      // The symbol "else" must occur in the final clause
-      if (Symbol.ELSE.equals(clause.car()) && clauses.cdr() != List.EMPTY)
-        return false;
-    }
     return true;
   }
 
@@ -769,7 +724,7 @@ public class Compiler
    */
   private Inst compileFun(List exp, Scope scope, Inst next)
   {
-    if (exp.length() < 3 || exp.cadr().type() != Type.LIST)
+    if (exp.length() < 3 || !(exp.cadr() instanceof List))
       throw malformedExp(exp);
 
     var params = (List) exp.cadr();
@@ -822,10 +777,10 @@ public class Compiler
   */
   private boolean isInnerDef(Datum exp)
   {
-    if (exp.type() != Type.LIST || exp == List.EMPTY)
+    if (exp instanceof List form)
+      return !form.empty() && (Symbol.DEF.equals(form.car()) || Symbol.DEFUN.equals(form.car()));
+    else
       return false;
-    var car = ((List)exp).car();
-    return Symbol.DEF.equals(car) || Symbol.DEFUN.equals(car);
   }
 
   /* Compiles the "or" special form, a logical disjunction.
@@ -941,8 +896,8 @@ public class Compiler
     
     var x = exp.cadr();
     
-    if (x.type() == Type.SYMBOL)
-      x = ((Symbol)x).intern();
+    if (x instanceof Symbol s)
+      x = s.intern();
     
     return new LoadConst(x, next);
   }
@@ -973,42 +928,38 @@ public class Compiler
 
   private List transformQuasiquote(Datum exp)
   {
-    // (quasiquote ()) => ()
+    // (quasiquote x) = x, for self-evaluating x
     
     if (exp == List.EMPTY)
       return List.EMPTY;
     
-    // (quasiquote x) => (quote x) for atomic (non-list) x
-    
-    if (exp.type() != Type.LIST)
+    if (!(exp instanceof List list))
       return List.of(Symbol.QUOTE, exp);
-
-    var list = (List) exp;
+    
+    //var list = (List) exp;
     
     // Check for the unquote and unquote-splicing forms
     
-    if (list.car().type() == Type.LIST && list.car() != List.EMPTY) {
-      
-      var car = (List) list.car();
-      
+    if (list.car() instanceof List form && !form.empty())
+    {      
       // (quasiquote (unquote x) xs...) => (cons x (quasiquote xs...))
       
-      if (car.car() == Symbol.UNQUOTE) {
-        if (car.length() != 2)
+      if (form.car() instanceof Symbol car && car.equals(Symbol.UNQUOTE)) {        
+        if (form.length() != 2)
           throw malformedExp(exp);
         return List.cons(new Symbol("cons"),
-               List.cons(car.cadr(),
+               List.cons(form.cadr(),
                List.cons(transformQuasiquote(list.cdr()),
                List.EMPTY)));
       }
 
       // (quasiquote (unquote-splicing x) xs...) => (concat x (quasiquote xs...))    
       
-      if (car.car() == Symbol.UNQUOTE_SPLICING) {
-        if (car.length() != 2)
+      if (form.car() instanceof Symbol car && car.equals(Symbol.UNQUOTE_SPLICING)) {        
+        if (form.length() != 2)
           throw malformedExp(exp);
         return List.cons(new Symbol("concat"),
-               List.cons(car.cadr(),
+               List.cons(form.cadr(),
                List.cons(transformQuasiquote(list.cdr()),
                List.EMPTY)));
       }
@@ -1125,16 +1076,9 @@ public class Compiler
 
   private Inst compileDefMacro(List exp, Scope scope, Inst next)
   {
-    if (exp.length() < 4 || exp.cadr().type() != Type.SYMBOL || exp.caddr().type() != Type.LIST)
+    if (!(exp.length() >= 4 && exp.cadr() instanceof Symbol symb && exp.caddr() instanceof List params && checkParamListForm(params)))
       throw malformedExp(exp);
-
-    var symb = (Symbol) exp.cadr();
-    var params = (List) exp.caddr();
-    var body = exp.cdddr();
-    
-    if (!checkParamListForm(params))
-      throw malformedExp(exp);
-    
+    var body = exp.cdddr();    
     MacroEnv.bind(symb, new Macro(makeProcedure(params, body, Scope.EMPTY)));
     return new LoadConst(Nil.VALUE, next);
   }
@@ -1171,8 +1115,7 @@ public class Compiler
   private Inst compileCombo(List exp, Scope scope, boolean tail, Inst next)
   {
     // Handle special forms
-    if (exp.car().type().isSymbol()) {
-      var car = (Symbol) exp.car();
+    if (exp.car() instanceof Symbol car) {
       if (car.equals(Symbol.IF))
         return compileIf(exp, scope, tail, next);
       if (car.equals(Symbol.LET))
@@ -1224,10 +1167,12 @@ public class Compiler
   {
     if (isSelfEval(exp))
       return compileSelfEval(exp, next);
-    else if (exp.type() == Type.SYMBOL)
-      return compileVarRef((Symbol)exp, scope, next);
-    else
+    else if (exp instanceof Symbol variable)
+      return compileVarRef(variable, scope, next);
+    else //if (exp instanceof List list)
       return compileCombo((List)exp, scope, tail, next);
+    //else
+      //throw new 
   }
 
   private PositionMap positionMap;

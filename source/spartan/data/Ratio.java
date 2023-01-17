@@ -352,7 +352,13 @@ public final class Ratio implements Datum, INum, IReal, IEq, IOrd
     
     return a.multiply(d).compareTo(b.multiply(c));
   }
-    
+  
+  @Override
+  public int compareTo(Real rhs)
+  {
+    return toReal().compareTo(rhs);
+  }
+  
   @Override
   public Real sin()
   {

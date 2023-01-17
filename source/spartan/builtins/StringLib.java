@@ -20,43 +20,37 @@ public final class StringLib
   
   public static final Primitive JOIN = new Primitive(1, true) {
     public void apply(VirtualMachine vm) {
-      if (vm.popArg() instanceof Text delim) {
-        vm.result = Text.join(delim, vm.popRestArgs());
-        vm.popFrame();
-      }
-      else throw new TypeMismatch();
+      if (!(vm.popArg() instanceof Text delim))
+        throw new TypeMismatch();
+      vm.result = Text.join(delim, vm.popRestArgs());
+      vm.popFrame();      
     }
   };
   
   public static final Primitive SUBSTR = new Primitive(3, false) {
     public void apply(VirtualMachine vm) {
-      if (vm.popArg() instanceof Text text &&
-          vm.popArg() instanceof IInt start &&
-          vm.popArg() instanceof IInt end) {
-        vm.result = text.substring(start.intValue(), end.intValue());
-        vm.popFrame();
-      }
-      else throw new TypeMismatch();
+      if (!(vm.popArg() instanceof Text text && vm.popArg() instanceof IInt start && vm.popArg() instanceof IInt end))
+        throw new TypeMismatch();
+      vm.result = text.substring(start.intValue(), end.intValue());
+      vm.popFrame();
     }
   };
   
   public static final Primitive REVERSE = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
-      if (vm.popArg() instanceof Text text) {
-        vm.result = text.reverse();
-        vm.popFrame();
-      }
-      else throw new TypeMismatch();
+      if (!(vm.popArg() instanceof Text text))
+        throw new TypeMismatch();
+      vm.result = text.reverse();
+      vm.popFrame();
     }
   };
   
   public static final Primitive HASH = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
-      if (vm.popArg() instanceof Text text) {
-        vm.result = new Int(text.hashCode());
-        vm.popFrame();
-      }
-      else throw new TypeMismatch();
+      if (!(vm.popArg() instanceof Text text))
+        throw new TypeMismatch();
+      vm.result = new Int(text.hashCode());
+      vm.popFrame();
     }
   };
 }
