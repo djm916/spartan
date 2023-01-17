@@ -22,9 +22,10 @@ permits InputPort, OutputPort, FilePort
     throw new InvalidArgument("invalid file open flags");
   }
   
-  public Type type()
+  @Override
+  public String type()
   {
-    return Type.PORT;
+    return "port";
   }
   
   public void close()

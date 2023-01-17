@@ -15,9 +15,9 @@ public abstract class Primitive implements Datum, Callable
   }
   
   @Override
-  public final Type type()
+  public String type()
   {
-    return Type.PRIMITIVE;
+    return "procedure";
   }
   
   @Override

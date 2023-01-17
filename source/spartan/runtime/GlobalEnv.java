@@ -81,8 +81,6 @@ public final class GlobalEnv
     bind(Symbol.of("format-decimal"), CoreLib.FORMAT_DECIMAL);
     bind(Symbol.of("max"), CoreLib.MAX);
     bind(Symbol.of("min"), CoreLib.MIN);
-    bind(Symbol.of("wrap-type"), CoreLib.WRAP_TYPE);
-    bind(Symbol.of("unwrap-type"), CoreLib.UNWRAP_TYPE);
     
     /* Type predicates */
     

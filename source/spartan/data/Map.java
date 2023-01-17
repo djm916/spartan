@@ -24,9 +24,9 @@ public final class Map implements Datum, Callable
   }
   
   @Override
-  public Type type()
+  public String type()
   {
-    return Type.MAPPING;
+    return "map";
   }
   
   @Override

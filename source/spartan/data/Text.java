@@ -13,9 +13,9 @@ public final class Text implements Datum, IEq, IOrd, ISize, ISeq
   }
     
   @Override // Datum
-  public Type type()
+  public String type()
   {
-    return Type.TEXT;
+    return "string";
   }
   
   @Override // Datum

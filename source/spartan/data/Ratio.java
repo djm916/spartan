@@ -39,11 +39,13 @@ public final class Ratio implements Datum, INum, IReal, IEq, IOrd
          BigInteger.valueOf(denom));
   }
   
-  public Type type()
+  @Override
+  public String type()
   {
-    return Type.RATIO;
+    return "rational";
   }
   
+  @Override
   public String repr()
   {
     return String.format("%s/%s", numer, denom);

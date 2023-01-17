@@ -1,7 +1,6 @@
 package spartan.builtins;
 
 import spartan.errors.TypeMismatch;
-import spartan.data.Type;
 import spartan.data.Primitive;
 import spartan.data.Bytes;
 import spartan.data.Int;

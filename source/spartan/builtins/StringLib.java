@@ -1,6 +1,5 @@
 package spartan.builtins;
 
-import spartan.data.Type;
 import spartan.data.Primitive;
 import spartan.data.Text;
 import spartan.data.List;

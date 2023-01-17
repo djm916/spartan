@@ -16,9 +16,9 @@ public final class Closure implements Datum, Callable
   }
   
   @Override
-  public Type type()
+  public String type()
   {
-    return Type.CLOSURE;
+    return "procedure";
   }
   
   @Override

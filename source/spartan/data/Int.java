@@ -17,12 +17,6 @@ public final class Int implements Datum, INum, IInt, IReal, IEq, IOrd
   }
   
   @Override // Datum
-  public Type type()
-  {
-    return Type.INT;
-  }
-  
-  @Override // Datum
   public String repr()
   {
     return Integer.toString(value);

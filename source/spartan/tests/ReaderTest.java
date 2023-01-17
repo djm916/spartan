@@ -6,6 +6,7 @@ import spartan.parsing.Reader;
 import spartan.errors.Error;
 import spartan.data.Datum;
 import java.io.IOException;
+import spartan.data.Int;
 
 public class ReaderTest
 {   
@@ -38,8 +39,8 @@ public class ReaderTest
   public void test3()
   {
     try (Reader r = Reader.forString("123")) {
-      Datum output = r.read().datum();
-      assertTrue(output.type().isInt());
+      var output = r.read().datum();
+      assertTrue(output instanceof Int);
       assertEquals(output.repr(), "123");
     }
     catch (Error ex) {

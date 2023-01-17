@@ -46,9 +46,9 @@ public final class Symbol implements Datum, IEq
   }
   
   @Override
-  public Type type()
+  public String type()
   {
-    return Type.SYMBOL;
+    return "symbol";
   }
   
   @Override

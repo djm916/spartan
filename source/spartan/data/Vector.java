@@ -47,9 +47,9 @@ public final class Vector implements Datum, Callable, ISeq, ISize, IEq, Iterable
   }
     
   @Override // Datum
-  public Type type()
+  public String type()
   {
-    return Type.VECTOR;
+    return "vector";
   }
   
   @Override // Datum

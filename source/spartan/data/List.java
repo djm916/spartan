@@ -68,19 +68,19 @@ public final class List implements Datum, ISeq, ISize, IEq, Iterable<Datum>
   public static List concat(List lists)
   {
     var builder = new List.Builder();
-    for (var list : lists) {
-      if (list.type() != Type.LIST)
+    for (var car : lists) {
+      if (!(car instanceof List list))
         throw new TypeMismatch();
-      for (var elem : (List) list)
+      for (var elem : list)
         builder.add(elem);
     }
     return builder.build();
   }
   
   @Override
-  public Type type()
+  public String type()
   {
-    return Type.LIST;
+    return "list";
   }
   
   @Override

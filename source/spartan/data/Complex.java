@@ -20,9 +20,10 @@ public final class Complex implements Datum, INum, IEq
     this(Double.parseDouble(real), Double.parseDouble(imag));
   }
   
-  public Type type()
+  @Override
+  public String type()
   {
-    return Type.COMPLEX;
+    return "complex";
   }
   
   public String repr()

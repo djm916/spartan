@@ -11,9 +11,9 @@ public final class Continuation implements Datum, Callable
   }
   
   @Override
-  public Type type()
+  public String type()
   {
-    return Type.CONTINUE;
+    return "procedure";
   }
   
   @Override

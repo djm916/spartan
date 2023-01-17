@@ -73,11 +73,6 @@ public final class VirtualMachine
     return x;
   }
   
-  public Datum peekArg()
-  {
-    return args.car();
-  }
-  
   public List popRestArgs()
   {
     List x = args;

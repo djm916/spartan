@@ -4,11 +4,13 @@ public final class Nil implements Datum, IEq
 {
   public static final Nil VALUE = new Nil();
   
-  public Type type()
+  @Override
+  public String type()
   {
-    return Type.NIL;
+    return "nil";
   }
   
+  @Override
   public String repr()
   {
     return "nil";

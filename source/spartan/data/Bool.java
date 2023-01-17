@@ -11,9 +11,9 @@ public final class Bool implements Datum, IEq
   }
   
   @Override
-  public Type type()
+  public String type()
   {
-    return Type.BOOL;
+    return "boolean";
   }
 
   @Override

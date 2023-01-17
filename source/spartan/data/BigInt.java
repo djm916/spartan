@@ -22,12 +22,6 @@ public final class BigInt implements Datum, INum, IInt, IReal, IEq, IOrd
   }
   
   @Override
-  public Type type()
-  {
-    return Type.BIGINT;
-  }
-  
-  @Override
   public String repr()
   {
     return value.toString();

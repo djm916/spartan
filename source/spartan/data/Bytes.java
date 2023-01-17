@@ -22,9 +22,10 @@ public final class Bytes implements Datum
     return result;
   }
   
-  public Type type()
+  @Override
+  public String type()
   {
-    return Type.BYTES;
+    return "bytes";
   }
   
   public Bytes(int capacity)

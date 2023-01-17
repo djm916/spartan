@@ -29,4 +29,9 @@ permits Int, BigInt
   IInt remainder(Int rhs);
   IInt remainder(BigInt rhs);
   
+  @Override // Datum
+  default String type()
+  {
+    return "integer";
+  }  
 }

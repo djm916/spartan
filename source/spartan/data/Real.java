@@ -20,9 +20,10 @@ public final class Real implements Datum, INum, IReal, IEq, IOrd
     this(Double.parseDouble(val));
   }
   
-  public Type type()
+  @Override
+  public String type()
   {
-    return Type.REAL;
+    return "real";
   }
   
   public String repr()

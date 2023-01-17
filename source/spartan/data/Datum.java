@@ -2,7 +2,7 @@ package spartan.data;
 
 public interface Datum
 {
-  Type type();
+  String type();
   
   /* Returns a String representation of this object, intended to be machine-readable.
   
