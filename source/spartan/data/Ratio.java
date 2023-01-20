@@ -3,7 +3,7 @@ package spartan.data;
 import java.math.BigInteger;
 import spartan.errors.InvalidArgument;
 
-public final class Ratio implements Datum, INum, IReal, IEq, IOrd
+public final class Ratio implements Datum, INum, IRatio, IReal, IEq, IOrd
 {
   public Ratio(BigInteger numer, BigInteger denom)
   {
@@ -51,11 +51,13 @@ public final class Ratio implements Datum, INum, IReal, IEq, IOrd
     return String.format("%s/%s", numer, denom);
   }
   
+  @Override
   public BigInt numerator()
   {
     return new BigInt(numer);
   }
   
+  @Override
   public BigInt denominator()
   {
     return new BigInt(denom);
@@ -455,6 +457,19 @@ public final class Ratio implements Datum, INum, IReal, IEq, IOrd
   public Complex log(Complex rhs)
   {
     return toComplex().log(rhs);
+  }
+  
+  
+  @Override
+  public IReal realPart()
+  {
+    return toReal();
+  }
+  
+  @Override
+  public IReal imagPart()
+  {
+    return Real.ZERO;
   }
   
   private final BigInteger numer;

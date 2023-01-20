@@ -63,6 +63,11 @@ public final class Symbol implements Datum, IEq
     return (rhs instanceof Symbol s) && id.equals(s.id);
   }
   
+  public boolean equals(String rhs)
+  {
+    return id.equals(rhs);
+  }
+  
   @Override // Object
   public int hashCode()
   {

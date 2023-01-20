@@ -78,7 +78,6 @@ public final class GlobalEnv
     bind(Symbol.of("gensym"), CoreLib.GENSYM);
     bind(Symbol.of("identity-hash"), CoreLib.IDENTITY_HASH);
     bind(Symbol.of("error"), CoreLib.ERROR);    
-    bind(Symbol.of("format-decimal"), CoreLib.FORMAT_DECIMAL);
     bind(Symbol.of("max"), CoreLib.MAX);
     bind(Symbol.of("min"), CoreLib.MIN);
     
@@ -144,6 +143,8 @@ public final class GlobalEnv
     bind(Symbol.of("bytes->string"), CoreLib.BYTES_TO_TEXT); // decode
     //bind(Symbol.of("string->number"), CoreLib.TEXT_TO_NUMBER);
     bind(Symbol.of("string->int"), CoreLib.TEXT_TO_INT);
+    bind(Symbol.of("format-int"), CoreLib.FORMAT_INT);
+    bind(Symbol.of("format-decimal"), CoreLib.FORMAT_DECIMAL);
     
     /* List procedures */
 

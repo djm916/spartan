@@ -26,17 +26,20 @@ public final class Complex implements Datum, INum, IEq
     return "complex";
   }
   
+  @Override
   public String repr()
   {
     return String.format("%g%+gi", real, imag);
   }
   
-  public Real real()
+  @Override
+  public Real realPart()
   {
     return new Real(real);
   }
   
-  public Real imag()
+  @Override
+  public Real imagPart()
   {
     return new Real(imag);
   }

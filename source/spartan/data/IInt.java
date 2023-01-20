@@ -33,5 +33,7 @@ permits Int, BigInt
   default String type()
   {
     return "integer";
-  }  
+  }
+  
+  String format(int base);
 }

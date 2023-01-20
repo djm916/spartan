@@ -4,8 +4,11 @@ import java.math.BigInteger;
 import spartan.errors.DivisionByZero;
 import spartan.errors.IntegerOverflow;
 
-public final class BigInt implements Datum, INum, IInt, IReal, IEq, IOrd
+public final class BigInt implements Datum, INum, IInt, IRatio, IReal, IEq, IOrd
 {
+  public static final BigInt ZERO = new BigInt(0);
+  public static final BigInt ONE = new BigInt(1);
+  
   public BigInt(long value)
   {
     this(BigInteger.valueOf(value));
@@ -42,6 +45,12 @@ public final class BigInt implements Datum, INum, IInt, IReal, IEq, IOrd
   public double doubleValue()
   {
     return value.doubleValue();
+  }
+  
+  @Override
+  public String format(int base)
+  {
+    return value.toString(base);
   }
   
   @Override
@@ -109,7 +118,7 @@ public final class BigInt implements Datum, INum, IInt, IReal, IEq, IOrd
   {
     return toReal().compareTo(rhs);
   }
-      
+    
   public Ratio toRatio()
   {
     return new Ratio(value, BigInteger.ONE);
@@ -403,6 +412,30 @@ public final class BigInt implements Datum, INum, IInt, IReal, IEq, IOrd
   public BigInt round()
   {
     return this;
+  }
+  
+  @Override
+  public IReal realPart()
+  {
+    return toReal();
+  }
+  
+  @Override
+  public IReal imagPart()
+  {
+    return Real.ZERO;
+  }
+  
+  @Override
+  public BigInt numerator()
+  {
+    return this;
+  }
+  
+  @Override
+  public BigInt denominator()
+  {
+    return ONE;
   }
   
   private final BigInteger value;

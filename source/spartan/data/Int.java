@@ -4,8 +4,11 @@ import java.math.BigInteger;
 import spartan.errors.DivisionByZero;
 import spartan.errors.IntegerOverflow;
 
-public final class Int implements Datum, INum, IInt, IReal, IEq, IOrd
+public final class Int implements Datum, INum, IInt, IRatio, IReal, IEq, IOrd
 {
+  public static final Int ZERO = new Int(0);
+  public static final Int ONE = new Int(1);
+  
   public Int(int value)
   {
     this.value = value;
@@ -34,10 +37,16 @@ public final class Int implements Datum, INum, IInt, IReal, IEq, IOrd
     return (double)value;
   }
   
-  @Override // Object
-  public boolean equals(Object other)
+  @Override
+  public String format(int base)
   {
-    return (other instanceof Int that) && this.value == that.value;
+    return Integer.toString(value, base);
+  }
+  
+  @Override // Object
+  public boolean equals(Object rhs)
+  {
+    return (rhs instanceof Int that) && this.value == that.value;
   }
   
   @Override // Object
@@ -64,6 +73,18 @@ public final class Int implements Datum, INum, IInt, IReal, IEq, IOrd
   public Complex toComplex()
   {
     return new Complex((double)value, 0.0);
+  }
+  
+  @Override
+  public Int numerator()
+  {
+    return this;
+  }
+  
+  @Override
+  public Int denominator()
+  {
+    return ONE;
   }
   
   @Override
@@ -369,7 +390,19 @@ public final class Int implements Datum, INum, IInt, IReal, IEq, IOrd
   {
     return toComplex().log(rhs);
   }
-    
+  
+  @Override
+  public IReal realPart()
+  {
+    return toReal();
+  }
+  
+  @Override
+  public IReal imagPart()
+  {
+    return Real.ZERO;
+  }
+  
   @Override // IEq
   public boolean isEqual(Int rhs)  
   {
@@ -423,6 +456,6 @@ public final class Int implements Datum, INum, IInt, IReal, IEq, IOrd
   {
     return toReal().compareTo(rhs);
   }
-    
+  
   private final int value;
 }

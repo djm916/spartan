@@ -66,5 +66,5 @@ public final class Core
       xs = xs.cdr();
     }
     return min;
-  }
+  }  
 }

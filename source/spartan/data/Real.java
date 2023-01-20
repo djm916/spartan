@@ -9,6 +9,7 @@ public final class Real implements Datum, INum, IReal, IEq, IOrd
   public static final Real POS_INF = new Real(Double.POSITIVE_INFINITY);
   public static final Real NEG_INF = new Real(Double.NEGATIVE_INFINITY);
   public static final Real NAN = new Real(Double.NaN);
+  public static final Real ZERO = new Real(0.0);
   
   public Real(double value)
   {
@@ -348,6 +349,19 @@ public final class Real implements Datum, INum, IReal, IEq, IOrd
   public int compareTo(Real that)
   {
     return Double.compare(this.value, that.value);
+  }
+  
+  
+  @Override
+  public IReal realPart()
+  {
+    return new Real(value);
+  }
+  
+  @Override
+  public IReal imagPart()
+  {
+    return ZERO;
   }
   
   private final double value;

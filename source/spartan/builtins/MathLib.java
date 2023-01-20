@@ -161,18 +161,18 @@ public final class MathLib
     
   public static final Primitive REAL_PART = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof Complex c))
+      if (!(vm.popArg() instanceof INum c))
         throw new TypeMismatch();
-      vm.result = c.real();
+      vm.result = c.realPart();
       vm.popFrame();
     }
   };
   
   public static final Primitive IMAG_PART = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof Complex c))
+      if (!(vm.popArg() instanceof INum c))
         throw new TypeMismatch();
-      vm.result = c.imag();
+      vm.result = c.imagPart();
       vm.popFrame();
     }
   };
@@ -204,7 +204,7 @@ public final class MathLib
   
   public static final Primitive NUMERATOR = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof Ratio q))
+      if (!(vm.popArg() instanceof IRatio q))
         throw new TypeMismatch();
       vm.result = q.numerator();
       vm.popFrame();
@@ -213,7 +213,7 @@ public final class MathLib
   
   public static final Primitive DENOMINATOR = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof Ratio q))
+      if (!(vm.popArg() instanceof IRatio q))
         throw new TypeMismatch();
       vm.result = q.denominator();
       vm.popFrame();

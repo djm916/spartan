@@ -189,11 +189,36 @@ public final class CoreLib
     }
   };
   
-  public static final Primitive FORMAT_DECIMAL = new Primitive(1, false) {
+  // (format-decimal num [precision])
+  
+  public static final Primitive FORMAT_DECIMAL = new Primitive(1, true) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof IReal num))
         throw new TypeMismatch();
+      var args = vm.popRestArgs();
+      var precision = 2;
+      if (!args.empty() && args.car() instanceof IInt arg)
+        precision = arg.intValue();
+      Config.NUMERIC_FORMATTER.setMinimumFractionDigits(precision);
+      Config.NUMERIC_FORMATTER.setMaximumFractionDigits(precision);
       vm.result = new Text(Config.NUMERIC_FORMATTER.format(num.doubleValue()));
+      Config.NUMERIC_FORMATTER.setMinimumFractionDigits(Config.DEFAULT_DECIMAL_PRECISION);
+      Config.NUMERIC_FORMATTER.setMaximumFractionDigits(Config.DEFAULT_DECIMAL_PRECISION);
+      vm.popFrame();
+    }
+  };
+  
+  // (format-int num [base])
+  
+  public static final Primitive FORMAT_INT = new Primitive(1, true) {
+    public void apply(VirtualMachine vm) {
+      if (!(vm.popArg() instanceof IInt num))
+        throw new TypeMismatch();
+      var args = vm.popRestArgs();
+      int base = 10;
+      if (!args.empty() && args.car() instanceof IInt arg)
+        base = arg.intValue();
+      vm.result = new Text(num.format(base));
       vm.popFrame();
     }
   };
