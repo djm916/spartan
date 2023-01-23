@@ -13,7 +13,7 @@ import spartan.errors.InvalidArgument;
 import spartan.runtime.VirtualMachine;
 import spartan.builtins.Core;
 
-public final class Vector implements Datum, Callable, ISeq, ISize, IEq, Iterable<Datum>
+public final class Vector implements Datum, Callable, ISize, IEq, Iterable<Datum>
 {
   public static Vector fromList(List elems)
   {
@@ -64,7 +64,7 @@ public final class Vector implements Datum, Callable, ISeq, ISize, IEq, Iterable
   public void apply(VirtualMachine vm)
   {
     if (vm.popArg() instanceof IInt index) {
-      vm.result = at(index.intValue());
+      vm.result = get(index.intValue());
       vm.popFrame();
     }
     else throw new InvalidArgument();
@@ -82,8 +82,8 @@ public final class Vector implements Datum, Callable, ISeq, ISize, IEq, Iterable
     return elems.size();
   }
   
-  @Override // ISeq
-  public Datum at(int index)
+  //@Override
+  public Datum get(int index)
   {
     try {
       return elems.get(index);

@@ -254,6 +254,59 @@ public class Reader implements AutoCloseable
     }
   }
   
+  /* Read a number (integer, rational, real, or complex)
+     according to the following grammar:
+    
+    <number> -> <sign>? (<integer> | <rational> | <real> | <complex>)
+    <integer> -> <digit>+
+    <rational> -> <integer> "/" <integer>
+    <real> -> <integer> "." <integer> <exponent>?
+    <complex> -> <real> <sign> <real> "i"
+    <exponent> -> ("e" | "E") <sign>? <integer>
+    <sign> -> "-" | "+"
+    <digit> -> "0" | "1" | ... | "9"
+    
+  */
+    
+  private INum readNumber()
+  {
+    var text = new StringBuilder();
+    var position = getTokenPosition();
+    
+    if (isSign(lastChar)) {
+      text.append((char)lastChar);
+      getChar();
+    }
+
+    scanDigits(text);
+
+    if (peekChar() == '/') {
+      var numer = text.toString();
+      text = new StringBuilder();
+      getChar(); // skip /
+      getChar();
+      scanDigits(text);
+      var denom = text.toString();
+      return makeRatio(numer, denom);
+    }
+    
+    if (peekChar() == '.') {      
+      scanFractionAndExponent(text);
+      
+      if (isSign(peekChar())) {
+        var real = text.toString();
+        text = new StringBuilder();
+        scanImaginaryPart(text);
+        var imag = text.toString();
+        return makeComplex(real, imag);
+      }
+      
+      return makeReal(text.toString());
+    }
+        
+    return makeInt(text.toString());
+  }
+
   private void scanDigits(StringBuilder text)
   {
     if (!isDigit(lastChar))
@@ -320,59 +373,6 @@ public class Reader implements AutoCloseable
     getChar(); // eat "i"
   }
   
-  /* Read a number (integer, rational, real, or complex)
-     according to the following grammar:
-    
-    <number> -> <sign>? (<integer> | <rational> | <real> | <complex>)
-    <integer> -> <digit>+
-    <rational> -> <integer> "/" <integer>
-    <real> -> <integer> "." <integer> <exponent>?
-    <complex> -> <real> <sign> <real> "i"
-    <exponent> -> ("e" | "E") <sign>? <integer>
-    <sign> -> "-" | "+"
-    <digit> -> "0" | "1" | ... | "9"
-    
-  */
-    
-  private INum readNumber()
-  {
-    var text = new StringBuilder();
-    var position = getTokenPosition();
-    
-    if (isSign(lastChar)) {
-      text.append((char)lastChar);
-      getChar();
-    }
-
-    scanDigits(text);
-
-    if (peekChar() == '/') {
-      var numer = text.toString();
-      text = new StringBuilder();
-      getChar(); // skip /
-      getChar();
-      scanDigits(text);
-      var denom = text.toString();
-      return makeRatio(numer, denom);
-    }
-    
-    if (peekChar() == '.') {      
-      scanFractionAndExponent(text);
-      
-      if (isSign(peekChar())) {
-        var real = text.toString();
-        text = new StringBuilder();
-        scanImaginaryPart(text);
-        var imag = text.toString();
-        return makeComplex(real, imag);
-      }
-      
-      return makeReal(text.toString());
-    }
-        
-    return makeInt(text.toString());
-  }
-
   private IInt makeInt(String text)
   {
     try {

@@ -129,8 +129,8 @@ public final class GlobalEnv
     bind(Symbol.of("complex"), MathLib.MAKE_COMPLEX);
     bind(Symbol.of("real"), MathLib.REAL_PART);
     bind(Symbol.of("imag"), MathLib.IMAG_PART);
-    bind(Symbol.of("rect->polar"), MathLib.RECT_TO_POLAR);
-    bind(Symbol.of("polar->rect"), MathLib.POLAR_TO_RECT);
+    bind(Symbol.of("angle"), MathLib.ANGLE);
+    bind(Symbol.of("magnitude"), MathLib.MAGNITUDE);
     bind(Symbol.of("ratio"), MathLib.MAKE_RATIO);
     bind(Symbol.of("numer"), MathLib.NUMERATOR);
     bind(Symbol.of("denom"), MathLib.DENOMINATOR);
@@ -167,7 +167,7 @@ public final class GlobalEnv
     /* Vector procedures */
     
     bind(Symbol.of("vector"), VectorLib.FROM_LIST);
-    bind(Symbol.of("vector/fill"), VectorLib.FILL);
+    bind(Symbol.of("vector/new"), VectorLib.FILL);
     bind(Symbol.of("vector/copy"), VectorLib.COPY);
     bind(Symbol.of("vector/ref"), VectorLib.REF);
     bind(Symbol.of("vector/set!"), VectorLib.SET);
@@ -175,15 +175,14 @@ public final class GlobalEnv
     
     /* Map procedures */
     
-    //bind(Symbol.of("mapping"), MapLib.FROM_LIST);
+    bind(Symbol.of("mapping"), MapLib.FROM_LIST);
     bind(Symbol.of("map/get"), MapLib.GET);
     bind(Symbol.of("map/set!"), MapLib.SET);
     bind(Symbol.of("map/length"), MapLib.LENGTH);
     bind(Symbol.of("map/keys"), MapLib.KEYS);
     bind(Symbol.of("map/values"), MapLib.VALUES);
     bind(Symbol.of("map/entries"), MapLib.ENTRIES);
-    
-    
+        
     /* String procedures */
     
     bind(Symbol.of("string/concat"), StringLib.CONCAT);

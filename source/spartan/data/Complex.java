@@ -44,25 +44,16 @@ public final class Complex implements Datum, INum, IEq
     return new Real(imag);
   }
   
+  @Override
   public Real magnitude()
   {
     return abs();
   }
   
+  @Override
   public Real angle()
   {
     return new Real(Math.atan2(imag, real));
-  }
-  
-  public List toRect()
-  {
-    return List.of(new Real(real), new Real(imag));
-  }
-  
-  public List toPolar()
-  {
-    return List.of(new Real(Math.hypot(real, imag)),
-                   new Real(Math.atan2(imag, real)));
   }
   
   @Override

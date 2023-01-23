@@ -19,13 +19,13 @@ public final class Int implements Datum, INum, IInt, IRatio, IReal, IEq, IOrd
     this(Integer.parseInt(value));
   }
   
-  @Override // Datum
+  @Override
   public String repr()
   {
     return Integer.toString(value);
   }
-  
-  @Override // IInt
+
+  @Override
   public int intValue()
   {
     return value;
@@ -43,13 +43,13 @@ public final class Int implements Datum, INum, IInt, IRatio, IReal, IEq, IOrd
     return Integer.toString(value, base);
   }
   
-  @Override // Object
+  @Override
   public boolean equals(Object rhs)
   {
     return (rhs instanceof Int that) && this.value == that.value;
   }
   
-  @Override // Object
+  @Override
   public int hashCode()
   {
     return Integer.hashCode(value);
@@ -73,18 +73,6 @@ public final class Int implements Datum, INum, IInt, IRatio, IReal, IEq, IOrd
   public Complex toComplex()
   {
     return new Complex((double)value, 0.0);
-  }
-  
-  @Override
-  public Int numerator()
-  {
-    return this;
-  }
-  
-  @Override
-  public Int denominator()
-  {
-    return ONE;
   }
   
   @Override
@@ -392,66 +380,90 @@ public final class Int implements Datum, INum, IInt, IRatio, IReal, IEq, IOrd
   }
   
   @Override
-  public IReal realPart()
+  public Int numerator()
+  {
+    return this;
+  }
+  
+  @Override
+  public Int denominator()
+  {
+    return ONE;
+  }
+  
+  @Override
+  public Real realPart()
   {
     return toReal();
   }
   
   @Override
-  public IReal imagPart()
+  public Real imagPart()
   {
     return Real.ZERO;
   }
   
-  @Override // IEq
+  @Override
+  public Real angle()
+  {
+    return toComplex().angle();
+  }
+  
+  @Override
+  public Real magnitude()
+  {
+    return toComplex().magnitude();
+  }
+  
+  @Override
   public boolean isEqual(Int rhs)  
   {
     return this.value == rhs.value;
   }
   
-  @Override // IEq
+  @Override
   public boolean isEqual(BigInt rhs)
   {
     return toBigInt().isEqual(rhs);
   }
   
-  @Override // IEq
+  @Override
   public boolean isEqual(Ratio rhs)  
   {
     return toRatio().isEqual(rhs);
   }
   
-  @Override // IEq
+  @Override
   public boolean isEqual(Real rhs)  
   {
     return toReal().isEqual(rhs);
   }
   
-  @Override // IEq
+  @Override
   public boolean isEqual(Complex rhs)  
   {
     return toComplex().isEqual(rhs);
   }
-  
-  @Override // IOrd
+
+  @Override
   public int compareTo(Int rhs)
   {
     return Integer.compare(this.value, rhs.value);
   }
   
-  @Override // IOrd
+  @Override
   public int compareTo(BigInt rhs)
   {
     return toBigInt().compareTo(rhs);
   }
   
-  @Override // IOrd
+  @Override
   public int compareTo(Ratio rhs)
   {
     return toRatio().compareTo(rhs);
   }
   
-  @Override // IOrd
+  @Override
   public int compareTo(Real rhs)
   {
     return toReal().compareTo(rhs);

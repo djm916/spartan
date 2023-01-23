@@ -1,6 +1,8 @@
 package spartan.data;
 
-public sealed interface ISeq permits List, Vector, Text
+public interface ISeq
 {
-  Datum at(int index);
+  boolean isEmpty();
+  Datum get(int index);
+  void set(int index, Datum elem);
 }

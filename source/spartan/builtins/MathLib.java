@@ -177,20 +177,20 @@ public final class MathLib
     }
   };
   
-  public static final Primitive RECT_TO_POLAR = new Primitive(1, false) {
+  public static final Primitive ANGLE = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof Complex c))
+      if (!(vm.popArg() instanceof INum c))
         throw new TypeMismatch();
-      vm.result = c.toPolar();
+      vm.result = c.angle();
       vm.popFrame();
     }
   };
   
-  public static final Primitive POLAR_TO_RECT = new Primitive(1, false) {
+  public static final Primitive MAGNITUDE = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof Complex c))
+      if (!(vm.popArg() instanceof INum c))
         throw new TypeMismatch();
-      vm.result = c.toRect();
+      vm.result = c.magnitude();
       vm.popFrame();
     }
   };

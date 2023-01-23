@@ -457,19 +457,30 @@ public final class Ratio implements Datum, INum, IRatio, IReal, IEq, IOrd
   public Complex log(Complex rhs)
   {
     return toComplex().log(rhs);
-  }
-  
+  }  
   
   @Override
-  public IReal realPart()
+  public Real realPart()
   {
     return toReal();
   }
   
   @Override
-  public IReal imagPart()
+  public Real imagPart()
   {
     return Real.ZERO;
+  }
+  
+  @Override
+  public Real angle()
+  {
+    return toComplex().angle();
+  }
+  
+  @Override
+  public Real magnitude()
+  {
+    return toComplex().magnitude();
   }
   
   private final BigInteger numer;

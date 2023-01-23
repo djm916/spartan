@@ -351,7 +351,6 @@ public final class Real implements Datum, INum, IReal, IEq, IOrd
     return Double.compare(this.value, that.value);
   }
   
-  
   @Override
   public IReal realPart()
   {
@@ -362,6 +361,18 @@ public final class Real implements Datum, INum, IReal, IEq, IOrd
   public IReal imagPart()
   {
     return ZERO;
+  }
+  
+  @Override
+  public Real angle()
+  {
+    return toComplex().angle();
+  }
+  
+  @Override
+  public Real magnitude()
+  {
+    return toComplex().magnitude();
   }
   
   private final double value;

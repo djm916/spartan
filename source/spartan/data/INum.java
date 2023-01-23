@@ -122,4 +122,6 @@ permits IInt, IRatio, IReal, Int, BigInt, Ratio, Real, Complex
   
   IReal realPart();
   IReal imagPart();
+  IReal angle();
+  IReal magnitude();
 }

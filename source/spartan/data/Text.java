@@ -5,7 +5,7 @@ import java.nio.CharBuffer;
 import spartan.errors.TypeMismatch;
 import spartan.errors.IndexOutOfBounds;
 
-public final class Text implements Datum, IEq, IOrd, ISize, ISeq
+public final class Text implements Datum, IEq, IOrd, ISize
 {
   public Text(String value)
   {
@@ -106,8 +106,8 @@ public final class Text implements Datum, IEq, IOrd, ISize, ISeq
     return new Text(new StringBuilder(value).reverse().toString());
   }
   
-  @Override
-  public Text at(int index)
+  //@Override
+  public Text get(int index)
   {
     return substring(index, index + 1);
   }

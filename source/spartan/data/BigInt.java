@@ -415,15 +415,27 @@ public final class BigInt implements Datum, INum, IInt, IRatio, IReal, IEq, IOrd
   }
   
   @Override
-  public IReal realPart()
+  public Real realPart()
   {
     return toReal();
   }
   
   @Override
-  public IReal imagPart()
+  public Real imagPart()
   {
     return Real.ZERO;
+  }
+  
+  @Override
+  public Real angle()
+  {
+    return toComplex().angle();
+  }
+  
+  @Override
+  public Real magnitude()
+  {
+    return toComplex().magnitude();
   }
   
   @Override
