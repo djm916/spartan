@@ -6,16 +6,17 @@ import spartan.parsing.Reader;
 import spartan.errors.Error;
 import spartan.data.Datum;
 import java.io.IOException;
+import java.io.EOFException;
 import spartan.data.Int;
 
 public class ReaderTest
 {   
-  @Test
-  // Reader returns null on end of input
-  public void test1()
+  @Test(expected = EOFException.class)
+  // Reader throws EOFException on end of input
+  public void test1() throws EOFException
   {
     try (Reader r = Reader.forString("")) {
-      assertNull(r.read());
+      r.read();
     }
     catch (Error ex) {
       fail(ex.getMessage());
@@ -24,7 +25,7 @@ public class ReaderTest
 
   @Test(expected = NullPointerException.class)
   // Reader throws NullPointerException on null input
-  public void test2()
+  public void test2() throws EOFException
   {
     try (Reader r = Reader.forString(null)) {
       r.read();
@@ -42,6 +43,9 @@ public class ReaderTest
       var output = r.read().datum();
       assertTrue(output instanceof Int);
       assertEquals(output.repr(), "123");
+    }
+    catch (EOFException ex) {
+      fail(ex.getMessage());
     }
     catch (Error ex) {
       fail(ex.getMessage());

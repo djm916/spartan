@@ -67,12 +67,12 @@ public class Reader implements AutoCloseable
    * @return the next {@code SourceDatum}, or {@code null} if the input source is exhausted
    * @throws SyntaxError if the input is syntactially invalid
    */
-  public SourceDatum read()
+  public SourceDatum read() throws EOFException
   {
     positionMap.clear();
     skipSpace();
     if (lastChar == -1)
-      return null;
+      throw new EOFException();
     return new SourceDatum(readDatum(), positionMap);
   }
     

@@ -6,6 +6,7 @@ import spartan.runtime.VirtualMachine;
 import spartan.errors.Error;
 import spartan.errors.LoadError;
 import java.io.FileNotFoundException;
+import java.io.EOFException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.InvalidPathException;
@@ -63,13 +64,12 @@ public final class Loader
       var compiler = new Compiler(vm);
       
       try {
-        do {
-          var exp = reader.read();
-          if (exp == null)
-            break;
-          vm.eval(compiler.compile(exp));
+        while (true) {
+          vm.eval(compiler.compile(reader.read()));
         }
-        while (true);
+      }
+      catch (EOFException ex) {
+        // nothing to do
       }
       catch (Error err) {
         System.err.println(err);

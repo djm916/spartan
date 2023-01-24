@@ -46,7 +46,8 @@
   <target name="test" depends="compile">
     <delete dir="test-results"/>
     <mkdir dir="test-results"/>
-    <junit printsummary="withOutAndErr">
+    <junit fork="true" printsummary="withOutAndErr">
+      <jvmarg value="--enable-preview"/>
       <formatter type="brief"/>
       <classpath path="${classpath};build"/>
       <batchtest todir="test-results">

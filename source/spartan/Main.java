@@ -14,24 +14,20 @@ import spartan.runtime.GlobalEnv;
 import spartan.errors.Error;
 import spartan.errors.LoadError;
 
-class TextConverter implements ITypeConverter<Text> {
-  public Text convert(String arg) {
-    return new Text(arg);
-  }
-};
-
 @Command(name = "spartan",
-         description = """
-Invoke the Spartan interpreter.
-If no script is given, starts interactive mode.
-Otherwise, executes the given script, passing the given arguments.
-""",
+         description = "Invoke the Spartan interpreter.",
          mixinStandardHelpOptions = true,
          showEndOfOptionsDelimiterInUsageHelp = true,
          sortOptions = false)
 
 public class Main implements Callable<Integer>
 {
+  private static class TextConverter implements ITypeConverter<Text> {
+    public Text convert(String arg) {
+      return new Text(arg);
+    }
+  };
+  
   private static final Logger log = Logger.getLogger(Main.class.getName());
   
   // Optional script to execute
@@ -39,10 +35,11 @@ public class Main implements Callable<Integer>
   private String scriptPath;
   
   // List of arguments passed to the script (or null if none given)
-  @Parameters(index = "1", arity = "0..*", paramLabel = "args", description = "script arguments", converter = TextConverter.class)
+  @Parameters(index = "1", arity = "0..*", paramLabel = "args", description = "script arguments",
+    converter = TextConverter.class)
   private Text[] scriptArgs = new Text[0];
   
-  public static void main(String[] args) //throws java.io.IOException
+  public static void main(String[] args)
   {
     System.exit(new CommandLine(new Main()).execute(args));
   }
@@ -58,8 +55,11 @@ public class Main implements Callable<Integer>
         System.err.println(err.getMessage());
       }
     }
+    else {
+      // TODO: Load JNI libraries on other OS than Windows
+    }
     
-    // Bootstrap global environment
+    // Bootstrap global environment with built-in definitions and procedures
     try {
       Loader.load(Config.BUILTINS_FILE_PATH);
     }
@@ -82,6 +82,6 @@ public class Main implements Callable<Integer>
       Repl.start();
     }
 
-    return 0;
+    return 0; // Successful exit
   }
 }
