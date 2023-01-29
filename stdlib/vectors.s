@@ -4,7 +4,7 @@
 (defun vector/map! (f v)
   (let ((i 0) (n (length v)))
     (while (< i n)
-      (vector/set! v i (f (v i)))
+      (set-at! v i (f (v i)))
       (set! i (+ 1 i)))))
 
 (defun vector/map (f v)
@@ -43,8 +43,8 @@
 
 (defun vector/swap! (v i j)
   (let ((temp (v i)))
-    (vector/set! v i (v j))
-    (vector/set! v j temp)))
+    (set-at! v i (v j))
+    (set-at! v j temp)))
 
 (defun vector/reverse! (v)
   (let ((i 0) (j (- (length v) 1)))
@@ -67,30 +67,30 @@
     (let ((i from) (j mid) (k from))
       
       (while (and (< i mid) (< j to))
-        (cond ((less-than? (vector/ref source i)
-                           (vector/ref source j))
-                (vector/set! temp k (vector/ref source i))
+        (cond ((less-than? (at source i)
+                           (at source j))
+                (set-at! temp k (at source i))
                 (set! i (+ 1 i)))
               (else
-                (vector/set! temp k (vector/ref source j))
+                (set-at! temp k (at source j))
                 (set! j (+ 1 j))))
         (set! k (+ 1 k)))
       
       (while (< i mid)
-        (vector/set! temp k (vector/ref source i))
+        (set-at! temp k (at source i))
         (set! i (+ 1 i))
         (set! k (+ 1 k)))
       
       (while (< j to)
-        (vector/set! temp k (vector/ref source j))
+        (set-at! temp k (at source j))
         (set! j (+ 1 j))
         (set! k (+ 1 k)))
       
       (set! k from)
       (while (< k to)
-        (vector/set! source k (vector/ref temp k))
+        (set-at! source k (at temp k))
         (set! k (+ 1 k)))))
       
    (let* ((n (length v))
-          (temp (vector/fill n nil)))
+          (temp (vector/new n nil)))
      (sort v 0 n temp)))

@@ -10,10 +10,12 @@ import java.util.stream.StreamSupport;
 import java.util.stream.Collectors;
 import spartan.errors.IndexOutOfBounds;
 import spartan.errors.InvalidArgument;
+import spartan.errors.TypeMismatch;
+import spartan.errors.NoSuchElement;
 import spartan.runtime.VirtualMachine;
 import spartan.builtins.Core;
 
-public final class Vector implements Datum, Callable, ISize, IEq, Iterable<Datum>
+public final class Vector implements Datum, ISize, IEq, IFun, IAssoc, Iterable<Datum>
 {
   public static Vector fromList(List elems)
   {
@@ -63,11 +65,8 @@ public final class Vector implements Datum, Callable, ISize, IEq, Iterable<Datum
   @Override // Callable
   public void apply(VirtualMachine vm)
   {
-    if (vm.popArg() instanceof IInt index) {
-      vm.result = get(index.intValue());
-      vm.popFrame();
-    }
-    else throw new InvalidArgument();
+    vm.result = get(vm.popArg());
+    vm.popFrame();
   }
   
   @Override // Callable
@@ -82,15 +81,30 @@ public final class Vector implements Datum, Callable, ISize, IEq, Iterable<Datum
     return elems.size();
   }
   
-  //@Override
+  @Override // IAssoc
+  public Datum get(Datum key)
+  {
+    if (!(key instanceof IInt index))
+      throw new TypeMismatch();
+    return get(index.intValue());    
+  }
+  
   public Datum get(int index)
   {
     try {
       return elems.get(index);
     }
     catch (IndexOutOfBoundsException ex) {
-      throw new IndexOutOfBounds();
+      throw new NoSuchElement();
     }
+  }
+  
+  @Override // IAssoc
+  public void set(Datum key, Datum value)
+  {
+    if (!(key instanceof IInt index))
+      throw new TypeMismatch();
+    set(index.intValue(), value);    
   }
   
   public void set(int index, Datum value)
@@ -99,13 +113,33 @@ public final class Vector implements Datum, Callable, ISize, IEq, Iterable<Datum
       elems.set(index, value);
     }
     catch (IndexOutOfBoundsException ex) {
-      throw new IndexOutOfBounds();
+      throw new NoSuchElement();
     }
   }
   
-  public void append(Datum x)
+  public void append(Datum e)
   {
-    elems.add(x);
+    elems.add(e);
+  }
+  
+  public void insert(int i, Datum e)
+  {
+    try {
+      elems.add(i, e);
+    }
+    catch (IndexOutOfBoundsException ex) {
+      throw new NoSuchElement();
+    }
+  }
+  
+  public void remove(int i)
+  {
+    try {
+      elems.remove(i);
+    }
+    catch (IndexOutOfBoundsException ex) {
+      throw new NoSuchElement();
+    }
   }
   
   public void fill(Datum x)

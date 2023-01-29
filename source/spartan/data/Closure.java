@@ -6,7 +6,7 @@ import spartan.runtime.LocalEnv;
 import spartan.runtime.Inst;
 import spartan.runtime.VirtualMachine;
 
-public final class Closure implements Datum, Callable
+public final class Closure implements Datum, IFun
 {
   public Closure(Procedure proc, LocalEnv locals)
   {

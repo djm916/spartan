@@ -67,7 +67,7 @@
 (defun generate-mutator (name)
   (fun (field index)
     `(defun ,(generate-mutator-name name field) (self value)
-       (vector/set! self ,index value))))
+       (set-at! self ,index value))))
 
 (defun generate-mutators (name fields)
   (map-with-index (generate-mutator name) 1 fields))

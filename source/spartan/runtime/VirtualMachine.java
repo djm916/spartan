@@ -2,7 +2,7 @@ package spartan.runtime;
 
 import spartan.data.Datum;
 import spartan.data.List;
-import spartan.data.Callable;
+import spartan.data.IFun;
 import spartan.errors.Error;
 import spartan.errors.WrongNumberArgs;
 import spartan.errors.TypeMismatch;
@@ -96,7 +96,7 @@ public final class VirtualMachine
   
   public void apply(int numArgs)
   {
-    if (!(result instanceof Callable f))
+    if (!(result instanceof IFun f))
       throw new TypeMismatch();
     if (!f.arityMatches(numArgs))
       throw new WrongNumberArgs();

@@ -28,25 +28,6 @@ public final class BytesLib
     }
   };
   
-  public static final Primitive REF = new Primitive(2, false) {
-    public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof Bytes bytes && vm.popArg() instanceof IInt index))
-        throw new TypeMismatch();
-      vm.result = new Int(bytes.get(index.intValue()));
-      vm.popFrame();
-    }
-  };
-  
-  public static final Primitive SET = new Primitive(3, false) {
-    public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof Bytes bytes && vm.popArg() instanceof IInt index && vm.popArg() instanceof IInt elem))
-        throw new TypeMismatch();
-      bytes.set(index.intValue(), (byte) elem.intValue());
-      vm.result = Nil.VALUE;
-      vm.popFrame();
-    }
-  };
-  
   public static final Primitive PUSH = new Primitive(2, false) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Bytes bytes && vm.popArg() instanceof IInt elem))
@@ -99,7 +80,7 @@ public final class BytesLib
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Bytes bytes))
         throw new TypeMismatch();
-      vm.result = Bool.of(bytes.isEmpty());
+      vm.result = Core.truth(bytes.remaining() == 0);
       vm.popFrame();
     }
   };

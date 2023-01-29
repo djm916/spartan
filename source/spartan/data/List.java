@@ -11,7 +11,7 @@ import spartan.errors.TypeMismatch;
 import spartan.errors.NoSuchElement;
 import spartan.builtins.Core;
 
-public final class List implements Datum, ISize, IEq, Iterable<Datum>
+public final class List implements Datum, ISize, IEq, IAssoc, Iterable<Datum>
 {
   public static final List EMPTY = new List(null, null);
   
@@ -91,6 +91,7 @@ public final class List implements Datum, ISize, IEq, Iterable<Datum>
       .collect(Collectors.joining(" ", "(", ")"));
   }
   
+  @Override
   public boolean empty()
   {
     return this == EMPTY;
@@ -164,7 +165,14 @@ public final class List implements Datum, ISize, IEq, Iterable<Datum>
     return isEqual(this, rhs);
   }
   
-  //@Override
+  @Override // IAssoc
+  public Datum get(Datum key)
+  {
+    if (!(key instanceof IInt index))
+      throw new TypeMismatch();
+    return get(index.intValue());    
+  }
+  
   public Datum get(int index)
   {
     var list = this;
@@ -173,14 +181,24 @@ public final class List implements Datum, ISize, IEq, Iterable<Datum>
     return list.car();
   }
   
-  public void set(int index, Datum x)
+  @Override // IAssoc
+  public void set(Datum key, Datum value)
   {
+    if (!(key instanceof IInt index))
+      throw new TypeMismatch();
+    set(index.intValue(), value);
+  }
+  
+  public void set(int index, Datum value)
+  {
+    if (index < 0)
+      throw new NoSuchElement();    
     var list = this;
     for (; !list.empty() && index > 0; --index, list = list.cdr())
       ;
-    list.setCar(x);
+    list.setCar(value);
   }
-   
+  
   public List append(Datum x)
   {
     return append(this, x);

@@ -42,6 +42,13 @@ public final class Core
     throw new TypeMismatch();
   }
   
+  public static boolean empty(Datum x)
+  {
+    if (x instanceof ISize arg)
+      return arg.empty();
+    throw new TypeMismatch();
+  }
+    
   public static Datum max(List xs)
   {
     var max = xs.car();

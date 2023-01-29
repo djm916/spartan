@@ -2,21 +2,22 @@ package spartan.data;
 
 import spartan.errors.Error;
 import spartan.errors.NoSuchElement;
+import spartan.errors.IndexOutOfBounds;
 import spartan.errors.TypeMismatch;
 import java.nio.ByteBuffer;
 import java.nio.BufferUnderflowException;
+import java.nio.BufferOverflowException;
 import java.nio.charset.Charset;
 
-public final class Bytes implements Datum
+public final class Bytes implements Datum, IAssoc, ISize
 {
   public static Bytes fromList(List elems)
   {
     var result = new Bytes(elems.length());
-    for (; !elems.empty(); elems = elems.cdr()) {
-      if (!(elems.car() instanceof IInt elem))
+    for (var e : elems) {
+      if (!(e instanceof IInt b))
         throw new TypeMismatch();
-      var value = elem.intValue();
-      result.push((byte) value);
+      result.push((byte) b.intValue()); // TODO: check for loss of value
     }
     result.flip();
     return result;
@@ -53,19 +54,62 @@ public final class Bytes implements Datum
     return buffer;
   }
   
+  @Override // IAssoc
+  public Int get(Datum key)
+  {
+    if (!(key instanceof IInt i))
+      throw new TypeMismatch();
+    return new Int(get(i.intValue())); // TODO: cache small integers to avoid allocation
+  }
+  
   public byte get(int index)
   {
-    return buffer.get(index);
+    try {
+      return buffer.get(index);
+    }
+    catch (IndexOutOfBoundsException ex) {
+      throw new NoSuchElement();
+    }
+  }
+  
+  @Override // IAssoc
+  public void set(Datum key, Datum value)
+  {
+    if (!(key instanceof IInt i && value instanceof IInt b))
+      throw new TypeMismatch();
+    set(i.intValue(), (byte) b.intValue()); // TODO: check for loss of value
   }
   
   public void set(int index, byte value)
   {
-    buffer.put(index, value);
+    try {
+      buffer.put(index, value);
+    }
+    catch (IndexOutOfBoundsException ex) {
+      throw new NoSuchElement();
+    }    
+  }
+  
+  @Override // ISize
+  public int length()
+  {
+    return capacity();
+  }
+  
+  @Override // ISize
+  public boolean empty()
+  {
+    return remaining() == 0;
   }
   
   public void push(byte value)
   {
-    buffer.put(value);
+    try {
+      buffer.put(value);
+    }
+    catch (BufferOverflowException ex) {
+      throw new IndexOutOfBounds();
+    }
   }
   
   public byte pop()
@@ -106,11 +150,6 @@ public final class Bytes implements Datum
   public int remaining()
   {
     return buffer.remaining();
-  }
-  
-  public boolean isEmpty()
-  {
-    return remaining() == 0;
   }
   
   public void clear()

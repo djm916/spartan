@@ -1,7 +1,11 @@
 package spartan.data;
 
-public sealed interface ISize
-permits List, Vector, Text
+public interface ISize
 {
   int length();
+  
+  default boolean empty()
+  {
+    return length() == 0;
+  }  
 }

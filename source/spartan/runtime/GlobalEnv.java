@@ -67,6 +67,7 @@ public final class GlobalEnv
     bind(Symbol.of("print-line"), CoreLib.PRINT_LINE);
     bind(Symbol.of("type"), CoreLib.TYPE);
     bind(Symbol.of("length"), CoreLib.LENGTH);
+    bind(Symbol.of("empty?"), CoreLib.IS_EMPTY);
     bind(Symbol.of("load"), CoreLib.LOAD);
     bind(Symbol.of("="), CoreLib.EQ);
     bind(Symbol.of("/="), CoreLib.NE);
@@ -79,7 +80,9 @@ public final class GlobalEnv
     bind(Symbol.of("identity-hash"), CoreLib.IDENTITY_HASH);
     bind(Symbol.of("error"), CoreLib.ERROR);    
     bind(Symbol.of("max"), CoreLib.MAX);
-    bind(Symbol.of("min"), CoreLib.MIN);
+    bind(Symbol.of("min"), CoreLib.MIN);    
+    bind(Symbol.of("at"), CoreLib.AT);
+    bind(Symbol.of("set-at!"), CoreLib.SET_AT);
     
     /* Type predicates */
     
@@ -91,8 +94,7 @@ public final class GlobalEnv
     bind(Symbol.of("number?"), CoreLib.IS_NUMBER);
     bind(Symbol.of("symbol?"), CoreLib.IS_SYMBOL);
     bind(Symbol.of("text?"), CoreLib.IS_TEXT);
-    //bind(Symbol.of("bytes?"), CoreLib.IsBytes);
-    bind(Symbol.of("empty?"), CoreLib.IS_EMPTY_LIST);
+    //bind(Symbol.of("bytes?"), CoreLib.IsBytes);    
     bind(Symbol.of("list?"), CoreLib.IS_LIST);
     bind(Symbol.of("vector?"), CoreLib.IS_VECTOR);
     bind(Symbol.of("callable?"), CoreLib.IS_CALLABLE);
@@ -167,18 +169,15 @@ public final class GlobalEnv
     /* Vector procedures */
     
     bind(Symbol.of("vector"), VectorLib.FROM_LIST);
-    bind(Symbol.of("vector/new"), VectorLib.FILL);
+    bind(Symbol.of("vector/new"), VectorLib.NEW);
     bind(Symbol.of("vector/copy"), VectorLib.COPY);
-    bind(Symbol.of("vector/ref"), VectorLib.REF);
-    bind(Symbol.of("vector/set!"), VectorLib.SET);
     bind(Symbol.of("vector/append!"), VectorLib.APPEND);
+    bind(Symbol.of("vector/insert!"), VectorLib.INSERT);
+    bind(Symbol.of("vector/remove!"), VectorLib.INSERT);
     
     /* Map procedures */
     
-    bind(Symbol.of("mapping"), MapLib.FROM_LIST);
-    bind(Symbol.of("map/get"), MapLib.GET);
-    bind(Symbol.of("map/set!"), MapLib.SET);
-    bind(Symbol.of("map/length"), MapLib.LENGTH);
+    bind(Symbol.of("mapping"), MapLib.FROM_LIST);    
     bind(Symbol.of("map/keys"), MapLib.KEYS);
     bind(Symbol.of("map/values"), MapLib.VALUES);
     bind(Symbol.of("map/entries"), MapLib.ENTRIES);
@@ -189,7 +188,7 @@ public final class GlobalEnv
     bind(Symbol.of("string/join"), StringLib.JOIN);
     bind(Symbol.of("string/substr"), StringLib.SUBSTR);
     bind(Symbol.of("string/reverse"), StringLib.REVERSE);
-    bind(Symbol.of("string/hash"), StringLib.HASH);
+    bind(Symbol.of("string/hash"), StringLib.HASH); // TODO: delete me (replace with generic hash)
     
     /* Port procedures */
     
@@ -204,13 +203,11 @@ public final class GlobalEnv
     
     bind(Symbol.of("bytes"), BytesLib.FROM_LIST);
     bind(Symbol.of("bytes/new"), BytesLib.MAKE_BYTES);
-    bind(Symbol.of("bytes/ref"), BytesLib.REF);
-    bind(Symbol.of("bytes/set!"), BytesLib.SET);
     bind(Symbol.of("bytes/push!"), BytesLib.PUSH);
     bind(Symbol.of("bytes/pop!"), BytesLib.POP);
     bind(Symbol.of("bytes/flip!"), BytesLib.FLIP);
     bind(Symbol.of("bytes/clear!"), BytesLib.FLIP);
-    bind(Symbol.of("bytes/remaining"), BytesLib.REMAINING);
-    bind(Symbol.of("bytes/empty?"), BytesLib.IS_EMPTY);
+    bind(Symbol.of("bytes/remaining"), BytesLib.REMAINING);  // TODO: delete me (replace with generic length)
+    //bind(Symbol.of("bytes/empty?"), BytesLib.IS_EMPTY);  // TODO: delete me (replace with generic empty?)
   }
 }

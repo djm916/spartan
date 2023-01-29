@@ -2,7 +2,7 @@ package spartan.data;
 
 import spartan.compiling.Signature;
 
-public abstract class Primitive implements Datum, Callable
+public abstract class Primitive implements Datum, IFun
 {
   public Primitive(int requiredArgs, boolean isVariadic)
   {
@@ -14,13 +14,13 @@ public abstract class Primitive implements Datum, Callable
     this.sig = sig;
   }
   
-  @Override
+  @Override // IFun
   public String type()
   {
     return "procedure";
   }
   
-  @Override
+  @Override // IFun
   public boolean arityMatches(int numArgs)
   {
     return sig.matches(numArgs);

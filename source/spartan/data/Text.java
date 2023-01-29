@@ -30,7 +30,7 @@ public final class Text implements Datum, IEq, IOrd, ISize
     return value;
   }
   
-  @Override // ISize
+  @Override
   public int length()
   {
     return value.length();

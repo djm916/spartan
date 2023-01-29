@@ -6,18 +6,23 @@ import spartan.runtime.VirtualMachine;
 
 public final class VectorLib
 {  
+  // (vector ...)
+  
   public static final Primitive FROM_LIST = new Primitive(0, true) {
     public void apply(VirtualMachine vm) {
       vm.result = Vector.fromList(vm.popRestArgs());
       vm.popFrame();
     }
   };
-    
-  public static final Primitive FILL = new Primitive(2, false) {
+  
+  // (vector/new n e)
+  
+  public static final Primitive NEW = new Primitive(2, false) {
     public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof IInt length))
+      if (!(vm.popArg() instanceof IInt n))
         throw new TypeMismatch();
-      vm.result = new Vector(length.intValue(), vm.popArg());
+      var e = vm.popArg();
+      vm.result = new Vector(n.intValue(), e);
       vm.popFrame();      
     }
   };
@@ -31,30 +36,39 @@ public final class VectorLib
     }
   };
   
-  public static final Primitive REF = new Primitive(2, false) {
-    public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof Vector vector && vm.popArg() instanceof IInt index))
-        throw new TypeMismatch();
-      vm.result = vector.get(index.intValue());
-      vm.popFrame();
-    }
-  };
+  // (vector/append! v e)
   
-  public static final Primitive SET = new Primitive(3, false) {
+  public static final Primitive APPEND = new Primitive(2, false) {
     public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof Vector vector && vm.popArg() instanceof IInt index))
+      if (!(vm.popArg() instanceof Vector v))
         throw new TypeMismatch();
-      vector.set(index.intValue(), vm.popArg());
+      var e = vm.popArg();
+      v.append(e);
       vm.result = Nil.VALUE;
       vm.popFrame();
     }
   };
   
-  public static final Primitive APPEND = new Primitive(2, false) {
+  // (vector/insert! v i e)
+  
+  public static final Primitive INSERT = new Primitive(3, false) {
     public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof Vector vector))
+      if (!(vm.popArg() instanceof Vector v && vm.popArg() instanceof IInt i))
         throw new TypeMismatch();
-      vector.append(vm.popArg());
+      var e = vm.popArg();
+      v.insert(i.intValue(), e);
+      vm.result = Nil.VALUE;
+      vm.popFrame();
+    }
+  };
+  
+  // (vector/remove! v i)
+  
+  public static final Primitive REMOVE = new Primitive(2, false) {
+    public void apply(VirtualMachine vm) {
+      if (!(vm.popArg() instanceof Vector v && vm.popArg() instanceof IInt i))
+        throw new TypeMismatch();
+      v.remove(i.intValue());
       vm.result = Nil.VALUE;
       vm.popFrame();
     }

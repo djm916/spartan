@@ -6,7 +6,7 @@ import spartan.errors.WrongNumberArgs;
 import spartan.errors.NoSuchElement;
 import spartan.runtime.VirtualMachine;
 
-public final class Map implements Datum, Callable
+public final class Map implements Datum, IFun, IAssoc, ISize
 {
   public static Map fromList(List elems)
   {
@@ -18,18 +18,28 @@ public final class Map implements Datum, Callable
       var key = elems.car();
       elems = elems.cdr();
       var val = elems.car();
-      result.put(key, val);
+      result.set(key, val);
     }
     return result;
   }
   
-  @Override
-  public String type()
+  public Map()
   {
-    return "map";
+    this(DEFAULT_CAPACITY);
   }
   
-  @Override
+  public Map(int capacity)
+  {
+    this.map = new java.util.HashMap<>(capacity);
+  }
+  
+  @Override // Datum
+  public String type()
+  {
+    return "mapping";
+  }
+  
+  @Override // Datum
   public String repr()
   {
     return map.entrySet().stream()      
@@ -37,24 +47,20 @@ public final class Map implements Datum, Callable
       .collect(Collectors.joining(" ", "{", "}"));
   }
   
-  @Override
+  @Override // IFun
   public void apply(VirtualMachine vm)
   {
     vm.result = get(vm.popArg());
     vm.popFrame();
   }
   
-  @Override
+  @Override // IFun
   public boolean arityMatches(int numArgs)
   {
     return numArgs == 1;
   }
   
-  public void put(Datum key, Datum value)
-  {
-    map.put(key, value);
-  }
-  
+  @Override // IAssoc
   public Datum get(Datum key)
   {
     var value = map.get(key);
@@ -62,7 +68,14 @@ public final class Map implements Datum, Callable
       throw new NoSuchElement();
     return value;
   }
-    
+  
+  @Override // IAssoc
+  public void set(Datum key, Datum value)
+  {
+    map.put(key, value);
+  }
+  
+  @Override // ISize
   public int length()
   {
     return map.size();
@@ -83,16 +96,6 @@ public final class Map implements Datum, Callable
     var builder = new List.Builder();
     map.entrySet().forEach((e) -> builder.add(List.of(e.getKey(), e.getValue())));
     return builder.build();
-  }
-  
-  public Map()
-  {
-    this(DEFAULT_CAPACITY);
-  }
-  
-  public Map(int capacity)
-  {
-    this.map = new java.util.HashMap<>(capacity);
   }
   
   private static final int DEFAULT_CAPACITY = 8;

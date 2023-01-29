@@ -3,7 +3,7 @@ package spartan.data;
 import spartan.runtime.Frame;
 import spartan.runtime.VirtualMachine;
 
-public final class Continuation implements Datum, Callable
+public final class Continuation implements Datum, IFun
 {
   public Continuation(Frame frame)
   {
