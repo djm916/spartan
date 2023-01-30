@@ -881,7 +881,7 @@ public class Compiler
     var body = exp.cddr();
     var jump = new Jump();
     var loop = compile(pred, scope, false,
-               new Branch(compileSequence(body, scope, tail, jump),
+               new Branch(compileSequence(body, scope, false, jump),
                           new LoadConst(Nil.VALUE, next)));
     jump.setTarget(loop);
     return loop;
