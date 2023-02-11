@@ -3,7 +3,9 @@ package spartan.data;
 import spartan.errors.Error;
 import spartan.errors.NoSuchElement;
 import spartan.errors.IndexOutOfBounds;
+import spartan.errors.InvalidArgument;
 import spartan.errors.TypeMismatch;
+import spartan.Config;
 import java.nio.ByteBuffer;
 import java.nio.BufferUnderflowException;
 import java.nio.BufferOverflowException;
@@ -13,14 +15,16 @@ public final class Bytes implements Datum, IAssoc, ISize
 {
   public static Bytes fromList(List elems)
   {
-    var result = new Bytes(elems.length());
+    //var result = new Bytes(elems.length());
+    var buffer = ByteBuffer.allocate(elems.length());
+    buffer.clear();
     for (var e : elems) {
       if (!(e instanceof IInt b))
         throw new TypeMismatch();
-      result.push((byte) b.intValue()); // TODO: check for loss of value
+      buffer.put((byte) b.intValue()); // TODO: check for loss of value
     }
-    result.flip();
-    return result;
+    buffer.flip();
+    return new Bytes(buffer);
   }
   
   @Override
@@ -93,78 +97,22 @@ public final class Bytes implements Datum, IAssoc, ISize
   @Override // ISize
   public int length()
   {
-    return capacity();
-  }
-  
-  @Override // ISize
-  public boolean empty()
-  {
-    return remaining() == 0;
-  }
-  
-  public void push(byte value)
-  {
-    try {
-      buffer.put(value);
-    }
-    catch (BufferOverflowException ex) {
-      throw new IndexOutOfBounds();
-    }
-  }
-  
-  public byte pop()
-  {
-    try {
-      return buffer.get();
-    }
-    catch (BufferUnderflowException ex) {
-      throw new NoSuchElement();
-    }
-  }
-  
-  public int position()
-  {
-    return buffer.position();
-  }
-  
-  public void position(int newPosition)
-  {
-    buffer.position(newPosition);
-  }
-  
-  public int limit()
-  {
-    return buffer.limit();
-  }
-  
-  public void limit(int newLimit)
-  {
-    buffer.limit(newLimit);
-  }
-  
-  public int capacity()
-  {
     return buffer.capacity();
   }
   
-  public int remaining()
+  public Text decode(IInt start, IInt count, Charset encoding)
   {
-    return buffer.remaining();
+    return new Text(decode(start.intValue(), count.intValue(), encoding));
   }
   
-  public void clear()
+  public String decode(int start, int count, Charset encoding)
   {
-    buffer.clear();
-  }
-  
-  public void flip()
-  {
-    buffer.flip();
-  }
-  
-  public Text decode(Charset encoding)
-  {
-    return new Text(encoding.decode(buffer).toString());
+    try {
+      return new String(buffer.array(), start, count, encoding);
+    }
+    catch (IndexOutOfBoundsException ex) {
+      throw new InvalidArgument();
+    }
   }
   
   private final ByteBuffer buffer;

@@ -63,7 +63,8 @@ public final class Text implements Datum, IEq, IOrd, ISize
   public Bytes encode(Charset encoding)
   {
     //return new Bytes(encoding.encode(CharBuffer.wrap(value)));
-    return new Bytes(encoding.encode(value));
+    //return new Bytes(encoding.encode(value));
+    return new Bytes(value.getBytes(encoding));
   }
   
   public static Text join(Text delim, List args)

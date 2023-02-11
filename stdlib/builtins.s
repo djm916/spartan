@@ -83,6 +83,12 @@
         (set! *files-loaded* (cons filename *files-loaded*))
         (load filename)))))
 
+(defmacro inc! (i)
+  `(set! ,i (+ 1 ,i)))
+
+(defmacro dec! (i)
+  `(set! ,i (- ,i 1)))
+
 (load "stdlib/lists.s")
 (load "stdlib/vectors.s")
 (load "stdlib/defstruct.s")

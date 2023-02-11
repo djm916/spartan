@@ -59,7 +59,7 @@
 (defun generate-accessor (name)
   (fun (field index)
     `(defun ,(generate-accessor-name name field) (self)
-       (self ,index))))
+       (at self ,index))))
 
 (defun generate-accessors (name fields)
   (map-with-index (generate-accessor name) 1 fields))
@@ -74,9 +74,9 @@
 
 (defun generate-predicate (name)
   `(defun ,(generate-predicate-name name) (self)
-     (and (= (type self) 'type/vector)
-          (> (length self) 0)
-          (= (self 0) ',name))))
+     (and (vector? self)
+          (not (empty? self))
+          (= (at self 0) ',name))))
 
 (defmacro defstruct (name fields)
   `(do

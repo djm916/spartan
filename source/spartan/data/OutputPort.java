@@ -1,11 +1,13 @@
 package spartan.data;
 
 import spartan.errors.IOError;
+import spartan.errors.InvalidArgument;
 import java.io.OutputStream;
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.FileNotFoundException;
+import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.WritableByteChannel;
 
@@ -22,17 +24,26 @@ public final class OutputPort extends Port
       throw new IOError(ex.getMessage());
     }
   }
-
-  public int write(Bytes src)
+  
+  @Override // Port
+  public int write(ByteBuffer buffer, int start, int count)
   {
     try {
-      return channel.write(src.buffer());
+      buffer.position(start).limit(start + count);
+    }
+    catch (IllegalArgumentException ex) {
+      throw new InvalidArgument();
+    }
+    
+    try {      
+      return channel.write(buffer);
     }
     catch (IOException ex) {
       throw new IOError(ex.getMessage());
     }
   }
   
+  @Override // Port
   public void close()
   {
     try {
@@ -41,6 +52,12 @@ public final class OutputPort extends Port
     catch (IOException ex) {
       throw new IOError(ex.getMessage());
     }
+  }
+  
+  @Override // Port
+  public boolean isOpen()
+  {
+    return channel.isOpen();
   }
   
   private OutputPort(OutputStream stream)

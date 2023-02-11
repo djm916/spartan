@@ -179,11 +179,11 @@ public final class CoreLib
     }
   };
   
-  public static final Primitive BYTES_TO_TEXT = new Primitive(1, false) {
+  public static final Primitive BYTES_TO_TEXT = new Primitive(3, false) {
     public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof Bytes bytes))
+      if (!(vm.popArg() instanceof Bytes bytes && vm.popArg() instanceof IInt start && vm.popArg() instanceof IInt count))
         throw new TypeMismatch();
-      vm.result = bytes.decode(Config.DEFAULT_ENCODING);
+      vm.result = bytes.decode(start, count, Config.DEFAULT_ENCODING);
       vm.popFrame();
     }
   };
@@ -307,9 +307,16 @@ public final class CoreLib
     }
   };
   
-  public static final Primitive IS_EMPTY_LIST = new Primitive(1, false) {
+  public static final Primitive IS_PORT = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
-      vm.result = truth(vm.popArg() instanceof List list && list.empty());
+      vm.result = truth(vm.popArg() instanceof Port);
+      vm.popFrame();
+    }
+  };
+  
+  public static final Primitive IS_BYTES = new Primitive(1, false) {
+    public void apply(VirtualMachine vm) {
+      vm.result = truth(vm.popArg() instanceof Bytes);
       vm.popFrame();
     }
   };

@@ -2,6 +2,7 @@ package spartan.data;
 
 import spartan.errors.IOError;
 import spartan.errors.InvalidArgument;
+import java.nio.ByteBuffer;
 
 public abstract sealed class Port implements Datum
 permits InputPort, OutputPort, FilePort
@@ -33,12 +34,14 @@ permits InputPort, OutputPort, FilePort
     throw unsupportedOperation();
   }
   
-  public int read(Bytes bytes)
+  public abstract boolean isOpen();
+  
+  public int read(ByteBuffer buffer, int start, int count)
   {
     throw unsupportedOperation();
   }
   
-  public int write(Bytes bytes)
+  public int write(ByteBuffer buffer, int start, int count)
   {
     throw unsupportedOperation();
   }

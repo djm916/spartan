@@ -1,12 +1,10 @@
 package spartan.builtins;
 
-import spartan.data.Datum;
 import spartan.data.Primitive;
 import spartan.data.List;
 import spartan.data.Nil;
 import spartan.runtime.VirtualMachine;
 import spartan.errors.TypeMismatch;
-import spartan.errors.InvalidArgument;
 
 public final class ListLib
 {

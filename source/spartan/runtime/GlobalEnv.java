@@ -93,11 +93,12 @@ public final class GlobalEnv
     bind(Symbol.of("complex?"), CoreLib.IS_COMPLEX);
     bind(Symbol.of("number?"), CoreLib.IS_NUMBER);
     bind(Symbol.of("symbol?"), CoreLib.IS_SYMBOL);
-    bind(Symbol.of("text?"), CoreLib.IS_TEXT);
-    //bind(Symbol.of("bytes?"), CoreLib.IsBytes);    
+    bind(Symbol.of("text?"), CoreLib.IS_TEXT);    
     bind(Symbol.of("list?"), CoreLib.IS_LIST);
     bind(Symbol.of("vector?"), CoreLib.IS_VECTOR);
     bind(Symbol.of("callable?"), CoreLib.IS_CALLABLE);
+    bind(Symbol.of("port?"), CoreLib.IS_PORT);
+    bind(Symbol.of("bytes?"), CoreLib.IS_BYTES);
     
     /* Math constants & procedures */
     
@@ -198,16 +199,11 @@ public final class GlobalEnv
     bind(Symbol.of("port/write"), PortLib.WRITE);
     bind(Symbol.of("port/stdin"), InputPort.STDIN);
     bind(Symbol.of("port/stdout"), OutputPort.STDOUT);
+    bind(Symbol.of("port/open?"), PortLib.IS_OPEN);
     
     /* Bytes procedures */
     
     bind(Symbol.of("bytes"), BytesLib.FROM_LIST);
     bind(Symbol.of("bytes/new"), BytesLib.MAKE_BYTES);
-    bind(Symbol.of("bytes/push!"), BytesLib.PUSH);
-    bind(Symbol.of("bytes/pop!"), BytesLib.POP);
-    bind(Symbol.of("bytes/flip!"), BytesLib.FLIP);
-    bind(Symbol.of("bytes/clear!"), BytesLib.FLIP);
-    bind(Symbol.of("bytes/remaining"), BytesLib.REMAINING);  // TODO: delete me (replace with generic length)
-    //bind(Symbol.of("bytes/empty?"), BytesLib.IS_EMPTY);  // TODO: delete me (replace with generic empty?)
   }
 }

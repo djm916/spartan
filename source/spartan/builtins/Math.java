@@ -148,7 +148,7 @@ public final class Math
   public static final Ratio makeRatio(Datum x, Datum y)
   {
     if (x instanceof IInt numer && y instanceof IInt denom)
-      return (Ratio) numer.div(denom);
+      return new Ratio(numer.bigIntValue(), denom.bigIntValue());
     throw new TypeMismatch();
   }
 }

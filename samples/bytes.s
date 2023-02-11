@@ -1,12 +1,12 @@
-(def b (bytes/new 10))
+(def file (port/open "./samples/test.txt" "r"))
+(def buffer (bytes/new 20))
 
-; this only prints x once
-; possible bug due to tail call elimination of the call to print-line?
-;(defun f ()
-;  (while true
-;    (print-line "x")))
+(defun print-bytes (b)
+  (let ((i 0) (n (length b)))
+    (while (< i n)
+      (print-line (string/concat "0x" (format-int (at b i) 16)))
+      (set! i (+ 1 i)))))
 
-;(while (not (empty? b))
-;  (print-line (bytes/pop! b)))
-  
-(f)
+(def bytes-read (port/read file buffer 0 (length buffer)))
+(print-bytes buffer)
+(print-line "\"" (bytes->string buffer 0 bytes-read) "\"")
