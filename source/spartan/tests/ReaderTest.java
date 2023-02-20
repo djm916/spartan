@@ -12,43 +12,36 @@ import spartan.data.Int;
 public class ReaderTest
 {   
   @Test(expected = EOFException.class)
-  // Reader throws EOFException on end of input
-  public void test1() throws EOFException
+  public void endOfInputThrowsEOF() throws EOFException
   {
     try (Reader r = Reader.forString("")) {
       r.read();
     }
-    catch (Error ex) {
-      fail(ex.getMessage());
-    }
   }
 
   @Test(expected = NullPointerException.class)
-  // Reader throws NullPointerException on null input
-  public void test2() throws EOFException
+  public void nullInputThrowsNPE() throws EOFException
   {
     try (Reader r = Reader.forString(null)) {
       r.read();
     }
-    catch (Error ex) {
-      fail(ex.getMessage());
-    }
   }
   
   @Test
-  // Reader parses integers
-  public void test3()
+  public void parsesIntegers() throws EOFException
   {
-    try (Reader r = Reader.forString("123")) {
+    try (Reader r = Reader.forString("1 -1 +1")) {
       var output = r.read().datum();
       assertTrue(output instanceof Int);
-      assertEquals(output.repr(), "123");
-    }
-    catch (EOFException ex) {
-      fail(ex.getMessage());
-    }
-    catch (Error ex) {
-      fail(ex.getMessage());
+      assertEquals(output.repr(), "1");
+      
+      output = r.read().datum();
+      assertTrue(output instanceof Int);
+      assertEquals(output.repr(), "-1");
+      
+      output = r.read().datum();
+      assertTrue(output instanceof Int);
+      assertEquals(output.repr(), "1");
     }
   }
 }
