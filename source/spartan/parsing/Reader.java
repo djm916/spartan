@@ -425,8 +425,8 @@ public class Reader implements AutoCloseable
   
   private Datum readSymbol(boolean readQualified)
   {
-    var text = new StringBuilder();
     var position = getTokenPosition();
+    var text = new StringBuilder();
     
     text.append((char)lastChar);
 
@@ -435,7 +435,8 @@ public class Reader implements AutoCloseable
       text.append((char)lastChar);
     }
     
-    var symbol = withPosition(new Symbol(text.toString()), position);
+    var symbol = new Symbol(text.toString());
+    positionMap.put(symbol, position);
     
     if (readQualified && peekChar() == '.')
       return readQualifiedSymbol(symbol);
@@ -455,12 +456,12 @@ public class Reader implements AutoCloseable
   {
     getChar(); // eat '.'
     getChar();
+    
     if (!isSymbol(lastChar))
       throw syntaxError("malformed qualified symbol");
     
-    var result = withPosition(
-      List.of(seed, List.of(Symbol.QUOTE, readSymbol(false))),
-      getTokenPosition());
+    var result = List.of(seed, List.of(Symbol.QUOTE, readSymbol(false)));
+    positionMap.put(result, getTokenPosition());
     
     if (peekChar() == '.')
       return readQualifiedSymbol(result);

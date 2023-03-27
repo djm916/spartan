@@ -105,18 +105,18 @@ public class Compiler
      Otherwise, assume the symbol is a global variable, and generate a store-global instruction.
   */
 
-  private Inst compileSet(List exp, Scope scope, Inst next)
+  private Inst compileSetVar(List exp, Scope scope, Inst next)
   {
     if (!(exp.length() == 3 && exp.cadr() instanceof Symbol variable))
       throw malformedExp(exp);
     var init = exp.caddr();
     return compile(init, scope, false,
            scope.lookup(variable)
-                .map((index) -> compileLocalVarSet(index, next))
-                .orElseGet(() -> compileGlobalVarSet(variable, next)));
+                .map((index) -> compileSetLocalVar(index, next))
+                .orElseGet(() -> compileSetGlobalVar(variable, next)));
   }
   
-  private Inst compileLocalVarSet(DeBruijnIndex index, Inst next)
+  private Inst compileSetLocalVar(DeBruijnIndex index, Inst next)
   {
     if (index.depth() == 0)
       return new StoreLocal0(index.offset(),
@@ -126,9 +126,9 @@ public class Compiler
              new LoadConst(Nil.VALUE, next));
   }
   
-  private Inst compileGlobalVarSet(Symbol symb, Inst next)
+  private Inst compileSetGlobalVar(Symbol variable, Inst next)
   {
-    return new StoreGlobal(symb.intern(), new LoadConst(Nil.VALUE, next));
+    return new StoreGlobal(variable.intern(), new LoadConst(Nil.VALUE, next));
   }
   
   /* Compile a "def" special form.
@@ -367,7 +367,7 @@ public class Compiler
   
   private Inst compileRecursiveBindings(List inits, int offset, Scope scope, Inst next)
   {
-    if (inits == List.EMPTY)
+    if (inits.empty())
       return next;
 
     return compile(inits.car(), scope, false,
@@ -427,7 +427,7 @@ public class Compiler
 
   private Inst compileSequentialBindings(List bindings, int offset, Scope scope, Inst next)
   {
-    if (bindings == List.EMPTY)
+    if (bindings.empty())
       return next;
 
     var binding = (List) bindings.car();
@@ -590,7 +590,7 @@ public class Compiler
   
   private Inst compilePushArgs(List args, Scope scope, Inst next)
   {
-    if (args == List.EMPTY)
+    if (args.empty())
       return next;
 
     return compilePushArgs(args.cdr(), scope,
@@ -630,15 +630,14 @@ public class Compiler
     
     // Optimization: omit frame for call in tail position
     
-    if (tail)
-      return compilePushArgs(exp.cdr(), scope,
-             compile(exp.car(), scope, false,
-             new Apply(numArgs, positionMap.get(exp))));
+    return tail ? compilePushArgs(exp.cdr(), scope,
+                  compile(exp.car(), scope, false,
+                  new Apply(numArgs, positionMap.get(exp))))
     
-    return new PushFrame(next, positionMap.get(exp),
-           compilePushArgs(exp.cdr(), scope,
-           compile(exp.car(), scope, false,
-           new Apply(numArgs, positionMap.get(exp)))));
+                : new PushFrame(next, positionMap.get(exp),
+                  compilePushArgs(exp.cdr(), scope,
+                  compile(exp.car(), scope, false,
+                  new Apply(numArgs, positionMap.get(exp)))));
   }
 
   /* Compile the call/cc form.
@@ -661,17 +660,16 @@ public class Compiler
     
     // Optimization: omit frame for call in tail position
     
-    if (tail)
-      return new MakeCont(
-             new PushArg(
-             compile(exp.cadr(), scope, tail,           
-             new Apply(1, positionMap.get(exp.cadr())))));
+    return tail ? new MakeCont(
+                  new PushArg(
+                  compile(exp.cadr(), scope, tail,           
+                  new Apply(1, positionMap.get(exp.cadr())))))
     
-    return new PushFrame(next, positionMap.get(exp),
-           new MakeCont(
-           new PushArg(
-           compile(exp.cadr(), scope, tail,           
-           new Apply(1, positionMap.get(exp.cadr()))))));
+                : new PushFrame(next, positionMap.get(exp),
+                  new MakeCont(
+                  new PushArg(
+                  compile(exp.cadr(), scope, tail,           
+                  new Apply(1, positionMap.get(exp.cadr()))))));
   }
   
   /* Compiles a sequence of expressions.
@@ -691,10 +689,10 @@ public class Compiler
   
   private Inst compileSequence(List exp, Scope scope, boolean tail, Inst next)
   {
-    if (exp == List.EMPTY)
+    if (exp.empty())
       return next;
 
-    return compile(exp.car(), scope, (tail && exp.cdr() == List.EMPTY),
+    return compile(exp.car(), scope, (tail && exp.cdr().empty()),
            compileSequence(exp.cdr(), scope, tail, next));
   }
 
@@ -761,7 +759,7 @@ public class Compiler
   {
     List.Builder bindings = new List.Builder();
 
-    while (body != List.EMPTY && isInnerDef(body.car())) {
+    while (!body.empty() && isInnerDef(body.car())) {
       var exp = (List) body.car();
       if (Symbol.DEFUN.equals(exp.car()))
         exp = transformDefun(exp);
@@ -777,10 +775,7 @@ public class Compiler
   */
   private boolean isInnerDef(Datum exp)
   {
-    if (exp instanceof List form)
-      return !form.empty() && (Symbol.DEF.equals(form.car()) || Symbol.DEFUN.equals(form.car()));
-    else
-      return false;
+    return exp instanceof List form && !form.empty() && (Symbol.DEF.equals(form.car()) || Symbol.DEFUN.equals(form.car()));
   }
 
   /* Compiles the "or" special form, a logical disjunction.
@@ -806,10 +801,10 @@ public class Compiler
 
   private Inst compileDisjunction(List exp, Scope scope, boolean tail, Inst next)
   {
-    if (exp == List.EMPTY)
+    if (exp.empty())
       return next;
 
-    return compile(exp.car(), scope, (tail && exp.cdr() == List.EMPTY),
+    return compile(exp.car(), scope, (tail && exp.cdr().empty()),
            new Branch(next,
                       compileDisjunction(exp.cdr(), scope, tail, next)));
   }
@@ -837,10 +832,10 @@ public class Compiler
 
   private Inst compileConjuction(List exp, Scope scope, boolean tail, Inst next)
   {
-    if (exp == List.EMPTY)
+    if (exp.empty())
       return next;
 
-    return compile(exp.car(), scope, (tail && exp.cdr() == List.EMPTY),
+    return compile(exp.car(), scope, (tail && exp.cdr().empty()),
            new Branch(compileConjuction(exp.cdr(), scope, tail, next),
                       next));
   }
@@ -1145,7 +1140,7 @@ public class Compiler
       if (car.equals(Symbol.COND))
         return compileCond(exp, scope, tail, next);      
       if (car.equals(Symbol.SET))
-        return compileSet(exp, scope, next);
+        return compileSetVar(exp, scope, next);
       if (car.equals(Symbol.WHILE))
         return compileWhile(exp, scope, tail, next);
       if (car.equals(Symbol.FOR))
