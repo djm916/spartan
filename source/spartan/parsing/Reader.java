@@ -119,8 +119,13 @@ public class Reader implements AutoCloseable
         || ch == '=' || ch == '|' || ch == '\\' || ch == ':' || ch == '<' || ch == '>'
         || ch == '?' || ch ==  '/';
   }
-
-  private static boolean isSymbol(int ch)
+  
+  private static boolean isSymbolStart(int ch)
+  {
+    return isLetter(ch) || isSpecial(ch);
+  }
+  
+  private static boolean isSymbolFollow(int ch)
   {
     return isLetter(ch) || isSpecial(ch) || isDigit(ch);
   }
@@ -430,7 +435,7 @@ public class Reader implements AutoCloseable
     
     text.append((char)lastChar);
 
-    while (isSymbol(peekChar())) {
+    while (isSymbolFollow(peekChar())) {
       getChar();
       text.append((char)lastChar);
     }
@@ -457,7 +462,7 @@ public class Reader implements AutoCloseable
     getChar(); // eat '.'
     getChar();
     
-    if (!isSymbol(lastChar))
+    if (!isSymbolStart(lastChar))
       throw syntaxError("malformed qualified symbol");
     
     var result = List.of(seed, List.of(Symbol.QUOTE, readSymbol(false)));
@@ -586,7 +591,7 @@ public class Reader implements AutoCloseable
       return readNumber();
     if (isDigit(lastChar))
       return readNumber();
-    if (isSymbol(lastChar))
+    if (isSymbolStart(lastChar))
       return readSymbol(true);
     if (lastChar == '\"')
       return readText();
