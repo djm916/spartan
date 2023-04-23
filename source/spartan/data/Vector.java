@@ -27,7 +27,12 @@ public final class Vector implements Datum, ISize, IEq, IFun, IAssoc, Iterable<D
     
   public Vector(int initialCapacity)
   {
-    elems = new ArrayList<>(initialCapacity);
+    try {
+      this.elems = new ArrayList<>(initialCapacity);
+    }
+    catch (IllegalArgumentException ex) {
+      throw new InvalidArgument();
+    }
   }
   
   public Vector(int length, Datum init)

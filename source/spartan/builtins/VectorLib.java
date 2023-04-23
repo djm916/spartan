@@ -6,7 +6,7 @@ import spartan.runtime.VirtualMachine;
 
 public final class VectorLib
 {  
-  // (vector ...)
+  // (vector e...)
   
   public static final Primitive FROM_LIST = new Primitive(0, true) {
     public void apply(VirtualMachine vm) {
@@ -15,17 +15,18 @@ public final class VectorLib
     }
   };
   
-  // (vector/new n e)
+  // (vector-init n e)
   
-  public static final Primitive NEW = new Primitive(2, false) {
+  public static final Primitive MAKE_VECTOR = new Primitive(2, false) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof IInt n))
-        throw new TypeMismatch();
-      var e = vm.popArg();
-      vm.result = new Vector(n.intValue(), e);
+        throw new TypeMismatch();      
+      vm.result = new Vector(n.intValue(), vm.popArg());
       vm.popFrame();      
     }
   };
+  
+  // (vector-copy v)
   
   public static final Primitive COPY = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
@@ -36,7 +37,7 @@ public final class VectorLib
     }
   };
   
-  // (vector/append! v e)
+  // (vector-append! v e)
   
   public static final Primitive APPEND = new Primitive(2, false) {
     public void apply(VirtualMachine vm) {
@@ -49,7 +50,7 @@ public final class VectorLib
     }
   };
   
-  // (vector/insert! v i e)
+  // (vector-insert! v i e)
   
   public static final Primitive INSERT = new Primitive(3, false) {
     public void apply(VirtualMachine vm) {
@@ -62,7 +63,7 @@ public final class VectorLib
     }
   };
   
-  // (vector/remove! v i)
+  // (vector-remove! v i)
   
   public static final Primitive REMOVE = new Primitive(2, false) {
     public void apply(VirtualMachine vm) {
