@@ -61,6 +61,12 @@
       (inc! i)
       (dec! j))))
 
+; Sorts the elements of a vector, according to a given comparison function.
+; The sort runs in O(N log N) time, where N is the number of elements.
+; The comparison function determines the ordering amongst elements (i.e., implements a strict weak ordering on the element set).
+; It receives two arguments and returns true if the first precedes the second, and false otherwise.
+; The sort is stable: equivalent elements (according to the comparison function) maintain their original relative positions.
+
 (defun vector/sort! (<? v)
   
   (defun sort (source from to temp)    

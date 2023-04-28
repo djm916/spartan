@@ -1,6 +1,10 @@
 
 ; Standard list processing library
 
+; map - Maps a procedure across a list
+;
+; Given a procedure f and a list xs, (map f xs) returns the value (list (f x1) (f x2) ...)
+
 (defun map (f xs)
   (if (empty? xs) ()
     (cons (f (car xs))
@@ -86,6 +90,18 @@
 (defun iota (i j)
   (if (> i j) ()
     (cons i (iota (+ 1 i) j))))
+
+(defun unfold-left (gen)
+  (let ((next-elem (gen)))
+    (if (nil? next-elem) ()
+        (cons next-elem (unfold-left gen)))))
+
+(defun unfold-right (gen)
+  (defun loop (result)
+    (let ((next-elem (gen)))
+      (if (nil? next-elem) result
+          (loop (cons next-elem result)))))
+  (loop ()))
 
 ; Note: defined in core
 ;(defun reverse (xs)
