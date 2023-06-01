@@ -2,12 +2,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title>Spartan Manual</title>
+<title>Spartan</title>
 <link href="manual.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 
-<h1>Spartan Language Reference Manual</h1>
+<h1>The Spartan Language</h1>
+<h1>Overview and Implementation</h1>
 
 <h2>Table of Contents</h2>
 <ol>
@@ -24,9 +25,17 @@
 
 <a id="intro"><h2>Introduction</h2></a>
 
-<p>Spartan is a minimal programming language and virtual machine,
-developed primarily for education and experimentation. It was designed
-to be minimalistic, yet expressive. The language itself is essentially
+<p>Spartan is a dialect of Scheme, a minimal and elegant programming language used widely in computer science pedogogy.
+Though Spartan was developed primarily for the author's own education, readers interested in implementing a Scheme-like language can also benefit.
+Some familiarity with Scheme is assumed. The canonical source is "Structured Interpretation of Computer Programs", commonly referred to as "SICP" or "The Wizard Book",
+written by the original designers. For technical reference, consult the standard "Revised^5 Report on the Algorithmic Language Scheme", or "R5RS".
+This document covers the compilation of a Scheme-like language into instructions for a virtual machine. The compilation phase is essentially the
+same as the heap-based strategy given in "Three Implementation Models for Scheme". The virtual machine is based on the "SECD" abstract machine.
+
+The host language is Java (JDK 17+) and so familiarity with Java will also be assumed.
+Spartan implements all the major features of Scheme: syntax based on S-expressions, first-class functions, closures,
+metaprogramming via macros, and first-class continuations. 
+The implementation is in Java (JDK 17+) 
 a dialect of Scheme, while the virtual machine is based on a variant of
 the SECD abstract machine.
 </p>

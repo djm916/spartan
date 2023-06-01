@@ -6,14 +6,14 @@ import spartan.errors.WrongNumberArgs;
 import spartan.errors.NoSuchElement;
 import spartan.runtime.VirtualMachine;
 
-public final class Map implements Datum, IFun, IAssoc, ISize
+public final class Table implements Datum, IFun, IAssoc, ISize
 {
-  public static Map fromList(List elems)
+  public static Table fromList(List elems)
   {
     int numElems = elems.length();
     if (numElems % 2 != 0)
       throw new WrongNumberArgs();
-    var result = new Map(numElems);
+    var result = new Table(numElems);
     for (; !elems.empty(); elems = elems.cdr()) {
       var key = elems.car();
       elems = elems.cdr();
@@ -23,12 +23,12 @@ public final class Map implements Datum, IFun, IAssoc, ISize
     return result;
   }
   
-  public Map()
+  public Table()
   {
     this(DEFAULT_CAPACITY);
   }
   
-  public Map(int capacity)
+  public Table(int capacity)
   {
     this.map = new java.util.HashMap<>(capacity);
   }
@@ -36,7 +36,7 @@ public final class Map implements Datum, IFun, IAssoc, ISize
   @Override // Datum
   public String type()
   {
-    return "mapping";
+    return "table";
   }
   
   @Override // Datum

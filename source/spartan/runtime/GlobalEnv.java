@@ -5,7 +5,7 @@ import spartan.builtins.CoreLib;
 import spartan.builtins.MathLib;
 import spartan.builtins.ListLib;
 import spartan.builtins.VectorLib;
-import spartan.builtins.MapLib;
+import spartan.builtins.TableLib;
 import spartan.builtins.StringLib;
 import spartan.builtins.PortLib;
 import spartan.builtins.BytesLib;
@@ -176,13 +176,13 @@ public final class GlobalEnv
     bind(Symbol.of("vector/insert!"), VectorLib.INSERT);
     bind(Symbol.of("vector/remove!"), VectorLib.INSERT);
     
-    /* Map procedures */
+    /* Table procedures */
     
-    bind(Symbol.of("mapping"), MapLib.FROM_LIST);    
-    bind(Symbol.of("map/keys"), MapLib.KEYS);
-    bind(Symbol.of("map/values"), MapLib.VALUES);
-    bind(Symbol.of("map/entries"), MapLib.ENTRIES);
-        
+    bind(Symbol.of("table"), TableLib.FROM_LIST);    
+    bind(Symbol.of("table/keys"), TableLib.KEYS);
+    bind(Symbol.of("table/values"), TableLib.VALUES);
+    bind(Symbol.of("table/entries"), TableLib.ENTRIES);
+    
     /* String procedures */
     
     bind(Symbol.of("string/concat"), StringLib.CONCAT);

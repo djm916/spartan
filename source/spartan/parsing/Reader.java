@@ -538,10 +538,10 @@ public class Reader implements AutoCloseable
     return withPosition(List.cons(new Symbol("vector"), readDatums(']')), position);
   }
   
-  private List readMap()
+  private List readTable()
   {
     var position = getTokenPosition();
-    return withPosition(List.cons(new Symbol("mapping"), readDatums('}')), position);
+    return withPosition(List.cons(new Symbol("table"), readDatums('}')), position);
   }
   
   private List readQuote()
@@ -586,7 +586,7 @@ public class Reader implements AutoCloseable
     if (lastChar == '[')
       return readVector();
     if (lastChar == '{')
-      return readMap();
+      return readTable();
     if (isSign(lastChar) && isDigit(peekChar()))
       return readNumber();
     if (isDigit(lastChar))
