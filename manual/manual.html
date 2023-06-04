@@ -26,18 +26,26 @@
 <a id="intro"><h2>Introduction</h2></a>
 
 <p>Spartan is a dialect of Scheme, a minimal and elegant programming language used widely in computer science pedogogy.
-Though Spartan was developed primarily for the author's own education, readers interested in implementing a Scheme-like language can also benefit.
+Though Spartan was developed primarily for the author's own education, readers interested in implementing a Scheme-like language may also benefit.
 Some familiarity with Scheme is assumed. The canonical source is "Structured Interpretation of Computer Programs", commonly referred to as "SICP" or "The Wizard Book",
-written by the original designers. For technical reference, consult the standard "Revised^5 Report on the Algorithmic Language Scheme", or "R5RS".
-This document covers the compilation of a Scheme-like language into instructions for a virtual machine. The compilation phase is essentially the
-same as the heap-based strategy given in "Three Implementation Models for Scheme". The virtual machine is based on the "SECD" abstract machine.
+written by the original designers. For technical reference, consult the standard "Revised^5 Report on the Algorithmic Language Scheme", or simply "R5RS".
+This document covers the compilation of a Scheme-like language into instructions for a customized virtual machine. The compilation phase is based on the
+heap-based strategy given in "Three Implementation Models for Scheme". The virtual machine itself is based on the "CEK" abstract machine model, with an
+instruction set custom-tailored for Scheme.
 
-The host language is Java (JDK 17+) and so familiarity with Java will also be assumed.
-Spartan implements all the major features of Scheme: syntax based on S-expressions, first-class functions, closures,
-metaprogramming via macros, and first-class continuations. 
-The implementation is in Java (JDK 17+) 
-a dialect of Scheme, while the virtual machine is based on a variant of
-the SECD abstract machine.
+The host language is Java (JDK 17+), so for readers to understand the implementation, a familiarity with Java is assumed.
+
+Spartan implements many the major features of Scheme: S-expressions based syntax, first-class anonymous procedures, lexical closures,
+macro metaprogramming, first-class continuations, etc.
+
+However, Spartan is not properly a Scheme, since it does not conform to any Scheme standard and the design differs in many ways. Most notable are:
+
+<ul>
+  <li>No cons: There is no pair data type, cons, car, or cdr. Instead, the fundamental data type is the list. This implies that their is no A pair is simply a list of 2 elements.</li>
+  <li>Numbers: We implement the full numeric heirarchy, but there is no distinction between extact and inexact numbers.</li>
+  <li>Macros are not hygenic: a defmacro special form is provided, there is no facility for syntax-case, etc.</li>  
+</ul>
+
 </p>
 
 <a id="chapter_1"><h2>Basic Concepts</h2></a>
