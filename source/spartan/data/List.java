@@ -11,9 +11,49 @@ import spartan.errors.TypeMismatch;
 import spartan.errors.NoSuchElement;
 import spartan.builtins.Core;
 
-public final class List implements Datum, ISize, IEq, IAssoc, Iterable<Datum>
+final class EmptyList extends List
 {
-  public static final List EMPTY = new List(null, null);
+  EmptyList()
+  {
+    super(null, null);
+  }
+  
+  @Override
+  public boolean empty()
+  {
+    return true;
+  }
+  
+  @Override
+  public Datum car()
+  {
+    throw new NoSuchElement();
+  }
+  
+  @Override
+  public void setCar(Datum x)
+  {
+    throw new NoSuchElement();
+  }
+  
+  @Override
+  public List cdr()
+  {
+    throw new NoSuchElement();
+  }
+  
+  @Override
+  public void setCdr(List x)
+  {
+    throw new NoSuchElement();
+  }
+}
+
+public sealed class List
+implements Datum, ISize, IEq, IAssoc, Iterable<Datum>
+permits EmptyList
+{
+  public static final List EMPTY = new EmptyList();
   
   public static class Builder
   {
@@ -94,34 +134,26 @@ public final class List implements Datum, ISize, IEq, IAssoc, Iterable<Datum>
   @Override
   public boolean empty()
   {
-    return this == EMPTY;
+    return false;
   }
   
   public Datum car()
   {
-    if (empty())
-      throw new NoSuchElement();
     return first;
   }
   
   public void setCar(Datum x)
   {
-    if (empty())
-      throw new NoSuchElement();
     first = x;
   }
   
   public List cdr()
   {
-    if (empty())
-      throw new NoSuchElement();
     return rest;
   }
   
   public void setCdr(List x)
   {
-    if (empty())
-      throw new NoSuchElement();
     rest = x;
   }
   
@@ -320,7 +352,7 @@ public final class List implements Datum, ISize, IEq, IAssoc, Iterable<Datum>
     return lhs == EMPTY && rhs == EMPTY;
   }
   
-  private List(Datum first, List rest)
+  protected List(Datum first, List rest)
   {
     this.first = first;
     this.rest = rest;
