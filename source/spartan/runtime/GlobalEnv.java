@@ -93,7 +93,7 @@ public final class GlobalEnv
     bind(Symbol.of("complex?"), CoreLib.IS_COMPLEX);
     bind(Symbol.of("number?"), CoreLib.IS_NUMBER);
     bind(Symbol.of("symbol?"), CoreLib.IS_SYMBOL);
-    bind(Symbol.of("text?"), CoreLib.IS_TEXT);    
+    bind(Symbol.of("string?"), CoreLib.IS_TEXT);
     bind(Symbol.of("list?"), CoreLib.IS_LIST);
     bind(Symbol.of("vector?"), CoreLib.IS_VECTOR);
     bind(Symbol.of("callable?"), CoreLib.IS_CALLABLE);
@@ -170,11 +170,11 @@ public final class GlobalEnv
     /* Vector procedures */
     
     bind(Symbol.of("vector"), VectorLib.FROM_LIST);
-    bind(Symbol.of("vector/init"), VectorLib.MAKE_VECTOR);
+    bind(Symbol.of("vector/new"), VectorLib.MAKE_VECTOR);
     bind(Symbol.of("vector/copy"), VectorLib.COPY);
     bind(Symbol.of("vector/append!"), VectorLib.APPEND);
     bind(Symbol.of("vector/insert!"), VectorLib.INSERT);
-    bind(Symbol.of("vector/remove!"), VectorLib.INSERT);
+    bind(Symbol.of("vector/remove!"), VectorLib.REMOVE);
     
     /* Table procedures */
     

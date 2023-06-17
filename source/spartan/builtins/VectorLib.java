@@ -15,7 +15,7 @@ public final class VectorLib
     }
   };
   
-  // (vector-init n e)
+  // (make-vector n e)
   
   public static final Primitive MAKE_VECTOR = new Primitive(2, false) {
     public void apply(VirtualMachine vm) {

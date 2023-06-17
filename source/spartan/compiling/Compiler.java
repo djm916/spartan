@@ -931,15 +931,13 @@ public class Compiler
     if (!(exp instanceof List list))
       return List.of(Symbol.QUOTE, exp);
     
-    //var list = (List) exp;
-    
     // Check for the unquote and unquote-splicing forms
     
     if (list.car() instanceof List form && !form.empty())
     {      
       // (quasiquote (unquote x) xs...) => (cons x (quasiquote xs...))
       
-      if (form.car() instanceof Symbol car && car.equals(Symbol.UNQUOTE)) {        
+      if (form.car() instanceof Symbol s && s.equals(Symbol.UNQUOTE)) {
         if (form.length() != 2)
           throw malformedExp(exp);
         return List.cons(new Symbol("cons"),
@@ -950,7 +948,7 @@ public class Compiler
 
       // (quasiquote (unquote-splicing x) xs...) => (concat x (quasiquote xs...))    
       
-      if (form.car() instanceof Symbol car && car.equals(Symbol.UNQUOTE_SPLICING)) {        
+      if (form.car() instanceof Symbol s && s.equals(Symbol.UNQUOTE_SPLICING)) {
         if (form.length() != 2)
           throw malformedExp(exp);
         return List.cons(new Symbol("concat"),
@@ -1110,45 +1108,45 @@ public class Compiler
   private Inst compileCombo(List exp, Scope scope, boolean tail, Inst next)
   {
     // Handle special forms
-    if (exp.car() instanceof Symbol car) {
-      if (car.equals(Symbol.IF))
+    if (exp.car() instanceof Symbol s) {
+      if (s.equals(Symbol.IF))
         return compileIf(exp, scope, tail, next);
-      if (car.equals(Symbol.LET))
+      if (s.equals(Symbol.LET))
         return compileLet(exp, scope, tail, next);
-      if (car.equals(Symbol.LETSTAR))
+      if (s.equals(Symbol.LETSTAR))
         return compileLetStar(exp, scope, tail, next);
-      if (car.equals(Symbol.LETREC))
+      if (s.equals(Symbol.LETREC))
         return compileLetRec(exp, scope, tail, next);
-      if (car.equals(Symbol.DO))
+      if (s.equals(Symbol.DO))
         return compileDo(exp, scope, tail, next);
-      if (car.equals(Symbol.DEF))
+      if (s.equals(Symbol.DEF))
         return compileDef(exp, scope, next);
-      if (car.equals(Symbol.DEFUN))
+      if (s.equals(Symbol.DEFUN))
         return compileDefun(exp, scope, next);
-      if (car.equals(Symbol.DEFMACRO))
+      if (s.equals(Symbol.DEFMACRO))
         return compileDefMacro(exp, scope, next);
-      if (car.equals(Symbol.FUN))
+      if (s.equals(Symbol.FUN))
         return compileFun(exp, scope, next);
-      if (car.equals(Symbol.QUOTE))
+      if (s.equals(Symbol.QUOTE))
         return compileQuote(exp, next);
-      if (car.equals(Symbol.QUASIQUOTE))
+      if (s.equals(Symbol.QUASIQUOTE))
         return compileQuasiquote(exp, scope, next);
-      if (car.equals(Symbol.OR))
+      if (s.equals(Symbol.OR))
         return compileOr(exp, scope, tail, next);
-      if (car.equals(Symbol.AND))
+      if (s.equals(Symbol.AND))
         return compileAnd(exp, scope, tail, next);
-      if (car.equals(Symbol.COND))
+      if (s.equals(Symbol.COND))
         return compileCond(exp, scope, tail, next);      
-      if (car.equals(Symbol.SET))
+      if (s.equals(Symbol.SET))
         return compileSetVar(exp, scope, next);
-      if (car.equals(Symbol.WHILE))
+      if (s.equals(Symbol.WHILE))
         return compileWhile(exp, scope, tail, next);
-      if (car.equals(Symbol.FOR))
+      if (s.equals(Symbol.FOR))
         return compileForLoop(exp, scope, tail, next);
-      if (car.equals(Symbol.CALL_CC))
+      if (s.equals(Symbol.CALL_CC))
         return compileCallCC(exp, scope, tail, next);
       // Handle macro expansion
-      if (MacroEnv.contains(car))
+      if (MacroEnv.contains(s))
         return compileApplyMacro(exp, scope, tail, next);
     }
     
@@ -1162,8 +1160,8 @@ public class Compiler
   {
     if (isSelfEval(exp))
       return compileSelfEval(exp, next);
-    else if (exp instanceof Symbol variable)
-      return compileVarRef(variable, scope, next);
+    else if (exp instanceof Symbol s)
+      return compileVarRef(s, scope, next);
     else //if (exp instanceof List list)
       return compileCombo((List)exp, scope, tail, next);
     //else

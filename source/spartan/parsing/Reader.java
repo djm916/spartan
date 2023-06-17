@@ -428,7 +428,8 @@ public class Reader implements AutoCloseable
     }
   }
   
-  private Datum readSymbol(boolean readQualified)
+  //private Datum readSymbol(boolean readQualified)
+  private Datum readSymbol()
   {
     var position = getTokenPosition();
     var text = new StringBuilder();
@@ -443,9 +444,9 @@ public class Reader implements AutoCloseable
     var symbol = new Symbol(text.toString());
     positionMap.put(symbol, position);
     
-    if (readQualified && peekChar() == '.')
-      return readQualifiedSymbol(symbol);
-    else
+    //if (readQualified && peekChar() == '.')
+      //return readQualifiedSymbol(symbol);
+    //else
       return symbol;
   }
   
@@ -457,6 +458,7 @@ public class Reader implements AutoCloseable
    * a.b.c => ((a 'b) 'c)
    * a.b.c.d => (((a 'b) 'c) 'd)
    */
+  /*
   private List readQualifiedSymbol(Datum seed)
   {
     getChar(); // eat '.'
@@ -473,7 +475,7 @@ public class Reader implements AutoCloseable
     else
       return result;
   }
-  
+  */
   private Text readText()
   {
     var text = new StringBuilder();
@@ -592,7 +594,8 @@ public class Reader implements AutoCloseable
     if (isDigit(lastChar))
       return readNumber();
     if (isSymbolStart(lastChar))
-      return readSymbol(true);
+      //return readSymbol(true);
+      return readSymbol();
     if (lastChar == '\"')
       return readText();
     if (lastChar == '\'')
