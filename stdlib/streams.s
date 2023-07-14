@@ -38,6 +38,8 @@
 
 (defun stream/cdr (s) (cadr (force s)))
 
+(defun stream/cons (e s) (delay (list e s)))
+
 ; Determine if a stream is empty
 
 (defun stream/empty? (s) (empty? (force s)))

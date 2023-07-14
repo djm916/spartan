@@ -89,6 +89,10 @@
 (defmacro dec! (i)
   `(set! ,i (- ,i 1)))
 
+(defun range (i j)
+  (if (>= i j) ()
+    (cons i (range (+ 1 i) j))))
+
 (load "stdlib/lists.s")
 (load "stdlib/vectors.s")
 (load "stdlib/defstruct.s")

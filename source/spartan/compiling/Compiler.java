@@ -75,24 +75,24 @@ public class Compiler
    *
    * Otherwise, assume the symbol is a global variable, and generate a load-global instruction.
    */
-  private Inst compileVarRef(Symbol symb, Scope scope, Inst next)
+  private Inst compileVarRef(Symbol s, Scope scope, Inst next)
   {
-    return scope.lookup(symb)
-                .map((index) -> compileLocalVarRef(index, next))
-                .orElseGet(() -> compileGlobalVarRef(symb, next));
+    return scope.lookup(s)
+                .map(i -> compileLocalVarRef(i, next))
+                .orElseGet(() -> compileGlobalVarRef(s, next));
   }
   
-  private Inst compileLocalVarRef(DeBruijnIndex index, Inst next)
+  private Inst compileLocalVarRef(DeBruijnIndex i, Inst next)
   {
-    if (index.depth() == 0)
-      return new LoadLocal0(index.offset(), next);
+    if (i.depth() == 0)
+      return new LoadLocal0(i.offset(), next);
     else
-      return new LoadLocal(index.depth(), index.offset(), next);
+      return new LoadLocal(i.depth(), i.offset(), next);
   }
   
-  private Inst compileGlobalVarRef(Symbol symb, Inst next)
+  private Inst compileGlobalVarRef(Symbol s, Inst next)
   {
-    return new LoadGlobal(symb.intern(), positionMap.get(symb), next);
+    return new LoadGlobal(s.intern(), positionMap.get(s), next);
   }
   
   /* Compile a variable assignment.
@@ -107,28 +107,28 @@ public class Compiler
 
   private Inst compileSetVar(List exp, Scope scope, Inst next)
   {
-    if (!(exp.length() == 3 && exp.cadr() instanceof Symbol variable))
+    if (!(exp.length() == 3 && exp.cadr() instanceof Symbol s))
       throw malformedExp(exp);
     var init = exp.caddr();
     return compile(init, scope, false,
-           scope.lookup(variable)
-                .map((index) -> compileSetLocalVar(index, next))
-                .orElseGet(() -> compileSetGlobalVar(variable, next)));
+           scope.lookup(s)
+                .map(i -> compileSetLocalVar(i, next))
+                .orElseGet(() -> compileSetGlobalVar(s, next)));
   }
   
-  private Inst compileSetLocalVar(DeBruijnIndex index, Inst next)
+  private Inst compileSetLocalVar(DeBruijnIndex i, Inst next)
   {
-    if (index.depth() == 0)
-      return new StoreLocal0(index.offset(),
+    if (i.depth() == 0)
+      return new StoreLocal0(i.offset(),
              new LoadConst(Nil.VALUE, next));
     else
-      return new StoreLocal(index.depth(), index.offset(),
+      return new StoreLocal(i.depth(), i.offset(),
              new LoadConst(Nil.VALUE, next));
   }
   
-  private Inst compileSetGlobalVar(Symbol variable, Inst next)
+  private Inst compileSetGlobalVar(Symbol s, Inst next)
   {
-    return new StoreGlobal(variable.intern(), new LoadConst(Nil.VALUE, next));
+    return new StoreGlobal(s.intern(), new LoadConst(Nil.VALUE, next));
   }
   
   /* Compile a "def" special form.
@@ -440,94 +440,6 @@ public class Compiler
                    next)));
   }
   
-  /* Compiles the "for" special form.
-  
-  Syntax:
-    (iter ((var init step) ...)
-      (pred result)
-      body...)
-  
-  Compilation:
-  
-     <<initN>>                   ; Evaluate init expressions
-     push-arg
-     ...
-     <<init1>>
-     push-arg
-     push-env N
-     pop-arg
-     store-local 0 0
-     ...
-     pop-arg
-     store-local 0 N-1
-  loop:
-    <<pred>>                     ; Evaluate predicate
-    branch done step           
-  step:                          ; Evaluate body and step expressions
-    <<body>>
-    <<stepN>>
-    push-arg
-    ...
-    <<step1>>
-    push-arg
-    pop-arg
-    store-local 0 0
-    ...
-    pop-arg
-    store-local 0 N-1
-    jump loop                    ; Repeat loop
-  done:                          ; Evaluate result expression
-    <<result>>                   
-    pop-env                      ; Exit loop
-  next: ...
-  
-  */
-  
-  private Inst compileForLoop(List exp, Scope scope, boolean tail, Inst next)
-  {
-    if (!checkForLoopForm(exp))
-      throw malformedExp(exp);
-    
-    var bindings = (List) exp.cadr();
-    int numBindings = bindings.length();
-    var vars = extractFirst(bindings);
-    var inits = extractSecond(bindings);
-    var steps = extractThird(bindings);
-    var test = (List) exp.caddr();
-    var body = exp.cdddr();        
-    var extendedScope = scope.extend(vars);
-    var done = compile(test.cadr(), extendedScope, tail, new PopEnv(next));
-    var jump = new Jump();
-    var step = compileSequence(body, extendedScope, false,
-               compilePushArgs(steps, extendedScope,
-               compileBindLocals(0, numBindings,
-               jump)));
-    var loop = compile(test.car(), extendedScope, false,
-               new Branch(done, step));
-    jump.setTarget(loop);
-    return compilePushArgs(inits, scope,
-           new PushEnv(numBindings,
-           compileBindLocals(0, numBindings,
-           loop)));
-  }
-  
-  private boolean checkForLoopForm(List exp)
-  {
-    return exp.length() >= 3
-           && exp.cadr() instanceof List bindings
-           && checkForLoopBindingListForm(bindings)
-           && exp.caddr() instanceof List test
-           && test.length() == 2;
-  }
-  
-  private boolean checkForLoopBindingListForm(List bindings)
-  {
-    for (var binding : bindings)
-      if (!(binding instanceof List triple && triple.length() == 3 && triple.car() instanceof Symbol))
-        return false;
-    return true;
-  }
-      
   private boolean checkBindingListForm(List bindings)
   {
     for (var binding : bindings)
@@ -573,18 +485,6 @@ public class Compiler
     var result = new List.Builder();
     for (; !list.empty(); list = list.cdr())
       result.add(((List)list.car()).cadr());
-    return result.build();
-  }
-
-  /* Extract the 3rd element of each list in a list of lists
-
-     ((x1 y1 z1 ...) (x2 y2 z2 ...) ...) => (z1 z2 ...)
-  */
-  private List extractThird(List list)
-  {
-    var result = new List.Builder();
-    for (; !list.empty(); list = list.cdr())
-      result.add(((List)list.car()).caddr());
     return result.build();
   }
   
@@ -1141,8 +1041,6 @@ public class Compiler
         return compileSetVar(exp, scope, next);
       if (s.equals(Symbol.WHILE))
         return compileWhile(exp, scope, tail, next);
-      if (s.equals(Symbol.FOR))
-        return compileForLoop(exp, scope, tail, next);
       if (s.equals(Symbol.CALL_CC))
         return compileCallCC(exp, scope, tail, next);
       // Handle macro expansion

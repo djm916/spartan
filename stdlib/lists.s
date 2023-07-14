@@ -87,10 +87,6 @@
   (if (empty? xs) i
     (f (car xs) (fold-right f i (cdr xs)))))
   
-(defun iota (i j)
-  (if (> i j) ()
-    (cons i (iota (+ 1 i) j))))
-
 (defun unfold-left (gen)
   (let ((next-elem (gen)))
     (if (nil? next-elem) ()
