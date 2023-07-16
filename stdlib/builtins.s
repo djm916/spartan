@@ -30,19 +30,6 @@
        (set! ,a ,b)
        (set! ,b ,tmp))))
 
-(defun memoize (proc) 
-  (let ((value-ready? false)
-        (cached-value nil))
-    (fun ()
-      (unless value-ready?
-        (set! cached-value (proc))
-        (set! value-ready? true))
-      cached-value)))
-
-(defmacro delay (exp) `(memoize (fun () ,exp)))
-
-(defun force (promise) (promise))
-
 ; (compose f) => f
 ; (compose f g) => (fun (x) (g (f x)))
 ; (compose f g h) => (fun (x) (h (g (f x))))
@@ -93,7 +80,16 @@
   (if (>= i j) ()
     (cons i (range (+ 1 i) j))))
 
+; Simple list destructuring binding form
+; vars : a list of variables (symbols) to be bound
+; exp  : a list argument
+; body : a sequence of expressions to evaluate
+
+(defmacro let-match (vars exp & body)
+  `(apply (fun ,vars ,@body) ,exp))
+
 (load "stdlib/lists.s")
 (load "stdlib/vectors.s")
 (load "stdlib/defstruct.s")
+(load "stdlib/promises.s")
 (load "stdlib/streams.s")

@@ -61,16 +61,13 @@
       (inc! i)
       (dec! j))))
 
-(defun vector/unfold (f len seed)
-  (def v (vector/new len nil))
+(defun vector/unfold (g n)
+  (def v (make-vector n nil))
   (let ((i 0))
-    (while (< i len)
-      (apply (fun (elem next-seed)
-               (set-at! v i elem)
-               (set! seed next-seed))
-             (f i seed))
+    (while (< i n)
+      (set-at! v i (g))
       (inc! i)))
-   v)
+    v)
 
 ; Sorts the elements of a vector, according to a given comparison function.
 ; The sort runs in O(N log N) time, where N is the number of elements.
@@ -116,5 +113,5 @@
         (inc! k))))
       
    (let* ((n (length v))
-          (temp (vector/new n nil)))
+          (temp (make-vector n nil)))
      (sort v 0 n temp)))

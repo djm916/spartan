@@ -1,15 +1,10 @@
 
 (require "stdlib/vectors.s")
 
-(defun create-random-vector (n)
-  (let ((v []) (i 0))
-    (while (< i n)
-      (vector/append! v (rand))
-      (set! i (+ 1 i)))
-    v))
+(def N 50)
 
-(def v (create-random-vector 25))
+(def v (vector/unfold rand N)) ; Create an array of random integers
 
-(vector/sort! < v)
+(vector/sort! < v) ; Sort the vector
 
-(vector/for-each print-line (vector/map (fun (x) (format-decimal x 3)) v))
+(print v "\n")
