@@ -49,6 +49,24 @@ public final class Int implements Datum, INum, IInt, IRatio, IReal, IComplex, IE
   }
   
   @Override
+  public Int floor()
+  {
+    return this;
+  }
+  
+  @Override
+  public Int ceiling()
+  {
+    return this;
+  }
+  
+  @Override
+  public Int round()
+  {
+    return this;
+  }
+  
+  @Override
   public String format(int base)
   {
     return Long.toString(value, base);
@@ -78,12 +96,12 @@ public final class Int implements Datum, INum, IInt, IRatio, IReal, IComplex, IE
   
   public Real toReal()
   {
-    return new Real((double)value);
+    return new Real(toFloat64());
   }
   
   public Complex toComplex()
   {
-    return new Complex((double)value, 0.0);
+    return new Complex(toFloat64(), 0.0);
   }
   
   @Override
@@ -289,25 +307,6 @@ public final class Int implements Datum, INum, IInt, IRatio, IReal, IComplex, IE
     return toBigInt().over(rhs);
   }
   
-  
-  @Override
-  public Int floor()
-  {
-    return this;
-  }
-  
-  @Override
-  public Int ceiling()
-  {
-    return this;
-  }
-  
-  @Override
-  public Int round()
-  {
-    return this;
-  }
-  
   @Override
   public Int numerator()
   {
@@ -319,15 +318,15 @@ public final class Int implements Datum, INum, IInt, IRatio, IReal, IComplex, IE
   {
     return ONE;
   }
-  
+    
   @Override
-  public Real realPart()
+  public Real real()
   {
     return toReal();
   }
   
   @Override
-  public Real imagPart()
+  public Real imag()
   {
     return Real.ZERO;
   }

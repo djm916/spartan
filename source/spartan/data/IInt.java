@@ -1,13 +1,15 @@
 package spartan.data;
 
+/**
+ * Extends the base numeric interface with a set of functions specific to integers.
+ */
 public sealed interface IInt extends INum
 permits Int, BigInt
 {
   // Conversion to native Java types
   int toInt32();
   long toInt64();
-  double toFloat64();
-  
+    
   default IInt quotient(IInt rhs)
   {
     return switch (rhs) {

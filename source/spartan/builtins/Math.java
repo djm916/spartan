@@ -61,21 +61,21 @@ public final class Math
     throw new TypeMismatch();
   }
   
-  public static IReal floor(Datum x)
+  public static IInt floor(Datum x)
   {
     if (x instanceof IReal arg)
       return arg.floor();
     throw new TypeMismatch();
   }
   
-  public static IReal ceiling(Datum x)
+  public static IInt ceiling(Datum x)
   {
     if (x instanceof IReal arg)
       return arg.ceiling();
     throw new TypeMismatch();
   }
   
-  public static IReal round(Datum x)
+  public static IInt round(Datum x)
   {
     if (x instanceof IReal arg)
       return arg.round();
@@ -141,7 +141,7 @@ public final class Math
   public static final IComplex makeComplex(Datum x, Datum y)
   {
     if (x instanceof IReal real && y instanceof IReal imag)
-      return new Complex(real.toFloat64(), imag.toFloat64());
+      return new Complex(real, imag);
     throw new TypeMismatch();
   }
   

@@ -1,9 +1,9 @@
 package spartan.data;
 
 /**
- * Base interface for numeric data types
+ * Base interface for all numeric types (integer, rational, real, and complex).
  *
- * This interface contains the common mathmatical operations which apply to all numeric types (integer, rational, real, and complex).
+ * Contains the common subset of mathematical functions which apply to all numeric types.
  */
 public sealed interface INum extends Datum
 permits IInt, IRatio, IReal, IComplex, ITrans, Int, BigInt, Ratio, Real, Complex

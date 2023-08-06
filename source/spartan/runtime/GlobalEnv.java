@@ -126,8 +126,8 @@ public final class GlobalEnv
     bind(Symbol.of("atan"), MathLib.ATAN);    
     bind(Symbol.of("rand"), MathLib.RAND);
     bind(Symbol.of("complex"), MathLib.MAKE_COMPLEX);
-    bind(Symbol.of("real"), MathLib.REAL_PART);
-    bind(Symbol.of("imag"), MathLib.IMAG_PART);
+    bind(Symbol.of("real"), MathLib.REAL);
+    bind(Symbol.of("imag"), MathLib.IMAG);
     bind(Symbol.of("angle"), MathLib.ANGLE);
     bind(Symbol.of("magnitude"), MathLib.MAGNITUDE);
     bind(Symbol.of("ratio"), MathLib.MAKE_RATIO);

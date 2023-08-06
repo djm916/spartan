@@ -159,20 +159,20 @@ public final class MathLib
     }
   };
     
-  public static final Primitive REAL_PART = new Primitive(1, false) {
+  public static final Primitive REAL = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof IComplex c))
         throw new TypeMismatch();
-      vm.result = c.realPart();
+      vm.result = c.real();
       vm.popFrame();
     }
   };
   
-  public static final Primitive IMAG_PART = new Primitive(1, false) {
+  public static final Primitive IMAG = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof IComplex c))
         throw new TypeMismatch();
-      vm.result = c.imagPart();
+      vm.result = c.imag();
       vm.popFrame();
     }
   };

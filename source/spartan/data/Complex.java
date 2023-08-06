@@ -33,13 +33,13 @@ public final class Complex implements Datum, INum, IComplex, ITrans, IEq
   }
   
   @Override
-  public Real realPart()
+  public Real real()
   {
     return new Real(real);
   }
   
   @Override
-  public Real imagPart()
+  public Real imag()
   {
     return new Real(imag);
   }

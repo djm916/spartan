@@ -70,21 +70,21 @@ public final class Real implements Datum, INum, IReal, IComplex, ITrans, IEq, IO
   }
   
   @Override
-  public Real floor()
+  public Int floor()
   {
-    return new Real(Math.floor(value));
+    return new Int((long) Math.floor(value));
   }
   
   @Override
-  public Real ceiling()
+  public Int ceiling()
   {
-    return new Real(Math.ceil(value));
+    return new Int((long) Math.ceil(value));
   }
   
   @Override
-  public Real round()
+  public Int round()
   {
-    return new Real(Math.round(value));
+    return new Int((long) Math.round(value));
   }
   
   public Real sin()
@@ -316,13 +316,13 @@ public final class Real implements Datum, INum, IReal, IComplex, ITrans, IEq, IO
   }
   
   @Override
-  public IReal realPart()
+  public IReal real()
   {
     return new Real(value);
   }
   
   @Override
-  public IReal imagPart()
+  public IReal imag()
   {
     return ZERO;
   }

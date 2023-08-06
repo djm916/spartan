@@ -51,17 +51,44 @@ public final class BigInt implements Datum, INum, IInt, IRatio, IReal, IComplex,
       throw new IntegerOverflow();
     }
   }
-/*  
-  @Override 
-  public BigInteger bigIntValue()
-  {
-    return value;
-  }
-*/
-  @Override // INum
+  
+  @Override
   public double toFloat64()
   {
     return value.doubleValue();
+  }
+  
+  @Override
+  public BigInt floor()
+  {
+    return this;
+  }
+  
+  @Override
+  public BigInt ceiling()
+  {
+    return this;
+  }
+  
+  @Override
+  public BigInt round()
+  {
+    return this;
+  }
+  
+  public Ratio toRatio()
+  {
+    return new Ratio(value, BigInteger.ONE);
+  }
+  
+  public Real toReal()
+  {
+    return new Real(toFloat64());
+  }
+  
+  public Complex toComplex()
+  {
+    return new Complex(toFloat64(), 0.0);
   }
   
   @Override
@@ -135,21 +162,6 @@ public final class BigInt implements Datum, INum, IInt, IRatio, IReal, IComplex,
   {
     return toReal().compareTo(rhs);
   }
-    
-  public Ratio toRatio()
-  {
-    return new Ratio(value, BigInteger.ONE);
-  }
-  
-  public Real toReal()
-  {
-    return new Real(value.doubleValue());
-  }
-  
-  public Complex toComplex()
-  {
-    return new Complex(value.doubleValue(), 0.0);
-  }  
   
   @Override
   public BigInt neg()
@@ -328,33 +340,15 @@ public final class BigInt implements Datum, INum, IInt, IRatio, IReal, IComplex,
   {
     return new Ratio(this.value, rhs.value);
   }
-  
+    
   @Override
-  public BigInt floor()
-  {
-    return this;
-  }
-  
-  @Override
-  public BigInt ceiling()
-  {
-    return this;
-  }
-  
-  @Override
-  public BigInt round()
-  {
-    return this;
-  }
-  
-  @Override
-  public Real realPart()
+  public Real real()
   {
     return toReal();
   }
   
   @Override
-  public Real imagPart()
+  public Real imag()
   {
     return Real.ZERO;
   }

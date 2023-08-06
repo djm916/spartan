@@ -1,5 +1,8 @@
 package spartan.data;
 
+/**
+ * Extends the set of base numeric functions with the transcendental functions.
+ */
 public sealed interface ITrans extends INum
 permits Real, Complex
 {
