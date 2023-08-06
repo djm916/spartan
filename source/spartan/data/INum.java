@@ -6,7 +6,7 @@ package spartan.data;
  * This interface contains the common mathmatical operations which apply to all numeric types (integer, rational, real, and complex).
  */
 public sealed interface INum extends Datum
-permits IInt, IRatio, IReal, Int, BigInt, Ratio, Real, Complex
+permits IInt, IRatio, IReal, IComplex, ITrans, Int, BigInt, Ratio, Real, Complex
 {
   default INum add(INum rhs)
   {
@@ -78,50 +78,4 @@ permits IInt, IRatio, IReal, Int, BigInt, Ratio, Real, Complex
   
   INum neg();
   INum abs();
-  
-  INum sin();
-  INum cos();
-  INum tan();
-  INum asin();
-  INum acos();
-  INum atan();
-  
-  default INum exp(INum rhs)
-  {
-    return switch (rhs) {
-      case Int z -> exp(z);
-      case BigInt z -> exp(z);
-      case Ratio q -> exp(q);
-      case Real r -> exp(r);
-      case Complex c -> exp(c);
-    };
-  }
-  
-  INum exp(Int rhs);
-  INum exp(BigInt rhs);
-  INum exp(Ratio rhs);
-  INum exp(Real rhs);
-  INum exp(Complex rhs);
-  
-  default INum log(INum rhs)
-  {
-    return switch (rhs) {
-      case Int z -> log(z);
-      case BigInt z -> log(z);
-      case Ratio q -> log(q);
-      case Real r -> log(r);
-      case Complex c -> log(c);
-    };
-  }
-  
-  INum log(Int rhs);
-  INum log(BigInt rhs);
-  INum log(Ratio rhs);
-  INum log(Real rhs);
-  INum log(Complex rhs);
-  
-  IReal realPart();
-  IReal imagPart();
-  IReal angle();
-  IReal magnitude();
 }

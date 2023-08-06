@@ -1,6 +1,6 @@
 package spartan.data;
 
-public final class Complex implements Datum, INum, IEq
+public final class Complex implements Datum, INum, IComplex, ITrans, IEq
 {
   public static final Complex I = new Complex(0.0, 1.0);
     
@@ -289,25 +289,7 @@ public final class Complex implements Datum, INum, IEq
   {
     return catan(real, imag);
   }
-  
-  @Override
-  public Complex exp(Int rhs)
-  {
-    return exp(rhs.toComplex());
-  }
-  
-  @Override
-  public Complex exp(BigInt rhs)
-  {
-    return exp(rhs.toComplex());
-  }
-  
-  @Override
-  public Complex exp(Ratio rhs)
-  {
-    return exp(rhs.toComplex());
-  }
-  
+    
   @Override
   public Complex exp(Real rhs)
   {
@@ -318,24 +300,6 @@ public final class Complex implements Datum, INum, IEq
   public Complex exp(Complex rhs)
   {
     return cexp(this.real, this.imag, rhs.real, rhs.imag);
-  }
-  
-  @Override
-  public Complex log(Int rhs)
-  {
-    return log(rhs.toComplex());
-  }
-  
-  @Override
-  public Complex log(BigInt rhs)
-  {
-    return log(rhs.toComplex());
-  }
-  
-  @Override
-  public Complex log(Ratio rhs)
-  {
-    return log(rhs.toComplex());
   }
   
   @Override

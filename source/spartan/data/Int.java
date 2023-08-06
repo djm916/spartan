@@ -4,7 +4,7 @@ import java.math.BigInteger;
 import spartan.errors.DivisionByZero;
 import spartan.errors.IntegerOverflow;
 
-public final class Int implements Datum, INum, IInt, IRatio, IReal, IEq, IOrd
+public final class Int implements Datum, INum, IInt, IRatio, IReal, IComplex, IEq, IOrd
 {
   public static final Int ZERO = new Int(0);
   public static final Int ONE = new Int(1);
@@ -306,102 +306,6 @@ public final class Int implements Datum, INum, IInt, IRatio, IReal, IEq, IOrd
   public Int round()
   {
     return this;
-  }
-  
-  @Override
-  public Real sin()
-  {
-    return toReal().sin();
-  }
-  
-  @Override
-  public Real cos()
-  {
-    return toReal().cos();
-  }
-  
-  @Override
-  public Real tan()
-  {
-    return toReal().tan();
-  }
-  
-  @Override
-  public Real asin()
-  {
-    return toReal().asin();
-  }
-  
-  @Override
-  public Real acos()
-  {
-    return toReal().acos();
-  }
-  
-  @Override
-  public Real atan()
-  {
-    return toReal().atan();
-  }
-  
-  @Override
-  public Real exp(Int rhs)
-  {
-    return toReal().exp(rhs);
-  }
-  
-  @Override
-  public Real exp(BigInt rhs)
-  {
-    return toReal().exp(rhs);
-  }
-  
-  @Override
-  public Real exp(Ratio rhs)
-  {
-    return toReal().exp(rhs);
-  }
-  
-  @Override
-  public Real exp(Real rhs)
-  {
-    return toReal().exp(rhs);
-  }
-  
-  @Override
-  public Complex exp(Complex rhs)
-  {
-    return toComplex().exp(rhs);
-  }
-  
-  @Override
-  public Real log(Int rhs)
-  {
-    return toReal().log(rhs);
-  }
-  
-  @Override
-  public Real log(BigInt rhs)
-  {
-    return toReal().log(rhs);
-  }
-  
-  @Override
-  public Real log(Ratio rhs)
-  {
-    return toReal().log(rhs);
-  }
-  
-  @Override
-  public Real log(Real rhs)
-  {
-    return toReal().log(rhs);
-  }
-  
-  @Override
-  public Complex log(Complex rhs)
-  {
-    return toComplex().log(rhs);
   }
   
   @Override

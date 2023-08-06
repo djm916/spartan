@@ -161,7 +161,7 @@ public final class MathLib
     
   public static final Primitive REAL_PART = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof INum c))
+      if (!(vm.popArg() instanceof IComplex c))
         throw new TypeMismatch();
       vm.result = c.realPart();
       vm.popFrame();
@@ -170,7 +170,7 @@ public final class MathLib
   
   public static final Primitive IMAG_PART = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof INum c))
+      if (!(vm.popArg() instanceof IComplex c))
         throw new TypeMismatch();
       vm.result = c.imagPart();
       vm.popFrame();
@@ -179,7 +179,7 @@ public final class MathLib
   
   public static final Primitive ANGLE = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof INum c))
+      if (!(vm.popArg() instanceof IComplex c))
         throw new TypeMismatch();
       vm.result = c.angle();
       vm.popFrame();
@@ -188,7 +188,7 @@ public final class MathLib
   
   public static final Primitive MAGNITUDE = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof INum c))
+      if (!(vm.popArg() instanceof IComplex c))
         throw new TypeMismatch();
       vm.result = c.magnitude();
       vm.popFrame();
