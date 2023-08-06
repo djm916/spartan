@@ -48,4 +48,13 @@ public final class StringLib
       vm.popFrame();
     }
   };
+  
+  public static final Primitive LENGTH = new Primitive(1, false) {
+    public void apply(VirtualMachine vm) {
+      if (!(vm.popArg() instanceof Text text))
+        throw new TypeMismatch();
+      vm.result = new Int(text.length());
+      vm.popFrame();
+    }
+  };
 }

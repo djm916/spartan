@@ -59,31 +59,27 @@ public final class GlobalEnv
   {
     /* General values & procedures */
     
-    bind(Symbol.of("nil"), Nil.VALUE);
-    bind(Symbol.of("true"), Bool.TRUE);
-    bind(Symbol.of("false"), Bool.FALSE);    
-    bind(Symbol.of("apply"), CoreLib.APPLY);
-    bind(Symbol.of("print"), CoreLib.PRINT);
-    bind(Symbol.of("print-line"), CoreLib.PRINT_LINE);
-    bind(Symbol.of("type"), CoreLib.TYPE);
-    bind(Symbol.of("length"), CoreLib.LENGTH);
-    bind(Symbol.of("empty?"), CoreLib.IS_EMPTY);
-    bind(Symbol.of("load"), CoreLib.LOAD);
     bind(Symbol.of("="), CoreLib.EQ);
     bind(Symbol.of("/="), CoreLib.NE);
     bind(Symbol.of("<"), CoreLib.LT);
     bind(Symbol.of(">"), CoreLib.GT);
     bind(Symbol.of("<="), CoreLib.LE);
     bind(Symbol.of(">="), CoreLib.GE);
+    bind(Symbol.of("nil"), Nil.VALUE);
+    bind(Symbol.of("true"), Bool.TRUE);
+    bind(Symbol.of("false"), Bool.FALSE);    
+    bind(Symbol.of("apply"), CoreLib.APPLY);
+    bind(Symbol.of("print"), CoreLib.PRINT);
+    bind(Symbol.of("print-line"), CoreLib.PRINT_LINE);
+    bind(Symbol.of("type"), CoreLib.TYPE);    
+    bind(Symbol.of("load"), CoreLib.LOAD);
     bind(Symbol.of("not"), CoreLib.NOT);    
     bind(Symbol.of("gensym"), CoreLib.GENSYM);
     bind(Symbol.of("identity-hash"), CoreLib.IDENTITY_HASH);
     bind(Symbol.of("error"), CoreLib.ERROR);    
     bind(Symbol.of("max"), CoreLib.MAX);
-    bind(Symbol.of("min"), CoreLib.MIN);    
-    bind(Symbol.of("at"), CoreLib.AT);
-    bind(Symbol.of("set-at!"), CoreLib.SET_AT);
-    
+    bind(Symbol.of("min"), CoreLib.MIN);
+
     /* Type predicates */
     
     bind(Symbol.of("nil?"), CoreLib.IS_NIL);
@@ -101,7 +97,7 @@ public final class GlobalEnv
     bind(Symbol.of("bytes?"), CoreLib.IS_BYTES);
     
     /* Math constants & procedures */
-    
+
     bind(Symbol.of("E"), Real.E);
     bind(Symbol.of("PI"), Real.PI);
     bind(Symbol.of("+inf"), Real.POS_INF);
@@ -166,30 +162,41 @@ public final class GlobalEnv
     //bind(Symbol.of("remove"), ListLib.REMOVED);
     bind(Symbol.of("set-car!"), ListLib.SET_CAR);
     bind(Symbol.of("set-cdr!"), ListLib.SET_CDR);
+    bind(Symbol.of("length"), ListLib.LENGTH);
+    bind(Symbol.of("empty?"), ListLib.IS_EMPTY);
     
     /* Vector procedures */
     
     bind(Symbol.of("vector"), VectorLib.FROM_LIST);
     bind(Symbol.of("vector/make"), VectorLib.MAKE);
+    bind(Symbol.of("vector/ref"), VectorLib.REF);    
+    bind(Symbol.of("vector/length"), VectorLib.LENGTH);
     bind(Symbol.of("vector/copy"), VectorLib.COPY);
+    bind(Symbol.of("vector/set!"), VectorLib.SET);
     bind(Symbol.of("vector/append!"), VectorLib.APPEND);
     bind(Symbol.of("vector/insert!"), VectorLib.INSERT);
     bind(Symbol.of("vector/remove!"), VectorLib.REMOVE);
     
     /* Table procedures */
     
-    bind(Symbol.of("table"), TableLib.FROM_LIST);    
+    bind(Symbol.of("table"), TableLib.FROM_LIST);
+    bind(Symbol.of("table/find"), TableLib.FIND);
+    bind(Symbol.of("table/assoc!"), TableLib.ASSOC);
+    bind(Symbol.of("table/length"), TableLib.LENGTH);
     bind(Symbol.of("table/keys"), TableLib.KEYS);
     bind(Symbol.of("table/values"), TableLib.VALUES);
     bind(Symbol.of("table/entries"), TableLib.ENTRIES);
     
     /* String procedures */
     
+    bind(Symbol.of("string/length"), StringLib.LENGTH);
     bind(Symbol.of("string/concat"), StringLib.CONCAT);
     bind(Symbol.of("string/join"), StringLib.JOIN);
     bind(Symbol.of("string/substr"), StringLib.SUBSTR);
     bind(Symbol.of("string/reverse"), StringLib.REVERSE);
-    bind(Symbol.of("string/hash"), StringLib.HASH); // TODO: delete me (replace with generic hash)
+    bind(Symbol.of("string/hash"), StringLib.HASH);
+    //bind(Symbol.of("string/compare"), StringLib.COMPARE);
+    //bind(Symbol.of("string/compare-no-case"), StringLib.COMPARE_NO_CASE);
     
     /* Port procedures */
     

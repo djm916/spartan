@@ -4,7 +4,7 @@
 ; (power-set '(1 2 3)) => ((1 2 3) (1 2) (1 3) (1) (2 3) (2) (3) ())
 
 (defun power-set (set)
-  (if (= () set) '(())
+  (if (empty? set) '(())
     (let ((excludes (power-set (cdr set))))
       (concat 
         (map (fun (subset) (cons (car set) subset)) excludes)

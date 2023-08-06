@@ -88,20 +88,6 @@ public final class CoreLib
       vm.popFrame();
     }
   };
-    
-  public static final Primitive LENGTH = new Primitive(1, false) {
-    public void apply(VirtualMachine vm) {
-      vm.result = new Int(length(vm.popArg()));
-      vm.popFrame();
-    }
-  };
-  
-  public static final Primitive IS_EMPTY = new Primitive(1, false) {
-    public void apply(VirtualMachine vm) {
-      vm.result = truth(empty(vm.popArg()));
-      vm.popFrame();
-    }
-  };
   
   public static final Primitive TYPE = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
@@ -331,25 +317,6 @@ public final class CoreLib
   public static final Primitive MIN = new Primitive(1, true) {
     public void apply(VirtualMachine vm) {
       vm.result = min(vm.popRestArgs());
-      vm.popFrame();
-    }
-  };
-  
-  public static final Primitive AT = new Primitive(2, false) {
-    public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof IAssoc container))          
-        throw new TypeMismatch();
-      vm.result = container.get(vm.popArg());
-      vm.popFrame();
-    }
-  };
-  
-  public static final Primitive SET_AT = new Primitive(3, false) {
-    public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof IAssoc container))          
-        throw new TypeMismatch();
-      container.set(vm.popArg(), vm.popArg());
-      vm.result = Nil.VALUE;
       vm.popFrame();
     }
   };

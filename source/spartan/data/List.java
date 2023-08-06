@@ -49,8 +49,7 @@ final class EmptyList extends List
   }
 }
 
-public sealed class List
-implements Datum, ISize, IEq, IAssoc, Iterable<Datum>
+public sealed class List implements Datum, Iterable<Datum>
 permits EmptyList
 {
   public static final List EMPTY = new EmptyList();
@@ -131,7 +130,6 @@ permits EmptyList
       .collect(Collectors.joining(" ", "(", ")"));
   }
   
-  @Override
   public boolean empty()
   {
     return false;
@@ -182,7 +180,6 @@ permits EmptyList
     return cdr().cdr().cdr();
   }
   
-  @Override // ISize
   public int length()
   {
     int length = 0;
@@ -190,47 +187,7 @@ permits EmptyList
       ++length;
     return length;
   }
-  
-  @Override // IEq
-  public boolean isEqual(List rhs)
-  {
-    return isEqual(this, rhs);
-  }
-  
-  @Override // IAssoc
-  public Datum get(Datum key)
-  {
-    if (!(key instanceof IInt index))
-      throw new TypeMismatch();
-    return get(index.intValue());    
-  }
-  
-  public Datum get(int index)
-  {
-    var list = this;
-    for (; !list.empty() && index > 0; --index, list = list.cdr())
-      ;
-    return list.car();
-  }
-  
-  @Override // IAssoc
-  public void set(Datum key, Datum value)
-  {
-    if (!(key instanceof IInt index))
-      throw new TypeMismatch();
-    set(index.intValue(), value);
-  }
-  
-  public void set(int index, Datum value)
-  {
-    if (index < 0)
-      throw new NoSuchElement();    
-    var list = this;
-    for (; !list.empty() && index > 0; --index, list = list.cdr())
-      ;
-    list.setCar(value);
-  }
-  
+    
   public List append(Datum x)
   {
     return append(this, x);
@@ -342,16 +299,7 @@ permits EmptyList
         return i;
     return -1;
   }
-  
-  private static boolean isEqual(List lhs, List rhs)
-  {
-    for (; lhs != EMPTY && rhs != EMPTY; lhs = lhs.rest, rhs = rhs.rest)
-      if (lhs.car() instanceof IEq x && rhs.car() instanceof IEq y)
-        if (! x.isEqual(y))
-          return false;    
-    return lhs == EMPTY && rhs == EMPTY;
-  }
-  
+    
   protected List(Datum first, List rest)
   {
     this.first = first;

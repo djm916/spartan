@@ -26,7 +26,42 @@ public final class VectorLib
     }
   };
   
-  // (vector-copy v)
+  // (vector/ref v i)
+  
+  public static final Primitive REF = new Primitive(2, false) {
+    public void apply(VirtualMachine vm) {
+      if (!(vm.popArg() instanceof Vector vector && vm.popArg() instanceof IInt index))
+        throw new TypeMismatch();
+      vm.result = vector.ref(index.intValue());
+      vm.popFrame();
+    }
+  };
+  
+  // (vector/set! v i e)
+  
+  public static final Primitive SET = new Primitive(3, false) {
+    public void apply(VirtualMachine vm) {
+      if (!(vm.popArg() instanceof Vector vector && vm.popArg() instanceof IInt index))
+        throw new TypeMismatch();
+      var item = vm.popArg();
+      vector.set(index.intValue(), item);
+      vm.result = Nil.VALUE;
+      vm.popFrame();
+    }
+  };
+  
+  // (vector/length v)
+  
+  public static final Primitive LENGTH = new Primitive(1, false) {
+    public void apply(VirtualMachine vm) {
+      if (!(vm.popArg() instanceof Vector vector))
+        throw new TypeMismatch();
+      vm.result = new Int(vector.length());
+      vm.popFrame();
+    }
+  };
+  
+  // (vector/copy v)
   
   public static final Primitive COPY = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
@@ -37,7 +72,7 @@ public final class VectorLib
     }
   };
   
-  // (vector-append! v e)
+  // (vector/append! v e)
   
   public static final Primitive APPEND = new Primitive(2, false) {
     public void apply(VirtualMachine vm) {
@@ -50,7 +85,7 @@ public final class VectorLib
     }
   };
   
-  // (vector-insert! v i e)
+  // (vector/insert! v i e)
   
   public static final Primitive INSERT = new Primitive(3, false) {
     public void apply(VirtualMachine vm) {
@@ -63,7 +98,7 @@ public final class VectorLib
     }
   };
   
-  // (vector-remove! v i)
+  // (vector/remove! v i)
   
   public static final Primitive REMOVE = new Primitive(2, false) {
     public void apply(VirtualMachine vm) {

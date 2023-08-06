@@ -44,7 +44,7 @@
 (defun generate-accessor (name)
   (fun (field index)
     `(defun ,(generate-accessor-name name field) (self)
-       (at self ,index))))
+       (vector/ref self ,index))))
 
 (defun generate-accessors (name fields)
   (map-with-index (generate-accessor name) 1 fields))
@@ -52,7 +52,7 @@
 (defun generate-mutator (name)
   (fun (field index)
     `(defun ,(generate-mutator-name name field) (self value)
-       (set-at! self ,index value))))
+       (vector/set! self ,index value))))
 
 (defun generate-mutators (name fields)
   (map-with-index (generate-mutator name) 1 fields))
@@ -60,8 +60,8 @@
 (defun generate-predicate (name)
   `(defun ,(generate-predicate-name name) (self)
      (and (vector? self)
-          (not (empty? self))
-          (= (at self 0) ',name))))
+          (> (vector/length self) 0)
+          (= (vector/ref self 0) ',name))))
 
 (defmacro defstruct (name fields)
   `(do

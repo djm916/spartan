@@ -3,8 +3,10 @@ package spartan.builtins;
 import spartan.data.Primitive;
 import spartan.data.List;
 import spartan.data.Nil;
+import spartan.data.Int;
 import spartan.runtime.VirtualMachine;
 import spartan.errors.TypeMismatch;
+import static spartan.builtins.Core.truth;
 
 public final class ListLib
 {
@@ -123,4 +125,23 @@ public final class ListLib
       vm.popFrame();
     }
   };
+    
+  public static final Primitive LENGTH = new Primitive(1, false) {
+    public void apply(VirtualMachine vm) {
+      if (!(vm.popArg() instanceof List list))
+        throw new TypeMismatch();
+      vm.result = new Int(list.length());
+      vm.popFrame();
+    }
+  };
+  
+  public static final Primitive IS_EMPTY = new Primitive(1, false) {
+    public void apply(VirtualMachine vm) {
+      if (!(vm.popArg() instanceof List list))
+        throw new TypeMismatch();
+      vm.result = truth(list.empty());
+      vm.popFrame();
+    }
+  };
+
 }

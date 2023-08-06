@@ -4,9 +4,8 @@ import java.util.stream.Collectors;
 import spartan.errors.InvalidArgument;
 import spartan.errors.WrongNumberArgs;
 import spartan.errors.NoSuchElement;
-import spartan.runtime.VirtualMachine;
 
-public final class Table implements Datum, IFun, IAssoc, ISize
+public final class Table implements Datum
 {
   public static Table fromList(List elems)
   {
@@ -18,7 +17,7 @@ public final class Table implements Datum, IFun, IAssoc, ISize
       var key = elems.car();
       elems = elems.cdr();
       var val = elems.car();
-      result.set(key, val);
+      result.assoc(key, val);
     }
     return result;
   }
@@ -47,21 +46,7 @@ public final class Table implements Datum, IFun, IAssoc, ISize
       .collect(Collectors.joining(" ", "{", "}"));
   }
   
-  @Override // IFun
-  public void apply(VirtualMachine vm)
-  {
-    vm.result = get(vm.popArg());
-    vm.popFrame();
-  }
-  
-  @Override // IFun
-  public boolean arityMatches(int numArgs)
-  {
-    return numArgs == 1;
-  }
-  
-  @Override // IAssoc
-  public Datum get(Datum key)
+  public Datum find(Datum key)
   {
     var value = map.get(key);
     if (value == null)
@@ -69,13 +54,22 @@ public final class Table implements Datum, IFun, IAssoc, ISize
     return value;
   }
   
-  @Override // IAssoc
-  public void set(Datum key, Datum value)
+  public Datum findOrElse(Datum key, Datum theDefault)
+  {
+    var value = map.get(key);
+    return value == null ? theDefault : value;
+  }
+  
+  public boolean contains(Datum key)
+  {
+    return map.get(key) == null;
+  }
+  
+  public void assoc(Datum key, Datum value)
   {
     map.put(key, value);
   }
   
-  @Override // ISize
   public int length()
   {
     return map.size();

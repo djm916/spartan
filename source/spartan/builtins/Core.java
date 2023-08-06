@@ -34,21 +34,7 @@ public final class Core
       return lhs.compareTo(rhs);
     throw new TypeMismatch();
   }
-  
-  public static int length(Datum x)
-  {
-    if (x instanceof ISize arg)
-      return arg.length();
-    throw new TypeMismatch();
-  }
-  
-  public static boolean empty(Datum x)
-  {
-    if (x instanceof ISize arg)
-      return arg.empty();
-    throw new TypeMismatch();
-  }
-    
+      
   public static Datum max(List xs)
   {
     var max = xs.car();

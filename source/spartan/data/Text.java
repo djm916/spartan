@@ -5,7 +5,7 @@ import java.nio.CharBuffer;
 import spartan.errors.TypeMismatch;
 import spartan.errors.IndexOutOfBounds;
 
-public final class Text implements Datum, IEq, IOrd, ISize
+public final class Text implements Datum
 {
   public Text(String value)
   {
@@ -30,34 +30,15 @@ public final class Text implements Datum, IEq, IOrd, ISize
     return value;
   }
   
-  @Override
   public int length()
   {
     return value.length();
   }
-  
-  @Override // Object
-  public boolean equals(Object rhs)
-  {
-    return (rhs instanceof Text s) && value.equals(s.value);
-  }
-  
+    
   @Override // Object
   public int hashCode()
   {
     return value.hashCode();
-  }
-  
-  @Override // IEq
-  public boolean isEqual(Text rhs)
-  {
-    return value.equals(rhs.value);
-  }
-  
-  @Override
-  public int compareTo(Text rhs)
-  {
-    return value.compareTo(rhs.value);
   }
   
   public Bytes encode(Charset encoding)
@@ -105,12 +86,6 @@ public final class Text implements Datum, IEq, IOrd, ISize
   public Text reverse()
   {
     return new Text(new StringBuilder(value).reverse().toString());
-  }
-  
-  //@Override
-  public Text get(int index)
-  {
-    return substring(index, index + 1);
   }
   
   private final String value;
