@@ -62,4 +62,38 @@ public final class PortLib
       vm.popFrame();
     }
   };
+  
+  // (port/position port)
+  
+  public static final Primitive POSITION = new Primitive(1, false) {
+    public void apply(VirtualMachine vm) {
+      if (!(vm.popArg() instanceof Port port))
+        throw new TypeMismatch();
+      vm.result = new BigInt(port.position()); // TODO: use Int if it fits
+      vm.popFrame();
+    }
+  };
+  
+  // (port/seek port position)
+  
+  public static final Primitive SEEK = new Primitive(2, false) {
+    public void apply(VirtualMachine vm) {
+      if (!(vm.popArg() instanceof Port port && vm.popArg() instanceof IInt position))
+        throw new TypeMismatch();
+      port.seek(position.longValue());
+      vm.result = Nil.VALUE;
+      vm.popFrame();
+    }
+  };
+  
+  // (port/length port)
+  
+  public static final Primitive LENGTH = new Primitive(1, false) {
+    public void apply(VirtualMachine vm) {
+      if (!(vm.popArg() instanceof Port port))
+        throw new TypeMismatch();
+      vm.result = new BigInt(port.length()); // TODO: use Int if it fits
+      vm.popFrame();
+    }
+  };
 }

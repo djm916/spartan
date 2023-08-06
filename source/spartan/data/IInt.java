@@ -6,8 +6,9 @@ public sealed interface IInt extends INum
 permits Int, BigInt
 {
   int intValue();
+  long longValue();
   BigInteger bigIntValue();
-  
+    
   default IInt quotient(IInt rhs)
   {
     return switch (rhs) {

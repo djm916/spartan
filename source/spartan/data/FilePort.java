@@ -75,5 +75,38 @@ public final class FilePort extends Port
     return channel.isOpen();
   }
   
+  @Override // Port
+  public long position()
+  {
+    try {
+      return channel.position();
+    }
+    catch (IOException ex) {
+      throw new IOError(ex.getMessage());
+    }
+  }
+  
+  @Override // Port
+  public void seek(long position)
+  {
+    try {
+      channel.position(position);
+    }
+    catch (IOException ex) {
+      throw new IOError(ex.getMessage());
+    }
+  }
+  
+  @Override // Port
+  public long length()
+  {
+    try {
+      return channel.size();
+    }
+    catch (IOException ex) {
+      throw new IOError(ex.getMessage());
+    }
+  }
+  
   private final FileChannel channel;
 }

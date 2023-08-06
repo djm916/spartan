@@ -46,6 +46,26 @@ permits InputPort, OutputPort, FilePort
     throw unsupportedOperation();
   }
   
+  public long position()
+  {
+    throw unsupportedOperation();
+  }
+  
+  public void seek(long position)
+  {
+    throw unsupportedOperation();
+  }
+  
+  public void seekRelative(long offset)
+  {
+    throw unsupportedOperation();
+  }
+  
+  public long length()
+  {
+    throw unsupportedOperation();
+  }
+  
   private static IOError unsupportedOperation()
   {
     return new IOError("unsupported I/O operation");

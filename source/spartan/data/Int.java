@@ -31,6 +31,12 @@ public final class Int implements Datum, INum, IInt, IRatio, IReal, IEq, IOrd
     return value;
   }  
   
+  @Override
+  public long longValue()
+  {
+    return value;
+  }
+  
   @Override 
   public BigInteger bigIntValue()
   {

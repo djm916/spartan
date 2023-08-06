@@ -41,6 +41,17 @@ public final class BigInt implements Datum, INum, IInt, IRatio, IReal, IEq, IOrd
     }
   }
   
+  @Override
+  public long longValue()
+  {
+    try {
+      return value.longValueExact();
+    }
+    catch (ArithmeticException ex) {
+      throw new IntegerOverflow();
+    }
+  }
+  
   @Override 
   public BigInteger bigIntValue()
   {

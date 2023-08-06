@@ -207,10 +207,16 @@ public final class GlobalEnv
     bind(Symbol.of("port/stdin"), InputPort.STDIN);
     bind(Symbol.of("port/stdout"), OutputPort.STDOUT);
     bind(Symbol.of("port/open?"), PortLib.IS_OPEN);
+    bind(Symbol.of("port/position"), PortLib.POSITION);
+    bind(Symbol.of("port/seek"), PortLib.SEEK);
+    bind(Symbol.of("port/length"), PortLib.LENGTH);
     
     /* Bytes procedures */
     
     bind(Symbol.of("bytes"), BytesLib.FROM_LIST);
     bind(Symbol.of("bytes/make"), BytesLib.MAKE);
+    bind(Symbol.of("bytes/ref"), BytesLib.REF);
+    bind(Symbol.of("bytes/set!"), BytesLib.SET);
+    bind(Symbol.of("bytes/length"), BytesLib.LENGTH);
   }
 }

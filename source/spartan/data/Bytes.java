@@ -58,20 +58,20 @@ public final class Bytes implements Datum
     return buffer;
   }
   
-  public Int ref(int index)
+  public byte ref(int index)
   {
     try {
-      return new Int(buffer.get(index));
+      return buffer.get(index);
     }
     catch (IndexOutOfBoundsException ex) {
       throw new NoSuchElement();
     }
   }
-    
-  public void set(int index, int value)
+  
+  public void set(int index, byte value)
   {
     try {
-      buffer.put(index, (byte)value);
+      buffer.put(index, value);
     }
     catch (IndexOutOfBoundsException ex) {
       throw new NoSuchElement();
@@ -82,12 +82,7 @@ public final class Bytes implements Datum
   {
     return buffer.capacity();
   }
-  
-  public Text decode(IInt start, IInt count, Charset encoding)
-  {
-    return new Text(decode(start.intValue(), count.intValue(), encoding));
-  }
-  
+    
   public String decode(int start, int count, Charset encoding)
   {
     try {

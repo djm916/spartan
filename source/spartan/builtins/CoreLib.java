@@ -169,7 +169,7 @@ public final class CoreLib
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Bytes bytes && vm.popArg() instanceof IInt start && vm.popArg() instanceof IInt count))
         throw new TypeMismatch();
-      vm.result = bytes.decode(start, count, Config.DEFAULT_ENCODING);
+      vm.result = new Text(bytes.decode(start.intValue(), count.intValue(), Config.DEFAULT_ENCODING));
       vm.popFrame();
     }
   };

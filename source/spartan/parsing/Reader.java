@@ -387,7 +387,7 @@ public class Reader implements AutoCloseable
       return makeBigInt(text);
     }
   }
-  
+    
   private BigInt makeBigInt(String text)
   {    
     try {
