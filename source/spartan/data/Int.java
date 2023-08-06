@@ -9,42 +9,41 @@ public final class Int implements Datum, INum, IInt, IRatio, IReal, IEq, IOrd
   public static final Int ZERO = new Int(0);
   public static final Int ONE = new Int(1);
   
-  public Int(int value)
+  public Int(long value)
   {
     this.value = value;
   }
   
   public Int(String value)
   {
-    this(Integer.parseInt(value));
+    this(Long.valueOf(value));
   }
   
   @Override
   public String repr()
   {
-    return Integer.toString(value);
+    return Long.toString(value);
   }
 
   @Override
-  public int intValue()
+  public int toInt32()
   {
-    return value;
+    try {
+      return Math.toIntExact(value);
+    }
+    catch (ArithmeticException ex) {
+      throw new IntegerOverflow();
+    }
   }  
   
   @Override
-  public long longValue()
+  public long toInt64()
   {
     return value;
   }
   
-  @Override 
-  public BigInteger bigIntValue()
-  {
-    return BigInteger.valueOf(value);
-  }
-  
   @Override
-  public double doubleValue()
+  public double toFloat64()
   {
     return (double)value;
   }
@@ -52,7 +51,7 @@ public final class Int implements Datum, INum, IInt, IRatio, IReal, IEq, IOrd
   @Override
   public String format(int base)
   {
-    return Integer.toString(value, base);
+    return Long.toString(value, base);
   }
   
   @Override
@@ -64,7 +63,7 @@ public final class Int implements Datum, INum, IInt, IRatio, IReal, IEq, IOrd
   @Override
   public int hashCode()
   {
-    return Integer.hashCode(value);
+    return Long.hashCode(value);
   }
   
   public BigInt toBigInt()
@@ -249,7 +248,7 @@ public final class Int implements Datum, INum, IInt, IRatio, IReal, IEq, IOrd
   {
     if (rhs.value == 0)
       throw new DivisionByZero();
-    if (this.value == Integer.MIN_VALUE && rhs.value == -1)
+    if (this.value == Long.MIN_VALUE && rhs.value == -1)
       return quotient(rhs.toBigInt());
     return new Int(this.value / rhs.value);
   }
@@ -276,6 +275,20 @@ public final class Int implements Datum, INum, IInt, IRatio, IReal, IEq, IOrd
   {
     return toBigInt().remainder(rhs);
   }
+  
+  
+  @Override
+  public Ratio over(Int rhs)
+  {
+    return new Ratio(this.value, rhs.value);
+  }
+  
+  @Override
+  public Ratio over(BigInt rhs)
+  {
+    return toBigInt().over(rhs);
+  }
+  
   
   @Override
   public Int floor()
@@ -460,7 +473,7 @@ public final class Int implements Datum, INum, IInt, IRatio, IReal, IEq, IOrd
   @Override
   public int compareTo(Int rhs)
   {
-    return Integer.compare(this.value, rhs.value);
+    return Long.compare(this.value, rhs.value);
   }
   
   @Override
@@ -481,5 +494,5 @@ public final class Int implements Datum, INum, IInt, IRatio, IReal, IEq, IOrd
     return toReal().compareTo(rhs);
   }
   
-  private final int value;
+  private final long value;
 }

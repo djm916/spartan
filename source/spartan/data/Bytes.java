@@ -21,7 +21,7 @@ public final class Bytes implements Datum
     for (var e : elems) {
       if (!(e instanceof IInt b))
         throw new TypeMismatch();
-      buffer.put((byte) b.intValue()); // TODO: check for loss of value
+      buffer.put((byte) b.toInt32()); // TODO: check for loss of value
     }
     buffer.flip();
     return new Bytes(buffer);

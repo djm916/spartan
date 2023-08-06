@@ -31,7 +31,7 @@ public final class BigInt implements Datum, INum, IInt, IRatio, IReal, IEq, IOrd
   }
   
   @Override
-  public int intValue()
+  public int toInt32()
   {
     try {
       return value.intValueExact();
@@ -42,7 +42,7 @@ public final class BigInt implements Datum, INum, IInt, IRatio, IReal, IEq, IOrd
   }
   
   @Override
-  public long longValue()
+  public long toInt64()
   {
     try {
       return value.longValueExact();
@@ -51,15 +51,15 @@ public final class BigInt implements Datum, INum, IInt, IRatio, IReal, IEq, IOrd
       throw new IntegerOverflow();
     }
   }
-  
+/*  
   @Override 
   public BigInteger bigIntValue()
   {
     return value;
   }
-  
-  @Override
-  public double doubleValue()
+*/
+  @Override // INum
+  public double toFloat64()
   {
     return value.doubleValue();
   }
@@ -315,6 +315,18 @@ public final class BigInt implements Datum, INum, IInt, IRatio, IReal, IEq, IOrd
     catch (ArithmeticException ex) {
       throw new DivisionByZero();
     }
+  }
+  
+  @Override
+  public Ratio over(Int rhs)
+  {
+    return over(rhs.toBigInt());
+  }
+  
+  @Override
+  public Ratio over(BigInt rhs)
+  {
+    return new Ratio(this.value, rhs.value);
   }
   
   @Override

@@ -12,7 +12,7 @@ public final class Complex implements Datum, INum, IEq
   
   public Complex(IReal x, IReal y)  
   {
-    this(x.doubleValue(), y.doubleValue());
+    this(x.toFloat64(), y.toFloat64());
   }
   
   public Complex(String real, String imag)

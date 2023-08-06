@@ -32,8 +32,7 @@ public final class Ratio implements Datum, INum, IRatio, IReal, IEq, IOrd
     this(new BigInteger(numer), new BigInteger(denom));
   }
   
-    
-  public Ratio(int numer, int denom)
+  public Ratio(long numer, long denom)
   {
     this(BigInteger.valueOf(numer),
          BigInteger.valueOf(denom));
@@ -51,13 +50,13 @@ public final class Ratio implements Datum, INum, IRatio, IReal, IEq, IOrd
     return String.format("%s/%s", numer, denom);
   }
   
-  @Override
+  @Override // IRatio
   public BigInt numerator()
   {
     return new BigInt(numer);
   }
   
-  @Override
+  @Override // IRatio
   public BigInt denominator()
   {
     return new BigInt(denom);
@@ -68,8 +67,8 @@ public final class Ratio implements Datum, INum, IRatio, IReal, IEq, IOrd
     return numer.doubleValue() / denom.doubleValue();
   }
   
-  @Override
-  public double doubleValue()
+  @Override // INum
+  public double toFloat64()
   {
     return approx();
   }

@@ -26,7 +26,7 @@ public final class StringLib
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Text text && vm.popArg() instanceof IInt start && vm.popArg() instanceof IInt end))
         throw new TypeMismatch();
-      vm.result = text.substring(start.intValue(), end.intValue());
+      vm.result = text.substring(start.toInt32(), end.toInt32());
       vm.popFrame();
     }
   };

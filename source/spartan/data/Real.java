@@ -52,7 +52,7 @@ public final class Real implements Datum, INum, IReal, IEq, IOrd
   }
   
   @Override
-  public double doubleValue()
+  public double toFloat64()
   {
     return value;
   }

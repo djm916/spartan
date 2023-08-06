@@ -1,14 +1,13 @@
 package spartan.data;
 
-import java.math.BigInteger;
-
 public sealed interface IInt extends INum
 permits Int, BigInt
 {
-  int intValue();
-  long longValue();
-  BigInteger bigIntValue();
-    
+  // Conversion to native Java types
+  int toInt32();
+  long toInt64();
+  double toFloat64();
+  
   default IInt quotient(IInt rhs)
   {
     return switch (rhs) {
@@ -30,6 +29,17 @@ permits Int, BigInt
   
   IInt remainder(Int rhs);
   IInt remainder(BigInt rhs);
+  
+  default IRatio over(IInt rhs)
+  {
+    return switch (rhs) {
+      case Int z -> over(z);
+      case BigInt z -> over(z);
+    };
+  }
+  
+  IRatio over(Int rhs);
+  IRatio over(BigInt rhs);
   
   @Override // Datum
   default String type()

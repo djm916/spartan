@@ -141,14 +141,14 @@ public final class Math
   public static final Complex makeComplex(Datum x, Datum y)
   {
     if (x instanceof IReal real && y instanceof IReal imag)
-      return new Complex(real.doubleValue(), imag.doubleValue());
+      return new Complex(real.toFloat64(), imag.toFloat64());
     throw new TypeMismatch();
   }
   
-  public static final Ratio makeRatio(Datum x, Datum y)
+  public static final IRatio makeRatio(Datum x, Datum y)
   {
     if (x instanceof IInt numer && y instanceof IInt denom)
-      return new Ratio(numer.bigIntValue(), denom.bigIntValue());
+      return numer.over(denom);
     throw new TypeMismatch();
   }
 }
