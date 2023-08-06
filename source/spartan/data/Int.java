@@ -8,40 +8,14 @@ import spartan.errors.IntegerOverflow;
  */
 public final class Int implements Datum, INum, IInt, IRatio, IReal, IComplex, IEq, IOrd
 {
-  // Define a cache for small-value optimization (i.e., the flyweight pattern)
-  // Only values in the range [MIN, MAX] (inclusive) will be cached
-  // The cache is lazily-initialized as values are requested via get()
-  private static class LazyIntCache
-  {
-    private static final int MIN = -127;
-    private static final int MAX = 255;
-    private static final int SIZE = MAX - MIN + 1;
-    private final Int[] cache = new Int[SIZE];
-    
-    Int get(long value)
-    {
-      // First check if the value *may* have been cached
-      if (value >= MIN && value <= MAX) {
-        int index = (int)value - MIN; // Need a non-negative index!
-        // Is it cached?
-        if (cache[index] == null)
-          cache[index] = new Int(value); // No, go ahead and cache the new value
-        // Now return cached value
-        return cache[index];
-      }
-      // Not possible to cache this value, allocate new instance
-      else return new Int(value);
-    }
-  }
-
-  private static final LazyIntCache cache = new LazyIntCache();
+  private static final IntCache cache = new IntCache();
   
   public static final Int ZERO = valueOf(0);
   public static final Int ONE = valueOf(1);
   
   public static Int valueOf(long value)
   {
-    return cache.get(value);
+    return cache.get(value, Int::new);
   }
   
   public static Int valueOf(String value)
