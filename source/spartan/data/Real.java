@@ -39,12 +39,14 @@ public final class Real implements Datum, INum, IReal, IComplex, ITrans, IEq, IO
       return Double.toString(value);
   }
   
+  /*
   public Int toInt()
   {
     if (value < Integer.MIN_VALUE || value > Integer.MAX_VALUE)
       throw new IntegerOverflow();
     return new Int((int)value);
   }
+  */
   
   public Complex toComplex()
   {
@@ -72,19 +74,19 @@ public final class Real implements Datum, INum, IReal, IComplex, ITrans, IEq, IO
   @Override
   public Int floor()
   {
-    return new Int((long) Math.floor(value));
+    return Int.valueOf((long) Math.floor(value));
   }
   
   @Override
   public Int ceiling()
   {
-    return new Int((long) Math.ceil(value));
+    return Int.valueOf((long) Math.ceil(value));
   }
   
   @Override
   public Int round()
   {
-    return new Int((long) Math.round(value));
+    return Int.valueOf((long) Math.round(value));
   }
   
   public Real sin()

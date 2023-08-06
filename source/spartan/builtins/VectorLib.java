@@ -56,7 +56,7 @@ public final class VectorLib
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Vector vector))
         throw new TypeMismatch();
-      vm.result = new Int(vector.length());
+      vm.result = Int.valueOf(vector.length());
       vm.popFrame();
     }
   };

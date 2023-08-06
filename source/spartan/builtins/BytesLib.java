@@ -25,7 +25,7 @@ public final class BytesLib
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Bytes v && vm.popArg() instanceof IInt i))
         throw new TypeMismatch();
-      vm.result = new Int(v.ref(i.toInt32()));
+      vm.result = Int.valueOf(v.ref(i.toInt32()));
       vm.popFrame();
     }
   };
@@ -48,7 +48,7 @@ public final class BytesLib
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Bytes v))
         throw new TypeMismatch();
-      vm.result = new Int(v.length());
+      vm.result = Int.valueOf(v.length());
       vm.popFrame();
     }
   };

@@ -137,7 +137,7 @@ public final class CoreLib
     
   public static final Primitive IDENTITY_HASH = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
-      vm.result = new Int(System.identityHashCode(vm.popArg()));
+      vm.result = Int.valueOf(System.identityHashCode(vm.popArg()));
       vm.popFrame();
     }
   };
@@ -156,7 +156,7 @@ public final class CoreLib
       if (!(vm.popArg() instanceof Text text))
         throw new TypeMismatch();
       try {
-        vm.result = new Int(text.str());
+        vm.result = Int.valueOf(text.str());
         vm.popFrame();
       }
       catch (NumberFormatException ex) {

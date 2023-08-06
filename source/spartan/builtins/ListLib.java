@@ -130,7 +130,7 @@ public final class ListLib
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof List list))
         throw new TypeMismatch();
-      vm.result = new Int(list.length());
+      vm.result = Int.valueOf(list.length());
       vm.popFrame();
     }
   };

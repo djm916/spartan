@@ -381,7 +381,7 @@ public class Reader implements AutoCloseable
   private IInt makeInt(String text)
   {
     try {
-      return new Int(text);
+      return Int.valueOf(text);
     }
     catch (NumberFormatException ex) {
       return makeBigInt(text);

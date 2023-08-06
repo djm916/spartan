@@ -44,7 +44,7 @@ public final class StringLib
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Text text))
         throw new TypeMismatch();
-      vm.result = new Int(text.hashCode());
+      vm.result = Int.valueOf(text.hashCode());
       vm.popFrame();
     }
   };
@@ -53,7 +53,7 @@ public final class StringLib
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Text text))
         throw new TypeMismatch();
-      vm.result = new Int(text.length());
+      vm.result = Int.valueOf(text.length());
       vm.popFrame();
     }
   };

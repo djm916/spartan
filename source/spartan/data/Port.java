@@ -7,7 +7,7 @@ import java.nio.ByteBuffer;
 public abstract sealed class Port implements Datum
 permits InputPort, OutputPort, FilePort
 {
-  public static final Int EOF = new Int(-1);
+  public static final Int EOF = Int.valueOf(-1);
   
   public static Port open(String fileName, String flags)
   {

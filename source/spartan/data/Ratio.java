@@ -93,24 +93,24 @@ public final class Ratio implements Datum, INum, IRatio, IReal, IComplex, IEq, I
   @Override
   public Int floor()
   {
-    return new Int((long) Math.floor(toFloat64()));
+    return Int.valueOf((long) Math.floor(toFloat64()));
   }
   
   @Override
   public Int ceiling()
   {
-    return new Int((long) Math.ceil(toFloat64()));
+    return Int.valueOf((long) Math.ceil(toFloat64()));
   }
   
   public Int truncate()
   {
-    return new Int((int) toFloat64());
+    return Int.valueOf((int) toFloat64());
   }
   
   @Override
   public Int round()
   {
-    return new Int((long) Math.round(toFloat64()));
+    return Int.valueOf((long) Math.round(toFloat64()));
   }
   
   @Override

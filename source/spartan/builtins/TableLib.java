@@ -23,7 +23,7 @@ public final class TableLib
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Table t))
         throw new TypeMismatch();
-      vm.result = new Int(t.length());
+      vm.result = Int.valueOf(t.length());
       vm.popFrame();
     }
   };
