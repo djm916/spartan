@@ -17,9 +17,9 @@ public final class BytesLib
     }
   };
   
-  // (bytes/new capacity)
+  // (bytes/make capacity)
   
-  public static final Primitive MAKE_BYTES = new Primitive(1, false) {
+  public static final Primitive MAKE = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof IInt capacity))
         throw new TypeMismatch();

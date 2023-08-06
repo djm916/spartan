@@ -62,7 +62,7 @@
       (dec! j))))
 
 (defun vector/unfold (g n)
-  (def v (make-vector n nil))
+  (def v (vector/make n nil))
   (let ((i 0))
     (while (< i n)
       (set-at! v i (g))
@@ -113,5 +113,5 @@
         (inc! k))))
       
    (let* ((n (length v))
-          (temp (make-vector n nil)))
+          (temp (vector/make n nil)))
      (sort v 0 n temp)))

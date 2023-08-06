@@ -1,36 +1,41 @@
 
-; Example of ADT "queue", making use of "defstruct" macro
+; Example implementation of a queue, making use of defstruct
+
+; A queue is implemented here as a list containing the elements currently in the queue,
+; and a (pointer to) the last element of that list (allowing constant-time push).
 
 (require "stdlib/defstruct.s")
 
-(defstruct __queue-impl (front back))
+(defstruct __queue (front back))
 
 (defun queue ()
-  (__queue-impl () ()))
+  (__queue () ()))
 
 (defun queue? (self)
-  (__queue-impl? self))
+  (__queue? self))
 
 (defun queue/empty? (self)
-  (and (empty? (__queue-impl/front self)) 
-       (empty? (__queue-impl/back self))))
+  (empty? (__queue/front self)))
+
+  ;(and (empty? (__queue/front self)) 
+   ;    (empty? (__queue/back self))))
 
 (defun queue/push (self item)
   (let ((node (cons item ())))
     (cond ((queue/empty? self)
-             (__queue-impl/set-front! self node)
-             (__queue-impl/set-back! self node))
+             (__queue/set-front! self node)
+             (__queue/set-back! self node))
           (else
-             (set-cdr! (__queue-impl/back self) node)
-             (__queue-impl/set-back! self node)))))
+             (set-cdr! (__queue/back self) node)
+             (__queue/set-back! self node)))))
 
 (defun queue/pop (self)
   (cond ((queue/empty? self) nil)
         (else
-          (let ((node (__queue-impl/front self)))
-            (__queue-impl/set-front! self (cdr node))
-            (if (empty? (__queue-impl/front self))
-              (__queue-impl/set-back! self ()))
+          (let ((node (__queue/front self)))
+            (__queue/set-front! self (cdr node))
+            (if (empty? (__queue/front self))
+              (__queue/set-back! self ()))
             (car node)))))
 
 (def q (queue))

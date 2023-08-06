@@ -4,7 +4,7 @@
 
 (defun hash-map (hash equal?)
   (def initial-capacity 8)
-  (def table (vector/new initial-capacity ()))
+  (def table (vector/make initial-capacity ()))
   (__hash-map-impl hash equal? table 0))
 
 (def hash-map? __hash-map-impl?)

@@ -9,8 +9,8 @@
 
 (def fib-stream (stream/cons 0 (stream/cons 1 (stream (make-fib-generator)))))
 
-(def N 75)
+(def N 10)
 
-(def fibs-to-N (stream->list (stream/take (- N 2) fib-stream)))
+(def fibs-to-N (stream->list (stream/take N fib-stream)))
 
 (print-line "The first " N " Fibonacci numbers are: " fibs-to-N)

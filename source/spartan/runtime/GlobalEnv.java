@@ -170,7 +170,7 @@ public final class GlobalEnv
     /* Vector procedures */
     
     bind(Symbol.of("vector"), VectorLib.FROM_LIST);
-    bind(Symbol.of("make-vector"), VectorLib.MAKE_VECTOR);
+    bind(Symbol.of("vector/make"), VectorLib.MAKE);
     bind(Symbol.of("vector/copy"), VectorLib.COPY);
     bind(Symbol.of("vector/append!"), VectorLib.APPEND);
     bind(Symbol.of("vector/insert!"), VectorLib.INSERT);
@@ -204,6 +204,6 @@ public final class GlobalEnv
     /* Bytes procedures */
     
     bind(Symbol.of("bytes"), BytesLib.FROM_LIST);
-    bind(Symbol.of("make-bytes"), BytesLib.MAKE_BYTES);
+    bind(Symbol.of("bytes/make"), BytesLib.MAKE);
   }
 }

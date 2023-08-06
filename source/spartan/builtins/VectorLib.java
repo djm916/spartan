@@ -15,9 +15,9 @@ public final class VectorLib
     }
   };
   
-  // (make-vector n e)
+  // (vector/make n e)
   
-  public static final Primitive MAKE_VECTOR = new Primitive(2, false) {
+  public static final Primitive MAKE = new Primitive(2, false) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof IInt n))
         throw new TypeMismatch();      

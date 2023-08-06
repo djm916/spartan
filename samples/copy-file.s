@@ -1,6 +1,6 @@
 
 (def file (port/open "./samples/test.txt" "r"))
-(def buffer (bytes/new 1024))
+(def buffer (bytes/make 1024))
 
 (let ((eof false))
   (while (not eof)

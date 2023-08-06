@@ -1,4 +1,8 @@
 
+; Computes the prime factors of a given number
+
+; Usage: spartan factors.s N
+
 (require "stdlib/streams.s")
 
 ; Returns a function that determines if y is NOT a factor of its argument x
@@ -8,7 +12,7 @@
 (defun make-int-generator (start)
   (fun ()
     (let ((next start))
-      (set! start (+ 1 start))
+      (inc! start)
       next)))
 
 ; Generate the primes using the Sieve of Eratosthenes algorithm
@@ -32,4 +36,6 @@
       (set! primes (stream/cdr primes))))
   factors)
 
-(print-line (prime-factors 402))
+(def N (string->int (car sys/args)))
+
+(print-line (prime-factors N))
