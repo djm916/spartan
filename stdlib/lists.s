@@ -136,3 +136,13 @@
     (cons (f (car xs) (car ys))
           (zip f (cdr xs) (cdr ys)))))
 
+(defun list/compare (x y c)
+  (cond [(and (empty? x) (empty? y)) 0]        ; x and y both empty, and all elements equal, so x and y are equal
+        [(empty? x)                 -1]        ; x is empty, has fewer elements than y, so x is less than y
+        [(empty? y)                 +1]        ; y is empty, has fewer elements than x, so x is greater than y
+        [else                           
+          (let ([order (c (car x) (car y))])        ; compare the first elements
+            (if (/= order 0) order                  ; the ordering of the first pair of unequal elements determines the result
+              (list/compare (cdr x) (cdr y) c)))])) ; first elements equal, compare rest
+
+ 

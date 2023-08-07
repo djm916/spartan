@@ -472,19 +472,19 @@ public class Reader implements AutoCloseable
     };
   }
   
-  private List readList()
+  private List readList(char delim)
   {
     var position = getTokenPosition();
     var builder = new List.Builder();
 
     skipSpace();
 
-    while (lastChar != -1 && lastChar != ')') {
+    while (lastChar != -1 && lastChar != delim) {
       builder.add(readDatum());
       skipSpace();
     }
     
-    if (lastChar != ')')
+    if (lastChar != delim)
       throw unexpectedEOF();
     
     var list = builder.build();
@@ -530,13 +530,14 @@ public class Reader implements AutoCloseable
     if (lastChar == -1)
       throw unexpectedEOF();
     if (lastChar == '(')
-      return readList();
+      return readList(')');
+    if (lastChar == '[')
+      return readList(']');
     if (isSign(lastChar) && isDigit(peekChar()))
       return readNumber();
     if (isDigit(lastChar))
       return readNumber();
     if (isSymbolStart(lastChar))
-      //return readSymbol(true);
       return readSymbol();
     if (lastChar == '\"')
       return readText();
