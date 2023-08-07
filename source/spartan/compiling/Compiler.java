@@ -868,39 +868,24 @@ public class Compiler
            List.EMPTY)));
   }
   
-  private Signature parseParams(List params)
-  {
-    var requiredArgs = 0;
-    var isVariadic = false;
-    
-    for (; !params.empty(); params = params.cdr()) {
-      var param = (Symbol) params.car();
-      if (param.equals(Symbol.AMPERSAND)) {
-        isVariadic = true;
-        break;
-      }
-      ++requiredArgs;
-    }
-    return new Signature(requiredArgs, isVariadic);
-  }
-  
   /** Create a Procedure
    *
    * @param params list of the procedure's parameters
    * @param body the procedure's body
    * @param scope scope of definition
    * @return 
-   */
+   */  
   private Procedure makeProcedure(List params, List body, Scope scope)
   {
-    var sig = parseParams(params);
-    if (sig.isVariadic())
-      params = params.removeInplace(x -> Symbol.AMPERSAND.equals(x));
+    var isVariadic = params.indexOf(Symbol.AMPERSAND::equals) >= 0;
+    var requiredArgs = isVariadic ? params.length() - 2 : params.length();
+    if (isVariadic)
+      params = params.remove(Symbol.AMPERSAND::equals);
     var extendedScope = scope.extend(params);
-    var procBody = sig.isVariadic()
-      ? compileVariadicProc(body, extendedScope, sig.requiredArgs())
-      : compileFixedProc(body, extendedScope, sig.requiredArgs());
-    return new Procedure(procBody, sig);
+    var procBody = isVariadic
+      ? compileVariadicProc(body, extendedScope, requiredArgs)
+      : compileFixedProc(body, extendedScope, requiredArgs);
+    return new Procedure(procBody, new Signature(requiredArgs, isVariadic));
   }
   
   /* Compile the body of a procedure with a fixed number of arguments N

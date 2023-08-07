@@ -270,28 +270,6 @@ permits EmptyList
     return result.build();
   }
   
-  private static List removeInplace(List list, Predicate<Datum> pred)
-  {
-    var cur = list;
-    // Remove leading elements
-    while (cur != EMPTY && pred.test(cur.first))
-      list = cur = cur.rest;
-    if (cur == EMPTY)
-      return EMPTY;
-    var prev = cur;
-    cur = cur.rest;
-    while (cur != EMPTY) {
-      if (pred.test(cur.first))
-        cur = cur.rest;
-      else {
-        prev.rest = cur;
-        prev = cur;
-        cur = cur.rest;
-      }
-    }
-    return list;
-  }
-  
   private static int indexOf(List list, Predicate<Datum> pred)
   {
     for (int i = 0; list != EMPTY; list = list.rest, ++i)
