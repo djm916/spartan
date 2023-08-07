@@ -21,7 +21,7 @@ public final class VectorLib
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof IInt n))
         throw new TypeMismatch();      
-      vm.result = new Vector(n.toInt32(), vm.popArg());
+      vm.result = new Vector(n.intValue(), vm.popArg());
       vm.popFrame();      
     }
   };
@@ -32,7 +32,7 @@ public final class VectorLib
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Vector vector && vm.popArg() instanceof IInt index))
         throw new TypeMismatch();
-      vm.result = vector.ref(index.toInt32());
+      vm.result = vector.ref(index.intValue());
       vm.popFrame();
     }
   };
@@ -44,7 +44,7 @@ public final class VectorLib
       if (!(vm.popArg() instanceof Vector vector && vm.popArg() instanceof IInt index))
         throw new TypeMismatch();
       var item = vm.popArg();
-      vector.set(index.toInt32(), item);
+      vector.set(index.intValue(), item);
       vm.result = Nil.VALUE;
       vm.popFrame();
     }
@@ -92,7 +92,7 @@ public final class VectorLib
       if (!(vm.popArg() instanceof Vector v && vm.popArg() instanceof IInt i))
         throw new TypeMismatch();
       var e = vm.popArg();
-      v.insert(i.toInt32(), e);
+      v.insert(i.intValue(), e);
       vm.result = Nil.VALUE;
       vm.popFrame();
     }
@@ -104,7 +104,7 @@ public final class VectorLib
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Vector v && vm.popArg() instanceof IInt i))
         throw new TypeMismatch();
-      v.remove(i.toInt32());
+      v.remove(i.intValue());
       vm.result = Nil.VALUE;
       vm.popFrame();
     }

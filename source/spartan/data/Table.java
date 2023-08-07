@@ -9,15 +9,15 @@ public final class Table implements Datum
 {
   public static Table fromList(List elems)
   {
-    int numElems = elems.length();
-    if (numElems % 2 != 0)
-      throw new WrongNumberArgs();
-    var result = new Table(numElems);
-    for (; !elems.empty(); elems = elems.cdr()) {
+    var result = new Table();
+    while (!elems.empty()) {      
       var key = elems.car();
       elems = elems.cdr();
+      if (elems.empty())
+        throw new WrongNumberArgs();
       var val = elems.car();
       result.assoc(key, val);
+      elems = elems.cdr();
     }
     return result;
   }

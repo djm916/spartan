@@ -63,19 +63,19 @@ public final class Ratio implements Datum, INum, IRatio, IReal, IComplex, IEq, I
   }
   
   @Override
-  public double toFloat64()
+  public double doubleValue()
   {
     return numer.doubleValue() / denom.doubleValue();
   }
   
   public Real toReal()
   {
-    return new Real(toFloat64());
+    return new Real(doubleValue());
   }
   
   public Complex toComplex()
   {
-    return new Complex(toFloat64(), 0.0);
+    return new Complex(doubleValue(), 0.0);
   }
   
   @Override
@@ -93,24 +93,24 @@ public final class Ratio implements Datum, INum, IRatio, IReal, IComplex, IEq, I
   @Override
   public Int floor()
   {
-    return Int.valueOf((long) Math.floor(toFloat64()));
+    return Int.valueOf((long) Math.floor(doubleValue()));
   }
   
   @Override
   public Int ceiling()
   {
-    return Int.valueOf((long) Math.ceil(toFloat64()));
+    return Int.valueOf((long) Math.ceil(doubleValue()));
   }
   
   public Int truncate()
   {
-    return Int.valueOf((int) toFloat64());
+    return Int.valueOf((int) doubleValue());
   }
   
   @Override
   public Int round()
   {
-    return Int.valueOf((long) Math.round(toFloat64()));
+    return Int.valueOf((long) Math.round(doubleValue()));
   }
   
   @Override

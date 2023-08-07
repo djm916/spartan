@@ -6,7 +6,7 @@ package spartan.data;
 public sealed interface IReal extends INum
 permits Int, BigInt, Ratio, Real
 {
-  double toFloat64();
+  double doubleValue();
   IInt floor();
   IInt ceiling();
   IInt round();

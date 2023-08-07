@@ -4,14 +4,18 @@ import spartan.errors.DivisionByZero;
 import spartan.errors.IntegerOverflow;
 
 /**
- * Implementation of IInt with a long (64-bit signed integer)
+ * Implementation of IInt as 64-bit signed integer (Java long type)
+ *
+ * Using a long for the representation has a few advantages. First, they can simultaneously represent bytes, array indices,
+ * hash codes, file sizes and positions, avoiding an explosion of custom wrappers for each size. The trade-off, of course,
+ * is that they probably waste a lot of space most of the time. Converting long to and from double produces sensible results,
+ * with minimal loss of precision. This makes it easy to convert Int to Real and vice-versa, which is useful for implementing
+ * math operations. 
+ *  - 
  */
 public final class Int implements Datum, INum, IInt, IRatio, IReal, IComplex, IEq, IOrd
 {
   private static final IntCache cache = new IntCache();
-  
-  public static final Int ZERO = valueOf(0);
-  public static final Int ONE = valueOf(1);
   
   public static Int valueOf(long value)
   {
@@ -35,7 +39,7 @@ public final class Int implements Datum, INum, IInt, IRatio, IReal, IComplex, IE
   }
 
   @Override
-  public int toInt32()
+  public int intValue()
   {
     try {
       return Math.toIntExact(value);
@@ -46,13 +50,13 @@ public final class Int implements Datum, INum, IInt, IRatio, IReal, IComplex, IE
   }  
   
   @Override
-  public long toInt64()
+  public long longValue()
   {
     return value;
   }
   
   @Override
-  public double toFloat64()
+  public double doubleValue()
   {
     return (double)value;
   }
@@ -105,12 +109,12 @@ public final class Int implements Datum, INum, IInt, IRatio, IReal, IComplex, IE
   
   public Real toReal()
   {
-    return new Real(toFloat64());
+    return new Real(doubleValue());
   }
   
   public Complex toComplex()
   {
-    return new Complex(toFloat64(), 0.0);
+    return new Complex(doubleValue(), 0.0);
   }
   
   @Override
@@ -325,7 +329,7 @@ public final class Int implements Datum, INum, IInt, IRatio, IReal, IComplex, IE
   @Override
   public Int denominator()
   {
-    return ONE;
+    return valueOf(1);
   }
     
   @Override

@@ -31,7 +31,7 @@ public final class BigInt implements Datum, INum, IInt, IRatio, IReal, IComplex,
   }
   
   @Override
-  public int toInt32()
+  public int intValue()
   {
     try {
       return value.intValueExact();
@@ -42,7 +42,7 @@ public final class BigInt implements Datum, INum, IInt, IRatio, IReal, IComplex,
   }
   
   @Override
-  public long toInt64()
+  public long longValue()
   {
     try {
       return value.longValueExact();
@@ -53,7 +53,7 @@ public final class BigInt implements Datum, INum, IInt, IRatio, IReal, IComplex,
   }
   
   @Override
-  public double toFloat64()
+  public double doubleValue()
   {
     return value.doubleValue();
   }
@@ -83,12 +83,12 @@ public final class BigInt implements Datum, INum, IInt, IRatio, IReal, IComplex,
   
   public Real toReal()
   {
-    return new Real(toFloat64());
+    return new Real(doubleValue());
   }
   
   public Complex toComplex()
   {
-    return new Complex(toFloat64(), 0.0);
+    return new Complex(doubleValue(), 0.0);
   }
   
   @Override

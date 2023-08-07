@@ -6,10 +6,9 @@ package spartan.data;
 public sealed interface IInt extends INum
 permits Int, BigInt
 {
-  // Conversion to native Java types
-  int toInt32();
-  long toInt64();
-    
+  int intValue();
+  long longValue();
+  
   default IInt quotient(IInt rhs)
   {
     return switch (rhs) {

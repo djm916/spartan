@@ -47,7 +47,7 @@ public final class PortLib
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Port port && vm.popArg() instanceof Bytes bytes && vm.popArg() instanceof IInt start && vm.popArg() instanceof IInt count))
         throw new TypeMismatch();
-      vm.result = Int.valueOf(port.read(bytes.buffer(), start.toInt32(), count.toInt32()));
+      vm.result = Int.valueOf(port.read(bytes.buffer(), start.intValue(), count.intValue()));
       vm.popFrame();
     }
   };
@@ -58,7 +58,7 @@ public final class PortLib
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Port port && vm.popArg() instanceof Bytes bytes && vm.popArg() instanceof IInt start && vm.popArg() instanceof IInt count))
         throw new TypeMismatch();
-      vm.result = Int.valueOf(port.write(bytes.buffer(), start.toInt32(), count.toInt32()));
+      vm.result = Int.valueOf(port.write(bytes.buffer(), start.intValue(), count.intValue()));
       vm.popFrame();
     }
   };
@@ -80,7 +80,7 @@ public final class PortLib
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Port port && vm.popArg() instanceof IInt position))
         throw new TypeMismatch();
-      port.seek(position.toInt64());
+      port.seek(position.longValue());
       vm.result = Nil.VALUE;
       vm.popFrame();
     }

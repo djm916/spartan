@@ -239,15 +239,7 @@ public class Reader implements AutoCloseable
   {
     return syntaxError("unexpected end of input");
   }
-  
-  // Convenience method to map values to source positions.
-  // Takes a value, enters it into the position map, and returns it.
-  private <T extends Datum> T withPosition(T val, Position pos)
-  {
-    positionMap.put(val, pos);
-    return val;
-  }
-  
+    
   private void discardRemainingInput()
   {
     try {
@@ -259,7 +251,7 @@ public class Reader implements AutoCloseable
     }
   }
   
-  /* Read a number (integer, rational, real, or complex)
+  /* Read a number literal (integer, rational, real, or complex)
      according to the following grammar:
     
     <number> -> <sign>? (<integer> | <rational> | <real> | <complex>)
@@ -428,7 +420,6 @@ public class Reader implements AutoCloseable
     }
   }
   
-  //private Datum readSymbol(boolean readQualified)
   private Datum readSymbol()
   {
     var position = getTokenPosition();
@@ -442,40 +433,10 @@ public class Reader implements AutoCloseable
     }
     
     var symbol = new Symbol(text.toString());
-    positionMap.put(symbol, position);
-    
-    //if (readQualified && peekChar() == '.')
-      //return readQualifiedSymbol(symbol);
-    //else
-      return symbol;
+    positionMap.put(symbol, position);    
+    return symbol;
   }
   
-  /*
-   * Reads a qualified symbol of the form a.b and converts
-   * it to a map lookup, e.g.:
-   *
-   * a.b => (a 'b)
-   * a.b.c => ((a 'b) 'c)
-   * a.b.c.d => (((a 'b) 'c) 'd)
-   */
-  /*
-  private List readQualifiedSymbol(Datum seed)
-  {
-    getChar(); // eat '.'
-    getChar();
-    
-    if (!isSymbolStart(lastChar))
-      throw syntaxError("malformed qualified symbol");
-    
-    var result = List.of(seed, List.of(Symbol.QUOTE, readSymbol(false)));
-    positionMap.put(result, getTokenPosition());
-    
-    if (peekChar() == '.')
-      return readQualifiedSymbol(result);
-    else
-      return result;
-  }
-  */
   private Text readText()
   {
     var text = new StringBuilder();
@@ -511,41 +472,26 @@ public class Reader implements AutoCloseable
     };
   }
   
-  private List readDatums(char delimiter)
+  private List readList()
   {
+    var position = getTokenPosition();
     var builder = new List.Builder();
 
     skipSpace();
 
-    while (lastChar != -1 && lastChar != delimiter) {
+    while (lastChar != -1 && lastChar != ')') {
       builder.add(readDatum());
       skipSpace();
     }
     
-    if (lastChar != delimiter)
+    if (lastChar != ')')
       throw unexpectedEOF();
     
-    return builder.build();
+    var list = builder.build();
+    positionMap.put(list, position);
+    return list;
   }
-  
-  private List readList()
-  {
-    var position = getTokenPosition();
-    return withPosition(readDatums(')'), position);
-  }
-
-  private List readVector()
-  {
-    var position = getTokenPosition();
-    return withPosition(List.cons(new Symbol("vector"), readDatums(']')), position);
-  }
-  
-  private List readTable()
-  {
-    var position = getTokenPosition();
-    return withPosition(List.cons(new Symbol("table"), readDatums('}')), position);
-  }
-  
+    
   private List readQuote()
   {
     skipSpace();
@@ -585,10 +531,6 @@ public class Reader implements AutoCloseable
       throw unexpectedEOF();
     if (lastChar == '(')
       return readList();
-    if (lastChar == '[')
-      return readVector();
-    if (lastChar == '{')
-      return readTable();
     if (isSign(lastChar) && isDigit(peekChar()))
       return readNumber();
     if (isDigit(lastChar))

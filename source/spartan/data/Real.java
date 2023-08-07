@@ -39,22 +39,13 @@ public final class Real implements Datum, INum, IReal, IComplex, ITrans, IEq, IO
       return Double.toString(value);
   }
   
-  /*
-  public Int toInt()
-  {
-    if (value < Integer.MIN_VALUE || value > Integer.MAX_VALUE)
-      throw new IntegerOverflow();
-    return new Int((int)value);
-  }
-  */
-  
   public Complex toComplex()
   {
     return new Complex(value, 0.0);
   }
   
   @Override
-  public double toFloat64()
+  public double doubleValue()
   {
     return value;
   }
