@@ -1,6 +1,7 @@
 package spartan.data;
 
 import java.util.function.Predicate;
+import java.util.function.UnaryOperator;
 import java.util.Iterator;
 import java.util.Spliterator;
 import java.util.Spliterators;
@@ -187,7 +188,7 @@ permits EmptyList
       ++length;
     return length;
   }
-    
+  
   public List append(Datum x)
   {
     return append(this, x);
@@ -202,15 +203,15 @@ permits EmptyList
   {
     return remove(this, pred);
   }
-  
-  public List removeInplace(Predicate<Datum> pred)
+      
+  public int index(Predicate<Datum> pred)
   {
-    return removeInplace(this, pred);
+    return index(this, pred);
   }
     
-  public int indexOf(Predicate<Datum> pred)
+  public List map(UnaryOperator<Datum> f)
   {
-    return indexOf(this, pred);
+    return map(this, f);
   }
   
   @Override // Iterable
@@ -270,14 +271,22 @@ permits EmptyList
     return result.build();
   }
   
-  private static int indexOf(List list, Predicate<Datum> pred)
+  private static int index(List list, Predicate<Datum> pred)
   {
     for (int i = 0; list != EMPTY; list = list.rest, ++i)
       if (pred.test(list.first))
         return i;
     return -1;
   }
-    
+  
+  private static List map(List list, UnaryOperator<Datum> f)
+  {
+    var result = new List.Builder();
+    for (; !list.empty(); list = list.cdr())
+      result.add(f.apply(list.first));
+    return result.build();
+  }
+  
   protected List(Datum first, List rest)
   {
     this.first = first;

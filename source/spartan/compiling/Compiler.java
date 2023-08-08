@@ -145,11 +145,11 @@ public class Compiler
 
   private Inst compileDef(List exp, Scope scope, Inst next)
   {
-    if (!(exp.length() == 3 && exp.cadr() instanceof Symbol variable))
+    if (!(exp.length() == 3 && exp.cadr() instanceof Symbol s))
       throw malformedExp(exp);
     var init = exp.caddr();
     return compile(init, scope, false,
-           new StoreGlobal(variable.intern(),
+           new StoreGlobal(s.intern(),
            new LoadConst(Nil.VALUE, next)));
   }
 
@@ -296,18 +296,14 @@ public class Compiler
 
   private Inst compileLet(List exp, Scope scope, boolean tail, Inst next)
   {
-    if (exp.length() < 3 || !(exp.cadr() instanceof List))
+    if (exp.length() < 3 || !(exp.cadr() instanceof List bindings) || !checkBindingListForm(bindings))
       throw malformedExp(exp);
 
-    var bindings = (List) exp.cadr();
     var body = exp.cddr();
 
-    if (!checkBindingListForm(bindings))
-      throw malformedExp(bindings);
-
     int numBindings = bindings.length();
-    var vars = extractFirst(bindings);
-    var inits = extractSecond(bindings);
+    var vars = extractVars(bindings);
+    var inits = extractInits(bindings);
     var extendedScope = scope.extend(vars);
 
     return compilePushArgs(inits, scope,
@@ -341,18 +337,14 @@ public class Compiler
   */
   private Inst compileLetRec(List exp, Scope scope, boolean tail, Inst next)
   {
-    if (exp.length() < 3 || !(exp.cadr() instanceof List))
+    if (exp.length() < 3 || !(exp.cadr() instanceof List bindings) || !checkBindingListForm(bindings))
       throw malformedExp(exp);
 
-    var bindings = (List) exp.cadr();
     var body = exp.cddr();
 
-    if (!checkBindingListForm(bindings))
-      throw malformedExp(exp);
-
     int numBindings = bindings.length();
-    var vars = extractFirst(bindings);
-    var inits = extractSecond(bindings);
+    var vars = extractVars(bindings);
+    var inits = extractInits(bindings);
     var extendedScope = scope.extend(vars);
 
     return new PushEnv(numBindings,
@@ -406,17 +398,13 @@ public class Compiler
   */
   private Inst compileLetStar(List exp, Scope scope, boolean tail, Inst next)
   {
-    if (exp.length() < 3 || !(exp.cadr() instanceof List))
+    if (exp.length() < 3 || !(exp.cadr() instanceof List bindings) || !checkBindingListForm(bindings))
       throw malformedExp(exp);
 
-    var bindings = (List) exp.cadr();
     var body = exp.cddr();
 
-    if (!checkBindingListForm(bindings))
-      throw malformedExp(exp);
-
     int numBindings = bindings.length();
-    var vars = extractFirst(bindings);
+    var vars = extractVars(bindings);
     var extendedScope = scope.extend(vars);
 
     return new PushEnv(numBindings,
@@ -464,28 +452,16 @@ public class Compiler
     return true;
   }
 
-  /* Extract the 1st element of each list in a list of lists
-
-     ((x1 ...) (x2 ...) ...) => (x1 x2 ...)
-  */
-  private List extractFirst(List list)
+  // Extract the variables from a binding list
+  private List extractVars(List bindings)
   {
-    var result = new List.Builder();
-    for (; !list.empty(); list = list.cdr())
-      result.add(((List)list.car()).car());
-    return result.build();
+    return bindings.map(pair -> ((List)pair).car());
   }
 
-  /* Extract the 2nd element of each list in a list of lists
-
-     ((x1 y1 ...) (x2 y2 ...) ...) => (y1 y2 ...)
-  */
-  private List extractSecond(List list)
+  // Extract the initializers from a binding list
+  private List extractInits(List bindings)
   {
-    var result = new List.Builder();
-    for (; !list.empty(); list = list.cdr())
-      result.add(((List)list.car()).cadr());
-    return result.build();
+    return bindings.map(pair -> ((List)pair).cadr());
   }
   
   private Inst compilePushArgs(List args, Scope scope, Inst next)
@@ -622,15 +598,9 @@ public class Compiler
    */
   private Inst compileFun(List exp, Scope scope, Inst next)
   {
-    if (exp.length() < 3 || !(exp.cadr() instanceof List))
+    if (exp.length() < 3 || !(exp.cadr() instanceof List params) || !checkParamListForm(params))
       throw malformedExp(exp);
-
-    var params = (List) exp.cadr();
     var body = exp.cddr();
-    
-    if (!checkParamListForm(params))
-      throw malformedExp(exp);
-    
     return new MakeClosure(makeProcedure(params, body, scope), next);
   }
 
@@ -870,22 +840,22 @@ public class Compiler
   
   /** Create a Procedure
    *
-   * @param params list of the procedure's parameters
-   * @param body the procedure's body
-   * @param scope scope of definition
+   * @param params the procedure parameters
+   * @param body the procedure body
+   * @param scope scope of procedure definition
    * @return 
    */  
   private Procedure makeProcedure(List params, List body, Scope scope)
   {
-    var isVariadic = params.indexOf(Symbol.AMPERSAND::equals) >= 0;
+    var isVariadic = params.index(Symbol.AMPERSAND::equals) >= 0;
     var requiredArgs = isVariadic ? params.length() - 2 : params.length();
     if (isVariadic)
       params = params.remove(Symbol.AMPERSAND::equals);
     var extendedScope = scope.extend(params);
-    var procBody = isVariadic
-      ? compileVariadicProc(body, extendedScope, requiredArgs)
-      : compileFixedProc(body, extendedScope, requiredArgs);
-    return new Procedure(procBody, new Signature(requiredArgs, isVariadic));
+    return new Procedure(
+      isVariadic ? compileVariadicProc(body, extendedScope, requiredArgs)
+                 : compileFixedProc(body, extendedScope, requiredArgs),
+      new Signature(requiredArgs, isVariadic));
   }
   
   /* Compile the body of a procedure with a fixed number of arguments N
@@ -1045,10 +1015,8 @@ public class Compiler
       return compileSelfEval(exp, next);
     else if (exp instanceof Symbol s)
       return compileVarRef(s, scope, next);
-    else //if (exp instanceof List list)
+    else 
       return compileCombo((List)exp, scope, tail, next);
-    //else
-      //throw new 
   }
 
   private PositionMap positionMap;
