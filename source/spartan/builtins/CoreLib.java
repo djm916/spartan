@@ -192,11 +192,7 @@ public final class CoreLib
       var precision = 2;
       if (!args.empty() && args.car() instanceof IInt arg)
         precision = arg.intValue();
-      Config.NUMERIC_FORMATTER.setMinimumFractionDigits(precision);
-      Config.NUMERIC_FORMATTER.setMaximumFractionDigits(precision);
-      vm.result = new Text(Config.NUMERIC_FORMATTER.format(num.doubleValue()));
-      Config.NUMERIC_FORMATTER.setMinimumFractionDigits(Config.DEFAULT_DECIMAL_PRECISION);
-      Config.NUMERIC_FORMATTER.setMaximumFractionDigits(Config.DEFAULT_DECIMAL_PRECISION);
+      vm.result = new Text(num.formatDec(precision));
       vm.popFrame();
     }
   };
@@ -211,7 +207,7 @@ public final class CoreLib
       int base = 10;
       if (!args.empty() && args.car() instanceof IInt arg)
         base = arg.intValue();
-      vm.result = new Text(num.format(base));
+      vm.result = new Text(num.formatInt(base));
       vm.popFrame();
     }
   };
@@ -303,20 +299,6 @@ public final class CoreLib
   public static final Primitive IS_BYTES = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
       vm.result = truth(vm.popArg() instanceof Bytes);
-      vm.popFrame();
-    }
-  };
-  
-  public static final Primitive MAX = new Primitive(1, true) {
-    public void apply(VirtualMachine vm) {
-      vm.result = max(vm.popRestArgs());
-      vm.popFrame();
-    }
-  };
-  
-  public static final Primitive MIN = new Primitive(1, true) {
-    public void apply(VirtualMachine vm) {
-      vm.result = min(vm.popRestArgs());
       vm.popFrame();
     }
   };

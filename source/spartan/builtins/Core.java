@@ -34,30 +34,4 @@ public final class Core
       return lhs.compareTo(rhs);
     throw new TypeMismatch();
   }
-      
-  public static Datum max(List xs)
-  {
-    var max = xs.car();
-    xs = xs.cdr();
-    while (xs != List.EMPTY) {
-      var x = xs.car();
-      if (compareTo(x, max) > 0)
-        max = x;
-      xs = xs.cdr();
-    }
-    return max;
-  }
-    
-  public static Datum min(List xs)
-  {
-    var min = xs.car();
-    xs = xs.cdr();
-    while (xs != List.EMPTY) {
-      var x = xs.car();
-      if (compareTo(x, min) < 0)
-        min = x;
-      xs = xs.cdr();
-    }
-    return min;
-  }  
 }

@@ -10,4 +10,5 @@ permits Int, BigInt, Ratio, Real
   IInt floor();
   IInt ceiling();
   IInt round();
+  String formatDec(int precision);
 }

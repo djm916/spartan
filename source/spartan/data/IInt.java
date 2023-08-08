@@ -48,5 +48,5 @@ permits Int, BigInt
     return "integer";
   }
   
-  String format(int base);
+  String formatInt(int base);
 }

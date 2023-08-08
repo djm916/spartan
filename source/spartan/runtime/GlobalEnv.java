@@ -77,8 +77,6 @@ public final class GlobalEnv
     bind(Symbol.of("gensym"), CoreLib.GENSYM);
     bind(Symbol.of("identity-hash"), CoreLib.IDENTITY_HASH);
     bind(Symbol.of("error"), CoreLib.ERROR);    
-    bind(Symbol.of("max"), CoreLib.MAX);
-    bind(Symbol.of("min"), CoreLib.MIN);
 
     /* Type predicates */
     

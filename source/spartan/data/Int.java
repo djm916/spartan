@@ -80,9 +80,15 @@ public final class Int implements Datum, INum, IInt, IRatio, IReal, IComplex, IE
   }
   
   @Override
-  public String format(int base)
+  public String formatInt(int base)
   {
     return Long.toString(value, base);
+  }
+  
+  @Override
+  public String formatDec(int precision)
+  {
+    return toReal().formatDec(precision);
   }
   
   @Override

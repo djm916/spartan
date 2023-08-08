@@ -38,6 +38,19 @@ public final class Real implements Datum, INum, IReal, IComplex, ITrans, IEq, IO
     else
       return Double.toString(value);
   }
+    
+  private static double round(double x, int n)
+  {
+    double scale = Math.pow(10.0, n);
+    double result = Math.floor(x * scale + 0.5) / scale;
+    return result;
+  }
+  
+  @Override
+  public String formatDec(int precision)
+  {
+    return Double.toString(round(this.value, precision));
+  }
   
   public Complex toComplex()
   {

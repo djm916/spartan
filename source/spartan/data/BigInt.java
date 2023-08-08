@@ -92,10 +92,17 @@ public final class BigInt implements Datum, INum, IInt, IRatio, IReal, IComplex,
   }
   
   @Override
-  public String format(int base)
+  public String formatInt(int base)
   {
     return value.toString(base);
   }
+  
+  @Override
+  public String formatDec(int precision)
+  {
+    return toReal().formatDec(precision);
+  }
+  
   
   @Override
   public boolean equals(Object other)

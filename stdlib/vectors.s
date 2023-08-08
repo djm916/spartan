@@ -4,7 +4,7 @@
 (defun vector/map! (f v)
   (let ((i 0) (n (vector/length v)))
     (while (< i n)
-      (vector/set! v i (f (v i)))
+      (vector/set! v i (f (vector/ref v i)))
       (inc! i))))
 
 (defun vector/map (f v)
@@ -20,10 +20,10 @@
       (dec! i))
     result))
 
-(defun vector/for-each (f v)
+(defun vector/for-each (v f)
   (let ((i 0) (n (vector/length v)))
     (while (< i n)
-      (f (v i))
+      (f (vector/ref v i))
       (inc! i))))
 
 (defun vector/for-each-index (f v)

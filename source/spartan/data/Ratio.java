@@ -50,6 +50,12 @@ public final class Ratio implements Datum, INum, IRatio, IReal, IComplex, IEq, I
     return String.format("%s/%s", numer, denom);
   }
   
+  @Override
+  public String formatDec(int precision)
+  {
+    return toReal().formatDec(precision);
+  }
+  
   @Override // IRatio
   public BigInt numerator()
   {
@@ -101,12 +107,7 @@ public final class Ratio implements Datum, INum, IRatio, IReal, IComplex, IEq, I
   {
     return Int.valueOf((long) Math.ceil(doubleValue()));
   }
-  
-  public Int truncate()
-  {
-    return Int.valueOf((int) doubleValue());
-  }
-  
+    
   @Override
   public Int round()
   {

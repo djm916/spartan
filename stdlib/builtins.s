@@ -80,6 +80,22 @@
   (if (>= i j) ()
     (cons i (range (+ 1 i) j))))
 
+(defun min (x & xs)
+  (let ((lo x))
+    (while (not (empty? xs))
+      (if (< (car xs) lo)
+        (set! lo (car xs)))
+      (set! xs (cdr xs)))
+  lo))
+
+(defun max (x & xs)
+  (let ((hi x))
+    (while (not (empty? xs))
+      (if (> (car xs) hi)
+        (set! hi (car xs)))
+      (set! xs (cdr xs)))
+  hi))
+
 ; Simple list destructuring binding form
 ; vars : a list of variables (symbols) to be bound
 ; exp  : a list argument

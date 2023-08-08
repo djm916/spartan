@@ -1,7 +1,6 @@
 package spartan;
 
 import spartan.errors.Error;
-import java.text.NumberFormat;
 import java.nio.file.Path;
 import java.nio.file.InvalidPathException;
 import java.nio.charset.StandardCharsets;
@@ -26,10 +25,7 @@ public final class Config
   
   /** The default decimal display precision */
   public static final int DEFAULT_DECIMAL_PRECISION = 3;
-  
-  /** Global NumberFormatter instance */
-  public static final NumberFormat NUMERIC_FORMATTER = NumberFormat.getNumberInstance();
-  
+    
   public static final Path HOME_DIR = initHomeDir();
   
   /** This source file (which is pre-loaded) bootstraps the initial environment with
@@ -48,12 +44,7 @@ public final class Config
   };
   
   public static final OSType OS_TYPE = getOSType();
-  
-  static {
-    NUMERIC_FORMATTER.setMinimumFractionDigits(DEFAULT_DECIMAL_PRECISION);
-    NUMERIC_FORMATTER.setMaximumFractionDigits(DEFAULT_DECIMAL_PRECISION);    
-  }
-  
+    
   private Config() {}
   
   private static Path initHomeDir()
