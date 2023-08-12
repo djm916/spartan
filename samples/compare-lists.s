@@ -7,4 +7,4 @@
 (def x '(1 2 3))
 (def y '(1 2))
 
-(list/compare x y compare)
+(print-line (list:compare x y compare))

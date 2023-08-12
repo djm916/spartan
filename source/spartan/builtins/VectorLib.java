@@ -17,7 +17,7 @@ public final class VectorLib
   
   // (vector/make n e)
   
-  public static final Primitive MAKE = new Primitive(2, false) {
+  public static final Primitive NEW = new Primitive(2, false) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof IInt n))
         throw new TypeMismatch();      

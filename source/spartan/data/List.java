@@ -181,12 +181,29 @@ permits EmptyList
     return cdr().cdr().cdr();
   }
   
+  public Datum get(int index)
+  {
+    return get(this, index);
+  }
+  
+  public void set(int index, Datum value)
+  {
+    set(this, index, value);
+  }
+  
+  public Datum tail(int index)
+  {
+    return tail(this, index);
+  }
+  
+  public void setTail(int index, List value)
+  {
+    setTail(this, index, value);
+  }
+  
   public int length()
   {
-    int length = 0;
-    for (var list = this; !list.empty(); list = list.cdr())
-      ++length;
-    return length;
+    return length(this);
   }
   
   public List append(Datum x)
@@ -243,6 +260,42 @@ permits EmptyList
   public Stream<Datum> stream()
   {
     return StreamSupport.stream(spliterator(), false);
+  }
+  
+  private static int length(List list)
+  {
+    int length = 0;
+    for (; !list.empty(); list = list.cdr())
+      ++length;
+    return length;
+  }
+  
+  private static Datum get(List list, int index)
+  {
+    for (; !list.empty() && index > 0; list = list.cdr(), --index)
+      ;
+    return list.car();
+  }
+  
+  private static void set(List list, int index, Datum value)
+  {
+    for (; !list.empty() && index > 0; list = list.cdr(), --index)
+      ;
+    list.setCar(value);
+  }
+  
+  private static Datum tail(List list, int index)
+  {
+    for (; !list.empty() && index > 0; list = list.cdr(), --index)
+      ;
+    return list.cdr();
+  }
+  
+  private static void setTail(List list, int index, List value)
+  {
+    for (; !list.empty() && index > 0; list = list.cdr(), --index)
+      ;
+    list.setCdr(value);
   }
   
   private static List append(List list, Datum x)

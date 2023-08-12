@@ -4,6 +4,7 @@ import spartan.data.Primitive;
 import spartan.data.List;
 import spartan.data.Nil;
 import spartan.data.Int;
+import spartan.data.IInt;
 import spartan.runtime.VirtualMachine;
 import spartan.errors.TypeMismatch;
 import static spartan.builtins.Core.truth;
@@ -143,5 +144,42 @@ public final class ListLib
       vm.popFrame();
     }
   };
-
+  
+  public static final Primitive NTH = new Primitive(2, false) {
+    public void apply(VirtualMachine vm) {
+      if (!(vm.popArg() instanceof List list && vm.popArg() instanceof IInt index))
+        throw new TypeMismatch();
+      vm.result = list.get(index.intValue());
+      vm.popFrame();
+    }
+  };
+  
+  public static final Primitive SET_NTH = new Primitive(3, false) {
+    public void apply(VirtualMachine vm) {
+      if (!(vm.popArg() instanceof List list && vm.popArg() instanceof IInt index))
+        throw new TypeMismatch();
+      list.set(index.intValue(), vm.popArg());
+      vm.result = Nil.VALUE;
+      vm.popFrame();
+    }
+  };
+  
+  public static final Primitive NTH_TAIL = new Primitive(2, false) {
+    public void apply(VirtualMachine vm) {
+      if (!(vm.popArg() instanceof List list && vm.popArg() instanceof IInt index))
+        throw new TypeMismatch();
+      vm.result = list.tail(index.intValue());
+      vm.popFrame();
+    }
+  };
+  
+  public static final Primitive SET_NTH_TAIL = new Primitive(3, false) {
+    public void apply(VirtualMachine vm) {
+      if (!(vm.popArg() instanceof List list && vm.popArg() instanceof IInt index && vm.popArg() instanceof List tail))
+        throw new TypeMismatch();
+      list.setTail(index.intValue(), tail);
+      vm.result = Nil.VALUE;
+      vm.popFrame();
+    }
+  };
 }

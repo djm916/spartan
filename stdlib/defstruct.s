@@ -23,17 +23,17 @@
 ; Generate the name of a structure accessor (getter)
 
 (defun generate-accessor-name (name field-name)
-  (string->symbol (string/concat (symbol->string name) "/" (symbol->string field-name))))
+  (string->symbol (string:concat (symbol->string name) ":" (symbol->string field-name))))
 
 ; Generate the name of a structure mutator ("setter")
 
 (defun generate-mutator-name (name field-name)
-  (string->symbol (string/concat (symbol->string name) "/set-" (symbol->string field-name) "!")))
+  (string->symbol (string:concat (symbol->string name) ":set-" (symbol->string field-name) "!")))
 
 ; Generate the name of a structure type predicate
 
 (defun generate-predicate-name (name)
-  (string->symbol (string/concat (symbol->string name) "?")))
+  (string->symbol (string:concat (symbol->string name) "?")))
 
 ; Generate a structure constructor
 
@@ -44,24 +44,24 @@
 (defun generate-accessor (name)
   (fun (field index)
     `(defun ,(generate-accessor-name name field) (self)
-       (vector/ref self ,index))))
+       (vector:ref self ,index))))
 
 (defun generate-accessors (name fields)
-  (map-with-index (generate-accessor name) 1 fields))
+  (map/index (generate-accessor name) 1 fields))
 
 (defun generate-mutator (name)
   (fun (field index)
     `(defun ,(generate-mutator-name name field) (self value)
-       (vector/set! self ,index value))))
+       (vector:set! self ,index value))))
 
 (defun generate-mutators (name fields)
-  (map-with-index (generate-mutator name) 1 fields))
+  (map/index (generate-mutator name) 1 fields))
 
 (defun generate-predicate (name)
   `(defun ,(generate-predicate-name name) (self)
      (and (vector? self)
-          (> (vector/length self) 0)
-          (= (vector/ref self 0) ',name))))
+          (> (vector:length self) 0)
+          (= (vector:ref self 0) ',name))))
 
 (defmacro defstruct (name fields)
   `(do

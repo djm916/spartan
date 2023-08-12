@@ -10,10 +10,10 @@
     (cons (f (car xs))
           (map f (cdr xs)))))
 
-(defun map-with-index (f i xs)
+(defun map/index (f i xs)
   (if (empty? xs) () 
     (cons (f (car xs) i)
-          (map-with-index f (+ 1 i) (cdr xs)))))
+          (map/index f (+ 1 i) (cdr xs)))))
 
 (defun flat-map (f xs)
   (apply concat
@@ -41,14 +41,14 @@
       (car xs)
       (find f (cdr xs)))))
 
-(defun find-index (f xs)
+(defun index (f xs)
   (rec loop ((i 0) (xs xs))
     (cond [(empty? xs)  -1]
           [(f (car xs)) i]
           [else         (loop (+ 1 i) (cdr xs))])))
 
 (defun contains? (x xs)
-  (not (= false (find-first (fun (y) (= x y)) xs))))
+  (> (index (fun (y) (= x y)) xs) 0))
 
 (defun remove (f xs)
   (filter (fun (x) (not (f x))) xs))
@@ -135,13 +135,13 @@
     (cons (f (car xs) (car ys))
           (zip f (cdr xs) (cdr ys)))))
 
-(defun list/compare (x y c)
+(defun list:compare (x y c)
   (cond [(and (empty? x) (empty? y)) 0]        ; x and y both empty, and all elements equal, so x and y are equal
         [(empty? x)                 -1]        ; x is empty, has fewer elements than y, so x is less than y
         [(empty? y)                 +1]        ; y is empty, has fewer elements than x, so x is greater than y
         [else                           
           (let ([order (c (car x) (car y))])        ; compare the first elements
             (if (/= order 0) order                  ; the ordering of the first pair of unequal elements determines the result
-              (list/compare (cdr x) (cdr y) c)))])) ; first elements equal, compare rest
+              (list:compare (cdr x) (cdr y) c)))])) ; first elements equal, compare rest
 
  

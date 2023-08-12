@@ -162,59 +162,63 @@ public final class GlobalEnv
     bind(Symbol.of("set-cdr!"), ListLib.SET_CDR);
     bind(Symbol.of("length"), ListLib.LENGTH);
     bind(Symbol.of("empty?"), ListLib.IS_EMPTY);
+    bind(Symbol.of("nth"), ListLib.NTH);
+    bind(Symbol.of("set-nth!"), ListLib.SET_NTH);
+    bind(Symbol.of("nth-tail"), ListLib.NTH_TAIL);
+    bind(Symbol.of("set-nth-tail!"), ListLib.SET_NTH_TAIL);
     
     /* Vector procedures */
     
     bind(Symbol.of("vector"), VectorLib.FROM_LIST);
-    bind(Symbol.of("vector/make"), VectorLib.MAKE);
-    bind(Symbol.of("vector/ref"), VectorLib.REF);    
-    bind(Symbol.of("vector/length"), VectorLib.LENGTH);
-    bind(Symbol.of("vector/copy"), VectorLib.COPY);
-    bind(Symbol.of("vector/set!"), VectorLib.SET);
-    bind(Symbol.of("vector/append!"), VectorLib.APPEND);
-    bind(Symbol.of("vector/insert!"), VectorLib.INSERT);
-    bind(Symbol.of("vector/remove!"), VectorLib.REMOVE);
+    bind(Symbol.of("vector:new"), VectorLib.NEW);
+    bind(Symbol.of("vector:ref"), VectorLib.REF);    
+    bind(Symbol.of("vector:length"), VectorLib.LENGTH);
+    bind(Symbol.of("vector:copy"), VectorLib.COPY);
+    bind(Symbol.of("vector:set!"), VectorLib.SET);
+    bind(Symbol.of("vector:append!"), VectorLib.APPEND);
+    bind(Symbol.of("vector:insert!"), VectorLib.INSERT);
+    bind(Symbol.of("vector:remove!"), VectorLib.REMOVE);
     
     /* Table procedures */
     
     bind(Symbol.of("table"), TableLib.FROM_LIST);
-    bind(Symbol.of("table/find"), TableLib.FIND);
-    bind(Symbol.of("table/assoc!"), TableLib.ASSOC);
-    bind(Symbol.of("table/length"), TableLib.LENGTH);
-    bind(Symbol.of("table/keys"), TableLib.KEYS);
-    bind(Symbol.of("table/values"), TableLib.VALUES);
-    bind(Symbol.of("table/entries"), TableLib.ENTRIES);
+    bind(Symbol.of("table:find"), TableLib.FIND);
+    bind(Symbol.of("table:assoc!"), TableLib.ASSOC);
+    bind(Symbol.of("table:length"), TableLib.LENGTH);
+    bind(Symbol.of("table:keys"), TableLib.KEYS);
+    bind(Symbol.of("table:values"), TableLib.VALUES);
+    bind(Symbol.of("table:entries"), TableLib.ENTRIES);
     
     /* String procedures */
     
-    bind(Symbol.of("string/length"), StringLib.LENGTH);
-    bind(Symbol.of("string/concat"), StringLib.CONCAT);
-    bind(Symbol.of("string/join"), StringLib.JOIN);
-    bind(Symbol.of("string/substr"), StringLib.SUBSTR);
-    bind(Symbol.of("string/reverse"), StringLib.REVERSE);
-    bind(Symbol.of("string/hash"), StringLib.HASH);
+    bind(Symbol.of("string:length"), StringLib.LENGTH);
+    bind(Symbol.of("string:concat"), StringLib.CONCAT);
+    bind(Symbol.of("string:join"), StringLib.JOIN);
+    bind(Symbol.of("string:substr"), StringLib.SUBSTR);
+    bind(Symbol.of("string:reverse"), StringLib.REVERSE);
+    bind(Symbol.of("string:hash"), StringLib.HASH);
     //bind(Symbol.of("string/compare"), StringLib.COMPARE);
     //bind(Symbol.of("string/compare-no-case"), StringLib.COMPARE_NO_CASE);
     
     /* Port procedures */
     
-    bind(Symbol.of("port/open"), PortLib.OPEN);
-    bind(Symbol.of("port/close"), PortLib.CLOSE);
-    bind(Symbol.of("port/read"), PortLib.READ);
-    bind(Symbol.of("port/write"), PortLib.WRITE);
-    bind(Symbol.of("port/stdin"), InputPort.STDIN);
-    bind(Symbol.of("port/stdout"), OutputPort.STDOUT);
-    bind(Symbol.of("port/open?"), PortLib.IS_OPEN);
-    bind(Symbol.of("port/position"), PortLib.POSITION);
-    bind(Symbol.of("port/seek"), PortLib.SEEK);
-    bind(Symbol.of("port/length"), PortLib.LENGTH);
+    bind(Symbol.of("port:open"), PortLib.OPEN);
+    bind(Symbol.of("port:close"), PortLib.CLOSE);
+    bind(Symbol.of("port:read"), PortLib.READ);
+    bind(Symbol.of("port:write"), PortLib.WRITE);
+    bind(Symbol.of("port:stdin"), InputPort.STDIN);
+    bind(Symbol.of("port:stdout"), OutputPort.STDOUT);
+    bind(Symbol.of("port:open?"), PortLib.IS_OPEN);
+    bind(Symbol.of("port:position"), PortLib.POSITION);
+    bind(Symbol.of("port:seek"), PortLib.SEEK);
+    bind(Symbol.of("port:length"), PortLib.LENGTH);
     
     /* Bytes procedures */
     
     bind(Symbol.of("bytes"), BytesLib.FROM_LIST);
-    bind(Symbol.of("bytes/make"), BytesLib.MAKE);
-    bind(Symbol.of("bytes/ref"), BytesLib.REF);
-    bind(Symbol.of("bytes/set!"), BytesLib.SET);
-    bind(Symbol.of("bytes/length"), BytesLib.LENGTH);
+    bind(Symbol.of("bytes:new"), BytesLib.NEW);
+    bind(Symbol.of("bytes:ref"), BytesLib.REF);
+    bind(Symbol.of("bytes:set!"), BytesLib.SET);
+    bind(Symbol.of("bytes:length"), BytesLib.LENGTH);
   }
 }

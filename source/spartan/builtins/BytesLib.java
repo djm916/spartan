@@ -55,7 +55,7 @@ public final class BytesLib
   
   // (bytes/make n)
   
-  public static final Primitive MAKE = new Primitive(1, false) {
+  public static final Primitive NEW = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof IInt n))
         throw new TypeMismatch();
