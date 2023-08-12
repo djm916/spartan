@@ -3,7 +3,7 @@
 
 ; map - Maps a procedure across a list
 ;
-; Given a procedure f and a list xs, (map f xs) returns the value (list (f x1) (f x2) ...)
+; Given a procedure f and a list xs = (x1 x2 ... xN), (map f xs) returns a new list ((f x1) (f x2) ... (f xN))
 
 (defun map (f xs)
   (if (empty? xs) ()
@@ -35,18 +35,17 @@
         ((f (car xs)) (set-cdr! xs (filter! f (cdr xs))) xs)
         (true         (filter! f (cdr xs)))))
 
-(defun find-first (f xs)
+(defun find (f xs)
   (if (empty? xs) false
     (if (f (car xs))
       (car xs)
-      (find-first f (cdr xs)))))
+      (find f (cdr xs)))))
 
 (defun find-index (f xs)
-  (defun find-index (i xs)
-    (cond ((empty? xs)  false)
-          ((f (car xs)) i)
-          (true         (find-index (+ 1 i) (cdr xs)))))
-  (find-index 0 xs))
+  (rec loop ((i 0) (xs xs))
+    (cond [(empty? xs)  -1]
+          [(f (car xs)) i]
+          [else         (loop (+ 1 i) (cdr xs))])))
 
 (defun contains? (x xs)
   (not (= false (find-first (fun (y) (= x y)) xs))))

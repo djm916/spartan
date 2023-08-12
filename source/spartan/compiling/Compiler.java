@@ -312,7 +312,37 @@ public class Compiler
            compileSequence(body, extendedScope, tail,
            new PopEnv(next)))));
   }
-
+  
+  /* (rec f bindings body)
+  */
+  private Inst compileRec(List exp, Scope scope, boolean tail, Inst next)
+  {
+    if (exp.length() < 4 || !(exp.cadr() instanceof Symbol f) || !(exp.caddr() instanceof List bindings))
+      throw malformedExp(exp);
+    
+    var xform = transformRec(f, bindings, exp.cdddr());
+    
+    if (Config.LOG_DEBUG)
+      log.info(() -> String.format("rec transform: %s => %s", exp.repr(), xform.repr()));
+    
+    try {
+      return compile(xform, scope, tail, next);
+    }
+    catch (Error err) {
+      err.setPosition(positionMap.get(exp));
+      throw err;
+    }
+  }
+  
+  /* (letrec ((f (fun vars body))) (f inits))
+  */
+  private List transformRec(Symbol f, List bindings, List body)
+  {
+    var vars = extractVars(bindings);
+    var inits = extractInits(bindings);
+    return List.of(Symbol.LETREC, List.cons(List.of(f, List.cons(Symbol.FUN, List.cons(vars, body))), List.EMPTY), List.cons(f, inits));
+  }
+  
   /* Compiles the "letrec" special form
 
      Syntax:  (letrec ((symb1 init1)
@@ -998,6 +1028,8 @@ public class Compiler
         return compileWhile(exp, scope, tail, next);
       if (s.equals(Symbol.CALL_CC))
         return compileCallCC(exp, scope, tail, next);
+      if (s.equals(Symbol.REC))
+        return compileRec(exp, scope, tail, next);
       // Handle macro expansion
       if (MacroEnv.contains(s))
         return compileApplyMacro(exp, scope, tail, next);
