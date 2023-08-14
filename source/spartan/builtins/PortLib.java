@@ -3,7 +3,6 @@ package spartan.builtins;
 import spartan.data.*;
 import spartan.errors.TypeMismatch;
 import spartan.runtime.VirtualMachine;
-import static spartan.builtins.Core.truth;
 
 public final class PortLib
 {
@@ -36,7 +35,7 @@ public final class PortLib
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Port port))
         throw new TypeMismatch();
-      vm.result = truth(port.isOpen());
+      vm.result = Bool.valueOf(port.isOpen());
       vm.popFrame();
     }
   };

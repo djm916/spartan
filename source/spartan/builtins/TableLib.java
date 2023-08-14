@@ -6,7 +6,7 @@ import spartan.errors.TypeMismatch;
 import spartan.data.Table;
 import spartan.data.Nil;
 import spartan.data.Int;
-import static spartan.builtins.Core.truth;
+import spartan.data.Bool;
 
 public final class TableLib
 {  
@@ -35,7 +35,7 @@ public final class TableLib
       if (!(vm.popArg() instanceof Table t))
         throw new TypeMismatch();
       var k = vm.popArg();
-      vm.result = truth(t.contains(k));
+      vm.result = Bool.valueOf(t.contains(k));
       vm.popFrame();
     }
   };

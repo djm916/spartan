@@ -288,7 +288,7 @@ permits EmptyList
   {
     for (; !list.empty() && index > 0; list = list.cdr(), --index)
       ;
-    return list.cdr();
+    return list;
   }
   
   private static void setTail(List list, int index, List value)

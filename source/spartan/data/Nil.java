@@ -22,5 +22,11 @@ public final class Nil implements Datum, IEq
     return this == rhs;
   }
   
+  @Override
+  public boolean boolValue()
+  {
+    return false;
+  }
+  
   private Nil() {}
 }

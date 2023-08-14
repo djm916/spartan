@@ -5,9 +5,9 @@ import spartan.data.List;
 import spartan.data.Nil;
 import spartan.data.Int;
 import spartan.data.IInt;
+import spartan.data.Bool;
 import spartan.runtime.VirtualMachine;
 import spartan.errors.TypeMismatch;
-import static spartan.builtins.Core.truth;
 
 public final class ListLib
 {
@@ -140,7 +140,7 @@ public final class ListLib
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof List list))
         throw new TypeMismatch();
-      vm.result = truth(list.empty());
+      vm.result = Bool.valueOf(list.empty());
       vm.popFrame();
     }
   };

@@ -35,4 +35,9 @@ public interface Datum
   {
     return repr();
   }
+  
+  default boolean boolValue()
+  {
+    return true;
+  }
 }

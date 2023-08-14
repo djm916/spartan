@@ -20,42 +20,42 @@ public final class CoreLib
  
   public static final Primitive EQ = new Primitive(2, false) {
     public void apply(VirtualMachine vm) {
-      vm.result = truth(isEqual(vm.popArg(), vm.popArg()));
+      vm.result = Bool.valueOf(isEqual(vm.popArg(), vm.popArg()));
       vm.popFrame();
     }
   };
 
   public static final Primitive NE = new Primitive(2, false) {
     public void apply(VirtualMachine vm) {
-      vm.result = truth(!isEqual(vm.popArg(), vm.popArg()));
+      vm.result = Bool.valueOf(!isEqual(vm.popArg(), vm.popArg()));
       vm.popFrame();
     }
   };
   
   public static final Primitive LT = new Primitive(2, false) {
     public void apply(VirtualMachine vm) {
-      vm.result = truth(compareTo(vm.popArg(), vm.popArg()) < 0);
+      vm.result = Bool.valueOf(compareTo(vm.popArg(), vm.popArg()) < 0);
       vm.popFrame();
     }
   };
   
   public static final Primitive LE = new Primitive(2, false) {
     public void apply(VirtualMachine vm) {
-      vm.result = truth(compareTo(vm.popArg(), vm.popArg()) <= 0);
+      vm.result = Bool.valueOf(compareTo(vm.popArg(), vm.popArg()) <= 0);
       vm.popFrame();
     }
   };
   
   public static final Primitive GT = new Primitive(2, false) {
     public void apply(VirtualMachine vm) {
-      vm.result = truth(compareTo(vm.popArg(), vm.popArg()) > 0);
+      vm.result = Bool.valueOf(compareTo(vm.popArg(), vm.popArg()) > 0);
       vm.popFrame();
     }
   };
   
   public static final Primitive GE = new Primitive(2, false) {
     public void apply(VirtualMachine vm) {
-      vm.result = truth(compareTo(vm.popArg(), vm.popArg()) >= 0);
+      vm.result = Bool.valueOf(compareTo(vm.popArg(), vm.popArg()) >= 0);
       vm.popFrame();
     }
   };
@@ -214,91 +214,91 @@ public final class CoreLib
   
   public static final Primitive IS_NIL = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
-      vm.result = truth(vm.popArg() instanceof Nil);
+      vm.result = Bool.valueOf(vm.popArg() instanceof Nil);
       vm.popFrame();
     }
   };
   
   public static final Primitive IS_BOOL = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
-      vm.result = truth(vm.popArg() instanceof Bool);
+      vm.result = Bool.valueOf(vm.popArg() instanceof Bool);
       vm.popFrame();
     }
   };
   
   public static final Primitive IS_INT = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
-      vm.result = truth(vm.popArg() instanceof IInt);
+      vm.result = Bool.valueOf(vm.popArg() instanceof IInt);
       vm.popFrame();
     }
   };
   
   public static final Primitive IS_REAL = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
-      vm.result = truth(vm.popArg() instanceof IReal);
+      vm.result = Bool.valueOf(vm.popArg() instanceof IReal);
       vm.popFrame();
     }
   };
   
   public static final Primitive IS_COMPLEX = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
-      vm.result = truth(vm.popArg() instanceof Complex);
+      vm.result = Bool.valueOf(vm.popArg() instanceof Complex);
       vm.popFrame();
     }
   };
   
   public static final Primitive IS_NUMBER = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
-      vm.result = truth(vm.popArg() instanceof INum);
+      vm.result = Bool.valueOf(vm.popArg() instanceof INum);
       vm.popFrame();
     }
   };
   
   public static final Primitive IS_SYMBOL = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
-      vm.result = truth(vm.popArg() instanceof Symbol);
+      vm.result = Bool.valueOf(vm.popArg() instanceof Symbol);
       vm.popFrame();
     }
   };
   
   public static final Primitive IS_TEXT = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
-      vm.result = truth(vm.popArg() instanceof Text);
+      vm.result = Bool.valueOf(vm.popArg() instanceof Text);
       vm.popFrame();
     }
   };
   
   public static final Primitive IS_CALLABLE = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
-      vm.result = truth(vm.popArg() instanceof IFun);
+      vm.result = Bool.valueOf(vm.popArg() instanceof IFun);
       vm.popFrame();
     }
   };
   
   public static final Primitive IS_VECTOR = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
-      vm.result = truth(vm.popArg() instanceof Vector);
+      vm.result = Bool.valueOf(vm.popArg() instanceof Vector);
       vm.popFrame();
     }
   };
   
   public static final Primitive IS_LIST = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
-      vm.result = truth(vm.popArg() instanceof List);
+      vm.result = Bool.valueOf(vm.popArg() instanceof List);
       vm.popFrame();
     }
   };
   
   public static final Primitive IS_PORT = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
-      vm.result = truth(vm.popArg() instanceof Port);
+      vm.result = Bool.valueOf(vm.popArg() instanceof Port);
       vm.popFrame();
     }
   };
   
   public static final Primitive IS_BYTES = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
-      vm.result = truth(vm.popArg() instanceof Bytes);
+      vm.result = Bool.valueOf(vm.popArg() instanceof Bytes);
       vm.popFrame();
     }
   };
