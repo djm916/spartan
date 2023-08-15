@@ -1,12 +1,9 @@
 ; Streams Library
 
-; Streams implement lazy sequences (a.k.a "streams") with a
-; functional list-style interface.
+; A stream is a lazyily-evaluated, possibly infinite, sequence with a list-like interface.
 
-; A stream is essentially a procedure (called a "promise"), which
-; generates a series of values, calculated on demand. Each time
-; it is invoked, a promise returns a pair: the next value in
-; the stream, and another promise to compute the remaining values.
+; A stream is essentially a procedure (called a "promise"), which generates a sequence of values, calculated on demand.
+; Each time the promise is invoked, it returns a pair: the next value in the stream, and another promise to compute the remaining values.
 
 ; This implementation of streams relys on the "delay" macro and the
 ; "force" procedure. The user defines a "generator" procedure,
@@ -32,64 +29,64 @@
 
 ; Return the next element of a stream
 
-(defun stream/car (s) (car (force s)))
+(defun stream:car (s) (car (force s)))
 
 ; Return the remainder of a stream
 
-(defun stream/cdr (s) (cadr (force s)))
+(defun stream:cdr (s) (cadr (force s)))
 
-(defun stream/cons (e s) (delay (list e s)))
+(defun stream:cons (e s) (delay (list e s)))
 
 ; Determine if a stream is empty
 
-(defun stream/empty? (s) (empty? (force s)))
+(defun stream:empty? (s) (empty? (force s)))
 
-(defun stream/map (f s)
+(defun stream:map (f s)
   (defun gen ()
-    (if (stream/empty? s) nil
-      (let ((next (f (stream/car s))))
-        (set! s (stream/cdr s))
+    (if (stream:empty? s) nil
+      (let ((next (f (stream:car s))))
+        (set! s (stream:cdr s))
         next)))
   (stream gen))
 
-(defun stream/for-each (f s)
-  (cond ((stream/empty? s) nil)
-        (else (f (stream/car s))
-              (stream/for-each f (stream/cdr s)))))
+(defun stream:for-each (f s)
+  (cond ((stream:empty? s) nil)
+        (else (f (stream:car s))
+              (stream:for-each f (stream:cdr s)))))
 
-(defun stream/filter (f s)
+(defun stream:filter (f s)
   (defun gen ()
-    (if (stream/empty? s) nil
-      (let ((next (stream/car s)))
-        (set! s (stream/cdr s))
+    (if (stream:empty? s) nil
+      (let ((next (stream:car s)))
+        (set! s (stream:cdr s))
         (if (f next)
           next
           (gen)))))
   (stream gen))
 
-(defun stream/take (n s)
+(defun stream:take (n s)
   (defun gen ()
-    (if (or (stream/empty? s) (= n 0)) nil
-      (let ((next (stream/car s)))
-        (set! s (stream/cdr s))
+    (if (or (stream:empty? s) (= n 0)) nil
+      (let ((next (stream:car s)))
+        (set! s (stream:cdr s))
         (set! n (- n 1))
         next)))
   (stream gen))
 
-(defun stream/reduce (f i s)
-  (if (stream/empty? s) i
-    (stream/reduce f (f i (stream/car s)) (stream/cdr s))))
+(defun stream:reduce (f i s)
+  (if (stream:empty? s) i
+    (stream:reduce f (f i (stream:car s)) (stream:cdr s))))
 
 (defun stream->list (s)
-  (if (stream/empty? s) ()
-    (cons (stream/car s)
-          (stream->list (stream/cdr s)))))
+  (if (stream:empty? s) ()
+    (cons (stream:car s)
+          (stream->list (stream:cdr s)))))
 
-(defun stream/enumerate (i s)
+(defun stream:enumerate (i s)
   (defun gen ()
-    (if (stream/empty? s) nil
-      (let ((next (list i (stream/car s))))
-        (set! s (stream/cdr s))
+    (if (stream:empty? s) nil
+      (let ((next (list i (stream:car s))))
+        (set! s (stream:cdr s))
         (set! i (+ 1 i))
         next)))
   (stream gen))

@@ -314,6 +314,11 @@ public class Compiler
   }
   
   /* (rec f bindings body)
+
+     is essentially Scheme's "named let" and is equivalent to
+
+     (letrec ((f (fun vars body)))
+       (f inits))
   */
   private Inst compileRec(List exp, Scope scope, boolean tail, Inst next)
   {
