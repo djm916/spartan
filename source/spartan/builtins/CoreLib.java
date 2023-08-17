@@ -72,7 +72,7 @@ public final class CoreLib
     
   public static final Primitive PRINT = new Primitive(1, true) {
     public void apply(VirtualMachine vm) {
-      while (!vm.args.empty())
+      while (!vm.args.isEmpty())
         System.out.print(vm.popArg().str());
       vm.result = Nil.VALUE;
       vm.popFrame();
@@ -81,7 +81,7 @@ public final class CoreLib
   
   public static final Primitive PRINT_LINE = new Primitive(1, true) {
     public void apply(VirtualMachine vm) {
-      while (!vm.args.empty())
+      while (!vm.args.isEmpty())
         System.out.print(vm.popArg().str());
       System.out.println();
       vm.result = Nil.VALUE;
@@ -190,7 +190,7 @@ public final class CoreLib
         throw new TypeMismatch();
       var args = vm.popRestArgs();
       var precision = 2;
-      if (!args.empty() && args.car() instanceof IInt arg)
+      if (!args.isEmpty() && args.car() instanceof IInt arg)
         precision = arg.intValue();
       vm.result = new Text(num.formatDec(precision));
       vm.popFrame();
@@ -205,7 +205,7 @@ public final class CoreLib
         throw new TypeMismatch();
       var args = vm.popRestArgs();
       int base = 10;
-      if (!args.empty() && args.car() instanceof IInt arg)
+      if (!args.isEmpty() && args.car() instanceof IInt arg)
         base = arg.intValue();
       vm.result = new Text(num.formatInt(base));
       vm.popFrame();
@@ -299,6 +299,46 @@ public final class CoreLib
   public static final Primitive IS_BYTES = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
       vm.result = Bool.valueOf(vm.popArg() instanceof Bytes);
+      vm.popFrame();
+    }
+  };
+  
+  public static final Primitive AT = new Primitive(2, false) {
+    public void apply(VirtualMachine vm) {
+      if (!(vm.popArg() instanceof IAssoc c))
+        throw new TypeMismatch();
+      var k = vm.popArg();
+      vm.result = c.get(k);
+      vm.popFrame();
+    }
+  };
+  
+  public static final Primitive SET_AT = new Primitive(3, false) {
+    public void apply(VirtualMachine vm) {
+      if (!(vm.popArg() instanceof IAssoc c))
+        throw new TypeMismatch();
+      var k = vm.popArg();
+      var v = vm.popArg();
+      c.set(k, v);
+      vm.result = Nil.VALUE;
+      vm.popFrame();
+    }
+  };
+  
+  public static final Primitive LENGTH = new Primitive(1, false) {
+    public void apply(VirtualMachine vm) {
+      if (!(vm.popArg() instanceof ILen c))
+        throw new TypeMismatch();
+      vm.result = Int.valueOf(c.length());
+      vm.popFrame();
+    }
+  };
+  
+  public static final Primitive IS_EMPTY = new Primitive(1, false) {
+    public void apply(VirtualMachine vm) {
+      if (!(vm.popArg() instanceof ILen c))
+        throw new TypeMismatch();
+      vm.result = Bool.valueOf(c.isEmpty());
       vm.popFrame();
     }
   };

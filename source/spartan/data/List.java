@@ -10,7 +10,7 @@ import java.util.stream.StreamSupport;
 import java.util.stream.Collectors;
 import spartan.errors.TypeMismatch;
 import spartan.errors.NoSuchElement;
-import spartan.builtins.Core;
+import spartan.runtime.VirtualMachine;
 
 final class EmptyList extends List
 {
@@ -20,7 +20,7 @@ final class EmptyList extends List
   }
   
   @Override
-  public boolean empty()
+  public boolean isEmpty()
   {
     return true;
   }
@@ -50,7 +50,7 @@ final class EmptyList extends List
   }
 }
 
-public sealed class List implements Datum, Iterable<Datum>
+public sealed class List implements Datum, ILen, IAssoc, IFun, Iterable<Datum>
 permits EmptyList
 {
   public static final List EMPTY = new EmptyList();
@@ -131,11 +131,6 @@ permits EmptyList
       .collect(Collectors.joining(" ", "(", ")"));
   }
   
-  public boolean empty()
-  {
-    return false;
-  }
-  
   public Datum car()
   {
     return first;
@@ -201,9 +196,45 @@ permits EmptyList
     setTail(this, index, value);
   }
   
+  @Override // IAssoc
+  public Datum get(Datum key)
+  {
+    if (!(key instanceof IInt index))
+      throw new TypeMismatch();
+    return get(index.intValue());
+  }
+  
+  @Override // IAssoc
+  public void set(Datum key, Datum value)
+  {
+    if (!(key instanceof IInt index))
+      throw new TypeMismatch();
+    set(index.intValue(), value);
+  }
+  
+  @Override // IFun
+  public void apply(VirtualMachine vm)
+  {
+    vm.result = get(vm.popArg());
+    vm.popFrame();
+  }
+  
+  @Override // IFun
+  public boolean arityMatches(int numArgs)
+  {
+    return numArgs == 1;
+  }
+  
+  @Override // ILen
   public int length()
   {
     return length(this);
+  }
+  
+  @Override // ILen
+  public boolean isEmpty()
+  {
+    return false;
   }
   
   public List append(Datum x)
@@ -239,7 +270,7 @@ permits EmptyList
       
       @Override
       public boolean hasNext() {
-        return !cur.empty();
+        return !cur.isEmpty();
       }
       
       @Override
@@ -265,35 +296,35 @@ permits EmptyList
   private static int length(List list)
   {
     int length = 0;
-    for (; !list.empty(); list = list.cdr())
+    for (; !list.isEmpty(); list = list.cdr())
       ++length;
     return length;
   }
   
   private static Datum get(List list, int index)
   {
-    for (; !list.empty() && index > 0; list = list.cdr(), --index)
+    for (; !list.isEmpty() && index > 0; list = list.cdr(), --index)
       ;
     return list.car();
   }
   
   private static void set(List list, int index, Datum value)
   {
-    for (; !list.empty() && index > 0; list = list.cdr(), --index)
+    for (; !list.isEmpty() && index > 0; list = list.cdr(), --index)
       ;
     list.setCar(value);
   }
   
   private static Datum tail(List list, int index)
   {
-    for (; !list.empty() && index > 0; list = list.cdr(), --index)
+    for (; !list.isEmpty() && index > 0; list = list.cdr(), --index)
       ;
     return list;
   }
   
   private static void setTail(List list, int index, List value)
   {
-    for (; !list.empty() && index > 0; list = list.cdr(), --index)
+    for (; !list.isEmpty() && index > 0; list = list.cdr(), --index)
       ;
     list.setCdr(value);
   }
@@ -301,7 +332,7 @@ permits EmptyList
   private static List append(List list, Datum x)
   {
     var result = new Builder();
-    for (; !list.empty(); list = list.cdr())
+    for (; !list.isEmpty(); list = list.cdr())
       result.add(list.car());
     result.add(x);
     return result.build();
@@ -310,7 +341,7 @@ permits EmptyList
   private static List reverse(List list)
   {
     var result = List.EMPTY;
-    for (; !list.empty(); list = list.cdr())
+    for (; !list.isEmpty(); list = list.cdr())
       result = cons(list.car(), result);
     return result;
   }
@@ -318,7 +349,7 @@ permits EmptyList
   private static List remove(List list, Predicate<Datum> pred)
   {
     var result = new Builder();
-    for (; !list.empty(); list = list.cdr())
+    for (; !list.isEmpty(); list = list.cdr())
       if (!pred.test(list.car()))
         result.add(list.car());
     return result.build();
@@ -335,7 +366,7 @@ permits EmptyList
   private static List map(List list, UnaryOperator<Datum> f)
   {
     var result = new List.Builder();
-    for (; !list.empty(); list = list.cdr())
+    for (; !list.isEmpty(); list = list.cdr())
       result.add(f.apply(list.first));
     return result.build();
   }

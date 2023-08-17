@@ -18,41 +18,7 @@ public final class BytesLib
       vm.popFrame();
     }
   };
-  
-  // (bytes/ref v i)
-  
-  public static final Primitive REF = new Primitive(2, false) {
-    public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof Bytes v && vm.popArg() instanceof IInt i))
-        throw new TypeMismatch();
-      vm.result = Int.valueOf(v.ref(i.intValue()));
-      vm.popFrame();
-    }
-  };
-  
-  // (bytes/set! v i e)
-  
-  public static final Primitive SET = new Primitive(3, false) {
-    public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof Bytes v && vm.popArg() instanceof IInt i && vm.popArg() instanceof IInt e))
-        throw new TypeMismatch();
-      v.set(i.intValue(), (byte) e.intValue());
-      vm.result = Nil.VALUE;
-      vm.popFrame();
-    }
-  };
-  
-  // (bytes/length v)
-  
-  public static final Primitive LENGTH = new Primitive(1, false) {
-    public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof Bytes v))
-        throw new TypeMismatch();
-      vm.result = Int.valueOf(v.length());
-      vm.popFrame();
-    }
-  };
-  
+    
   // (bytes/make n)
   
   public static final Primitive NEW = new Primitive(1, false) {

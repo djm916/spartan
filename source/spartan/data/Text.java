@@ -5,7 +5,7 @@ import java.nio.CharBuffer;
 import spartan.errors.TypeMismatch;
 import spartan.errors.IndexOutOfBounds;
 
-public final class Text implements Datum
+public final class Text implements Datum, ILen, IEq, IOrd
 {
   public Text(String value)
   {
@@ -30,15 +30,34 @@ public final class Text implements Datum
     return value;
   }
   
+  @Override // ILen
   public int length()
   {
     return value.length();
   }
-    
+  
+  @Override // ILen
+  public boolean isEmpty()
+  {
+    return value.isEmpty();
+  }
+  
   @Override // Object
   public int hashCode()
   {
     return value.hashCode();
+  }
+  
+  @Override // IOrd
+  public int compareTo(Text rhs)
+  {
+    return value.compareTo(rhs.value);
+  }
+  
+  @Override // IEq
+  public boolean isEqual(Text rhs)
+  {
+    return value.equals(rhs.value);
   }
   
   public Bytes encode(Charset encoding)
@@ -51,10 +70,10 @@ public final class Text implements Datum
   public static Text join(Text delim, List args)
   {
     var result = new StringBuilder();
-    for (; !args.empty(); args = args.cdr()) {
+    for (; !args.isEmpty(); args = args.cdr()) {
       if (args.car() instanceof Text text) {
         result.append(text.value);
-        if (! args.cdr().empty())
+        if (! args.cdr().isEmpty())
           result.append(delim.value);
       }
       else throw new TypeMismatch();

@@ -255,7 +255,7 @@ public class Compiler
 
   private Inst compileCondClauses(List clauses, Scope scope, boolean tail, Inst next)
   {
-    if (clauses.empty())
+    if (clauses.isEmpty())
       return new LoadConst(Nil.VALUE, next);
 
     var clause = (List) clauses.car();
@@ -394,7 +394,7 @@ public class Compiler
   
   private Inst compileRecursiveBindings(List inits, int offset, Scope scope, Inst next)
   {
-    if (inits.empty())
+    if (inits.isEmpty())
       return next;
 
     return compile(inits.car(), scope, false,
@@ -450,7 +450,7 @@ public class Compiler
 
   private Inst compileSequentialBindings(List bindings, int offset, Scope scope, Inst next)
   {
-    if (bindings.empty())
+    if (bindings.isEmpty())
       return next;
 
     var binding = (List) bindings.car();
@@ -473,16 +473,16 @@ public class Compiler
     
   private boolean checkParamListForm(List params)
   {
-    for (; !params.empty(); params = params.cdr())
-      if (!(params.car() instanceof Symbol param) || (param.equals(Symbol.AMPERSAND) && (params.cdr().empty() || !params.cddr().empty())))
+    for (; !params.isEmpty(); params = params.cdr())
+      if (!(params.car() instanceof Symbol param) || (param.equals(Symbol.AMPERSAND) && (params.cdr().isEmpty() || !params.cddr().isEmpty())))
         return false;
     return true;
   }
 
   private boolean checkClauseListForm(List clauses)
   {
-    for (; !clauses.empty(); clauses = clauses.cdr())
-      if (!(clauses.car() instanceof List clause) || clause.length() < 2 || (Symbol.ELSE.equals(clause.car()) && !clauses.cdr().empty()))
+    for (; !clauses.isEmpty(); clauses = clauses.cdr())
+      if (!(clauses.car() instanceof List clause) || clause.length() < 2 || (Symbol.ELSE.equals(clause.car()) && !clauses.cdr().isEmpty()))
         return false;
     return true;
   }
@@ -501,7 +501,7 @@ public class Compiler
   
   private Inst compilePushArgs(List args, Scope scope, Inst next)
   {
-    if (args.empty())
+    if (args.isEmpty())
       return next;
 
     return compilePushArgs(args.cdr(), scope,
@@ -600,10 +600,10 @@ public class Compiler
   
   private Inst compileSequence(List exp, Scope scope, boolean tail, Inst next)
   {
-    if (exp.empty())
+    if (exp.isEmpty())
       return next;
 
-    return compile(exp.car(), scope, (tail && exp.cdr().empty()),
+    return compile(exp.car(), scope, (tail && exp.cdr().isEmpty()),
            compileSequence(exp.cdr(), scope, tail, next));
   }
 
@@ -664,7 +664,7 @@ public class Compiler
   {
     List.Builder bindings = new List.Builder();
 
-    while (!body.empty() && isInnerDef(body.car())) {
+    while (!body.isEmpty() && isInnerDef(body.car())) {
       var exp = (List) body.car();
       if (Symbol.DEFUN.equals(exp.car()))
         exp = transformDefun(exp);
@@ -680,7 +680,7 @@ public class Compiler
   */
   private boolean isInnerDef(Datum exp)
   {
-    return exp instanceof List form && !form.empty() && (Symbol.DEF.equals(form.car()) || Symbol.DEFUN.equals(form.car()));
+    return exp instanceof List form && !form.isEmpty() && (Symbol.DEF.equals(form.car()) || Symbol.DEFUN.equals(form.car()));
   }
 
   /* Compiles the "or" special form, a logical disjunction.
@@ -706,10 +706,10 @@ public class Compiler
 
   private Inst compileDisjunction(List exp, Scope scope, boolean tail, Inst next)
   {
-    if (exp.empty())
+    if (exp.isEmpty())
       return next;
 
-    return compile(exp.car(), scope, (tail && exp.cdr().empty()),
+    return compile(exp.car(), scope, (tail && exp.cdr().isEmpty()),
            new Branch(next,
                       compileDisjunction(exp.cdr(), scope, tail, next)));
   }
@@ -737,10 +737,10 @@ public class Compiler
 
   private Inst compileConjuction(List exp, Scope scope, boolean tail, Inst next)
   {
-    if (exp.empty())
+    if (exp.isEmpty())
       return next;
 
-    return compile(exp.car(), scope, (tail && exp.cdr().empty()),
+    return compile(exp.car(), scope, (tail && exp.cdr().isEmpty()),
            new Branch(compileConjuction(exp.cdr(), scope, tail, next),
                       next));
   }
@@ -838,7 +838,7 @@ public class Compiler
     
     // Check for the unquote and unquote-splicing forms
     
-    if (list.car() instanceof List form && !form.empty())
+    if (list.car() instanceof List form && !form.isEmpty())
     {      
       // (quasiquote (unquote x) xs...) => (cons x (quasiquote xs...))
       

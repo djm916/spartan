@@ -76,8 +76,12 @@ public final class GlobalEnv
     bind(Symbol.of("not"), CoreLib.NOT);    
     bind(Symbol.of("gensym"), CoreLib.GENSYM);
     bind(Symbol.of("identity-hash"), CoreLib.IDENTITY_HASH);
-    bind(Symbol.of("error"), CoreLib.ERROR);    
-
+    bind(Symbol.of("error"), CoreLib.ERROR);
+    bind(Symbol.of("at"), CoreLib.AT);
+    bind(Symbol.of("set-at!"), CoreLib.SET_AT);
+    bind(Symbol.of("length"), CoreLib.LENGTH);
+    bind(Symbol.of("empty?"), CoreLib.IS_EMPTY);
+    
     /* Type predicates */
     
     bind(Symbol.of("nil?"), CoreLib.IS_NIL);
@@ -160,10 +164,10 @@ public final class GlobalEnv
     //bind(Symbol.of("remove"), ListLib.REMOVED);
     bind(Symbol.of("set-car!"), ListLib.SET_CAR);
     bind(Symbol.of("set-cdr!"), ListLib.SET_CDR);
-    bind(Symbol.of("length"), ListLib.LENGTH);
-    bind(Symbol.of("empty?"), ListLib.IS_EMPTY);
-    bind(Symbol.of("nth"), ListLib.NTH);
-    bind(Symbol.of("set-nth!"), ListLib.SET_NTH);
+    //bind(Symbol.of("length"), ListLib.LENGTH);
+    //bind(Symbol.of("empty?"), ListLib.IS_EMPTY);
+    //bind(Symbol.of("nth"), ListLib.NTH);
+    //bind(Symbol.of("set-nth!"), ListLib.SET_NTH);
     bind(Symbol.of("nth-tail"), ListLib.NTH_TAIL);
     bind(Symbol.of("set-nth-tail!"), ListLib.SET_NTH_TAIL);
     
@@ -171,10 +175,10 @@ public final class GlobalEnv
     
     bind(Symbol.of("vector"), VectorLib.FROM_LIST);
     bind(Symbol.of("vector:new"), VectorLib.NEW);
-    bind(Symbol.of("vector:ref"), VectorLib.REF);    
-    bind(Symbol.of("vector:length"), VectorLib.LENGTH);
+    //bind(Symbol.of("vector:ref"), VectorLib.REF);    
+    //bind(Symbol.of("vector:length"), VectorLib.LENGTH);
     bind(Symbol.of("vector:copy"), VectorLib.COPY);
-    bind(Symbol.of("vector:set!"), VectorLib.SET);
+    //bind(Symbol.of("vector:set!"), VectorLib.SET);
     bind(Symbol.of("vector:append!"), VectorLib.APPEND);
     bind(Symbol.of("vector:insert!"), VectorLib.INSERT);
     bind(Symbol.of("vector:remove!"), VectorLib.REMOVE);
@@ -182,16 +186,16 @@ public final class GlobalEnv
     /* Table procedures */
     
     bind(Symbol.of("table"), TableLib.FROM_LIST);
-    bind(Symbol.of("table:find"), TableLib.FIND);
-    bind(Symbol.of("table:assoc!"), TableLib.ASSOC);
-    bind(Symbol.of("table:length"), TableLib.LENGTH);
+    //bind(Symbol.of("table:find"), TableLib.FIND);
+    //bind(Symbol.of("table:assoc!"), TableLib.ASSOC);
+    //bind(Symbol.of("table:length"), TableLib.LENGTH);
     bind(Symbol.of("table:keys"), TableLib.KEYS);
     bind(Symbol.of("table:values"), TableLib.VALUES);
     bind(Symbol.of("table:entries"), TableLib.ENTRIES);
     
     /* String procedures */
     
-    bind(Symbol.of("string:length"), StringLib.LENGTH);
+    //bind(Symbol.of("string:length"), StringLib.LENGTH);
     bind(Symbol.of("string:concat"), StringLib.CONCAT);
     bind(Symbol.of("string:join"), StringLib.JOIN);
     bind(Symbol.of("string:substr"), StringLib.SUBSTR);
@@ -217,8 +221,8 @@ public final class GlobalEnv
     
     bind(Symbol.of("bytes"), BytesLib.FROM_LIST);
     bind(Symbol.of("bytes:new"), BytesLib.NEW);
-    bind(Symbol.of("bytes:ref"), BytesLib.REF);
-    bind(Symbol.of("bytes:set!"), BytesLib.SET);
-    bind(Symbol.of("bytes:length"), BytesLib.LENGTH);
+    //bind(Symbol.of("bytes:ref"), BytesLib.REF);
+    //bind(Symbol.of("bytes:set!"), BytesLib.SET);
+    //bind(Symbol.of("bytes:length"), BytesLib.LENGTH);
   }
 }

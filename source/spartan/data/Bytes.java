@@ -5,13 +5,14 @@ import spartan.errors.NoSuchElement;
 import spartan.errors.IndexOutOfBounds;
 import spartan.errors.InvalidArgument;
 import spartan.errors.TypeMismatch;
+import spartan.runtime.VirtualMachine;
 import spartan.Config;
 import java.nio.ByteBuffer;
 import java.nio.BufferUnderflowException;
 import java.nio.BufferOverflowException;
 import java.nio.charset.Charset;
 
-public final class Bytes implements Datum
+public final class Bytes implements Datum, ILen, IAssoc, IFun
 {
   public static Bytes fromList(List elems)
   {
@@ -58,7 +59,7 @@ public final class Bytes implements Datum
     return buffer;
   }
   
-  public byte ref(int index)
+  public byte get(int index)
   {
     try {
       return buffer.get(index);
@@ -78,11 +79,41 @@ public final class Bytes implements Datum
     }
   }
   
+  @Override // ILen
   public int length()
   {
     return buffer.capacity();
   }
-    
+  
+  @Override // IAssoc
+  public Datum get(Datum key)
+  {
+    if (!(key instanceof IInt index))
+      throw new TypeMismatch();
+    return Int.valueOf(get(index.intValue()));
+  }
+  
+  @Override // IAssoc
+  public void set(Datum key, Datum value)
+  {
+    if (!(key instanceof IInt index && value instanceof IInt b))
+      throw new TypeMismatch();
+    set(index.intValue(), (byte) b.intValue());
+  }
+  
+  @Override // IFun
+  public void apply(VirtualMachine vm)
+  {
+    vm.result = get(vm.popArg());
+    vm.popFrame();
+  }
+  
+  @Override // IFun
+  public boolean arityMatches(int numArgs)
+  {
+    return numArgs == 1;
+  }
+  
   public String decode(int start, int count, Charset encoding)
   {
     try {

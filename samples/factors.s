@@ -20,20 +20,20 @@
   ; Begin with the stream of all natural numbers from 2 (as 0 and 1 are not prime)
   (def nats (stream (make-int-generator 2)))
   (fun ()
-    (let ((next-prime (stream/car nats))) ; The first value is a prime
+    (let ((next-prime (stream:car nats))) ; The first value is a prime
       ; Filter out all the rest of the numbers that are a multiple of this prime
-      (set! nats (stream/filter (not-factor? next-prime) nats))
+      (set! nats (stream:filter (not-factor? next-prime) nats))
       next-prime)))
 
 (defun prime-factors (n)
   (def primes (stream (make-prime-generator)))
   (def factors ())
   (while (> n 1)
-    (let ((p (stream/car primes)))
+    (let ((p (stream:car primes)))
       (while (= 0 (remainder n p))
         (set! factors (cons p factors))
         (set! n (quotient n p)))
-      (set! primes (stream/cdr primes))))
+      (set! primes (stream:cdr primes))))
   factors)
 
 (def N (string->int (car sys/args)))

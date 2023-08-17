@@ -127,43 +127,6 @@ public final class ListLib
     }
   };
     
-  public static final Primitive LENGTH = new Primitive(1, false) {
-    public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof List list))
-        throw new TypeMismatch();
-      vm.result = Int.valueOf(list.length());
-      vm.popFrame();
-    }
-  };
-  
-  public static final Primitive IS_EMPTY = new Primitive(1, false) {
-    public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof List list))
-        throw new TypeMismatch();
-      vm.result = Bool.valueOf(list.empty());
-      vm.popFrame();
-    }
-  };
-  
-  public static final Primitive NTH = new Primitive(2, false) {
-    public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof List list && vm.popArg() instanceof IInt index))
-        throw new TypeMismatch();
-      vm.result = list.get(index.intValue());
-      vm.popFrame();
-    }
-  };
-  
-  public static final Primitive SET_NTH = new Primitive(3, false) {
-    public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof List list && vm.popArg() instanceof IInt index))
-        throw new TypeMismatch();
-      list.set(index.intValue(), vm.popArg());
-      vm.result = Nil.VALUE;
-      vm.popFrame();
-    }
-  };
-  
   public static final Primitive NTH_TAIL = new Primitive(2, false) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof List list && vm.popArg() instanceof IInt index))

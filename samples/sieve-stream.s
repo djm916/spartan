@@ -20,9 +20,9 @@
   ; Begin with the stream of all natural numbers from 2 (0 and 1 are not prime)
   (def nats (stream (make-int-generator 2)))
   (fun ()
-    (let ((next-prime (stream/car nats))) ; The first value in the stream is prime
+    (let ((next-prime (stream:car nats))) ; The first value in the stream is prime
       ; Filter out numbers that are a multiple of this prime
-      (set! nats (stream/filter (not-factor? next-prime) nats))
+      (set! nats (stream:filter (not-factor? next-prime) nats))
       next-prime)))
 
 ; Define a stream of prime numbers using the prime generator defined above
@@ -32,4 +32,4 @@
 
 (def N 10)
 (print-line "The first " N " primes are:")
-(stream/for-each print-line (stream/take N primes))
+(stream:for-each print-line (stream:take N primes))

@@ -10,10 +10,10 @@ public final class Table implements Datum
   public static Table fromList(List elems)
   {
     var result = new Table();
-    while (!elems.empty()) {      
+    while (!elems.isEmpty()) {      
       var key = elems.car();
       elems = elems.cdr();
-      if (elems.empty())
+      if (elems.isEmpty())
         throw new WrongNumberArgs();
       var val = elems.car();
       result.assoc(key, val);

@@ -32,7 +32,7 @@ public final class VectorLib
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Vector vector && vm.popArg() instanceof IInt index))
         throw new TypeMismatch();
-      vm.result = vector.ref(index.intValue());
+      vm.result = vector.get(index.intValue());
       vm.popFrame();
     }
   };

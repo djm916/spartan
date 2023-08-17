@@ -8,18 +8,17 @@ import java.util.NoSuchElementException;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import java.util.stream.Collectors;
-import spartan.errors.IndexOutOfBounds;
 import spartan.errors.InvalidArgument;
 import spartan.errors.TypeMismatch;
 import spartan.errors.NoSuchElement;
-import spartan.builtins.Core;
+import spartan.runtime.VirtualMachine;
 
-public final class Vector implements Datum, Iterable<Datum>
+public final class Vector implements Datum, IAssoc, ILen, IFun, Iterable<Datum>
 {
   public static Vector fromList(List elems)
   {
     var result = new Vector(elems.length());
-    for (; !elems.empty(); elems = elems.cdr())
+    for (; !elems.isEmpty(); elems = elems.cdr())
       result.append(elems.car());
     return result;
   }
@@ -65,13 +64,20 @@ public final class Vector implements Datum, Iterable<Datum>
       .map(e -> e.repr())
       .collect(Collectors.joining(" ", "[", "]"));
   }  
-    
+  
+  @Override // ILen
   public int length()
   {
     return elems.size();
   }
   
-  public Datum ref(int index)
+  @Override // ILen
+  public boolean isEmpty()
+  {
+    return elems.isEmpty();
+  }
+  
+  public Datum get(int index)
   {
     try {
       return elems.get(index);
@@ -80,7 +86,7 @@ public final class Vector implements Datum, Iterable<Datum>
       throw new NoSuchElement();
     }
   }
-    
+  
   public void set(int index, Datum value)
   {
     try {
@@ -120,6 +126,35 @@ public final class Vector implements Datum, Iterable<Datum>
   {
     for (int i = 0; i < elems.size(); ++i)
       elems.set(i, x);
+  }
+  
+  @Override // IAssoc
+  public Datum get(Datum key)
+  {
+    if (!(key instanceof IInt index))
+      throw new TypeMismatch();
+    return get(index.intValue());
+  }
+  
+  @Override // IAssoc
+  public void set(Datum key, Datum value)
+  {
+    if (!(key instanceof IInt index))
+      throw new TypeMismatch();
+    set(index.intValue(), value);
+  }
+  
+  @Override // IFun
+  public void apply(VirtualMachine vm)
+  {
+    vm.result = get(vm.popArg());
+    vm.popFrame();
+  }
+  
+  @Override // IFun
+  public boolean arityMatches(int numArgs)
+  {
+    return numArgs == 1;
   }
   
   @Override // Iterable
