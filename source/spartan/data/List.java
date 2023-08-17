@@ -92,7 +92,7 @@ permits EmptyList
     return new Builder().add(elems).build();
   }
   
-  public static List of(Iterable<Datum> elems)
+  public static <E extends Datum> List of(Iterable<E> elems)
   {
     var builder = new List.Builder();
     for (var elem : elems)

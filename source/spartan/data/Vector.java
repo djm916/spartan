@@ -56,15 +56,7 @@ public final class Vector implements Datum, IAssoc, ILen, IFun, Iterable<Datum>
   {
     return "vector";
   }
-  
-  @Override // Datum
-  public String repr()
-  {
-    return elems.stream()
-      .map(e -> e.repr())
-      .collect(Collectors.joining(" ", "[", "]"));
-  }  
-  
+    
   @Override // ILen
   public int length()
   {

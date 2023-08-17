@@ -1,11 +1,14 @@
 package spartan.data;
 
 import java.util.stream.Collectors;
+import java.util.IdentityHashMap;
 import spartan.errors.InvalidArgument;
+import spartan.errors.TypeMismatch;
 import spartan.errors.WrongNumberArgs;
 import spartan.errors.NoSuchElement;
+import spartan.runtime.VirtualMachine;
 
-public final class Table implements Datum
+public final class Table implements Datum, IAssoc, ILen, IFun
 {
   public static Table fromList(List elems)
   {
@@ -16,7 +19,7 @@ public final class Table implements Datum
       if (elems.isEmpty())
         throw new WrongNumberArgs();
       var val = elems.car();
-      result.assoc(key, val);
+      result.set(key, val);
       elems = elems.cdr();
     }
     return result;
@@ -29,7 +32,7 @@ public final class Table implements Datum
   
   public Table(int capacity)
   {
-    this.map = new java.util.HashMap<>(capacity);
+    this.map = new IdentityHashMap<>(capacity);
   }
   
   @Override // Datum
@@ -37,21 +40,18 @@ public final class Table implements Datum
   {
     return "table";
   }
-  
-  @Override // Datum
-  public String repr()
-  {
-    return map.entrySet().stream()      
-      .map(e -> e.getKey().repr() + " " + e.getValue().repr())
-      .collect(Collectors.joining(" ", "{", "}"));
-  }
-  
-  public Datum find(Datum key)
+    
+  public Datum get(Symbol key)
   {
     var value = map.get(key);
     if (value == null)
       throw new NoSuchElement();
     return value;
+  }
+  
+  public void set(Symbol key, Datum value)
+  {
+    map.put(key, value);
   }
   
   public Datum findOrElse(Datum key, Datum theDefault)
@@ -64,15 +64,46 @@ public final class Table implements Datum
   {
     return map.get(key) == null;
   }
-  
-  public void assoc(Datum key, Datum value)
-  {
-    map.put(key, value);
-  }
-  
+    
+  @Override // ILen
   public int length()
   {
     return map.size();
+  }
+  
+  @Override // ILen
+  public boolean isEmpty()
+  {
+    return map.isEmpty();
+  }
+  
+  @Override // IAssoc
+  public Datum get(Datum key)
+  {
+    if (!(key instanceof Symbol s))
+      throw new TypeMismatch();
+    return get(s);
+  }
+  
+  @Override // IAssoc
+  public void set(Datum key, Datum value)
+  {
+    if (!(key instanceof Symbol s))
+      throw new TypeMismatch();
+    set(s, value);
+  }
+  
+  @Override // IFun
+  public void apply(VirtualMachine vm)
+  {
+    vm.result = get(vm.popArg());
+    vm.popFrame();
+  }
+  
+  @Override // IFun
+  public boolean arityMatches(int numArgs)
+  {
+    return numArgs == 1;
   }
   
   public List keys()
@@ -93,5 +124,5 @@ public final class Table implements Datum
   }
   
   private static final int DEFAULT_CAPACITY = 8;
-  private final java.util.Map<Datum, Datum> map;
+  private final IdentityHashMap<Symbol, Datum> map;
 }

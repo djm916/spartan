@@ -5,6 +5,7 @@
 
 (defstruct point (x y))
 (def p (point 1 2))
+(print-line "p is " p)
 (print-line "p is a point? " (point? p))
 (print-line "p = (" (point:x p) ", " (point:y p) ")")
 (point:set-x! p 2)
