@@ -28,6 +28,7 @@ public final class Symbol implements Datum, IEq
   public static final Symbol AMPERSAND = new Symbol("&");
   public static final Symbol CALL_CC = new Symbol("call/cc");
   public static final Symbol REC = new Symbol("rec");
+  public static final Symbol RETURN = new Symbol("return");
   
   /**
    * Returns an interned symbol.

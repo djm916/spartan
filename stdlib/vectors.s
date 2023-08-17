@@ -50,8 +50,8 @@
     result))
 
 (defun vector:swap! (v i j)
-  (let ((temp (v i)))
-    (vector:set! v i (v j))
+  (let ((temp (vector:ref v i)))
+    (vector:set! v i (vector:ref v j))
     (vector:set! v j temp)))
 
 (defun vector:reverse! (v)

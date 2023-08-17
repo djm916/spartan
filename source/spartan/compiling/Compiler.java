@@ -993,6 +993,23 @@ public class Compiler
     }
   }
   
+  /**
+   * (return exp)
+   *
+   * Compilation:
+   *
+   * <<exp>>
+   * pop-frame
+   */
+  private Inst compileReturn(List exp, Scope scope, boolean tail, Inst next)
+  {
+    if (exp.length() != 2)
+      throw malformedExp(exp);
+    
+    return compile(exp.cadr(), scope, false,
+           new PopFrame());
+  }
+  
   /* Compile a combination (i.e., special forms, procedure application, and macro expansion. */
   
   private Inst compileCombo(List exp, Scope scope, boolean tail, Inst next)
@@ -1035,6 +1052,8 @@ public class Compiler
         return compileCallCC(exp, scope, tail, next);
       if (s.equals(Symbol.REC))
         return compileRec(exp, scope, tail, next);
+      if (s.equals(Symbol.RETURN))
+        return compileReturn(exp, scope, tail, next);
       // Handle macro expansion
       if (MacroEnv.contains(s))
         return compileApplyMacro(exp, scope, tail, next);
