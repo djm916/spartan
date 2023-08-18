@@ -111,9 +111,9 @@
          `(set! ,place ,init)]
         [(call-form? place)
          (let [(f (car place)) (x (cadr place))]
-           (cond [(and (symbol? f) (= f 'car))
+           (cond [(and (symbol? f) (= (symbol->string f) "car"))
                   `(set-car! ,x ,init)]
-                 [(and (symbol? f) (= f 'cdr))
+                 [(and (symbol? f) (= (symbol->string f) "cdr"))
                   `(set-cdr! ,x ,init)]
                  [else
                   `(set-at! ,f ,x ,init)]))]

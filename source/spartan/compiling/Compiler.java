@@ -96,6 +96,28 @@ public class Compiler
     return new LoadGlobal(s.intern(), positionMap.get(s), next);
   }
   
+  /* Compile the "set!" special form, a generalized assignment statement.
+
+     Syntax: (set! <place> <init>)
+     
+     <place> is a form that names a location where a value can be stored and mutated.
+     
+     The exact syntax of <place> is:
+     
+     <place> -> <symbol> | (<func> <arg>) | (car <arg>) | (cdr <arg>)
+     
+     (set! x init)
+     (set! (x :key) init) => (set-at! x :key init)
+     (set! (x i) init) => (set-at! x i init)
+     (set! (car x) init) => (set-car! x init)
+     (set! (cdr x) init) => (set-cdr! x init)
+  
+  private Inst compileSet(List exp, Scope scope, Inst next)
+  {
+    
+  }
+  */
+  
   /* Compile a variable assignment.
 
      Syntax: (set! symbol init)
