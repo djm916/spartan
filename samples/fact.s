@@ -14,7 +14,7 @@
       (loop (- n 1) (* n p))))
   (loop n 1))
 
-;Imperative style, using loops and assignments
+; Imperative style, using loops and assignments
 
 (defun fact-loop (n)
   (if (< n 2) n

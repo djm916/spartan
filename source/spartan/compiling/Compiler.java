@@ -54,7 +54,7 @@ public class Compiler
     return exp instanceof INum
         || exp instanceof Bool
         || exp instanceof Text
-        || (exp instanceof Symbol && ((Symbol)exp).isKeyword())
+        || (exp instanceof Symbol s && s.isKeyword())
         || exp == List.EMPTY
         || exp == Nil.VALUE;
   }
@@ -69,8 +69,8 @@ public class Compiler
   /**
    * Compile a variable reference (local or global).
    * 
-   * Syntax: an unquoted symbol
-   *  
+   * Syntax: an unquoted <symbol>
+   *
    * If the symbol is a bound local variable, look up its DeBruijn index (a 
    * depth, offset pair), and generate a load-local instruction.
    *
@@ -188,9 +188,9 @@ public class Compiler
 
      Compilation:
 
-     <<init>>
-     store-global symb
-     load-const nil
+           <<init>>
+           store-global symb
+           load-const nil
      next: ...
   */
 
@@ -274,12 +274,11 @@ public class Compiler
   }
 
   /* Compiles the "cond" special form.
-
+     
      Syntax: (cond (pred1 body1)
                    ...
-                   (predN bodyN)
-                   (else  default))
-
+                   (predN bodyN))
+     
      Compilation:
 
      pred1:  <<pred1>>
@@ -291,10 +290,27 @@ public class Compiler
              branch bodyN none
      bodyN:  <<bodyN>>
              jump next
-     default:<<default>>
-             jump next
      none:   load-const nil
      next:   ...
+     
+     Syntax: (cond (pred1 body1)
+                   ...
+                   (predN bodyN)
+                   (else  default))
+
+     Compilation:
+
+     pred1:    <<pred1>>
+               branch body1 pred2
+     body1:    <<body1>>
+               jump next
+               ...
+     predN:    <<predN>>
+               branch bodyN default
+     bodyN:    <<bodyN>>
+               jump next
+     default:  <<default>>
+     next:     ...
   */
   private Inst compileCond(List exp, Scope scope, boolean tail, Inst next)
   {
@@ -327,22 +343,25 @@ public class Compiler
                     ...
                     (symbN initN))
                 body...)
-
+     
+     Equivalent to: ((fun (symb1 ... symbN) body...) init1 ... initN)
+     
      Compilation:
 
-     <<initN>>
-     push-arg
-     ...
-     <<init1>>
-     push-arg
-     push-env N
-     pop-arg
-     store-local 0 0
-     ...
-     pop-arg
-     store-local 0 N-1
-     <<body>>
-     pop-env
+           <<initN>>
+           push-arg
+           ...
+           <<init1>>
+           push-arg
+           push-env N
+           pop-arg
+           store-local 0 0
+           ...
+           pop-arg
+           store-local 0 N-1
+           <<body>>
+           pop-env
+     next: ...
   */
 
   private Inst compileLet(List exp, Scope scope, boolean tail, Inst next)
@@ -351,7 +370,6 @@ public class Compiler
       throw malformedExp(exp);
 
     var body = exp.cddr();
-
     int numBindings = bindings.length();
     var vars = extractVars(bindings);
     var inits = extractInits(bindings);
@@ -364,12 +382,12 @@ public class Compiler
            new PopEnv(next)))));
   }
   
-  /* (rec f bindings body)
-
-     is essentially Scheme's "named let" and is equivalent to
-
-     (letrec ((f (fun vars body)))
-       (f inits))
+  /* Compile the "rec" special form, a shorthand for defining and invoking recursive procedures
+  
+     Syntax:     (rec f ((var1 init1) ... (varN initN)) body...)
+      
+     Transform:  (letrec ((f (fun (var1 ... varN) body..)))
+                   (f init1 ... initN))
   */
   private Inst compileRec(List exp, Scope scope, boolean tail, Inst next)
   {
@@ -390,8 +408,6 @@ public class Compiler
     }
   }
   
-  /* (letrec ((f (fun vars body))) (f inits))
-  */
   private List transformRec(Symbol f, List bindings, List body)
   {
     var vars = extractVars(bindings);
@@ -399,7 +415,7 @@ public class Compiler
     return List.of(Symbol.LETREC, List.cons(List.of(f, List.cons(Symbol.FUN, List.cons(vars, body))), List.EMPTY), List.cons(f, inits));
   }
   
-  /* Compiles the "letrec" special form
+  /* Compiles the "letrec" special form, for recursive and mutally-recursive functions
 
      Syntax:  (letrec ((symb1 init1)
                        ...
@@ -408,18 +424,19 @@ public class Compiler
 
      Compilation:
 
-     push-env N                ; Extend local environment
-     load-const nil            ; Initialize bindings to NIL value
-     store-local 0 0
-     ...
-     store-local 0 N-1
-     <<init1>>                 ; Evaluate initializer expression
-     store-local 0 0           
-     ...
-     <<initN>>
-     store-local 0 N-1
-     <<body>>                  ; Evaluate body in extended environment
-     pop-env                   ; Discard local environment
+           push-env N
+           load-const nil
+           store-local 0 0
+           ...
+           store-local 0 N-1
+           <<init1>>
+           store-local 0 0           
+           ...
+           <<initN>>
+           store-local 0 N-1
+           <<body>>
+           pop-env
+     next: ...
   */
   private Inst compileLetRec(List exp, Scope scope, boolean tail, Inst next)
   {
@@ -427,7 +444,6 @@ public class Compiler
       throw malformedExp(exp);
 
     var body = exp.cddr();
-
     int numBindings = bindings.length();
     var vars = extractVars(bindings);
     var inits = extractInits(bindings);
@@ -441,7 +457,7 @@ public class Compiler
            new PopEnv(next))))));
   }
   
-  /* Compile the binding sequence of a letrec expression */
+  /* Generate the binding sequence of a letrec expression */
   
   private Inst compileRecursiveBindings(List inits, int offset, Scope scope, Inst next)
   {
@@ -453,7 +469,7 @@ public class Compiler
            compileRecursiveBindings(inits.cdr(), offset + 1, scope, next)));
   }
   
-  /* Compile the initiation sequence of a letrec expression. */
+  /* Generate the initialization sequence of a letrec expression. */
   
   private static Inst compileInitRecEnv(int offset, int numBindings, Inst next)
   {
@@ -464,7 +480,7 @@ public class Compiler
              compileInitRecEnv(offset + 1, numBindings, next));
   }
   
-  /* Compiles the "let*" special form
+  /* Compiles the "let*" special form, for sequential binding
 
      Syntax:  (let* ((symb1 init1)
                      ...
@@ -473,14 +489,15 @@ public class Compiler
 
      Compilation:
 
-     push-env N
-     <<init1>>
-     store-local 0 0
-     ...
-     <<initN>>
-     store-local 0 N-1
-     <<body>>
-     pop-env
+           push-env N
+           <<init1>>
+           store-local 0 0
+           ...
+           <<initN>>
+           store-local 0 N-1
+           <<body>>
+           pop-env
+     next: ...
   */
   private Inst compileLetStar(List exp, Scope scope, boolean tail, Inst next)
   {
@@ -488,7 +505,6 @@ public class Compiler
       throw malformedExp(exp);
 
     var body = exp.cddr();
-
     int numBindings = bindings.length();
     var vars = extractVars(bindings);
     var extendedScope = scope.extend(vars);
@@ -498,7 +514,9 @@ public class Compiler
            compileSequence(body, extendedScope, tail,
            new PopEnv(next))));
   }
-
+  
+  /* Generate the binding sequence of a let* expression */
+  
   private Inst compileSequentialBindings(List bindings, int offset, Scope scope, Inst next)
   {
     if (bindings.isEmpty())
@@ -514,14 +532,21 @@ public class Compiler
                    next)));
   }
   
+  /* Check that a binding list is well-formed */
+  
   private boolean checkBindingListForm(List bindings)
   {
-    for (var binding : bindings)
-      if (!(binding instanceof List pair && pair.length() == 2 && pair.car() instanceof Symbol))
+    for (; !bindings.isEmpty(); bindings = bindings.cdr())
+      if (!(bindings.car() instanceof List pair && pair.length() == 2 && pair.car() instanceof Symbol))
         return false;
     return true;
   }
-    
+  
+  /* Check that a parameter list is well-formed
+   * 
+   * <parameter-list> => "(" <symbol>* <rest-parameter>? ")"
+   * <rest-parameter> => "&" <symbol>
+   */
   private boolean checkParamListForm(List params)
   {
     for (; !params.isEmpty(); params = params.cdr())
@@ -530,6 +555,12 @@ public class Compiler
     return true;
   }
 
+  /* Check that a clause list is well-formed
+   * 
+   * <clause-list> => "(" <clause>+ <else-clause>? ")"
+   * <clause> => "(" <expr> <expr>+ ")"
+   * <else-clause> => "(" "else" <expr>+ ")"
+   */
   private boolean checkClauseListForm(List clauses)
   {
     for (; !clauses.isEmpty(); clauses = clauses.cdr())
@@ -550,6 +581,8 @@ public class Compiler
     return bindings.map(pair -> ((List)pair).cadr());
   }
   
+  /* Generate the argument-evaluation sequence of a procedure application */
+  
   private Inst compilePushArgs(List args, Scope scope, Inst next)
   {
     if (args.isEmpty())
@@ -559,7 +592,9 @@ public class Compiler
            compile(args.car(), scope, false,
            new PushArg(next)));
   }
-
+  
+  /* Generate the parameter binding sequence of a procedure application */
+  
   private Inst compileBindLocals(int offset, int numBindings, Inst next)
   {
     if (offset >= numBindings)
@@ -572,47 +607,51 @@ public class Compiler
   
   /* Compiles a procedure application.
 
-     Syntax: (f arg1 arg2 ... argN)
+     Syntax: (proc arg1 arg2 ... argN)
 
      Compilation:
 
-     push-frame  // omit if in tail position
-     <<argN>>
-     push-arg
-     ...
-     <<arg1>>
-     push-arg
-     <<f>>
-     apply
+           push-frame  // Omitted if this expression occurs in tail context
+           <<argN>>
+           push-arg
+           ...
+           <<arg1>>
+           push-arg
+           <<proc>>
+           apply
+     next: ...
   */
 
   private Inst compileApply(List exp, Scope scope, boolean tail, Inst next)
   {
-    int numArgs = exp.length() - 1;
+    var proc = exp.car();
+    var args = exp.cdr();
+    int numArgs = args.length();
+    var position = positionMap.get(exp);
     
-    // Optimization: omit frame for call in tail position
-    
-    return tail ? compilePushArgs(exp.cdr(), scope,
-                  compile(exp.car(), scope, false,
-                  new Apply(numArgs, positionMap.get(exp))))
-    
-                : new PushFrame(next, positionMap.get(exp),
-                  compilePushArgs(exp.cdr(), scope,
-                  compile(exp.car(), scope, false,
-                  new Apply(numArgs, positionMap.get(exp)))));
+    if (tail) // Tail call optimization: omit call frame, return directly to the caller
+      return compilePushArgs(args, scope,
+             compile(proc, scope, false,
+             new Apply(numArgs, position)));
+    else
+      return new PushFrame(next, position,
+             compilePushArgs(args, scope,
+             compile(proc, scope, false,
+             new Apply(numArgs, position))));
   }
 
-  /* Compile the call/cc form.
+  /* Compile the "call/cc" form, or "call-with-current-continuation"
   
-     Syntax: (call/cc exp), where exp is required to be a "fun" expression.
+     Syntax: (call/cc proc)
      
      Compilation:
      
-     push-frame  // omit if in tail position
-     make-cont
-     push-arg
-     <<exp>>     
-     apply
+           push-frame  // Omitted if this expression occurs in tail context
+           make-cont
+           push-arg
+           <<proc>>    
+           apply
+     next: ...
   */
   
   private Inst compileCallCC(List exp, Scope scope, boolean tail, Inst next)
@@ -620,18 +659,21 @@ public class Compiler
     if (exp.length() != 2)
       throw malformedExp(exp);
     
+    var proc = exp.cadr();
+    var position = positionMap.get(exp);
+    
     // Optimization: omit frame for call in tail position
     
-    return tail ? new MakeCont(
-                  new PushArg(
-                  compile(exp.cadr(), scope, tail,           
-                  new Apply(1, positionMap.get(exp.cadr())))))
-    
-                : new PushFrame(next, positionMap.get(exp),
-                  new MakeCont(
-                  new PushArg(
-                  compile(exp.cadr(), scope, tail,           
-                  new Apply(1, positionMap.get(exp.cadr()))))));
+    if (tail) // Tail call optimization: omit call frame, return directly to the caller
+      return new MakeCont(
+             new PushArg(
+             compile(proc, scope, tail,           
+             new Apply(1, position))));
+    else
+      return new PushFrame(next, position,
+             new PushArg(
+             compile(proc, scope, tail,           
+             new Apply(1, position))));
   }
   
   /* Compiles a sequence of expressions.
@@ -845,12 +887,10 @@ public class Compiler
     if (exp.length() != 2)
       throw malformedExp(exp);
     
-    var x = exp.cadr();
-    
-    if (x instanceof Symbol s)
-      x = s.intern();
-    
-    return new LoadConst(x, next);
+    if (exp.cadr() instanceof Symbol s)
+      return new LoadConst(s.intern(), next);
+    else
+      return new LoadConst(exp.cadr(), next);
   }
 
   // Compile a (quasiquote x) form by reducing it to an equivalent
@@ -914,7 +954,7 @@ public class Compiler
       }
     }
     
-    // General case: recursively transform the list
+    // General case: recursively transform the car and cdr of the list
     
     // (quasiquote x xs...) => (cons (quasiquote x) (quasiquote xs...))
 

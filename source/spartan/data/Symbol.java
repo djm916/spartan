@@ -4,7 +4,7 @@ public final class Symbol implements Datum, IEq
 {
   private static WeakCache<String, Symbol> cache = new WeakCache<>();
   private static int nextUniqueId;
-  private final String id;
+  private final String name;
   
   public static final Symbol DEF = new Symbol("def");
   public static final Symbol DEFUN = new Symbol("defun");
@@ -33,11 +33,11 @@ public final class Symbol implements Datum, IEq
   public static final Symbol CDR = new Symbol("cdr");
   
   /**
-   * Returns an interned symbol.
+   * Returns an interned symbol with the given name.
    */
-  public static Symbol of(String id)
+  public static Symbol of(String name)
   {
-    return cache.get(id, () -> new Symbol(id));
+    return cache.get(name, () -> new Symbol(name));
   }
   
   /**
@@ -48,33 +48,33 @@ public final class Symbol implements Datum, IEq
     return new Symbol(String.format("#%d", nextUniqueId++));
   }
   
-  @Override
+  @Override // Datum
   public String type()
   {
     return "symbol";
   }
   
-  @Override
+  @Override // Datum
   public String repr()
   {
-    return id;
+    return name;
   }
   
   @Override // Object
   public boolean equals(Object rhs)
   {
-    return (rhs instanceof Symbol s) && id.equals(s.id);
-  }
-  
-  public boolean equals(String rhs)
-  {
-    return id.equals(rhs);
+    return (rhs instanceof Symbol s) && name.equals(s.name);
   }
   
   @Override // Object
   public int hashCode()
   {
-    return id.hashCode();
+    return name.hashCode();
+  }
+  
+  public boolean equals(String rhs)
+  {
+    return name.equals(rhs);
   }
   
   @Override // IEq
@@ -85,15 +85,15 @@ public final class Symbol implements Datum, IEq
   
   public boolean isKeyword()
   {
-    return id.charAt(0) == ':';
+    return name.charAt(0) == ':';
   }
   
   /**
    * Create a new, uninterned symbol for the given identifier
    */
-  public Symbol(String id)
+  public Symbol(String name)
   {
-    this.id = id;
+    this.name = name;
   }
   
   /**
@@ -101,6 +101,6 @@ public final class Symbol implements Datum, IEq
    */
   public Symbol intern()
   {
-    return cache.get(this.id, () -> this);
+    return cache.get(this.name, () -> this);
   }
 }

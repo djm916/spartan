@@ -82,6 +82,10 @@ public final class GlobalEnv
     bind(Symbol.of("length"), CoreLib.LENGTH);
     bind(Symbol.of("empty?"), CoreLib.IS_EMPTY);
     
+    /* Symbol related procedures */
+    
+    bind(Symbol.of("symbol-intern"), CoreLib.SYMBOL_INTERN);
+    
     /* Type predicates */
     
     bind(Symbol.of("nil?"), CoreLib.IS_NIL);
@@ -139,7 +143,7 @@ public final class GlobalEnv
     /* Conversion procedures */
     
     bind(Symbol.of("string->symbol"), CoreLib.TEXT_TO_SYMBOL);
-    bind(Symbol.of("symbol->string"), CoreLib.SYMBOL_TO_TEXT); 
+    bind(Symbol.of("symbol->string"), CoreLib.SYMBOL_TO_TEXT);
     bind(Symbol.of("string->bytes"), CoreLib.TEXT_TO_BYTES); // encode
     bind(Symbol.of("bytes->string"), CoreLib.BYTES_TO_TEXT); // decode
     //bind(Symbol.of("string->number"), CoreLib.TEXT_TO_NUMBER);

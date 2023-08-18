@@ -342,4 +342,13 @@ public final class CoreLib
       vm.popFrame();
     }
   };
+  
+  public static final Primitive SYMBOL_INTERN = new Primitive(1, false) {
+    public void apply(VirtualMachine vm) {
+      if (!(vm.popArg() instanceof Symbol s))
+        throw new TypeMismatch();
+      vm.result = s.intern();
+      vm.popFrame();
+    }
+  };
 }
