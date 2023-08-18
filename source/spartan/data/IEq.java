@@ -47,7 +47,7 @@ permits Nil, Bool, Symbol, Text, Int, BigInt, Ratio, Real, Complex
   {
     return false;
   }
-  
+    
   default boolean isEqual(Text rhs)
   {
     return false;

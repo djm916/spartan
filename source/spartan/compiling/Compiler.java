@@ -54,6 +54,7 @@ public class Compiler
     return exp instanceof INum
         || exp instanceof Bool
         || exp instanceof Text
+        || (exp instanceof Symbol && ((Symbol)exp).isKeyword())
         || exp == List.EMPTY
         || exp == Nil.VALUE;
   }

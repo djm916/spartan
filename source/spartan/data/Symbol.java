@@ -81,6 +81,11 @@ public final class Symbol implements Datum, IEq
     return this == rhs;
   }
   
+  public boolean isKeyword()
+  {
+    return id.charAt(0) == ':';
+  }
+  
   /**
    * Create a new, uninterned symbol for the given identifier
    */

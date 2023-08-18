@@ -116,8 +116,7 @@ public class Reader implements AutoCloseable
   {
     return ch == '~' || ch == '!' || ch == '@' || ch == '#' || ch == '$' || ch == '%'
         || ch == '^' || ch == '&' || ch == '*' || ch == '-' || ch == '_' || ch == '+'
-        || ch == '=' || ch == '|' || ch == '\\' || ch == '<' || ch == '>'
-        || ch == '?' || ch ==  '/';
+        || ch == '=' || ch == '|' || ch == '\\' || ch == '<' || ch == '>' || ch == '?' || ch ==  '/';
   }
   
   private static boolean isSymbolStart(int ch)
@@ -420,11 +419,16 @@ public class Reader implements AutoCloseable
     }
   }
   
-  private Datum readSymbol()
+  /** Read a symbol with the following grammar:
+   *
+   * <symbol> -> <symbol-start> <symbol-follow>*
+   *
+   */
+  private Symbol readSymbol()
   {
     var position = getTokenPosition();
     var text = new StringBuilder();
-    
+        
     text.append((char)lastChar);
 
     while (isSymbolFollow(peekChar())) {
@@ -434,30 +438,28 @@ public class Reader implements AutoCloseable
     
     var symbol = new Symbol(text.toString());
     positionMap.put(symbol, position);
-    
-    if (peekChar() == ':')
-      return readQualifiedSymbol(symbol);
-    else
-      return symbol;
+    return symbol;
   }
   
-  private Datum readQualifiedSymbol(Symbol ns)
+  /** Read a keyword symbol with the following grammar:
+   *
+   * <keyword-symbol> -> ":" <symbol>
+   *
+   */
+  private Symbol readKeyword()
   {
+    var position = getTokenPosition();
+    var text = new StringBuilder();
+    text.append((char)lastChar);
     getChar();
-    if (!isSymbolStart(peekChar()))
-      throw syntaxError("malformed qualified symbol");
-    getChar();
-    var text = new StringBuilder();    
+    if (!isSymbolStart(lastChar))
+      throw syntaxError("malformed symbol");
     text.append((char)lastChar);
     while (isSymbolFollow(peekChar())) {
       getChar();
       text.append((char)lastChar);
-    }    
-    var symbol = new Symbol(text.toString());
-    var xform = List.of(ns, List.of(Symbol.QUOTE, symbol));
-    System.out.println("qualified symbol transform: " + xform.repr());
-    positionMap.put(xform, positionMap.get(ns));
-    return xform;
+    }
+    return Symbol.of(text.toString());
   }
   
   private Text readText()
@@ -562,6 +564,8 @@ public class Reader implements AutoCloseable
       return readNumber();
     if (isSymbolStart(lastChar))
       return readSymbol();
+    if (lastChar == ':')
+      return readKeyword();
     if (lastChar == '\"')
       return readText();
     if (lastChar == '\'')
