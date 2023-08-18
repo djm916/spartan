@@ -104,20 +104,20 @@
 (defmacro let-match (vars exp & body)
   `(apply (fun ,vars ,@body) ,exp))
 
-(defmacro setf! (place init)
-  (defun call-form? (place)
-    (and (list? place) (= (length place) 2)))
-  (cond [(symbol? place)
-         `(set! ,place ,init)]
-        [(call-form? place)
-         (let [(f (car place)) (x (cadr place))]
-           (cond [(and (symbol? f) (= (symbol->string f) "car"))
-                  `(set-car! ,x ,init)]
-                 [(and (symbol? f) (= (symbol->string f) "cdr"))
-                  `(set-cdr! ,x ,init)]
-                 [else
-                  `(set-at! ,f ,x ,init)]))]
-        [else (error "malformed setf expression")]))
+;(defmacro setf! (place init)
+;  (defun call-form? (place)
+;    (and (list? place) (= (length place) 2)))
+;  (cond [(symbol? place)
+;         `(set! ,place ,init)]
+;        [(call-form? place)
+;         (let [(f (car place)) (x (cadr place))]
+;           (cond [(and (symbol? f) (= (symbol->string f) "car"))
+;                  `(set-car! ,x ,init)]
+;                 [(and (symbol? f) (= (symbol->string f) "cdr"))
+;                  `(set-cdr! ,x ,init)]
+;                 [else
+;                  `(set-at! ,f ,x ,init)]))]
+;        [else (error "malformed setf expression")]))
 
 ;(load "stdlib/lists.s")
 ;(load "stdlib/vectors.s")

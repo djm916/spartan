@@ -104,19 +104,48 @@ public class Compiler
      
      The exact syntax of <place> is:
      
-     <place> -> <symbol> | (<func> <arg>) | (car <arg>) | (cdr <arg>)
+     <place> -> <symbol> | (<exp> <arg>) | (car <exp>) | (cdr <exp>)
      
-     (set! x init)
-     (set! (x :key) init) => (set-at! x :key init)
-     (set! (x i) init) => (set-at! x i init)
-     (set! (car x) init) => (set-car! x init)
-     (set! (cdr x) init) => (set-cdr! x init)
-  
-  private Inst compileSet(List exp, Scope scope, Inst next)
-  {
-    
-  }
+     (set! <symbol> <init>)        ; set the variable <symbol> to <init>
+     (set! (<exp> <arg>) <init>)   ; (set-at! <exp> <arg> <init>)
+     (set! (car <exp>) <init>)     ; (set-car! <exp> <init>)
+     (set! (cdr <exp>) <init>)     ; (set-cdr! <exp> <init>)
   */
+  private Inst compileSet(List exp, Scope scope, boolean tail, Inst next)
+  {
+    if (!(exp.length() == 3))
+      throw malformedExp(exp);
+    
+    if (exp.cadr() instanceof Symbol)
+      return compileSetVar(exp, scope, next);
+    
+    var xform = transformSet(exp);
+    positionMap.put(xform, positionMap.get(exp));
+    
+    if (Config.LOG_DEBUG)
+      log.info(() -> String.format("set! transform: %s => %s", exp.repr(), xform.repr()));
+    
+    try {
+      return compile(xform, scope, tail, next);
+    }
+    catch (Error err) {
+      err.setPosition(positionMap.get(exp));
+      throw err;
+    }
+  }
+  
+  private List transformSet(List exp)
+  {
+    if (!(exp.cadr() instanceof List form && form.length() == 2))
+      throw malformedExp(exp);
+    
+    if (form.car() instanceof Symbol s && s.equals(Symbol.CAR))
+      return List.of(new Symbol("set-car!"), form.cadr(), exp.caddr());
+    else if (form.car() instanceof Symbol s && s.equals(Symbol.CDR))
+      return List.of(new Symbol("set-cdr!"), form.cadr(), exp.caddr());
+    else
+      return List.of(new Symbol("set-at!"), form.car(), form.cadr(), exp.caddr());
+  }
   
   /* Compile a variable assignment.
 
@@ -130,8 +159,7 @@ public class Compiler
 
   private Inst compileSetVar(List exp, Scope scope, Inst next)
   {
-    if (!(exp.length() == 3 && exp.cadr() instanceof Symbol s))
-      throw malformedExp(exp);
+    var s = (Symbol)exp.cadr();
     var init = exp.caddr();
     return compile(init, scope, false,
            scope.lookup(s)
@@ -1068,7 +1096,7 @@ public class Compiler
       if (s.equals(Symbol.COND))
         return compileCond(exp, scope, tail, next);      
       if (s.equals(Symbol.SET))
-        return compileSetVar(exp, scope, next);
+        return compileSet(exp, scope, tail, next);
       if (s.equals(Symbol.WHILE))
         return compileWhile(exp, scope, tail, next);
       if (s.equals(Symbol.CALL_CC))

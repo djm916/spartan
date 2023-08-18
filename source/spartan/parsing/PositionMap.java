@@ -14,7 +14,7 @@ public class PositionMap
   /**
    * Creates a new, empty instance.
    */
-  PositionMap()
+  public PositionMap()
   {}
   
   /**
@@ -30,7 +30,7 @@ public class PositionMap
   /**
    * Sets the position of the given expression.
    */
-  void put(Datum exp, Position pos)
+  public void put(Datum exp, Position pos)
   {
     map.put(exp, pos);
   }
@@ -38,7 +38,7 @@ public class PositionMap
   /**
    * Removes all entries.
    */
-  void clear()
+  public void clear()
   {
     map.clear();
   }

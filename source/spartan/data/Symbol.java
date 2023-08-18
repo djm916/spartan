@@ -29,6 +29,8 @@ public final class Symbol implements Datum, IEq
   public static final Symbol CALL_CC = new Symbol("call/cc");
   public static final Symbol REC = new Symbol("rec");
   public static final Symbol RETURN = new Symbol("return");
+  public static final Symbol CAR = new Symbol("car");
+  public static final Symbol CDR = new Symbol("cdr");
   
   /**
    * Returns an interned symbol.
