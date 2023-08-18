@@ -116,7 +116,7 @@ public class Reader implements AutoCloseable
   {
     return ch == '~' || ch == '!' || ch == '@' || ch == '#' || ch == '$' || ch == '%'
         || ch == '^' || ch == '&' || ch == '*' || ch == '-' || ch == '_' || ch == '+'
-        || ch == '=' || ch == '|' || ch == '\\' || ch == ':' || ch == '<' || ch == '>'
+        || ch == '=' || ch == '|' || ch == '\\' || ch == '<' || ch == '>'
         || ch == '?' || ch ==  '/';
   }
   
@@ -433,8 +433,31 @@ public class Reader implements AutoCloseable
     }
     
     var symbol = new Symbol(text.toString());
-    positionMap.put(symbol, position);    
-    return symbol;
+    positionMap.put(symbol, position);
+    
+    if (peekChar() == ':')
+      return readQualifiedSymbol(symbol);
+    else
+      return symbol;
+  }
+  
+  private Datum readQualifiedSymbol(Symbol ns)
+  {
+    getChar();
+    if (!isSymbolStart(peekChar()))
+      throw syntaxError("malformed qualified symbol");
+    getChar();
+    var text = new StringBuilder();    
+    text.append((char)lastChar);
+    while (isSymbolFollow(peekChar())) {
+      getChar();
+      text.append((char)lastChar);
+    }    
+    var symbol = new Symbol(text.toString());
+    var xform = List.of(ns, List.of(Symbol.QUOTE, symbol));
+    System.out.println("qualified symbol transform: " + xform.repr());
+    positionMap.put(xform, positionMap.get(ns));
+    return xform;
   }
   
   private Text readText()
