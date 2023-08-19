@@ -1,10 +1,11 @@
 package spartan.data;
 
-public final class Symbol implements Datum, IEq   
+public sealed class Symbol implements Datum, IEq
+permits QualifiedSymbol
 {
   private static WeakCache<String, Symbol> cache = new WeakCache<>();
   private static int nextUniqueId;
-  private final String name;
+  private final String name;    // full (qualified or unqualified) print name of the symbol
   
   public static final Symbol DEF = new Symbol("def");
   public static final Symbol DEFUN = new Symbol("defun");
@@ -82,12 +83,7 @@ public final class Symbol implements Datum, IEq
   {
     return this == rhs;
   }
-  
-  public boolean isKeyword()
-  {
-    return name.charAt(0) == ':';
-  }
-  
+    
   /**
    * Create a new, uninterned symbol for the given identifier
    */

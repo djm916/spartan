@@ -421,7 +421,11 @@ public class Reader implements AutoCloseable
   
   /** Read a symbol with the following grammar:
    *
-   * <symbol> -> <symbol-start> <symbol-follow>*
+   * <symbol> -> <qualified-symbol> | <bare-symbol>
+   * <qualified-symbol> => <namespace>:<local-name>
+   * <namespace> => <bare-symbol>
+   * <local-name> => <bare-symbol>
+   * <bare-symbol> -> <symbol-start-char> <symbol-follow-char>*
    *
    */
   private Symbol readSymbol()
@@ -435,31 +439,44 @@ public class Reader implements AutoCloseable
       getChar();
       text.append((char)lastChar);
     }
+        
+    // Read qualified symbol
+        
+    if (peekChar() == ':')      
+      return readQualifiedSymbol(text.toString(), text, position);
     
     var symbol = new Symbol(text.toString());
     positionMap.put(symbol, position);
     return symbol;
   }
   
-  /** Read a keyword symbol with the following grammar:
+  /** Read the 
    *
    * <keyword-symbol> -> ":" <symbol>
    *
    */
-  private Symbol readKeyword()
+  private QualifiedSymbol readQualifiedSymbol(String nameSpace, StringBuilder text, Position position)
   {
-    var position = getTokenPosition();
-    var text = new StringBuilder();
+    // the namespace separator ":" is part of the symbol's full name
+    getChar();      
     text.append((char)lastChar);
-    getChar();
-    if (!isSymbolStart(lastChar))
+    // save index of namespace separator for later split
+    var splitIndex = text.length() - 1;
+    // ensure the bare name is not empty and begins a valid symbol
+    if (!isSymbolStart(peekChar()))
       throw syntaxError("malformed symbol");
+    getChar();
     text.append((char)lastChar);
+    // read the rest of the bare name
     while (isSymbolFollow(peekChar())) {
       getChar();
       text.append((char)lastChar);
     }
-    return Symbol.of(text.toString());
+    var name = text.toString();
+    var bareName = name.substring(splitIndex);
+    var symbol = new QualifiedSymbol(text.toString(), nameSpace, bareName);
+    positionMap.put(symbol, position);
+    return symbol;
   }
   
   private Text readText()
@@ -564,8 +581,6 @@ public class Reader implements AutoCloseable
       return readNumber();
     if (isSymbolStart(lastChar))
       return readSymbol();
-    if (lastChar == ':')
-      return readKeyword();
     if (lastChar == '\"')
       return readText();
     if (lastChar == '\'')
