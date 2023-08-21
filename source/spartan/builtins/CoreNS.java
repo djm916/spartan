@@ -5,10 +5,19 @@ import spartan.NameSpace;
 
 public final class CoreNS extends NameSpace
 {
-  public CoreNS()
+  public static CoreNS getInstance()
+  {
+    if (instance == null)
+      instance = new CoreNS();
+    return instance;
+  }
+  
+  private CoreNS()
   {
     super(Symbol.of("core"), null);
   }
+  
+  private static CoreNS instance = null;
   
   // populate this namespace
   {

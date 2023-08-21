@@ -2,12 +2,10 @@ package spartan;
 
 import spartan.data.Symbol;
 import spartan.data.Datum;
-import spartan.compiling.Macro;
 import java.util.Map;
 import java.util.IdentityHashMap;
 import java.util.HashMap;
 import java.util.Optional;
-import spartan.errors.UnboundVariable;
 
 public class NameSpace
 {
@@ -16,7 +14,7 @@ public class NameSpace
     this.name = name;
     this.parent = parent;
   }
-  
+    
   public Symbol name()
   {
     return name;

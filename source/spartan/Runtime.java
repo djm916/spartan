@@ -1,7 +1,7 @@
 package spartan;
 
 import spartan.builtins.CoreNS;
-import spartan.data.Datum;
+import spartan.builtins.VectorNS;
 import spartan.data.Symbol;
 import java.util.Map;
 import java.util.IdentityHashMap;
@@ -39,8 +39,13 @@ public final class Runtime
     return nameSpaces.computeIfAbsent(ns, (s) -> new NameSpace(s, parent));
   }
   
-  private Runtime() { }
+  public static void putNS(NameSpace ns)
+  {
+    nameSpaces.put(ns.name(), ns);
+  }
   
+  private Runtime() { }
+    
   private static final Map<Symbol, NameSpace> nameSpaces = new IdentityHashMap<>();
   
   //private static NameSpace coreNS = new CoreLib();
@@ -49,11 +54,11 @@ public final class Runtime
   
   static
   {
-    var coreNS = new CoreNS();
-    nameSpaces.put(coreNS.name(), coreNS);
+    var coreNS = CoreNS.getInstance();
+    putNS(coreNS);
+    putNS(new VectorNS(coreNS));
     var userNS = new NameSpace(Symbol.of("user"), coreNS);
-    nameSpaces.put(userNS.name(), userNS);
-    //userNS.importAll(coreNS);
+    putNS(userNS);
     currentNS = userNS;
   }
 }
