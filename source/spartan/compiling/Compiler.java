@@ -191,7 +191,7 @@ public class Compiler
   {
     if (!(exp.length() == 3 && exp.cadr() instanceof Symbol s))
       throw malformedExp(exp);
-    var init = exp.caddr();    
+    var init = exp.caddr();  
     return compile(init, scope, false,
            new StoreGlobal(spartan.Runtime.currentNS().name(), s.intern(), positionMap.get(s),
            new LoadConst(Nil.VALUE, next)));
@@ -1120,6 +1120,9 @@ public class Compiler
   /* Compile a "using" form
    
      Syntax: (using <namespace> (<var1> ... <varN>))
+     
+     <using-form> -> "(" "using" <namespace> <import-list>? ")"
+     <import-list> -> "(" <symbol>+ ")"
      
      Compilation:
      
