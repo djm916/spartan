@@ -92,7 +92,10 @@ public class Compiler
   
   private Inst compileGlobalVarRef(Symbol s, Inst next)
   {
-    return new LoadGlobal(s.intern(), positionMap.get(s), next);
+    if (s instanceof QualifiedSymbol qs)
+      return new LoadGlobal(qs.nameSpace().intern(), Symbol.of(qs.bareName()), positionMap.get(qs), next);
+    else
+      return new LoadGlobal(spartan.Runtime.currentNS().name(), s.intern(), positionMap.get(s), next);
   }
   
   /* Compile the "set!" special form, a generalized assignment statement.
@@ -178,31 +181,22 @@ public class Compiler
   
   private Inst compileSetGlobalVar(Symbol s, Inst next)
   {
-    return new StoreGlobal(s.intern(), new LoadConst(Nil.VALUE, next));
+    if (s instanceof QualifiedSymbol qs)
+      return new StoreGlobal(qs.nameSpace().intern(), Symbol.of(qs.bareName()), positionMap.get(qs), new LoadConst(Nil.VALUE, next));
+    else
+      return new StoreGlobal(spartan.Runtime.currentNS().name(), s.intern(), positionMap.get(s), new LoadConst(Nil.VALUE, next));
   }
-  
-  /* Compile a "def" special form.
-  
-     Syntax: (def symb init)
-
-     Compilation:
-
-           <<init>>
-           store-global symb
-           load-const nil
-     next: ...
-  */
-
+    
   private Inst compileDef(List exp, Scope scope, Inst next)
   {
     if (!(exp.length() == 3 && exp.cadr() instanceof Symbol s))
       throw malformedExp(exp);
-    var init = exp.caddr();
+    var init = exp.caddr();    
     return compile(init, scope, false,
-           new StoreGlobal(s.intern(),
+           new StoreGlobal(spartan.Runtime.currentNS().name(), s.intern(), positionMap.get(s),
            new LoadConst(Nil.VALUE, next)));
   }
-
+  
   /* Compile "defun" special form
   
      Syntax: (defun symbol (params...) body...)
@@ -1045,7 +1039,7 @@ public class Compiler
      is intended to generate code rather than data. It receives
      unevaluated expressions as arguments and returns an expression
      which is then compiled and evaluated. 
-  */
+  
 
   private Inst compileDefMacro(List exp, Scope scope, Inst next)
   {
@@ -1055,6 +1049,7 @@ public class Compiler
     MacroEnv.bind(symb, new Macro(makeProcedure(params, body, Scope.EMPTY)));
     return new LoadConst(Nil.VALUE, next);
   }
+  */
   
   /* Compile a macro application
   
@@ -1064,7 +1059,7 @@ public class Compiler
      
      Applies the macro procedure to the list of (unevaluated) arguments,
      and compiles the code returned by the macro.
-  */
+  
   private Inst compileApplyMacro(List exp, Scope scope, boolean tail, Inst next)
   {
     var symb = (Symbol) exp.car();
@@ -1081,6 +1076,12 @@ public class Compiler
       err.setPosition(positionMap.get(exp));
       throw err;
     }
+  }
+  */
+  
+  private boolean isMacro(Symbol s)
+  {
+    return false;
   }
   
   /**
@@ -1120,8 +1121,8 @@ public class Compiler
         return compileDef(exp, scope, next);
       if (s.equals(Symbol.DEFUN))
         return compileDefun(exp, scope, next);
-      if (s.equals(Symbol.DEFMACRO))
-        return compileDefMacro(exp, scope, next);
+      //if (s.equals(Symbol.DEFMACRO))
+        //return compileDefMacro(exp, scope, next);
       if (s.equals(Symbol.FUN))
         return compileFun(exp, scope, next);
       if (s.equals(Symbol.QUOTE))
@@ -1145,8 +1146,8 @@ public class Compiler
       if (s.equals(Symbol.RETURN))
         return compileReturn(exp, scope, tail, next);
       // Handle macro expansion
-      if (MacroEnv.contains(s))
-        return compileApplyMacro(exp, scope, tail, next);
+      //if (isMacro(s))
+        //return compileApplyMacro(exp, scope, tail, next);
     }
     
     // Handle procedure application

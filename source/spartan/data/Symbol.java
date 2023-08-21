@@ -58,6 +58,11 @@ permits QualifiedSymbol
   @Override // Datum
   public String repr()
   {
+    return printName();
+  }
+  
+  public String printName()
+  {
     return name;
   }
   

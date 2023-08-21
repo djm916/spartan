@@ -460,8 +460,8 @@ public class Reader implements AutoCloseable
     // the namespace separator ":" is part of the symbol's full name
     getChar();      
     text.append((char)lastChar);
-    // save index of namespace separator for later split
-    var splitIndex = text.length() - 1;
+    // save index where bare name starts
+    var splitIndex = text.length();
     // ensure the bare name is not empty and begins a valid symbol
     if (!isSymbolStart(peekChar()))
       throw syntaxError("malformed symbol");

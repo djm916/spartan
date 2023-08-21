@@ -4,14 +4,9 @@ import spartan.parsing.Position;
 import spartan.data.Symbol;
 
 public class UnboundVariable extends Error
-{
-  public UnboundVariable(Symbol s)
+{  
+  public UnboundVariable(String ns, Symbol s, Position p)
   {
-    super("unbound variable \"" + s.repr() + "\"");
-  }
-  
-  public UnboundVariable(Symbol s, Position p)
-  {
-    super("unbound variable \"" + s.repr() + "\"", p);
+    super("unbound variable \"" + ns + ":" + s.repr() + "\"", p);
   }
 }

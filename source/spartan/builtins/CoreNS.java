@@ -1,64 +1,17 @@
-package spartan.runtime;
+package spartan.builtins;
 
 import spartan.data.*;
-import spartan.builtins.CoreLib;
-import spartan.builtins.MathLib;
-import spartan.builtins.ListLib;
-import spartan.builtins.VectorLib;
-import spartan.builtins.TableLib;
-import spartan.builtins.StringLib;
-import spartan.builtins.PortLib;
-import spartan.builtins.BytesLib;
-import java.util.Map;
-import java.util.IdentityHashMap;
-import java.util.Optional;
-import spartan.errors.UnboundVariable;
+import spartan.NameSpace;
 
-public final class GlobalEnv
+public final class CoreNS extends NameSpace
 {
-  /** Bind a variable to a given value.
-      If the variable is already bound, its value is replaced.
-      @param name The variable to bind
-  */
-  public static void bind(Symbol name, Datum val)
+  public CoreNS()
   {
-    bindings.put(name, val);
+    super("core");
   }
   
-  /** Lookup a variable by name, optionally returning its bound value.
-      @param name The variable to look up
-      @return The (optional) value of the variable
-  */
-  public static Optional<Datum> lookup(Symbol name)
+  // populate this namespace
   {
-    return Optional.ofNullable(bindings.get(name));
-  }
-  
-  /** Lookup a variable by name, throwing an exception if it is not bound.
-      @param name The variable to look up
-      @return The value of the variable
-  */
-  public static Datum lookupOrElse(Symbol name, Datum defaultValue)
-  {
-    return bindings.getOrDefault(name, defaultValue);
-  }
-  
-  public static Datum lookupOrThrow(Symbol name)
-  {
-    var value = bindings.get(name);
-    if (value == null)
-      throw new UnboundVariable(name);
-    return value;
-  }
-  
-  private GlobalEnv() { }
-  
-  private static final Map<Symbol, Datum> bindings = new IdentityHashMap<>();
-  
-  static
-  {
-    /* General values & procedures */
-    
     bind(Symbol.of("="), CoreLib.EQ);
     bind(Symbol.of("/="), CoreLib.NE);
     bind(Symbol.of("<"), CoreLib.LT);
@@ -139,7 +92,7 @@ public final class GlobalEnv
     bind(Symbol.of("ratio"), MathLib.MAKE_RATIO);
     bind(Symbol.of("numer"), MathLib.NUMERATOR);
     bind(Symbol.of("denom"), MathLib.DENOMINATOR);
-        
+    
     /* Conversion procedures */
     
     bind(Symbol.of("string->symbol"), CoreLib.TEXT_TO_SYMBOL);
@@ -174,59 +127,5 @@ public final class GlobalEnv
     //bind(Symbol.of("set-nth!"), ListLib.SET_NTH);
     bind(Symbol.of("nth-tail"), ListLib.NTH_TAIL);
     bind(Symbol.of("set-nth-tail!"), ListLib.SET_NTH_TAIL);
-    
-    /* Vector procedures */
-    
-    bind(Symbol.of("vector"), VectorLib.FROM_LIST);
-    bind(Symbol.of("vector:new"), VectorLib.NEW);
-    //bind(Symbol.of("vector:ref"), VectorLib.REF);    
-    //bind(Symbol.of("vector:length"), VectorLib.LENGTH);
-    bind(Symbol.of("vector:copy"), VectorLib.COPY);
-    //bind(Symbol.of("vector:set!"), VectorLib.SET);
-    bind(Symbol.of("vector:append!"), VectorLib.APPEND);
-    bind(Symbol.of("vector:insert!"), VectorLib.INSERT);
-    bind(Symbol.of("vector:remove!"), VectorLib.REMOVE);
-    
-    /* Table procedures */
-    
-    bind(Symbol.of("table"), TableLib.FROM_LIST);
-    //bind(Symbol.of("table:find"), TableLib.FIND);
-    //bind(Symbol.of("table:assoc!"), TableLib.ASSOC);
-    //bind(Symbol.of("table:length"), TableLib.LENGTH);
-    bind(Symbol.of("table:keys"), TableLib.KEYS);
-    bind(Symbol.of("table:values"), TableLib.VALUES);
-    bind(Symbol.of("table:entries"), TableLib.ENTRIES);
-    
-    /* String procedures */
-    
-    //bind(Symbol.of("string:length"), StringLib.LENGTH);
-    bind(Symbol.of("string:concat"), StringLib.CONCAT);
-    bind(Symbol.of("string:join"), StringLib.JOIN);
-    bind(Symbol.of("string:substr"), StringLib.SUBSTR);
-    bind(Symbol.of("string:reverse"), StringLib.REVERSE);
-    bind(Symbol.of("string:hash"), StringLib.HASH);
-    //bind(Symbol.of("string/compare"), StringLib.COMPARE);
-    //bind(Symbol.of("string/compare-no-case"), StringLib.COMPARE_NO_CASE);
-    
-    /* Port procedures */
-    
-    bind(Symbol.of("port:open"), PortLib.OPEN);
-    bind(Symbol.of("port:close"), PortLib.CLOSE);
-    bind(Symbol.of("port:read"), PortLib.READ);
-    bind(Symbol.of("port:write"), PortLib.WRITE);
-    bind(Symbol.of("port:stdin"), InputPort.STDIN);
-    bind(Symbol.of("port:stdout"), OutputPort.STDOUT);
-    bind(Symbol.of("port:open?"), PortLib.IS_OPEN);
-    bind(Symbol.of("port:position"), PortLib.POSITION);
-    bind(Symbol.of("port:seek"), PortLib.SEEK);
-    bind(Symbol.of("port:length"), PortLib.LENGTH);
-    
-    /* Bytes procedures */
-    
-    bind(Symbol.of("bytes"), BytesLib.FROM_LIST);
-    bind(Symbol.of("bytes:new"), BytesLib.NEW);
-    //bind(Symbol.of("bytes:ref"), BytesLib.REF);
-    //bind(Symbol.of("bytes:set!"), BytesLib.SET);
-    //bind(Symbol.of("bytes:length"), BytesLib.LENGTH);
   }
 }

@@ -7,10 +7,28 @@ import spartan.errors.InvalidArgument;
 import spartan.runtime.VirtualMachine;
 import spartan.Config;
 import spartan.parsing.Reader;
-import static spartan.builtins.Core.*;
 
 public final class CoreLib
 {
+  public static Bool not(Datum x)
+  {
+    return Bool.valueOf(!x.boolValue());
+  }
+  
+  public static boolean isEqual(Datum x, Datum y)
+  {
+    if (x instanceof IEq lhs && y instanceof IEq rhs)
+      return lhs.isEqual(rhs);
+    throw new TypeMismatch();
+  }
+  
+  public static int compareTo(Datum x, Datum y)
+  {
+    if (x instanceof IOrd lhs && y instanceof IOrd rhs)
+      return lhs.compareTo(rhs);
+    throw new TypeMismatch();
+  }
+  
   public static final Primitive NOT = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
       vm.result = not(vm.popArg());

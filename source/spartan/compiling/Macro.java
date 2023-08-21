@@ -6,7 +6,7 @@ import spartan.runtime.VirtualMachine;
 import spartan.runtime.Inst;
 import spartan.errors.WrongNumberArgs;
 
-final class Macro
+public final class Macro
 {
   Macro(Procedure proc)
   {

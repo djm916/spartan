@@ -14,4 +14,14 @@ public final class QualifiedSymbol extends Symbol
     this.nameSpace = nameSpace;
     this.bareName = bareName;
   }
+    
+  public String nameSpace()
+  {
+    return nameSpace;
+  }
+  
+  public String bareName()
+  {
+    return bareName;
+  }
 }

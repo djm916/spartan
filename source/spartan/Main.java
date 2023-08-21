@@ -10,7 +10,6 @@ import java.util.logging.Logger;
 import spartan.data.List;
 import spartan.data.Text;
 import spartan.data.Symbol;
-import spartan.runtime.GlobalEnv;
 import spartan.errors.Error;
 import spartan.errors.LoadError;
 
@@ -58,19 +57,21 @@ public class Main implements Callable<Integer>
     else {
       // TODO: Load JNI libraries on other OS than Windows
     }
-    
+        
     // Bootstrap global environment with built-in definitions and procedures
+    /*
     try {
       Loader.load(Config.BUILTINS_FILE_PATH);
     }
     catch (LoadError err) {
       System.err.println(err.getMessage());
     }
-    
+    */
+    // 
     if (scriptPath != null) {
       // Bind symbol containing the list of script arguments, as string/text values
-      GlobalEnv.bind(Symbol.of("sys/args"), List.of(scriptArgs));
-      
+      spartan.Runtime.currentNS().bind(Symbol.of("command-line-args"), List.of(scriptArgs));
+            
       try {
         Loader.load(scriptPath);
       }
