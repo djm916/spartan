@@ -32,6 +32,8 @@ permits QualifiedSymbol
   public static final Symbol RETURN = new Symbol("return");
   public static final Symbol CAR = new Symbol("car");
   public static final Symbol CDR = new Symbol("cdr");
+  public static final Symbol NAMESPACE = new Symbol("namespace");
+  public static final Symbol USING = new Symbol("using");
   
   /**
    * Returns an interned symbol with the given name.
@@ -58,10 +60,10 @@ permits QualifiedSymbol
   @Override // Datum
   public String repr()
   {
-    return printName();
+    return name();
   }
   
-  public String printName()
+  public String name()
   {
     return name;
   }

@@ -6,7 +6,7 @@ import spartan.errors.UnboundVariable;
 
 public final class LoadGlobal extends Inst
 {
-  public LoadGlobal(String nameSpace, Symbol bareName, Position position, Inst next)
+  public LoadGlobal(Symbol nameSpace, Symbol bareName, Position position, Inst next)
   {
     super(next);
     this.nameSpace = nameSpace;
@@ -22,7 +22,7 @@ public final class LoadGlobal extends Inst
     vm.control = next;
   }
   
-  private final String nameSpace;
+  private final Symbol nameSpace;
   private final Symbol bareName;
   private final Position position;
 }

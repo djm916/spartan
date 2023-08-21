@@ -7,7 +7,7 @@ public final class CoreNS extends NameSpace
 {
   public CoreNS()
   {
-    super("core");
+    super(Symbol.of("core"), null);
   }
   
   // populate this namespace

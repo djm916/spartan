@@ -11,14 +11,20 @@ import spartan.errors.UnboundVariable;
 
 public class NameSpace
 {
-  public NameSpace(String name)
+  public NameSpace(Symbol name, NameSpace parent)
   {
-    this.name = name.intern();
+    this.name = name;
+    this.parent = parent;
   }
   
-  public String name()
+  public Symbol name()
   {
     return name;
+  }
+  
+  public NameSpace parent()
+  {
+    return parent;
   }
   
   public void importAll(NameSpace other)
@@ -41,9 +47,14 @@ public class NameSpace
   */
   public Optional<Datum> lookup(Symbol name)
   {
-    return Optional.ofNullable(bindings.get(name));
+    var val = bindings.get(name);
+    if (val == null)
+      return (parent == null) ? Optional.empty() : parent.lookup(name);
+    else
+      return Optional.of(val);
   }
   
-  private final String name;
+  private final NameSpace parent;
+  private final Symbol name;
   private final Map<Symbol, Datum> bindings = new IdentityHashMap<>();
 }

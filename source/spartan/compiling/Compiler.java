@@ -93,7 +93,7 @@ public class Compiler
   private Inst compileGlobalVarRef(Symbol s, Inst next)
   {
     if (s instanceof QualifiedSymbol qs)
-      return new LoadGlobal(qs.nameSpace().intern(), Symbol.of(qs.bareName()), positionMap.get(qs), next);
+      return new LoadGlobal(Symbol.of(qs.nameSpace()), Symbol.of(qs.bareName()), positionMap.get(qs), next);
     else
       return new LoadGlobal(spartan.Runtime.currentNS().name(), s.intern(), positionMap.get(s), next);
   }
@@ -182,11 +182,11 @@ public class Compiler
   private Inst compileSetGlobalVar(Symbol s, Inst next)
   {
     if (s instanceof QualifiedSymbol qs)
-      return new StoreGlobal(qs.nameSpace().intern(), Symbol.of(qs.bareName()), positionMap.get(qs), new LoadConst(Nil.VALUE, next));
+      return new StoreGlobal(Symbol.of(qs.nameSpace()), Symbol.of(qs.bareName()), positionMap.get(qs), new LoadConst(Nil.VALUE, next));
     else
       return new StoreGlobal(spartan.Runtime.currentNS().name(), s.intern(), positionMap.get(s), new LoadConst(Nil.VALUE, next));
   }
-    
+  
   private Inst compileDef(List exp, Scope scope, Inst next)
   {
     if (!(exp.length() == 3 && exp.cadr() instanceof Symbol s))
@@ -1101,6 +1101,59 @@ public class Compiler
            new PopFrame());
   }
   
+  /* Compile expressions in a namespace
+   
+     Syntax: (namespace <symbol> body...)
+  
+  */
+  private Inst compileInNS(List exp, Scope scope, boolean tail, Inst next)
+  {
+    if (exp.length() < 2 || !(exp.cadr() instanceof Symbol ns))
+      throw malformedExp(exp);
+    
+    spartan.Runtime.enterNS(ns.intern());
+    var result = compileSequence(exp.cddr(), scope, false, new LoadConst(Nil.VALUE, next));
+    spartan.Runtime.leaveNS();
+    return result;
+  }
+  
+  /* Compile a "using" form
+   
+     Syntax: (using <namespace> (<var1> ... <varN>))
+     
+     Compilation:
+     
+     load-global <namespace> <var1>
+     store-global <current-namespace> <var1>
+     ...
+     
+  */
+  private Inst compileUsingForm(List exp, Scope scope, boolean tail, Inst next)
+  {
+    if (!(exp.length() == 3 && exp.cadr() instanceof Symbol ns && exp.caddr() instanceof List vars && checkUsingListForm(vars)))
+      throw malformedExp(exp);
+    
+    return compileUsingForm(ns.intern(), vars, next);
+  }
+  
+  public boolean checkUsingListForm(List list)
+  {
+    for (; !list.isEmpty(); list = list.cdr())
+      if (!(list.car() instanceof Symbol s))
+        return false;
+    return true;
+  }
+  
+  private Inst compileUsingForm(Symbol ns, List vars, Inst next)
+  {
+    if (vars.isEmpty())
+      return next;
+    var s = ((Symbol)vars.car()).intern();
+    return new LoadGlobal(ns, s, positionMap.get(s),
+           new StoreGlobal(spartan.Runtime.currentNS().name(), s, null,
+           compileUsingForm(ns, vars.cdr(), next)));
+  }
+  
   /* Compile a combination (i.e., special forms, procedure application, and macro expansion. */
   
   private Inst compileCombo(List exp, Scope scope, boolean tail, Inst next)
@@ -1145,6 +1198,10 @@ public class Compiler
         return compileRec(exp, scope, tail, next);
       if (s.equals(Symbol.RETURN))
         return compileReturn(exp, scope, tail, next);
+      if (s.equals(Symbol.NAMESPACE))
+        return compileInNS(exp, scope, tail, next);
+      if (s.equals(Symbol.USING))
+        return compileUsingForm(exp, scope, tail, next);
       // Handle macro expansion
       //if (isMacro(s))
         //return compileApplyMacro(exp, scope, tail, next);

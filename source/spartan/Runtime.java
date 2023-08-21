@@ -14,24 +14,34 @@ public final class Runtime
     return currentNS;
   }
   
-  public static void enterNS(String nsName)
+  public static void currentNS(NameSpace ns)
   {
-    currentNS = getOrCreateNS(nsName);
+    currentNS = ns;
   }
   
-  public static Optional<NameSpace> getNS(String name)
+  public static void enterNS(Symbol ns)
   {
-    return Optional.ofNullable(nameSpaces.get(name));
+    currentNS = getOrCreateNS(ns, currentNS);
   }
   
-  public static NameSpace getOrCreateNS(String name)
+  public static void leaveNS()
   {
-    return nameSpaces.computeIfAbsent(name, (dummy) -> new NameSpace(name));
+    currentNS = currentNS.parent();
   }
-    
+  
+  public static Optional<NameSpace> getNS(Symbol ns)
+  {
+    return Optional.ofNullable(nameSpaces.get(ns));
+  }
+  
+  public static NameSpace getOrCreateNS(Symbol ns, NameSpace parent)
+  {
+    return nameSpaces.computeIfAbsent(ns, (s) -> new NameSpace(s, parent));
+  }
+  
   private Runtime() { }
   
-  private static final Map<String, NameSpace> nameSpaces = new IdentityHashMap<>();
+  private static final Map<Symbol, NameSpace> nameSpaces = new IdentityHashMap<>();
   
   //private static NameSpace coreNS = new CoreLib();
   //private static NameSpace userNS = new NameSpace("user");
@@ -41,9 +51,9 @@ public final class Runtime
   {
     var coreNS = new CoreNS();
     nameSpaces.put(coreNS.name(), coreNS);
-    var userNS = new NameSpace("user");
+    var userNS = new NameSpace(Symbol.of("user"), coreNS);
     nameSpaces.put(userNS.name(), userNS);
-    userNS.importAll(coreNS);
+    //userNS.importAll(coreNS);
     currentNS = userNS;
   }
 }
