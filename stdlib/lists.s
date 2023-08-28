@@ -5,7 +5,8 @@
 ;
 ; Given a procedure f and a list xs = (x1 x2 ... xN), (map f xs) returns a new list ((f x1) (f x2) ... (f xN))
 
-(namespace list
+
+(namespace core
   
   (defun map (f xs)
     (if (empty? xs) ()
@@ -145,6 +146,6 @@
             (let ([order (c (car x) (car y))])   ; compare the first elements
               (if (/= order 0) order             ; the ordering of the first pair of unequal elements determines the result
                 (compare (cdr x) (cdr y) c)))])) ; first elements equal, compare rest
-)
+))
 
  

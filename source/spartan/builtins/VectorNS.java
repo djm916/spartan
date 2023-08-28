@@ -6,9 +6,9 @@ import static spartan.builtins.VectorLib.*;
 
 public final class VectorNS extends NameSpace
 {
-  public VectorNS(NameSpace parent)
+  public VectorNS()
   {
-    super(Symbol.of("vector"), parent);
+    super(Symbol.of("vector"));
   }
   
   {

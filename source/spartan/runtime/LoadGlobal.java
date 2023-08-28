@@ -16,6 +16,7 @@ public final class LoadGlobal extends Inst
   
   public final void eval(VirtualMachine vm)
   {
+    //System.out.println("reference to global variable " + bareName.repr() + " in namespace " + nameSpace.repr());
     vm.result = spartan.Runtime.getNS(nameSpace)
                 .flatMap(ns -> ns.lookup(bareName))
                 .orElseThrow(() -> new UnboundVariable(nameSpace, bareName, position));

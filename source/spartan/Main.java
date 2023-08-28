@@ -57,16 +57,15 @@ public class Main implements Callable<Integer>
     else {
       // TODO: Load JNI libraries on other OS than Windows
     }
-        
+
     // Bootstrap global environment with built-in definitions and procedures
-    /*
     try {
-      Loader.load(Config.BUILTINS_FILE_PATH);
+      spartan.Runtime.boot();
     }
     catch (LoadError err) {
       System.err.println(err.getMessage());
     }
-    */
+    
     // 
     if (scriptPath != null) {
       // Bind symbol containing the list of script arguments, as string/text values
@@ -74,12 +73,14 @@ public class Main implements Callable<Integer>
       
       try {
         Loader.load(scriptPath);
+        System.out.println("in Main, after Loader.load(scriptPath), current namespace = " + spartan.Runtime.currentNS().name().repr());
       }
       catch (LoadError err) {
         System.err.println(err.getMessage());
       }
     }
     else {
+      System.out.println("in Main(), before Repl.start(), current namespace = " + spartan.Runtime.currentNS().name().repr());
       Repl.start();
     }
 

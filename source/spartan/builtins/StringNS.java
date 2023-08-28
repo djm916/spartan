@@ -6,9 +6,9 @@ import static spartan.builtins.StringLib.*;
 
 public final class StringNS extends NameSpace
 {
-  public StringNS(NameSpace parent)
+  public StringNS()
   {
-    super(Symbol.of("string"), parent);
+    super(Symbol.of("string"));
   }
   
   {

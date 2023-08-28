@@ -8,9 +8,9 @@ import static spartan.builtins.PortLib.*;
 
 public final class PortNS extends NameSpace
 {
-  public PortNS(NameSpace parent)
+  public PortNS()
   {
-    super(Symbol.of("port"), parent);
+    super(Symbol.of("port"));
   }
   
   {

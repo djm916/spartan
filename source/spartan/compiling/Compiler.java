@@ -1039,17 +1039,16 @@ public class Compiler
      is intended to generate code rather than data. It receives
      unevaluated expressions as arguments and returns an expression
      which is then compiled and evaluated. 
-  
+  */
 
   private Inst compileDefMacro(List exp, Scope scope, Inst next)
   {
     if (!(exp.length() >= 4 && exp.cadr() instanceof Symbol symb && exp.caddr() instanceof List params && checkParamListForm(params)))
       throw malformedExp(exp);
     var body = exp.cdddr();    
-    MacroEnv.bind(symb, new Macro(makeProcedure(params, body, Scope.EMPTY)));
+    spartan.Runtime.defMacro(symb, new Macro(makeProcedure(params, body, Scope.EMPTY)));
     return new LoadConst(Nil.VALUE, next);
   }
-  */
   
   /* Compile a macro application
   
@@ -1059,13 +1058,13 @@ public class Compiler
      
      Applies the macro procedure to the list of (unevaluated) arguments,
      and compiles the code returned by the macro.
-  
+  */
   private Inst compileApplyMacro(List exp, Scope scope, boolean tail, Inst next)
   {
     var symb = (Symbol) exp.car();
     var args = exp.cdr();
-    var macro = MacroEnv.lookup(symb).get();
-    
+    var macro = spartan.Runtime.lookupMacro(symb).get();
+        
     try {
       var xform = macro.apply(vm, args);
       if (Config.LOG_DEBUG)
@@ -1077,13 +1076,7 @@ public class Compiler
       throw err;
     }
   }
-  */
-  
-  private boolean isMacro(Symbol s)
-  {
-    return false;
-  }
-  
+    
   /**
    * (return exp)
    *
@@ -1111,9 +1104,10 @@ public class Compiler
     if (exp.length() < 2 || !(exp.cadr() instanceof Symbol ns))
       throw malformedExp(exp);
     
+    var saveCurrentNS = spartan.Runtime.currentNS();
     spartan.Runtime.enterNS(ns.intern());
     var result = compileSequence(exp.cddr(), scope, false, new LoadConst(Nil.VALUE, next));
-    spartan.Runtime.leaveNS();
+    spartan.Runtime.currentNS(saveCurrentNS);
     return result;
   }
   
@@ -1177,8 +1171,8 @@ public class Compiler
         return compileDef(exp, scope, next);
       if (s.equals(Symbol.DEFUN))
         return compileDefun(exp, scope, next);
-      //if (s.equals(Symbol.DEFMACRO))
-        //return compileDefMacro(exp, scope, next);
+      if (s.equals(Symbol.DEFMACRO))
+        return compileDefMacro(exp, scope, next);
       if (s.equals(Symbol.FUN))
         return compileFun(exp, scope, next);
       if (s.equals(Symbol.QUOTE))
@@ -1205,9 +1199,9 @@ public class Compiler
         return compileInNS(exp, scope, tail, next);
       if (s.equals(Symbol.USING))
         return compileUsingForm(exp, scope, tail, next);
-      // Handle macro expansion
-      //if (isMacro(s))
-        //return compileApplyMacro(exp, scope, tail, next);
+      // Handle macros
+      if (spartan.Runtime.lookupMacro(s).isPresent())
+        return compileApplyMacro(exp, scope, tail, next);
     }
     
     // Handle procedure application

@@ -9,25 +9,24 @@ import java.util.Optional;
 
 public class NameSpace
 {
-  public NameSpace(Symbol name, NameSpace parent)
+  public NameSpace(Symbol name)
   {
     this.name = name;
-    this.parent = parent;
   }
     
   public Symbol name()
   {
     return name;
   }
-  
-  public NameSpace parent()
+    
+  public void importUnchecked(NameSpace ns)
   {
-    return parent;
+    this.bindings.putAll(ns.bindings);
   }
   
-  public void importAll(NameSpace other)
+  public void importUnchecked(NameSpace ns, Symbol s)
   {
-    this.bindings.putAll(other.bindings);
+    this.bindings.put(s, ns.bindings.get(s));
   }
   
   /** Bind a variable to a given value.
@@ -45,14 +44,9 @@ public class NameSpace
   */
   public Optional<Datum> lookup(Symbol name)
   {
-    var val = bindings.get(name);
-    if (val == null)
-      return (parent == null) ? Optional.empty() : parent.lookup(name);
-    else
-      return Optional.of(val);
+    return Optional.ofNullable(bindings.get(name));
   }
   
-  private final NameSpace parent;
   private final Symbol name;
   private final Map<Symbol, Datum> bindings = new IdentityHashMap<>();
 }

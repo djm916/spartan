@@ -14,7 +14,7 @@ public final class CoreNS extends NameSpace
   
   private CoreNS()
   {
-    super(Symbol.of("core"), null);
+    super(Symbol.of("core"));
   }
   
   private static CoreNS instance = null;
@@ -114,7 +114,7 @@ public final class CoreNS extends NameSpace
     bind(Symbol.of("format-decimal"), CoreLib.FORMAT_DECIMAL);
     
     /* List procedures */
-
+    
     bind(Symbol.of("list"), ListLib.MAKE_LIST);
     bind(Symbol.of("cons"), ListLib.CONS);
     bind(Symbol.of("car"), ListLib.CAR);
@@ -130,8 +130,6 @@ public final class CoreNS extends NameSpace
     //bind(Symbol.of("remove"), ListLib.REMOVED);
     bind(Symbol.of("set-car!"), ListLib.SET_CAR);
     bind(Symbol.of("set-cdr!"), ListLib.SET_CDR);
-    //bind(Symbol.of("length"), ListLib.LENGTH);
-    //bind(Symbol.of("empty?"), ListLib.IS_EMPTY);
     //bind(Symbol.of("nth"), ListLib.NTH);
     //bind(Symbol.of("set-nth!"), ListLib.SET_NTH);
     bind(Symbol.of("nth-tail"), ListLib.NTH_TAIL);
