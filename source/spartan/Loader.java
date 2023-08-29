@@ -63,7 +63,7 @@ public final class Loader
       var vm = new VirtualMachine();
       var compiler = new Compiler(vm);
       
-      System.out.println(String.format("in Loader.load(), before loading %s, current namespace = %s", path, spartan.Runtime.currentNS().name().repr()));
+      //System.out.println(String.format("in Loader.load(), before loading %s, current namespace = %s", path, spartan.Runtime.currentNS().name().repr()));
       
       try {        
         while (true) {
@@ -77,7 +77,7 @@ public final class Loader
         System.err.println(err);
       }
       
-      System.out.println(String.format("in Loader.load(), after loading %s, current namespace = %s", path, spartan.Runtime.currentNS().name().repr()));
+      //System.out.println(String.format("in Loader.load(), after loading %s, current namespace = %s", path, spartan.Runtime.currentNS().name().repr()));
     }
     catch (FileNotFoundException ex) {
       throw new LoadError(path.toString()); // No file was found

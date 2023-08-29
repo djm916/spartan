@@ -2,14 +2,15 @@ package spartan;
 
 import spartan.data.Symbol;
 import spartan.data.Datum;
+import spartan.data.List;
 import java.util.Map;
 import java.util.IdentityHashMap;
 import java.util.HashMap;
 import java.util.Optional;
 
-public class NameSpace
+public class Package
 {
-  public NameSpace(Symbol name)
+  public Package(Symbol name)
   {
     this.name = name;
   }
@@ -19,14 +20,25 @@ public class NameSpace
     return name;
   }
     
-  public void importUnchecked(NameSpace ns)
+  public void importUnchecked(Package pkg)
   {
-    this.bindings.putAll(ns.bindings);
+    this.vars.putAll(pkg.vars);
   }
   
-  public void importUnchecked(NameSpace ns, Symbol s)
+  public void importUnchecked(Package pkg, Symbol s, Symbol r)
   {
-    this.bindings.put(s, ns.bindings.get(s));
+    this.vars.put(r, pkg.vars.get(s));
+  }
+  
+  public void importChecked(Package pkg, List vars)
+  {
+    /*
+    for (; !vars.isEmpty(); vars = vars.cdr()) {
+      if (!(vars.car() instanceof Symbol s))
+        throw new TypeMismatch();
+      bind(s, pkg.lookup(s));
+    }
+    */
   }
   
   /** Bind a variable to a given value.
@@ -35,7 +47,7 @@ public class NameSpace
   */
   public void bind(Symbol name, Datum val)
   {
-    bindings.put(name, val);
+    vars.put(name, val);
   }
   
   /** Lookup a variable by name, optionally returning its bound value.
@@ -44,9 +56,10 @@ public class NameSpace
   */
   public Optional<Datum> lookup(Symbol name)
   {
-    return Optional.ofNullable(bindings.get(name));
+    return Optional.ofNullable(vars.get(name));
   }
   
   private final Symbol name;
-  private final Map<Symbol, Datum> bindings = new IdentityHashMap<>();
+  private final Map<Symbol, Datum> vars = new IdentityHashMap<>();
+  private final Map<Symbol, Macro> macros = new HashMap<>();
 }

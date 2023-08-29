@@ -2,22 +2,22 @@ package spartan.data;
 
 public final class QualifiedSymbol extends Symbol
 {
-  private final String nameSpace;   // namespace (qualified) portion
-  private final String bareName;    // bare (unqualified) portion
+  private final String packageName;   // namespace (qualified) portion
+  private final String bareName;      // bare (unqualified) portion
   
   /**
    * Create a new, uninterned qualified symbol
    */
-  public QualifiedSymbol(String name, String nameSpace, String bareName)
+  public QualifiedSymbol(String name, String packageName, String bareName)
   {
     super(name);
-    this.nameSpace = nameSpace;
+    this.packageName = packageName;
     this.bareName = bareName;
   }
     
-  public String nameSpace()
+  public String packageName()
   {
-    return nameSpace;
+    return packageName;
   }
   
   public String bareName()

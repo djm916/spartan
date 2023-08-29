@@ -1,12 +1,12 @@
 package spartan.builtins;
 
-import spartan.NameSpace;
+import spartan.Package;
 import spartan.data.Symbol;
 import static spartan.builtins.VectorLib.*;
 
-public final class VectorNS extends NameSpace
+public final class VectorPkg extends Package
 {
-  public VectorNS()
+  public VectorPkg()
   {
     super(Symbol.of("vector"));
   }

@@ -69,18 +69,16 @@ public class Main implements Callable<Integer>
     // 
     if (scriptPath != null) {
       // Bind symbol containing the list of script arguments, as string/text values
-      spartan.Runtime.currentNS().bind(Symbol.of("command-line-args"), List.of(scriptArgs));
+      spartan.Runtime.currentPackage().bind(Symbol.of("command-line-args"), List.of(scriptArgs));
       
       try {
         Loader.load(scriptPath);
-        System.out.println("in Main, after Loader.load(scriptPath), current namespace = " + spartan.Runtime.currentNS().name().repr());
       }
       catch (LoadError err) {
         System.err.println(err.getMessage());
       }
     }
     else {
-      System.out.println("in Main(), before Repl.start(), current namespace = " + spartan.Runtime.currentNS().name().repr());
       Repl.start();
     }
 

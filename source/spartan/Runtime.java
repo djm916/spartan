@@ -1,10 +1,10 @@
 package spartan;
 
-import spartan.builtins.CoreNS;
-import spartan.builtins.ListNS;
-import spartan.builtins.VectorNS;
-import spartan.builtins.StringNS;
-import spartan.builtins.PortNS;
+import spartan.builtins.CorePkg;
+import spartan.builtins.ListPkg;
+import spartan.builtins.VectorPkg;
+import spartan.builtins.StringPkg;
+import spartan.builtins.PortPkg;
 import spartan.data.Symbol;
 import spartan.compiling.Macro;
 import java.util.Map;
@@ -14,34 +14,34 @@ import java.util.Optional;
 
 public final class Runtime
 {
-  public static NameSpace currentNS()
+  public static Package currentPackage()
   {
-    return currentNS;
+    return currentPackage;
   }
   
-  public static void currentNS(NameSpace ns)
+  public static void currentPackage(Package pkg)
   {
-    currentNS = ns;
+    currentPackage = pkg;
   }
   
-  public static void enterNS(Symbol ns)
+  public static void enterPackage(Symbol pkg)
   {
-    currentNS = getOrCreateNS(ns);
+    currentPackage = getOrCreatePackage(pkg);
   }
   
-  public static Optional<NameSpace> getNS(Symbol ns)
+  public static Optional<Package> getPackage(Symbol pkg)
   {
-    return Optional.ofNullable(nameSpaces.get(ns));
+    return Optional.ofNullable(packages.get(pkg));
   }
   
-  public static NameSpace getOrCreateNS(Symbol ns)
+  public static Package getOrCreatePackage(Symbol pkg)
   {
-    return nameSpaces.computeIfAbsent(ns, (s) -> new NameSpace(s));
+    return packages.computeIfAbsent(pkg, (s) -> new Package(s));
   }
   
-  public static void putNS(NameSpace ns)
+  public static void addPackage(Package pkg)
   {
-    nameSpaces.put(ns.name(), ns);
+    packages.put(pkg.name(), pkg);
   }
   
   public static Optional<Macro> lookupMacro(Symbol name)
@@ -56,29 +56,20 @@ public final class Runtime
   
   public static void boot()
   {
-    // initialize "core" namespace with primitive builtins
-    var coreNS = CoreNS.getInstance();
-    putNS(coreNS);
-    putNS(new VectorNS());
-    putNS(new StringNS());
-    putNS(new PortNS());
-    // initialize "user" namespace
-    var userNS = getOrCreateNS(Symbol.of("user"));
-    userNS.importUnchecked(coreNS);
-    //userNS.importUnchecked(listNS);
-    currentNS(userNS);
-    //System.out.println("in Runtime.init(), current namespace = " + currentNS().name().repr());    
-    Loader.load(Config.BUILTINS_FILE_PATH); 
-    userNS.importUnchecked(coreNS);
-    currentNS(userNS);
+    var corePkg = CorePkg.getInstance();
+    addPackage(corePkg);
+    addPackage(new VectorPkg());
+    addPackage(new StringPkg());
+    addPackage(new PortPkg());
+    currentPackage(corePkg);
+    Loader.load(Config.BUILTINS_FILE_PATH);
+    var userPkg = getOrCreatePackage(Symbol.of("user"));
+    userPkg.importUnchecked(corePkg);
+    currentPackage(userPkg);
   }
   
   private Runtime() { }
   
-  private static final Map<Symbol, NameSpace> nameSpaces = new IdentityHashMap<>();
-  
-  private static final Map<Symbol, Macro> macros = new HashMap<>();
-  
-  private static NameSpace currentNS;
-  
+  private static final Map<Symbol, Package> packages = new IdentityHashMap<>();
+  private static Package currentPackage;
 }

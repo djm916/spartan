@@ -1,12 +1,12 @@
 package spartan.builtins;
 
-import spartan.NameSpace;
+import spartan.Package;
 import spartan.data.Symbol;
 import static spartan.builtins.StringLib.*;
 
-public final class StringNS extends NameSpace
+public final class StringPkg extends Package
 {
-  public StringNS()
+  public StringPkg()
   {
     super(Symbol.of("string"));
   }

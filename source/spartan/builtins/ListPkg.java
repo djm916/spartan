@@ -1,12 +1,12 @@
 package spartan.builtins;
 
-import spartan.NameSpace;
+import spartan.Package;
 import spartan.data.Symbol;
 import static spartan.builtins.ListLib.*;
 
-public final class ListNS extends NameSpace
+public final class ListPkg extends Package
 {
-  public ListNS()
+  public ListPkg()
   {
     super(Symbol.of("list"));
   }

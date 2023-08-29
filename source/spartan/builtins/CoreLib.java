@@ -369,4 +369,24 @@ public final class CoreLib
       vm.popFrame();
     }
   };
+  
+  public static final Primitive IN_PACKAGE = new Primitive(1, false) {
+    public void apply(VirtualMachine vm) {
+      if (!(vm.popArg() instanceof Symbol pkg))
+        throw new TypeMismatch();
+      spartan.Runtime.enterPackage(pkg);
+      vm.result = Nil.VALUE;
+      vm.popFrame();
+    }
+  };
+  
+  public static final Primitive IMPORT = new Primitive(2, false) {
+    public void apply(VirtualMachine vm) {
+      if (!(vm.popArg() instanceof Symbol pkg && vm.popArg() instanceof List vars))
+        throw new TypeMismatch();
+      //spartan.Runtime.currentPackage().importChecked(spartan.Runtime.getPackage(pkg), vars);
+      vm.result = Nil.VALUE;
+      vm.popFrame();
+    }
+  };
 }
