@@ -6,23 +6,23 @@ import spartan.errors.UnboundVariable;
 
 public final class LoadGlobal extends Inst
 {
-  public LoadGlobal(Symbol packageName, Symbol bareName, Position position, Inst next)
+  public LoadGlobal(Symbol nameSpace, Symbol baseName, Position position, Inst next)
   {
     super(next);
-    this.packageName = packageName;
-    this.bareName = bareName;
+    this.nameSpace = nameSpace;
+    this.baseName = baseName;
     this.position = position;
   }
   
   public final void eval(VirtualMachine vm)
   {
-    vm.result = spartan.Runtime.getPackage(packageName)
-                .flatMap(ns -> ns.lookup(bareName))
-                .orElseThrow(() -> new UnboundVariable(packageName, bareName, position));
+    vm.result = spartan.Runtime.getNS(nameSpace)
+                .flatMap(ns -> ns.lookup(baseName))
+                .orElseThrow(() -> new UnboundVariable(nameSpace, baseName, position));
     vm.control = next;
   }
   
-  private final Symbol packageName;
-  private final Symbol bareName;
+  private final Symbol nameSpace;
+  private final Symbol baseName;
   private final Position position;
 }

@@ -370,11 +370,11 @@ public final class CoreLib
     }
   };
   
-  public static final Primitive IN_PACKAGE = new Primitive(1, false) {
+  public static final Primitive NAMESPACE = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Symbol pkg))
         throw new TypeMismatch();
-      spartan.Runtime.enterPackage(pkg);
+      spartan.Runtime.enterNS(pkg);
       vm.result = Nil.VALUE;
       vm.popFrame();
     }

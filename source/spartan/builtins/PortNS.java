@@ -1,14 +1,14 @@
 package spartan.builtins;
 
-import spartan.Package;
+import spartan.Namespace;
 import spartan.data.Symbol;
 import spartan.data.InputPort;
 import spartan.data.OutputPort;
 import static spartan.builtins.PortLib.*;
 
-public final class PortPkg extends Package
+public final class PortNS extends Namespace
 {
-  public PortPkg()
+  public PortNS()
   {
     super(Symbol.of("port"));
   }

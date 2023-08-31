@@ -1,75 +1,64 @@
 package spartan;
 
-import spartan.builtins.CorePkg;
-import spartan.builtins.ListPkg;
-import spartan.builtins.VectorPkg;
-import spartan.builtins.StringPkg;
-import spartan.builtins.PortPkg;
+import spartan.builtins.CoreNS;
+import spartan.builtins.ListNS;
+import spartan.builtins.VectorNS;
+import spartan.builtins.StringNS;
+import spartan.builtins.PortNS;
 import spartan.data.Symbol;
-import spartan.compiling.Macro;
 import java.util.Map;
 import java.util.IdentityHashMap;
-import java.util.HashMap;
 import java.util.Optional;
 
 public final class Runtime
 {
-  public static Package currentPackage()
+  public static Namespace currentNS()
   {
-    return currentPackage;
+    return currentNS;
   }
   
-  public static void currentPackage(Package pkg)
+  public static void currentNS(Namespace pkg)
   {
-    currentPackage = pkg;
+    currentNS = pkg;
   }
   
-  public static void enterPackage(Symbol pkg)
+  public static void enterNS(Symbol pkg)
   {
-    currentPackage = getOrCreatePackage(pkg);
+    currentNS = getOrCreateNS(pkg);
   }
   
-  public static Optional<Package> getPackage(Symbol pkg)
+  public static Optional<Namespace> getNS(Symbol pkg)
   {
-    return Optional.ofNullable(packages.get(pkg));
+    return Optional.ofNullable(nameSpaces.get(pkg));
   }
   
-  public static Package getOrCreatePackage(Symbol pkg)
+  public static Namespace getOrCreateNS(Symbol pkg)
   {
-    return packages.computeIfAbsent(pkg, (s) -> new Package(s));
+    return nameSpaces.computeIfAbsent(pkg, (s) -> new Namespace(s));
   }
   
-  public static void addPackage(Package pkg)
+  public static void addNS(Namespace pkg)
   {
-    packages.put(pkg.name(), pkg);
+    nameSpaces.put(pkg.name(), pkg);
   }
-  
-  public static Optional<Macro> lookupMacro(Symbol name)
-  {
-    return Optional.ofNullable(macros.get(name));
-  }
-  
-  public static void defMacro(Symbol name, Macro val)
-  {
-    macros.put(name, val);
-  }
-  
+    
   public static void boot()
   {
-    var corePkg = CorePkg.getInstance();
-    addPackage(corePkg);
-    addPackage(new VectorPkg());
-    addPackage(new StringPkg());
-    addPackage(new PortPkg());
-    currentPackage(corePkg);
+    var coreNS = CoreNS.getInstance();
+    addNS(coreNS);
+    addNS(new ListNS());
+    addNS(new VectorNS());
+    addNS(new StringNS());
+    addNS(new PortNS());
+    currentNS(coreNS);
     Loader.load(Config.BUILTINS_FILE_PATH);
-    var userPkg = getOrCreatePackage(Symbol.of("user"));
-    userPkg.importUnchecked(corePkg);
-    currentPackage(userPkg);
+    var userNS = getOrCreateNS(Symbol.of("user"));
+    userNS.importUnchecked(coreNS);
+    currentNS(userNS);
   }
   
   private Runtime() { }
   
-  private static final Map<Symbol, Package> packages = new IdentityHashMap<>();
-  private static Package currentPackage;
+  private static final Map<Symbol, Namespace> nameSpaces = new IdentityHashMap<>();
+  private static Namespace currentNS;
 }

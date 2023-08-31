@@ -93,9 +93,9 @@ public class Compiler
   private Inst compileGlobalVarRef(Symbol s, Inst next)
   {
     if (s instanceof QualifiedSymbol qs)
-      return new LoadGlobal(Symbol.of(qs.packageName()), Symbol.of(qs.bareName()), positionMap.get(qs), next);
+      return new LoadGlobal(Symbol.of(qs.nameSpace()), Symbol.of(qs.baseName()), positionMap.get(qs), next);
     else
-      return new LoadGlobal(spartan.Runtime.currentPackage().name(), s.intern(), positionMap.get(s), next);
+      return new LoadGlobal(spartan.Runtime.currentNS().name(), s.intern(), positionMap.get(s), next);
   }
   
   /* Compile the "set!" special form, a generalized assignment statement.
@@ -182,9 +182,9 @@ public class Compiler
   private Inst compileSetGlobalVar(Symbol s, Inst next)
   {
     if (s instanceof QualifiedSymbol qs)
-      return new StoreGlobal(Symbol.of(qs.packageName()), Symbol.of(qs.bareName()), positionMap.get(qs), new LoadConst(Nil.VALUE, next));
+      return new StoreGlobal(Symbol.of(qs.nameSpace()), Symbol.of(qs.baseName()), positionMap.get(qs), new LoadConst(Nil.VALUE, next));
     else
-      return new StoreGlobal(spartan.Runtime.currentPackage().name(), s.intern(), positionMap.get(s), new LoadConst(Nil.VALUE, next));
+      return new StoreGlobal(spartan.Runtime.currentNS().name(), s.intern(), positionMap.get(s), new LoadConst(Nil.VALUE, next));
   }
   
   private Inst compileDef(List exp, Scope scope, Inst next)
@@ -193,7 +193,7 @@ public class Compiler
       throw malformedExp(exp);
     var init = exp.caddr();  
     return compile(init, scope, false,
-           new StoreGlobal(spartan.Runtime.currentPackage().name(), s.intern(), positionMap.get(s),
+           new StoreGlobal(spartan.Runtime.currentNS().name(), s.intern(), positionMap.get(s),
            new LoadConst(Nil.VALUE, next)));
   }
   
@@ -1039,7 +1039,7 @@ public class Compiler
      is intended to generate code rather than data. It receives
      unevaluated expressions as arguments and returns an expression
      which is then compiled and evaluated. 
-  */
+
 
   private Inst compileDefMacro(List exp, Scope scope, Inst next)
   {
@@ -1049,6 +1049,8 @@ public class Compiler
     spartan.Runtime.defMacro(symb, new Macro(makeProcedure(params, body, Scope.EMPTY)));
     return new LoadConst(Nil.VALUE, next);
   }
+  */
+
   
   /* Compile a macro application
   
@@ -1058,7 +1060,7 @@ public class Compiler
      
      Applies the macro procedure to the list of (unevaluated) arguments,
      and compiles the code returned by the macro.
-  */
+
   private Inst compileApplyMacro(List exp, Scope scope, boolean tail, Inst next)
   {
     var symb = (Symbol) exp.car();
@@ -1076,7 +1078,8 @@ public class Compiler
       throw err;
     }
   }
-    
+  */
+  
   /**
    * (return exp)
    *
@@ -1093,19 +1096,7 @@ public class Compiler
     return compile(exp.cadr(), scope, false,
            new PopFrame());
   }
-  
-  public boolean isMacro(Symbol s)
-  {
-    if (s instanceof QualifiedSymbol qs)
-      return spartan.Runtime.getPackage(qs.packageName())
-             .flatMap(pkg -> pkg.lookupMacro(qs.bareName()))
-             .isPresent();
-    else
-      return spartan.Runtime.currentPackage()
-             .lookupMacro(s.bareName())
-             .isPresent();
-  }
-  
+    
   /* Compile a combination (i.e., special forms, procedure application, and macro expansion. */
   
   private Inst compileCombo(List exp, Scope scope, boolean tail, Inst next)
@@ -1126,8 +1117,8 @@ public class Compiler
         return compileDef(exp, scope, next);
       if (s.equals(Symbol.DEFUN))
         return compileDefun(exp, scope, next);
-      if (s.equals(Symbol.DEFMACRO))
-        return compileDefMacro(exp, scope, next);
+      //if (s.equals(Symbol.DEFMACRO))
+        //return compileDefMacro(exp, scope, next);
       if (s.equals(Symbol.FUN))
         return compileFun(exp, scope, next);
       if (s.equals(Symbol.QUOTE))
@@ -1151,8 +1142,8 @@ public class Compiler
       if (s.equals(Symbol.RETURN))
         return compileReturn(exp, scope, tail, next);
       // Handle macros
-      if (isMacro(s))
-        return compileApplyMacro(exp, scope, tail, next);
+      //if (isMacro(s))
+        //return compileApplyMacro(exp, scope, tail, next);
     }
     
     // Handle procedure application

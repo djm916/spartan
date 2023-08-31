@@ -4,12 +4,12 @@
 ; This file is pre-loaded when the interpreter starts and
 ; itself loads several other files.
 
-(in-package 'core)
+(namespace 'core)
 
-(defmacro unless (test & body)
-  `(if ,test
-    nil
-    (do ,@body)))
+;(defmacro unless (test & body)
+;  `(if ,test
+;    nil
+;    (do ,@body)))
     
 (defun memoize (proc) 
   (let ((value-ready? false)
@@ -20,12 +20,12 @@
         (set! value-ready? true))
       cached-value)))
 
-(defmacro delay (exp) `(memoize (fun () ,exp)))
+;(defmacro delay (exp) `(memoize (fun () ,exp)))
 
 (defun force (p) (p))
 
 ;(load "stdlib/test.s")
-(load "stdlib/lists.s")
+;(load "stdlib/lists.s")
 ;(load "stdlib/vectors.s")
 ;(load "stdlib/defstruct.s")
 ;(load "stdlib/streams.s")

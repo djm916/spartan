@@ -1,23 +1,23 @@
 package spartan.builtins;
 
 import spartan.data.*;
-import spartan.Package;
+import spartan.Namespace;
 
-public final class CorePkg extends Package
+public final class CoreNS extends Namespace
 {
-  public static CorePkg getInstance()
+  public static CoreNS getInstance()
   {
     if (instance == null)
-      instance = new CorePkg();
+      instance = new CoreNS();
     return instance;
   }
   
-  private CorePkg()
+  private CoreNS()
   {
     super(Symbol.of("core"));
   }
   
-  private static CorePkg instance = null;
+  private static CoreNS instance = null;
   
   // populate this namespace
   {
@@ -135,7 +135,7 @@ public final class CorePkg extends Package
     bind(Symbol.of("nth-tail"), ListLib.NTH_TAIL);
     bind(Symbol.of("set-nth-tail!"), ListLib.SET_NTH_TAIL);
     
-    bind(Symbol.of("in-package"), CoreLib.IN_PACKAGE);
+    bind(Symbol.of("namespace"), CoreLib.NAMESPACE);
     bind(Symbol.of("import"), CoreLib.IMPORT);
   }
 }
