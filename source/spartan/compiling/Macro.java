@@ -1,12 +1,13 @@
 package spartan.compiling;
 
 import spartan.data.Datum;
+import spartan.data.IFun;
 import spartan.data.List;
 import spartan.runtime.VirtualMachine;
 import spartan.runtime.Inst;
 import spartan.errors.WrongNumberArgs;
 
-public final class Macro
+public final class Macro implements Datum, IFun
 {
   Macro(Procedure proc)
   {
@@ -14,17 +15,33 @@ public final class Macro
     this.body = proc.body();
   }
   
-  Datum apply(VirtualMachine vm, List args)
+  @Override // Datum
+  public String type()
   {
-    int numArgs = args.length();
-    if (!sig.matches(numArgs))
-      throw new WrongNumberArgs();
-    vm.pushFrame(null, null);
-    vm.args = args;
+    return "macro";
+  }
+  
+  @Override // IFun
+  public void apply(VirtualMachine vm)
+  {
     vm.eval(body);
+  }
+  
+  @Override // IFun
+  public boolean arityMatches(int numArgs)
+  {
+    return sig.matches(numArgs);
+  }
+  
+  Datum expand(VirtualMachine vm, List args)
+  {
+    vm.pushFrame(null, null);
+    vm.result = this;
+    vm.args = args;
+    vm.apply(args.length());
     return vm.result;
   }
   
-  private Signature sig;
-  private Inst body;
+  private final Signature sig;
+  private final Inst body;
 }

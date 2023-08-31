@@ -17,31 +17,31 @@ public final class Runtime
     return currentNS;
   }
   
-  public static void currentNS(Namespace pkg)
+  public static void currentNS(Namespace ns)
   {
-    currentNS = pkg;
+    currentNS = ns;
   }
   
-  public static void enterNS(Symbol pkg)
+  public static void enterNS(Symbol ns)
   {
-    currentNS = getOrCreateNS(pkg);
+    currentNS = getOrCreateNS(ns);
   }
   
-  public static Optional<Namespace> getNS(Symbol pkg)
+  public static Optional<Namespace> getNS(Symbol ns)
   {
-    return Optional.ofNullable(nameSpaces.get(pkg));
+    return Optional.ofNullable(nameSpaces.get(ns));
   }
   
-  public static Namespace getOrCreateNS(Symbol pkg)
+  public static Namespace getOrCreateNS(Symbol ns)
   {
-    return nameSpaces.computeIfAbsent(pkg, (s) -> new Namespace(s));
+    return nameSpaces.computeIfAbsent(ns, (s) -> new Namespace(s));
   }
   
-  public static void addNS(Namespace pkg)
+  public static void addNS(Namespace ns)
   {
-    nameSpaces.put(pkg.name(), pkg);
+    nameSpaces.put(ns.name(), ns);
   }
-    
+  
   public static void boot()
   {
     var coreNS = CoreNS.getInstance();

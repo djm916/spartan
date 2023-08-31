@@ -11,6 +11,7 @@ import spartan.errors.WrongNumberArgs;
 import spartan.runtime.VirtualMachine;
 import spartan.Config;
 import java.util.logging.Logger;
+import java.util.Optional;
 
 /**
  * Compiles source expressions into executable bytecodes.
@@ -1029,56 +1030,6 @@ public class Compiler
                compileBody(body, scope,
                new PopFrame())))));
   }
-
-  /* Compile the "defmacro" special form.
-     
-     Syntax: (defmacro f (param...) body...)
-             (defmacro f (param... & rest) body...)
-     
-     Creates a macro, which is essentially a regular procedure, but
-     is intended to generate code rather than data. It receives
-     unevaluated expressions as arguments and returns an expression
-     which is then compiled and evaluated. 
-
-
-  private Inst compileDefMacro(List exp, Scope scope, Inst next)
-  {
-    if (!(exp.length() >= 4 && exp.cadr() instanceof Symbol symb && exp.caddr() instanceof List params && checkParamListForm(params)))
-      throw malformedExp(exp);
-    var body = exp.cdddr();    
-    spartan.Runtime.defMacro(symb, new Macro(makeProcedure(params, body, Scope.EMPTY)));
-    return new LoadConst(Nil.VALUE, next);
-  }
-  */
-
-  
-  /* Compile a macro application
-  
-     Syntax: (f args...)
-     
-       where f is a macro
-     
-     Applies the macro procedure to the list of (unevaluated) arguments,
-     and compiles the code returned by the macro.
-
-  private Inst compileApplyMacro(List exp, Scope scope, boolean tail, Inst next)
-  {
-    var symb = (Symbol) exp.car();
-    var args = exp.cdr();
-    var macro = spartan.Runtime.lookupMacro(symb).get();
-        
-    try {
-      var xform = macro.apply(vm, args);
-      if (Config.LOG_DEBUG)
-        log.info(() -> String.format("macro transform: %s => %s", exp.repr(), xform.repr()));
-      return compile(xform, scope, tail, next);
-    }
-    catch (Error err) {
-      err.setPosition(positionMap.get(exp));
-      throw err;
-    }
-  }
-  */
   
   /**
    * (return exp)
@@ -1096,7 +1047,60 @@ public class Compiler
     return compile(exp.cadr(), scope, false,
            new PopFrame());
   }
+  
+  /* Compile the "defmacro" special form.
+     
+     Syntax: (defmacro f (param...) body...)
+             (defmacro f (param... & rest) body...)
+     
+     Creates a macro, which is essentially a regular procedure, but
+     is intended to generate code rather than data. It receives
+     unevaluated expressions as arguments and returns an expression
+     which is then compiled and evaluated. 
+  */
+
+  private Inst compileDefmacro(List exp, Scope scope, Inst next)
+  {
+    if (!(exp.length() >= 4 && exp.cadr() instanceof Symbol symbol && exp.caddr() instanceof List params && checkParamListForm(params)))
+      throw malformedExp(exp);
+    var body = exp.cdddr();
+    spartan.Runtime.currentNS().bind(symbol.intern(), new Macro(makeProcedure(params, body, Scope.EMPTY)));
+    return new LoadConst(Nil.VALUE, next);
+  }
+  
+  /* Compile a macro call
+  
+     Syntax: (f args...)
+     
+       where f is a macro
+     
+     Applies the macro procedure to the list of (unevaluated) arguments,
+     and compiles the returned code.
+  */
+  private Inst compileExpandMacro(Macro macro, List exp, Scope scope, boolean tail, Inst next)
+  {
+    var args = exp.cdr();
     
+    try {
+      var xform = macro.expand(vm, args);
+      if (Config.LOG_DEBUG)
+        log.info(() -> String.format("macro transform: %s => %s", exp.repr(), xform.repr()));
+      return compile(xform, scope, tail, next);
+    }
+    catch (Error err) {
+      err.setPosition(positionMap.get(exp));
+      throw err;
+    }
+  }
+  
+  private Optional<Datum> lookupMacro(Symbol s)
+  {
+    if (s instanceof QualifiedSymbol qs)
+      return spartan.Runtime.getNS(Symbol.of(qs.nameSpace())).flatMap(ns -> ns.lookup(Symbol.of(qs.baseName())));
+    else
+      return spartan.Runtime.currentNS().lookup(s.intern());
+  }
+  
   /* Compile a combination (i.e., special forms, procedure application, and macro expansion. */
   
   private Inst compileCombo(List exp, Scope scope, boolean tail, Inst next)
@@ -1117,8 +1121,8 @@ public class Compiler
         return compileDef(exp, scope, next);
       if (s.equals(Symbol.DEFUN))
         return compileDefun(exp, scope, next);
-      //if (s.equals(Symbol.DEFMACRO))
-        //return compileDefMacro(exp, scope, next);
+      if (s.equals(Symbol.DEFMACRO))
+        return compileDefmacro(exp, scope, next);
       if (s.equals(Symbol.FUN))
         return compileFun(exp, scope, next);
       if (s.equals(Symbol.QUOTE))
@@ -1142,8 +1146,9 @@ public class Compiler
       if (s.equals(Symbol.RETURN))
         return compileReturn(exp, scope, tail, next);
       // Handle macros
-      //if (isMacro(s))
-        //return compileApplyMacro(exp, scope, tail, next);
+      var maybeMacro = lookupMacro(s);
+      if (maybeMacro.isPresent() && maybeMacro.get() instanceof Macro macro)
+        return compileExpandMacro(macro, exp, scope, tail, next);
     }
     
     // Handle procedure application

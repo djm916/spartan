@@ -24,8 +24,8 @@
             <Keywords name="Folders in comment, open"></Keywords>
             <Keywords name="Folders in comment, middle"></Keywords>
             <Keywords name="Folders in comment, close"></Keywords>
-            <Keywords name="Keywords1">def defun defmacro defstruct fun if cond else let let* letrec rec set! do while delay and or when unless load require inc! dec!</Keywords>
-            <Keywords name="Keywords2">nil true false not list vector apply force&#x000D;&#x000A;cons car cdr cadr cddr&#x000D;&#x000A;set-car! set-cdr!&#x000D;&#x000A;at set-at! length&#x000D;&#x000A;gensym&#x000D;&#x000A;print print-line&#x000D;&#x000A;map filter concat append &#x000D;&#x000A;length empty?&#x000D;&#x000A;quotient remainder&#x000D;&#x000A;numerator denominator&#x000D;&#x000A;list? vector? boolean? nil?&#x000D;&#x000A;</Keywords>
+            <Keywords name="Keywords1">def defun defmacro defstruct fn if cond else let let* letrec rec set! do while delay and or when unless load require inc! dec! namespace</Keywords>
+            <Keywords name="Keywords2">nil true false not list vector apply force&#x000D;&#x000A;cons car cdr cadr cddr&#x000D;&#x000A;set-car! set-cdr!&#x000D;&#x000A;at set-at! length&#x000D;&#x000A;gensym&#x000D;&#x000A;print print-line&#x000D;&#x000A;map filter concat append &#x000D;&#x000A;length empty?&#x000D;&#x000A;quotient remainder&#x000D;&#x000A;numerator denominator&#x000D;&#x000A;list? vector? boolean? nil? symbol?&#x000D;&#x000A;</Keywords>
             <Keywords name="Keywords3"></Keywords>
             <Keywords name="Keywords4"></Keywords>
             <Keywords name="Keywords5"></Keywords>

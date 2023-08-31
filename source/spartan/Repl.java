@@ -19,6 +19,7 @@ public final class Repl
       
       while (true) {
         try {
+          System.out.print(String.format("%s>", spartan.Runtime.currentNS().name().repr()));
           System.out.println(vm.eval(compiler.compile(reader.read())).repr());
         }
         catch (EOFException ex) {

@@ -65,6 +65,8 @@ public final class Loader
       
       //System.out.println(String.format("in Loader.load(), before loading %s, current namespace = %s", path, spartan.Runtime.currentNS().name().repr()));
       
+      var previousNS = spartan.Runtime.currentNS();
+      
       try {        
         while (true) {
           vm.eval(compiler.compile(reader.read()));
@@ -75,6 +77,9 @@ public final class Loader
       }
       catch (Error err) {
         System.err.println(err);
+      }
+      finally {
+        spartan.Runtime.currentNS(previousNS);
       }
       
       //System.out.println(String.format("in Loader.load(), after loading %s, current namespace = %s", path, spartan.Runtime.currentNS().name().repr()));
