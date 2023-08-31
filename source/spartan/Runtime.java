@@ -6,6 +6,7 @@ import spartan.builtins.VectorNS;
 import spartan.builtins.StringNS;
 import spartan.builtins.PortNS;
 import spartan.data.Symbol;
+import spartan.data.Datum;
 import java.util.Map;
 import java.util.IdentityHashMap;
 import java.util.Optional;
@@ -34,7 +35,7 @@ public final class Runtime
   
   public static Namespace getOrCreateNS(Symbol ns)
   {
-    return nameSpaces.computeIfAbsent(ns, (s) -> new Namespace(s));
+    return nameSpaces.computeIfAbsent(ns, (s) -> new Namespace(s, CoreNS.getInstance()));
   }
   
   public static void addNS(Namespace ns)
@@ -46,14 +47,15 @@ public final class Runtime
   {
     var coreNS = CoreNS.getInstance();
     addNS(coreNS);
-    addNS(new ListNS());
+    //addNS(new ListNS());
     addNS(new VectorNS());
-    addNS(new StringNS());
-    addNS(new PortNS());
+    //addNS(new StringNS());
+    //addNS(new PortNS());
     currentNS(coreNS);
     Loader.load(Config.BUILTINS_FILE_PATH);
-    var userNS = getOrCreateNS(Symbol.of("user"));
-    userNS.importUnchecked(coreNS);
+    var userNS = new Namespace(Symbol.of("user"), coreNS);
+    //userNS.importAllFrom(coreNS);
+    addNS(userNS);    
     currentNS(userNS);
   }
   

@@ -6,8 +6,6 @@ import spartan.runtime.VirtualMachine;
 
 public final class VectorLib
 {  
-  // (vector e...)
-  
   public static final Primitive FROM_LIST = new Primitive(0, true) {
     public void apply(VirtualMachine vm) {
       vm.result = Vector.fromList(vm.popRestArgs());
@@ -15,9 +13,7 @@ public final class VectorLib
     }
   };
   
-  // (vector/make n e)
-  
-  public static final Primitive NEW = new Primitive(2, false) {
+  public static final Primitive MAKE = new Primitive(2, false) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof IInt n))
         throw new TypeMismatch();      
@@ -25,8 +21,6 @@ public final class VectorLib
       vm.popFrame();      
     }
   };
-  
-  // (vector/ref v i)
   
   public static final Primitive REF = new Primitive(2, false) {
     public void apply(VirtualMachine vm) {
@@ -36,8 +30,6 @@ public final class VectorLib
       vm.popFrame();
     }
   };
-  
-  // (vector/set! v i e)
   
   public static final Primitive SET = new Primitive(3, false) {
     public void apply(VirtualMachine vm) {
@@ -50,8 +42,6 @@ public final class VectorLib
     }
   };
   
-  // (vector/length v)
-  
   public static final Primitive LENGTH = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Vector vector))
@@ -61,8 +51,6 @@ public final class VectorLib
     }
   };
   
-  // (vector/copy v)
-  
   public static final Primitive COPY = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Vector vector))
@@ -71,8 +59,6 @@ public final class VectorLib
       vm.popFrame();
     }
   };
-  
-  // (vector/append! v e)
   
   public static final Primitive APPEND = new Primitive(2, false) {
     public void apply(VirtualMachine vm) {
@@ -85,8 +71,6 @@ public final class VectorLib
     }
   };
   
-  // (vector/insert! v i e)
-  
   public static final Primitive INSERT = new Primitive(3, false) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Vector v && vm.popArg() instanceof IInt i))
@@ -97,8 +81,6 @@ public final class VectorLib
       vm.popFrame();
     }
   };
-  
-  // (vector/remove! v i)
   
   public static final Primitive REMOVE = new Primitive(2, false) {
     public void apply(VirtualMachine vm) {

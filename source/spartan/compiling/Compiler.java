@@ -143,11 +143,11 @@ public class Compiler
       throw malformedExp(exp);
     
     if (form.car() instanceof Symbol s && s.equals(Symbol.CAR))
-      return List.of(new Symbol("set-car!"), form.cadr(), exp.caddr());
+      return List.of(Symbol.Q_SET_CAR, form.cadr(), exp.caddr());
     else if (form.car() instanceof Symbol s && s.equals(Symbol.CDR))
-      return List.of(new Symbol("set-cdr!"), form.cadr(), exp.caddr());
+      return List.of(Symbol.Q_SET_CDR, form.cadr(), exp.caddr());
     else
-      return List.of(new Symbol("set-at!"), form.car(), form.cadr(), exp.caddr());
+      return List.of(Symbol.Q_SET_AT, form.car(), form.cadr(), exp.caddr());
   }
   
   /* Compile a variable assignment.
@@ -930,7 +930,7 @@ public class Compiler
       if (form.car() instanceof Symbol s && s.equals(Symbol.UNQUOTE)) {
         if (form.length() != 2)
           throw malformedExp(exp);
-        return List.cons(new Symbol("cons"),
+        return List.cons(Symbol.Q_CONS,
                List.cons(form.cadr(),
                List.cons(transformQuasiquote(list.cdr()),
                List.EMPTY)));
@@ -941,7 +941,7 @@ public class Compiler
       if (form.car() instanceof Symbol s && s.equals(Symbol.UNQUOTE_SPLICING)) {
         if (form.length() != 2)
           throw malformedExp(exp);
-        return List.cons(new Symbol("concat"),
+        return List.cons(Symbol.Q_CONCAT,
                List.cons(form.cadr(),
                List.cons(transformQuasiquote(list.cdr()),
                List.EMPTY)));
@@ -952,7 +952,7 @@ public class Compiler
     
     // (quasiquote x xs...) => (cons (quasiquote x) (quasiquote xs...))
 
-    return List.cons(new Symbol("cons"),
+    return List.cons(Symbol.Q_CONS,
            List.cons(transformQuasiquote(list.car()),
            List.cons(transformQuasiquote(list.cdr()),
            List.EMPTY)));

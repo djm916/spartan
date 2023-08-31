@@ -3,6 +3,9 @@ package spartan;
 import spartan.data.Symbol;
 import spartan.data.Datum;
 import spartan.data.List;
+import spartan.errors.InvalidArgument;
+import spartan.errors.UnboundVariable;
+import spartan.errors.MultipleDefinition;
 import java.util.Map;
 import java.util.IdentityHashMap;
 import java.util.Optional;
@@ -11,7 +14,14 @@ public class Namespace
 {
   public Namespace(Symbol name)
   {
+    //this.name = name;
+    this(name, null);
+  }
+  
+  public Namespace(Symbol name, Namespace parent)
+  {
     this.name = name;
+    this.parent = parent;
   }
     
   public Symbol name()
@@ -24,14 +34,30 @@ public class Namespace
     this.bindings.putAll(ns.bindings);
   }
   
-  public void importUnchecked(Namespace ns, Symbol s, Symbol r)
+  public void importChecked(Namespace ns, Symbol s)
   {
-    this.bindings.put(r, ns.bindings.get(s));
+    if (null != this.bindings.putIfAbsent(s, ns.lookup(s).orElseThrow(() -> new UnboundVariable(ns.name(), s))))
+      throw new MultipleDefinition(s);
   }
   
-  public void importChecked(Namespace ns, List bindings)
+  public void importFrom(Namespace ns, List args)
   {
-    
+    if (args.isEmpty())
+      importAllFrom(ns);
+    else {
+      for (; !args.isEmpty(); args = args.cdr()) {
+        if (!(args.car() instanceof Symbol s))
+          throw new InvalidArgument();
+        importChecked(ns, s);
+      }
+    }
+  }
+  
+  public void importAllFrom(Namespace ns)
+  {
+    for (var s : ns.bindings.entrySet()) {
+      importChecked(ns, s.getKey());
+    }
   }
   
   /** Bind a variable to a given value.
@@ -49,9 +75,21 @@ public class Namespace
   */
   public Optional<Datum> lookup(Symbol name)
   {
-    return Optional.ofNullable(bindings.get(name));
+    //return Optional.ofNullable(bindings.get(name));
+    
+    //System.out.println("attempting to resolve variable " + name.repr() + " in namespace " + this.name().repr());
+    
+    var val = bindings.get(name);
+    if (val != null)
+      return Optional.of(val);
+    if (parent != null)
+      return parent.lookup(name);
+    else
+      return Optional.empty();
+    
   }
   
   private final Symbol name;
   private final Map<Symbol, Datum> bindings = new IdentityHashMap<>();
+  private final Namespace parent;
 }

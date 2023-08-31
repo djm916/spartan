@@ -1,4 +1,8 @@
 
+(require "stdlib/vectors.s")
+
+(import 'spartan.vector)
+
 ; level  row
 ; ----------------
 ; 0      [1]      
@@ -21,22 +25,29 @@
   (while (< level height)
     (let* ((row-above (triangle (- level 1)))
            (row (generate-row row-above)))
-      (vector:append! triangle row)
+      (append! triangle row)
       (inc! level)))
   triangle)
 
 (defun generate-row (row-above)
   (def len-above (length row-above))
   (def len (+ 1 len-above))
-  (def row (vector:new len nil))
+  (def row (make-vector len nil))
   (def i 1)
-  (set-at! row 0 1)
+  (set! (row 0) 1)
   (while (< i len-above)
     (let ((a (row-above (- i 1)))
           (b (row-above i)))
-      (set-at! row i (+ a b)))
+      (set! (row i) (+ a b)))
       (inc! i))
-  (set-at! row (- (length row) 1) 1)
+  (set! (row (- (length row) 1)) 1)
   row)
 
-(print (pascals-triangle 5))
+(defun print-row (row)
+  (for-each (fun (n) (print n " ")) row)
+  (print-line))
+
+(defun print-triangle (triangle)
+  (for-each print-row triangle))
+
+(print-triangle (pascals-triangle 5))

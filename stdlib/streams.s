@@ -21,72 +21,75 @@
 ; gen   A generator procedure that produces succesive stream values
 ;       each time it is called.
 
+(namespace 'spartan.stream)
+
 (defun stream (gen)
   (delay
     (let ((next (gen)))
       (if (nil? next) ()
         (list next (stream gen))))))
 
-; Return the next element of a stream
+; Return the first element of a stream
 
-(defun stream:car (s) (car (force s)))
+(defun car (s) (spartan.core:car (force s)))
 
-; Return the remainder of a stream
+; Return the rest of a stream
 
-(defun stream:cdr (s) (cadr (force s)))
+(defun cdr (s) (spartan.core:cadr (force s)))
 
-(defun stream:cons (e s) (delay (list e s)))
+; Add an element to the front of a stream
+
+(defun cons (e s) (delay (list e s)))
 
 ; Determine if a stream is empty
 
-(defun stream:empty? (s) (empty? (force s)))
+(defun empty? (s) (spartan.core:empty? (force s)))
 
-(defun stream:map (f s)
+(defun map (f s)
   (defun gen ()
-    (if (stream:empty? s) nil
-      (let ((next (f (stream:car s))))
-        (set! s (stream:cdr s))
+    (if (empty? s) nil
+      (let ((next (f (car s))))
+        (set! s (cdr s))
         next)))
   (stream gen))
 
-(defun stream:for-each (f s)
-  (cond ((stream:empty? s) nil)
-        (else (f (stream:car s))
-              (stream:for-each f (stream:cdr s)))))
+(defun for-each (f s)
+  (cond ((empty? s) nil)
+        (else (f (car s))
+              (for-each f (cdr s)))))
 
-(defun stream:filter (f s)
+(defun filter (f s)
   (defun gen ()
-    (if (stream:empty? s) nil
-      (let ((next (stream:car s)))
-        (set! s (stream:cdr s))
+    (if (empty? s) nil
+      (let ((next (car s)))
+        (set! s (cdr s))
         (if (f next)
           next
           (gen)))))
   (stream gen))
 
-(defun stream:take (n s)
+(defun take (n s)
   (defun gen ()
-    (if (or (stream:empty? s) (= n 0)) nil
-      (let ((next (stream:car s)))
-        (set! s (stream:cdr s))
+    (if (or (empty? s) (= n 0)) nil
+      (let ((next (car s)))
+        (set! s (cdr s))
         (set! n (- n 1))
         next)))
   (stream gen))
 
-(defun stream:reduce (f i s)
-  (if (stream:empty? s) i
-    (stream:reduce f (f i (stream:car s)) (stream:cdr s))))
+(defun reduce (f i s)
+  (if (empty? s) i
+    (reduce f (f i (car s)) (cdr s))))
 
 (defun stream->list (s)
-  (if (stream:empty? s) ()
-    (cons (stream:car s)
-          (stream->list (stream:cdr s)))))
+  (if (empty? s) ()
+    (spartan.core:cons (car s) (stream->list (cdr s)))))
 
-(defun stream:enumerate (i s)
+(defun enumerate (i s)
   (defun gen ()
-    (if (stream:empty? s) nil
-      (let ((next (list i (stream:car s))))
-        (set! s (stream:cdr s))
+    (if (empty? s) nil
+      (let ((next (list i (car s))))
+        (set! s (cdr s))
         (set! i (+ 1 i))
         next)))
   (stream gen))

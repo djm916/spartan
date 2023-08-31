@@ -14,7 +14,7 @@ public final class CoreNS extends Namespace
   
   private CoreNS()
   {
-    super(Symbol.of("core"));
+    super(Symbol.of("spartan.core"));
   }
   
   private static CoreNS instance = null;

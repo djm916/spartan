@@ -116,7 +116,8 @@ public class Reader implements AutoCloseable
   {
     return ch == '~' || ch == '!' || ch == '@' || ch == '#' || ch == '$' || ch == '%'
         || ch == '^' || ch == '&' || ch == '*' || ch == '-' || ch == '_' || ch == '+'
-        || ch == '=' || ch == '|' || ch == '\\' || ch == '<' || ch == '>' || ch == '?' || ch ==  '/';
+        || ch == '=' || ch == '|' || ch == '\\' || ch == '<' || ch == '>' || ch == '?'
+        || ch == '.' || ch ==  '/';
   }
   
   private static boolean isSymbolStart(int ch)

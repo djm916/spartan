@@ -14,7 +14,12 @@ public final class QualifiedSymbol extends Symbol
     this.nameSpace = nameSpace;
     this.baseName = baseName;
   }
-    
+  
+  public QualifiedSymbol(String nameSpace, String baseName)
+  {
+    this(nameSpace + ":" + baseName, nameSpace, baseName);
+  }
+  
   public String nameSpace()
   {
     return nameSpace;

@@ -32,8 +32,13 @@ permits QualifiedSymbol
   public static final Symbol RETURN = new Symbol("return");
   public static final Symbol CAR = new Symbol("car");
   public static final Symbol CDR = new Symbol("cdr");
-  public static final Symbol NAMESPACE = new Symbol("namespace");
-  public static final Symbol USING = new Symbol("using");
+  public static final Symbol Q_CAR = new QualifiedSymbol("spartan.core", "car");
+  public static final Symbol Q_CDR = new QualifiedSymbol("spartan.core", "cdr");
+  public static final Symbol Q_CONS = new QualifiedSymbol("spartan.core", "cons");
+  public static final Symbol Q_CONCAT = new QualifiedSymbol("spartan.core", "concat");
+  public static final Symbol Q_SET_CAR = new QualifiedSymbol("spartan.core", "set-car!");
+  public static final Symbol Q_SET_CDR = new QualifiedSymbol("spartan.core", "set-cdr!");
+  public static final Symbol Q_SET_AT = new QualifiedSymbol("spartan.core", "set-at!");
   
   /**
    * Returns an interned symbol with the given name.

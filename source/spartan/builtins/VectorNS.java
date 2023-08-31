@@ -8,12 +8,12 @@ public final class VectorNS extends Namespace
 {
   public VectorNS()
   {
-    super(Symbol.of("vector"));
+    super(Symbol.of("spartan.vector"), CoreNS.getInstance());
   }
   
   {
     bind(Symbol.of("vector"), FROM_LIST);
-    bind(Symbol.of("new"), NEW);
+    bind(Symbol.of("make-vector"), MAKE);
     bind(Symbol.of("copy"), COPY);
     bind(Symbol.of("append!"), APPEND);
     bind(Symbol.of("insert!"), INSERT);

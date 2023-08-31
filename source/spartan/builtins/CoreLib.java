@@ -4,6 +4,7 @@ import spartan.data.*;
 import spartan.errors.Error;
 import spartan.errors.TypeMismatch;
 import spartan.errors.InvalidArgument;
+import spartan.errors.NoSuchNamespace;
 import spartan.runtime.VirtualMachine;
 import spartan.Config;
 import spartan.parsing.Reader;
@@ -97,7 +98,7 @@ public final class CoreLib
     }
   };
   
-  public static final Primitive PRINT_LINE = new Primitive(1, true) {
+  public static final Primitive PRINT_LINE = new Primitive(0, true) {
     public void apply(VirtualMachine vm) {
       while (!vm.args.isEmpty())
         System.out.print(vm.popArg().str());
@@ -372,19 +373,20 @@ public final class CoreLib
   
   public static final Primitive NAMESPACE = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof Symbol pkg))
+      if (!(vm.popArg() instanceof Symbol nsName))
         throw new TypeMismatch();
-      spartan.Runtime.enterNS(pkg);
+      spartan.Runtime.enterNS(nsName);
       vm.result = Nil.VALUE;
       vm.popFrame();
     }
   };
   
-  public static final Primitive IMPORT = new Primitive(2, false) {
+  public static final Primitive IMPORT = new Primitive(1, true) {
     public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof Symbol pkg && vm.popArg() instanceof List vars))
+      if (!(vm.popArg() instanceof Symbol nsName))
         throw new TypeMismatch();
-      //spartan.Runtime.currentPackage().importChecked(spartan.Runtime.getPackage(pkg), vars);
+      var ns = spartan.Runtime.getNS(nsName).orElseThrow(() -> new NoSuchNamespace(nsName));
+      spartan.Runtime.currentNS().importFrom(ns, vm.popRestArgs());
       vm.result = Nil.VALUE;
       vm.popFrame();
     }

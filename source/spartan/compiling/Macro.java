@@ -7,7 +7,7 @@ import spartan.runtime.VirtualMachine;
 import spartan.runtime.Inst;
 import spartan.errors.WrongNumberArgs;
 
-public final class Macro implements Datum, IFun
+public final class Macro implements Datum
 {
   Macro(Procedure proc)
   {
@@ -20,25 +20,15 @@ public final class Macro implements Datum, IFun
   {
     return "macro";
   }
-  
-  @Override // IFun
-  public void apply(VirtualMachine vm)
-  {
-    vm.eval(body);
-  }
-  
-  @Override // IFun
-  public boolean arityMatches(int numArgs)
-  {
-    return sig.matches(numArgs);
-  }
-  
+    
   Datum expand(VirtualMachine vm, List args)
   {
+    int numArgs = args.length();
+    if (!sig.matches(numArgs))
+      throw new WrongNumberArgs();
     vm.pushFrame(null, null);
-    vm.result = this;
     vm.args = args;
-    vm.apply(args.length());
+    vm.eval(body);
     return vm.result;
   }
   

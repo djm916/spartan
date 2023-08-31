@@ -1,10 +1,12 @@
 
 (require "stdlib/vectors.s")
 
+(import 'spartan.vector)
+
 (def N 20)
 
-(def v (vector:unfold rand N)) ; Create an array of random integers
+(def random-nums (unfold rand N))
 
-(vector:sort! < v) ; Sort the vector
+(def sorted-nums (sort < random-nums))
 
-(vector:for-each v (fun (x) (print (format-decimal x) " ")))
+(for-each (fun (x) (print (format-decimal x) " ")) sorted-nums)
