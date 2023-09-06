@@ -1,15 +1,14 @@
-package spartan.compiling;
+package spartan.data;
 
-import spartan.data.Datum;
-import spartan.data.IFun;
-import spartan.data.List;
+import spartan.compiling.Procedure;
+import spartan.compiling.Signature;
 import spartan.runtime.VirtualMachine;
 import spartan.runtime.Inst;
 import spartan.errors.WrongNumberArgs;
 
 public final class Macro implements Datum
 {
-  Macro(Procedure proc)
+  public Macro(Procedure proc)
   {
     this.sig = proc.sig();
     this.body = proc.body();
@@ -20,8 +19,8 @@ public final class Macro implements Datum
   {
     return "macro";
   }
-    
-  Datum expand(VirtualMachine vm, List args)
+  
+  public Datum expand(VirtualMachine vm, List args)
   {
     int numArgs = args.length();
     if (!sig.matches(numArgs))

@@ -1093,7 +1093,7 @@ public class Compiler
     }
   }
   
-  private Optional<Datum> lookupMacro(Symbol s)
+  private Optional<Datum> lookup(Symbol s)
   {
     if (s instanceof QualifiedSymbol qs)
       return spartan.Runtime.getNS(Symbol.of(qs.nameSpace())).flatMap(ns -> ns.lookup(Symbol.of(qs.baseName())));
@@ -1146,9 +1146,9 @@ public class Compiler
       if (s.equals(Symbol.RETURN))
         return compileReturn(exp, scope, tail, next);
       // Handle macros
-      var maybeMacro = lookupMacro(s);
-      if (maybeMacro.isPresent() && maybeMacro.get() instanceof Macro macro)
-        return compileExpandMacro(macro, exp, scope, tail, next);
+      var maybeMacro = lookup(s);
+      if (maybeMacro.isPresent() && maybeMacro.get() instanceof Macro m)
+        return compileExpandMacro(m, exp, scope, tail, next);
     }
     
     // Handle procedure application

@@ -35,24 +35,24 @@ public final class Runtime
   
   public static Namespace getOrCreateNS(Symbol ns)
   {
-    return nameSpaces.computeIfAbsent(ns, (s) -> new Namespace(s, CoreNS.getInstance()));
+    return nameSpaces.computeIfAbsent(ns, (name) -> new Namespace(name, CoreNS.getInstance()));
   }
   
   public static void addNS(Namespace ns)
   {
     nameSpaces.put(ns.name(), ns);
   }
-  
+    
   public static void boot()
   {
     var coreNS = CoreNS.getInstance();
     addNS(coreNS);
+    currentNS(coreNS);
+    Loader.load(Config.BUILTINS_FILE_PATH);
     //addNS(new ListNS());
     addNS(new VectorNS());
     //addNS(new StringNS());
     //addNS(new PortNS());
-    currentNS(coreNS);
-    Loader.load(Config.BUILTINS_FILE_PATH);
     var userNS = new Namespace(Symbol.of("user"), coreNS);
     //userNS.importAllFrom(coreNS);
     addNS(userNS);    

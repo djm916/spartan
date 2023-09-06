@@ -2,6 +2,7 @@ package spartan.runtime;
 
 import spartan.data.Symbol;
 import spartan.parsing.Position;
+import spartan.errors.NoSuchNamespace;
 import spartan.errors.UnboundVariable;
 
 public final class StoreGlobal extends Inst
@@ -16,8 +17,7 @@ public final class StoreGlobal extends Inst
   
   public final void eval(VirtualMachine vm)
   {
-    spartan.Runtime.getNS(nameSpace)
-                   .orElseThrow(() -> new UnboundVariable(nameSpace, baseName, position))
+    spartan.Runtime.getNS(nameSpace).orElseThrow(() -> new NoSuchNamespace(nameSpace, position))
                    .bind(baseName, vm.result);
     vm.control = next;
   }

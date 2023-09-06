@@ -2,6 +2,7 @@ package spartan.runtime;
 
 import spartan.data.Symbol;
 import spartan.parsing.Position;
+import spartan.errors.NoSuchNamespace;
 import spartan.errors.UnboundVariable;
 
 public final class LoadGlobal extends Inst
@@ -17,7 +18,8 @@ public final class LoadGlobal extends Inst
   public final void eval(VirtualMachine vm)
   {
     vm.result = spartan.Runtime.getNS(nameSpace)
-                .flatMap(ns -> ns.lookup(baseName))
+                .orElseThrow(() -> new NoSuchNamespace(nameSpace, position))
+                .lookup(baseName)
                 .orElseThrow(() -> new UnboundVariable(nameSpace, baseName, position));
     vm.control = next;
   }

@@ -2,10 +2,10 @@ package spartan;
 
 import spartan.data.Symbol;
 import spartan.data.Datum;
+import spartan.data.Macro;
 import spartan.data.List;
 import spartan.errors.InvalidArgument;
 import spartan.errors.UnboundVariable;
-import spartan.errors.MultipleDefinition;
 import java.util.Map;
 import java.util.IdentityHashMap;
 import java.util.Optional;
@@ -14,30 +14,23 @@ public class Namespace
 {
   public Namespace(Symbol name)
   {
-    //this.name = name;
-    this(name, null);
+    this.name = name;
   }
   
-  public Namespace(Symbol name, Namespace parent)
+  public Namespace(Symbol name, Namespace imported)
   {
     this.name = name;
-    this.parent = parent;
+    importAllFrom(imported);
   }
-    
+  
   public Symbol name()
   {
     return name;
   }
   
-  public void importUnchecked(Namespace ns)
-  {
-    this.bindings.putAll(ns.bindings);
-  }
-  
   public void importChecked(Namespace ns, Symbol s)
   {
-    if (null != this.bindings.putIfAbsent(s, ns.lookup(s).orElseThrow(() -> new UnboundVariable(ns.name(), s))))
-      throw new MultipleDefinition(s);
+    bind(s, ns.lookup(s).orElseThrow(() -> new UnboundVariable(ns.name(), s)));
   }
   
   public void importFrom(Namespace ns, List args)
@@ -68,28 +61,16 @@ public class Namespace
   {
     bindings.put(name, val);
   }
-  
+    
   /** Lookup a variable by name, optionally returning its bound value.
       @param name The variable to look up
       @return The (optional) value of the variable
   */
   public Optional<Datum> lookup(Symbol name)
   {
-    //return Optional.ofNullable(bindings.get(name));
-    
-    //System.out.println("attempting to resolve variable " + name.repr() + " in namespace " + this.name().repr());
-    
-    var val = bindings.get(name);
-    if (val != null)
-      return Optional.of(val);
-    if (parent != null)
-      return parent.lookup(name);
-    else
-      return Optional.empty();
-    
+    return Optional.ofNullable(bindings.get(name));
   }
   
   private final Symbol name;
   private final Map<Symbol, Datum> bindings = new IdentityHashMap<>();
-  private final Namespace parent;
 }
