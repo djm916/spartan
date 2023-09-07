@@ -190,7 +190,7 @@ public class Compiler
   
   private Inst compileDef(List exp, Scope scope, Inst next)
   {
-    if (!(exp.length() == 3 && exp.cadr() instanceof Symbol s))
+    if (!(exp.length() == 3 && exp.cadr() instanceof Symbol s && !s.isQualified()))
       throw malformedExp(exp);
     var init = exp.caddr();  
     return compile(init, scope, false,
@@ -531,7 +531,7 @@ public class Compiler
   private boolean checkBindingListForm(List bindings)
   {
     for (; !bindings.isEmpty(); bindings = bindings.cdr())
-      if (!(bindings.car() instanceof List pair && pair.length() == 2 && pair.car() instanceof Symbol))
+      if (!(bindings.car() instanceof List pair && pair.length() == 2 && pair.car() instanceof Symbol s && !s.isQualified()))
         return false;
     return true;
   }
@@ -544,7 +544,7 @@ public class Compiler
   private boolean checkParamListForm(List params)
   {
     for (; !params.isEmpty(); params = params.cdr())
-      if (!(params.car() instanceof Symbol param) || (param.equals(Symbol.AMPERSAND) && (params.cdr().isEmpty() || !params.cddr().isEmpty())))
+      if (!(params.car() instanceof Symbol param && !param.isQualified()) || (param.equals(Symbol.AMPERSAND) && (params.cdr().isEmpty() || !params.cddr().isEmpty())))
         return false;
     return true;
   }
@@ -1061,7 +1061,7 @@ public class Compiler
 
   private Inst compileDefmacro(List exp, Scope scope, Inst next)
   {
-    if (!(exp.length() >= 4 && exp.cadr() instanceof Symbol symbol && exp.caddr() instanceof List params && checkParamListForm(params)))
+    if (!(exp.length() >= 4 && exp.cadr() instanceof Symbol symbol && !symbol.isQualified() && exp.caddr() instanceof List params && checkParamListForm(params)))
       throw malformedExp(exp);
     var body = exp.cdddr();
     spartan.Runtime.currentNS().bind(symbol.intern(), new Macro(makeProcedure(params, body, Scope.EMPTY)));

@@ -104,6 +104,11 @@ permits QualifiedSymbol
     this.name = name;
   }
   
+  public boolean isQualified()
+  {
+    return false;
+  }
+  
   /**
    * Return an interned symbol. May return a new symbol or this (if previously interned)
    */

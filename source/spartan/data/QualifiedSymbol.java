@@ -29,4 +29,9 @@ public final class QualifiedSymbol extends Symbol
   {
     return baseName;
   }
+  
+  public boolean isQualified()
+  {
+    return true;
+  }
 }

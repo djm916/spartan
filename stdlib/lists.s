@@ -7,8 +7,6 @@
 
 (namespace 'spartan.list)
 
-;(spartan.core:import 'spartan.core)
-
 (defun map (f xs)
   (if (empty? xs) ()
     (cons (f (car xs))
