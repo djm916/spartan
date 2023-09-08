@@ -43,6 +43,8 @@ public final class CoreNS extends Namespace
     bind(Symbol.of("set-at!"), CoreLib.SET_AT);
     bind(Symbol.of("length"), CoreLib.LENGTH);
     bind(Symbol.of("empty?"), CoreLib.IS_EMPTY);
+    bind(Symbol.of("namespace"), CoreLib.NAMESPACE);
+    bind(Symbol.of("import"), CoreLib.IMPORT);
     
     /* Symbol related procedures */
     
@@ -63,6 +65,7 @@ public final class CoreNS extends Namespace
     bind(Symbol.of("callable?"), CoreLib.IS_CALLABLE);
     bind(Symbol.of("port?"), CoreLib.IS_PORT);
     bind(Symbol.of("bytes?"), CoreLib.IS_BYTES);
+    bind(Symbol.of("table?"), CoreLib.IS_TABLE);
     
     /* Math constants & procedures */
 
@@ -133,9 +136,6 @@ public final class CoreNS extends Namespace
     //bind(Symbol.of("nth"), ListLib.NTH);
     //bind(Symbol.of("set-nth!"), ListLib.SET_NTH);
     bind(Symbol.of("nth-tail"), ListLib.NTH_TAIL);
-    bind(Symbol.of("set-nth-tail!"), ListLib.SET_NTH_TAIL);
-    
-    bind(Symbol.of("namespace"), CoreLib.NAMESPACE);
-    bind(Symbol.of("import"), CoreLib.IMPORT);
+    bind(Symbol.of("set-nth-tail!"), ListLib.SET_NTH_TAIL);    
   }
 }

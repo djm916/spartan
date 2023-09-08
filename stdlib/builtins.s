@@ -104,5 +104,5 @@
 
 (load "stdlib/lists.s")
 (load "stdlib/vectors.s")
-;(load "stdlib/defstruct.s")
+(load "stdlib/defstruct.s")
 (load "stdlib/streams.s")

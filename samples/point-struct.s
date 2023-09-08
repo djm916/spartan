@@ -1,13 +1,10 @@
-; Example of using the defstruct macro to
-; create a simple data type
-
-(require "stdlib/defstruct.s")
+; Example of using the defstruct macro
 
 (defstruct point (x y))
 (def p (point 1 2))
 (print-line "p is " p)
 (print-line "p is a point? " (point? p))
-(print-line "p = (" (point:x p) ", " (point:y p) ")")
-(point:set-x! p 2)
-(point:set-y! p 1)
-(print-line "p = (" (point:x p) ", " (point:y p) ")")
+(print-line "p = (" (p 'x) ", " (p 'y) ")")
+(set! (p 'x) 2)
+(set! (p 'y) 1)
+(print-line "p = (" (p 'x) ", " (p 'y) ")")

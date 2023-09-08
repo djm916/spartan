@@ -3,6 +3,8 @@
 
 (namespace 'spartan.vector)
 
+(import 'spartan.core)
+
 (defun map! (f v)
   (let [(i 0) (n (length v))]
     (while (< i n)

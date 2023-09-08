@@ -8,7 +8,7 @@ public final class StringNS extends Namespace
 {
   public StringNS()
   {
-    super(Symbol.of("string"));
+    super(Symbol.of("spartan.string"), CoreNS.getInstance());
   }
   
   {

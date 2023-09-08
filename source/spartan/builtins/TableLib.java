@@ -16,8 +16,6 @@ public final class TableLib
       vm.popFrame();
     }
   };
-    
-  // (table/contains? t k)
   
   public static final Primitive CONTAINS = new Primitive(2, false) {
     public void apply(VirtualMachine vm) {

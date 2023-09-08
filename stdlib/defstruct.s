@@ -20,52 +20,50 @@
 ; Structures are implemented as vectors where the first element is the name of the structure,
 ; (e.g., the symbol 'point), and whose remaining elements store the field values.
 
-; Generate the name of a structure accessor (getter)
+; Generate the table key for a field
 
-(defun generate-accessor-name (name field-name)
-  (string->symbol (string:concat (symbol->string name) ":" (symbol->string field-name))))
+;(defun generate-field-key (field)
+;  (string->symbol (string.concat ":" (symbol->string field))))
 
-; Generate the name of a structure mutator ("setter")
+;(defun generate-table-entries (fields)
+;  (rec loop [(fields fields) (keys (map generate-field-key fields))]
+;    (if (empty? fields) ()
+;      (cons (car keys) (cons (car fields) (loop (cdr fields) (cdr keys)))))))
 
-(defun generate-mutator-name (name field-name)
-  (string->symbol (string:concat (symbol->string name) ":set-" (symbol->string field-name) "!")))
+(namespace 'spartan.core)
+
+(defun generate-table-entries (fields dummy-params)
+  (if (empty? fields) ()
+    (let [(field (car fields)) (dummy-param (car dummy-params))]
+      `(',field ,dummy-param ,@(generate-table-entries (cdr fields) (cdr dummy-params))))))
 
 ; Generate the name of a structure type predicate
 
 (defun generate-predicate-name (name)
-  (string->symbol (string:concat (symbol->string name) "?")))
+  (string->symbol (spartan.string:concat (symbol->string name) "?")))
 
-; Generate a structure constructor
+(defun generate-dummy-params (num-fields)
+  (if (= 0 num-fields) ()
+    (let [(dummy-param (gensym))]
+      (cons dummy-param (generate-dummy-params (- num-fields 1))))))
+
+; Generate the structure constructor
 
 (defun generate-constructor (name fields)
-  `(defun ,name ,fields
-     (vector ',name ,@fields)))
+  (let [(dummy-params (generate-dummy-params (length fields)))]
+    `(defun ,name ,dummy-params
+       (spartan.table:table '__type ',name ,@(generate-table-entries fields dummy-params)))))
 
-(defun generate-accessor (name)
-  (fun (field index)
-    `(defun ,(generate-accessor-name name field) (self)
-       (self ,index))))
-
-(defun generate-accessors (name fields)
-  (map/index (generate-accessor name) 1 fields))
-
-(defun generate-mutator (name)
-  (fun (field index)
-    `(defun ,(generate-mutator-name name field) (self value)
-       (set-at! self ,index value))))
-
-(defun generate-mutators (name fields)
-  (map/index (generate-mutator name) 1 fields))
+; Generate the structure type predicate
 
 (defun generate-predicate (name)
-  `(defun ,(generate-predicate-name name) (self)
-     (and (vector? self)
-          (> (length self) 0)
-          (= (self 0) ',name))))
+  (let* [(dummy-params (generate-dummy-params 1))
+         (self (car dummy-params))]
+    `(defun ,(generate-predicate-name name) ,dummy-params
+       (and (table? ,self)
+            (= (,self '__type) ',name)))))
 
 (defmacro defstruct (name fields)
   `(do
      ,(generate-constructor name fields)
-     ,@(generate-accessors name fields)
-     ,@(generate-mutators name fields)
      ,(generate-predicate name)))

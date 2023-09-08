@@ -322,6 +322,13 @@ public final class CoreLib
     }
   };
   
+  public static final Primitive IS_TABLE = new Primitive(1, false) {
+    public void apply(VirtualMachine vm) {
+      vm.result = Bool.valueOf(vm.popArg() instanceof Table);
+      vm.popFrame();
+    }
+  };
+  
   public static final Primitive AT = new Primitive(2, false) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof IAssoc c))

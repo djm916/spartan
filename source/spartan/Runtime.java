@@ -5,6 +5,7 @@ import spartan.builtins.ListNS;
 import spartan.builtins.VectorNS;
 import spartan.builtins.StringNS;
 import spartan.builtins.PortNS;
+import spartan.builtins.TableNS;
 import spartan.data.Symbol;
 import spartan.data.Datum;
 import java.util.Map;
@@ -47,12 +48,15 @@ public final class Runtime
   {
     var coreNS = CoreNS.getInstance();
     addNS(coreNS);
-    currentNS(coreNS);
-    Loader.load(Config.BUILTINS_FILE_PATH);
+    
+    
     //addNS(new ListNS());
     addNS(new VectorNS());
-    //addNS(new StringNS());
+    addNS(new StringNS());
+    addNS(new TableNS());
     //addNS(new PortNS());
+    currentNS(coreNS);
+    Loader.load(Config.BUILTINS_FILE_PATH);
     var userNS = new Namespace(Symbol.of("user"), coreNS);
     //userNS.importAllFrom(coreNS);
     addNS(userNS);    
