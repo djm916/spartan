@@ -20,51 +20,36 @@
 ; Structures are implemented as vectors where the first element is the name of the structure,
 ; (e.g., the symbol 'point), and whose remaining elements store the field values.
 
-; Generate the table key for a field
-
-;(defun generate-field-key (field)
-;  (string->symbol (string.concat ":" (symbol->string field))))
-
-;(defun generate-table-entries (fields)
-;  (rec loop [(fields fields) (keys (map generate-field-key fields))]
-;    (if (empty? fields) ()
-;      (cons (car keys) (cons (car fields) (loop (cdr fields) (cdr keys)))))))
-
 (in-package 'spartan.core)
-
-(defun generate-table-entries (fields dummy-params)
-  (if (empty? fields) ()
-    (let [(field (car fields)) (dummy-param (car dummy-params))]
-      `(',field ,dummy-param ,@(generate-table-entries (cdr fields) (cdr dummy-params))))))
 
 ; Generate the name of a structure type predicate
 
 (defun generate-predicate-name (name)
   (string->symbol (string-concat (symbol->string name) "?")))
 
-(defun generate-dummy-params (num-fields)
-  (if (= 0 num-fields) ()
-    (let [(dummy-param (gensym))]
-      (cons dummy-param (generate-dummy-params (- num-fields 1))))))
+; Generate the name of a structure constructor
 
 (defun generate-constructor-name (name)
   (string->symbol (string-concat "make-" (symbol->string name))))
 
+; Generate the table entries for the underlying structure representation
+
+(defun generate-table-entries (fields)
+  (if (empty? fields) ()
+    `(',(car fields) ,(car fields) ,@(generate-table-entries (cdr fields)))))
+
 ; Generate the structure constructor
 
 (defun generate-constructor (name fields)
-  (let [(dummy-params (generate-dummy-params (length fields)))]
-    `(defun ,(generate-constructor-name name) ,dummy-params
-       (table '__type ',name ,@(generate-table-entries fields dummy-params)))))
+  `(defun ,(generate-constructor-name name) ,fields
+     (spartan.core:table '__type ',name ,@(generate-table-entries fields))))
 
 ; Generate the structure type predicate
 
 (defun generate-predicate (name)
-  (let* [(dummy-params (generate-dummy-params 1))
-         (self (car dummy-params))]
-    `(defun ,(generate-predicate-name name) ,dummy-params
-       (and (table? ,self)
-            (= (,self '__type) ',name)))))
+  `(defun ,(generate-predicate-name name) (self)
+     (and (spartan.core:table? self)
+          (spartan.core:= (self '__type) ',name))))
 
 (defmacro defstruct (name fields)
   `(do
