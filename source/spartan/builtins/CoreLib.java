@@ -53,20 +53,16 @@ public final class CoreLib
     else {
       while (!args.isEmpty()) {
         if (!(args.car() instanceof Symbol symbol && symbol.isSimple()))
-          throw new InvalidArgument();
-        /*
-        args = args.cdr();
-        if (!args.isEmpty() && args.car() == Symbol.of(":as")) {
-          args = args.cdr();
+          throw new InvalidArgument();        
+        if (!args.cdr().isEmpty() && args.cadr() == Symbol.KW_AS) {
+          args = args.cddr();
           if (!(args.car() instanceof Symbol symbolAlias && symbolAlias.isSimple()))
-            throw InvalidArgument();
-          spartan.Runtime.currentPackage().importChecked(pkg, symbolAlias);
+            throw new InvalidArgument();
+          spartan.Runtime.currentPackage().doImport(pkg, symbolAlias);
         }
         else {
-          spartan.Runtime.currentPackage().importChecked(pkg, symbol);
+          spartan.Runtime.currentPackage().doImport(pkg, symbol);
         }
-        */
-        spartan.Runtime.currentPackage().doImport(pkg, symbol);
         args = args.cdr();
       }
     }
