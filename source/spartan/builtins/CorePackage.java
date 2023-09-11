@@ -5,6 +5,8 @@ import spartan.Package;
 
 public final class CorePackage extends Package
 {
+  public static final String NAME = "spartan.core";
+  
   public static CorePackage getInstance()
   {
     if (instance == null)
@@ -14,7 +16,7 @@ public final class CorePackage extends Package
   
   private CorePackage()
   {
-    super(Symbol.of("spartan.core"));
+    super(Symbol.of(NAME));
   }
   
   private static CorePackage instance = null;
@@ -48,6 +50,7 @@ public final class CorePackage extends Package
     
     bind(Symbol.of("in-package"), CoreLib.IN_PACKAGE);
     bind(Symbol.of("import"), CoreLib.IMPORT);
+    bind(Symbol.of("print-package"), CoreLib.PRINT_PACKAGE);
     
     /* Symbol related procedures */
     

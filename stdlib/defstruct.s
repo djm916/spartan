@@ -47,12 +47,15 @@
     (let [(dummy-param (gensym))]
       (cons dummy-param (generate-dummy-params (- num-fields 1))))))
 
+(defun generate-constructor-name (name)
+  (string->symbol (string-concat "make-" (symbol->string name))))
+
 ; Generate the structure constructor
 
 (defun generate-constructor (name fields)
   (let [(dummy-params (generate-dummy-params (length fields)))]
-    `(defun ,name ,dummy-params
-       (spartan.core:table '__type ',name ,@(generate-table-entries fields dummy-params)))))
+    `(defun ,(generate-constructor-name name) ,dummy-params
+       (table '__type ',name ,@(generate-table-entries fields dummy-params)))))
 
 ; Generate the structure type predicate
 

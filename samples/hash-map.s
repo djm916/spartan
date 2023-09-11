@@ -4,25 +4,23 @@
 
 ; Test example
 
-(defun identity (x) x)
+(def h (hmap:make-hash-map string-hash =))
 
-(def h (hmap:hash-map identity =))
+(print-line "hashmap? " (hmap:hash-map? h))
+(print-line "size = " (hmap:size h))
+(print-line "empty? " (hmap:empty? h))
 
-(print-line (hmap:hash-map? h))
-(print-line (hmap:size h))
-(print-line (hmap:empty? h))
+(hmap:insert! h "a" 1)
+(hmap:insert! h "b" 2)
+(hmap:insert! h "c" 3)
+(hmap:insert! h "d" 4)
+(hmap:insert! h "e" 5)
 
-(hmap:insert! h 1 "a")
-(hmap:insert! h 2 "b")
-(hmap:insert! h 3 "c")
-(hmap:insert! h 4 "d")
-(hmap:insert! h 5 "e")
-
-(print-line (hmap:find h 1))
-(print-line (hmap:find h 2))
-(print-line (hmap:find h 3))
-(print-line (hmap:find h 4))
-(print-line (hmap:find h 5))
+(print-line "a => " (hmap:find h "a"))
+(print-line "b => " (hmap:find h "b"))
+(print-line "c => " (hmap:find h "c"))
+(print-line "d => " (hmap:find h "d"))
+(print-line "e => " (hmap:find h "e"))
 
 (print-line (hmap:entries h))
 (print-line (hmap:keys h))

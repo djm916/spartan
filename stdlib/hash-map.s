@@ -1,14 +1,14 @@
 (in-package 'spartan.hash-map)
 
-(defstruct __impl (hash equal? table size))
+(defstruct map-impl (hash equal? table size))
 
-(defun hash-map (hash equal?)
+(defun make-hash-map (hash equal?)
   (def initial-capacity 2)
   (def table (make-vector initial-capacity ()))
-  (__impl hash equal? table 0))
+  (make-map-impl hash equal? table 0))
 
 (defun hash-map? (self)
-  (__impl? self))
+  (map-impl? self))
 
 (defun empty? (self)
   (= 0 (self 'size)))

@@ -1,13 +1,13 @@
 
 (in-package 'spartan.priority-queue)
 
-(defstruct queue (comparator vector))
+(defstruct queue-impl (comparator vector))
 
-(defun priority-queue (comparator)
-  (queue comparator (vector)))
+(defun make-priority-queue (comparator)
+  (make-queue-impl comparator (vector)))
 
 (defun priority-queue? (self)
-  (queue? self))
+  (queue-impl? self))
 
 (defun empty? (self)
   (= 0 (length (self 'vector))))

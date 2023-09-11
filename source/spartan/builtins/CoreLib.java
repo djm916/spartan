@@ -39,11 +39,11 @@ public final class CoreLib
     var pkg = spartan.Runtime.getPackage(pkgName).orElseThrow(() -> new NoSuchPackage(pkgName));
     args = args.cdr();
     
-    if (!args.isEmpty() && args.car() == Symbol.of(":as")) {
+    if (!args.isEmpty() && args.car() == Symbol.KW_AS) {
       args = args.cdr();
       if (!(args.car() instanceof Symbol pkgAlias && pkgAlias.isSimple()))
         throw new InvalidArgument();
-      spartan.Runtime.currentPackage().addPackageAlias(pkg, pkgAlias);
+      spartan.Runtime.currentPackage().addPackageAlias(pkgAlias, pkg);
       args = args.cdr();
     }
     
@@ -433,6 +433,17 @@ public final class CoreLib
   public static final Primitive IMPORT = new Primitive(1, true) {
     public void apply(VirtualMachine vm) {
       doImport(vm.popRestArgs());
+      vm.result = Nil.VALUE;
+      vm.popFrame();
+    }
+  };
+  
+  public static final Primitive PRINT_PACKAGE = new Primitive(1, false) {
+    public void apply(VirtualMachine vm) {
+      if (!(vm.popArg() instanceof Symbol pkgName))
+        throw new TypeMismatch();
+      var pkg = spartan.Runtime.getPackage(pkgName).orElseThrow(() -> new NoSuchPackage(pkgName));
+      System.out.println(pkg.toString());
       vm.result = Nil.VALUE;
       vm.popFrame();
     }

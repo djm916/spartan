@@ -8,6 +8,7 @@ import spartan.errors.UnboundVariable;
 import java.util.Map;
 import java.util.IdentityHashMap;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class Package
 {
@@ -39,7 +40,7 @@ public class Package
     }
   }
   
-  public void addPackageAlias(Package p, Symbol s)
+  public void addPackageAlias(Symbol s, Package p)
   {
     packageAliases.put(s, p);
   }
@@ -65,6 +66,14 @@ public class Package
   public Optional<Datum> lookup(Symbol name)
   {
     return Optional.ofNullable(bindings.get(name));
+  }
+  
+  public String toString()
+  {
+    return String.format("package %s %s", name.repr(),
+      bindings.entrySet().stream()
+              .map(e -> e.getKey().repr() + " => " + e.getValue().repr())
+              .collect(Collectors.joining(", ", "{", "}")));
   }
   
   private final Symbol name;

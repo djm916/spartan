@@ -39,6 +39,7 @@ permits QualifiedSymbol
   public static final Symbol Q_SET_CAR = new QualifiedSymbol("spartan.core", "set-car!");
   public static final Symbol Q_SET_CDR = new QualifiedSymbol("spartan.core", "set-cdr!");
   public static final Symbol Q_SET_AT = new QualifiedSymbol("spartan.core", "set-at!");
+  public static final Symbol KW_AS = Symbol.of(":as");
   
   /**
    * Returns an interned symbol with the given name.
