@@ -26,7 +26,9 @@ public final class Runtime
   
   public static Optional<Package> getPackage(Symbol pkgName)
   {
-    return Optional.ofNullable(packages.get(pkgName));
+    //return Optional.ofNullable(packages.get(pkgName));
+    return currentPackage.getPackageAlias(pkgName)
+           .or(() -> Optional.ofNullable(packages.get(pkgName)));
   }
   
   public static Package getOrCreatePackage(Symbol pkgName)

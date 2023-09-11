@@ -39,6 +39,16 @@ public class Package
     }
   }
   
+  public void addPackageAlias(Package p, Symbol s)
+  {
+    packageAliases.put(s, p);
+  }
+  
+  public Optional<Package> getPackageAlias(Symbol pkgName)
+  {
+    return Optional.ofNullable(packageAliases.get(pkgName));
+  }
+  
   /** Bind a variable to a given value.
       If the variable is already bound, its value is replaced.
       @param name The variable to bind
@@ -59,4 +69,5 @@ public class Package
   
   private final Symbol name;
   private final Map<Symbol, Datum> bindings = new IdentityHashMap<>();
+  private final Map<Symbol, Package> packageAliases = new IdentityHashMap<>();
 }

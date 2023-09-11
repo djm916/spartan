@@ -38,15 +38,15 @@ public final class CoreLib
       throw new InvalidArgument();
     var pkg = spartan.Runtime.getPackage(pkgName).orElseThrow(() -> new NoSuchPackage(pkgName));
     args = args.cdr();
-    /*
+    
     if (!args.isEmpty() && args.car() == Symbol.of(":as")) {
       args = args.cdr();
       if (!(args.car() instanceof Symbol pkgAlias && pkgAlias.isSimple()))
-        throw InvalidArgument();
-      spartan.Runtime.currentPackage().addLocalPackageAlias(pkgAlias, pkg);
+        throw new InvalidArgument();
+      spartan.Runtime.currentPackage().addPackageAlias(pkg, pkgAlias);
       args = args.cdr();
     }
-    */
+    
     if (args.isEmpty()) {
       spartan.Runtime.currentPackage().doImport(pkg);
     }
