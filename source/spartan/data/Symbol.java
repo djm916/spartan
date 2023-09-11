@@ -109,6 +109,16 @@ permits QualifiedSymbol
     return false;
   }
   
+  public boolean isKeyword()
+  {
+    return name.charAt(0) == ':';
+  }
+  
+  public boolean isSimple()
+  {
+    return !isQualified() && !isKeyword();
+  }
+  
   /**
    * Return an interned symbol. May return a new symbol or this (if previously interned)
    */

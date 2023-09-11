@@ -4,7 +4,7 @@ import spartan.data.*;
 import spartan.errors.Error;
 import spartan.errors.TypeMismatch;
 import spartan.errors.InvalidArgument;
-import spartan.errors.NoSuchNamespace;
+import spartan.errors.NoSuchPackage;
 import spartan.runtime.VirtualMachine;
 import spartan.Config;
 import spartan.parsing.Reader;
@@ -28,6 +28,48 @@ public final class CoreLib
     if (x instanceof IOrd lhs && y instanceof IOrd rhs)
       return lhs.compareTo(rhs);
     throw new TypeMismatch();
+  }
+  
+  // (import package [:as package-alias] symbol [:as symbol-alias] ...)
+  
+  public static void doImport(List args)
+  {
+    if (!(args.car() instanceof Symbol pkgName && pkgName.isSimple()))
+      throw new InvalidArgument();
+    var pkg = spartan.Runtime.getPackage(pkgName).orElseThrow(() -> new NoSuchPackage(pkgName));
+    args = args.cdr();
+    /*
+    if (!args.isEmpty() && args.car() == Symbol.of(":as")) {
+      args = args.cdr();
+      if (!(args.car() instanceof Symbol pkgAlias && pkgAlias.isSimple()))
+        throw InvalidArgument();
+      spartan.Runtime.currentPackage().addLocalPackageAlias(pkgAlias, pkg);
+      args = args.cdr();
+    }
+    */
+    if (args.isEmpty()) {
+      spartan.Runtime.currentPackage().doImport(pkg);
+    }
+    else {
+      while (!args.isEmpty()) {
+        if (!(args.car() instanceof Symbol symbol && symbol.isSimple()))
+          throw new InvalidArgument();
+        /*
+        args = args.cdr();
+        if (!args.isEmpty() && args.car() == Symbol.of(":as")) {
+          args = args.cdr();
+          if (!(args.car() instanceof Symbol symbolAlias && symbolAlias.isSimple()))
+            throw InvalidArgument();
+          spartan.Runtime.currentPackage().importChecked(pkg, symbolAlias);
+        }
+        else {
+          spartan.Runtime.currentPackage().importChecked(pkg, symbol);
+        }
+        */
+        spartan.Runtime.currentPackage().doImport(pkg, symbol);
+        args = args.cdr();
+      }
+    }
   }
   
   public static final Primitive NOT = new Primitive(1, false) {
@@ -378,11 +420,11 @@ public final class CoreLib
     }
   };
   
-  public static final Primitive NAMESPACE = new Primitive(1, false) {
+  public static final Primitive IN_PACKAGE = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof Symbol nsName))
+      if (!(vm.popArg() instanceof Symbol pkgName))
         throw new TypeMismatch();
-      spartan.Runtime.enterNS(nsName);
+      spartan.Runtime.enterPackage(pkgName);
       vm.result = Nil.VALUE;
       vm.popFrame();
     }
@@ -390,10 +432,7 @@ public final class CoreLib
   
   public static final Primitive IMPORT = new Primitive(1, true) {
     public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof Symbol nsName))
-        throw new TypeMismatch();
-      var ns = spartan.Runtime.getNS(nsName).orElseThrow(() -> new NoSuchNamespace(nsName));
-      spartan.Runtime.currentNS().importFrom(ns, vm.popRestArgs());
+      doImport(vm.popRestArgs());
       vm.result = Nil.VALUE;
       vm.popFrame();
     }

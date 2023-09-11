@@ -30,7 +30,7 @@
 ;    (if (empty? fields) ()
 ;      (cons (car keys) (cons (car fields) (loop (cdr fields) (cdr keys)))))))
 
-(namespace 'spartan.core)
+(in-package 'spartan.core)
 
 (defun generate-table-entries (fields dummy-params)
   (if (empty? fields) ()
@@ -40,7 +40,7 @@
 ; Generate the name of a structure type predicate
 
 (defun generate-predicate-name (name)
-  (string->symbol (spartan.string:concat (symbol->string name) "?")))
+  (string->symbol (string-concat (symbol->string name) "?")))
 
 (defun generate-dummy-params (num-fields)
   (if (= 0 num-fields) ()
@@ -52,7 +52,7 @@
 (defun generate-constructor (name fields)
   (let [(dummy-params (generate-dummy-params (length fields)))]
     `(defun ,name ,dummy-params
-       (spartan.table:table '__type ',name ,@(generate-table-entries fields dummy-params)))))
+       (spartan.core:table '__type ',name ,@(generate-table-entries fields dummy-params)))))
 
 ; Generate the structure type predicate
 

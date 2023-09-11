@@ -52,11 +52,12 @@ public class Compiler
    */
   private static boolean isSelfEval(Datum exp)
   {
-    return exp instanceof INum
+    return exp == List.EMPTY
+        || exp == Nil.VALUE
+        || exp instanceof INum
         || exp instanceof Bool
         || exp instanceof Text
-        || exp == List.EMPTY
-        || exp == Nil.VALUE;
+        || (exp instanceof Symbol s && s.isKeyword());
   }
   
   /* Compile a self-evaluating expression. */
@@ -94,9 +95,9 @@ public class Compiler
   private Inst compileGlobalVarRef(Symbol s, Inst next)
   {
     if (s instanceof QualifiedSymbol qs)
-      return new LoadGlobal(Symbol.of(qs.nameSpace()), Symbol.of(qs.baseName()), positionMap.get(qs), next);
+      return new LoadGlobal(Symbol.of(qs.packageName()), Symbol.of(qs.baseName()), positionMap.get(qs), next);
     else
-      return new LoadGlobal(spartan.Runtime.currentNS().name(), s.intern(), positionMap.get(s), next);
+      return new LoadGlobal(spartan.Runtime.currentPackage().name(), s.intern(), positionMap.get(s), next);
   }
   
   /* Compile the "set!" special form, a generalized assignment statement.
@@ -183,9 +184,9 @@ public class Compiler
   private Inst compileSetGlobalVar(Symbol s, Inst next)
   {
     if (s instanceof QualifiedSymbol qs)
-      return new StoreGlobal(Symbol.of(qs.nameSpace()), Symbol.of(qs.baseName()), positionMap.get(qs), new LoadConst(Nil.VALUE, next));
+      return new StoreGlobal(Symbol.of(qs.packageName()), Symbol.of(qs.baseName()), positionMap.get(qs), new LoadConst(Nil.VALUE, next));
     else
-      return new StoreGlobal(spartan.Runtime.currentNS().name(), s.intern(), positionMap.get(s), new LoadConst(Nil.VALUE, next));
+      return new StoreGlobal(spartan.Runtime.currentPackage().name(), s.intern(), positionMap.get(s), new LoadConst(Nil.VALUE, next));
   }
   
   private Inst compileDef(List exp, Scope scope, Inst next)
@@ -194,7 +195,7 @@ public class Compiler
       throw malformedExp(exp);
     var init = exp.caddr();  
     return compile(init, scope, false,
-           new StoreGlobal(spartan.Runtime.currentNS().name(), s.intern(), positionMap.get(s),
+           new StoreGlobal(spartan.Runtime.currentPackage().name(), s.intern(), positionMap.get(s),
            new LoadConst(Nil.VALUE, next)));
   }
   
@@ -1064,7 +1065,7 @@ public class Compiler
     if (!(exp.length() >= 4 && exp.cadr() instanceof Symbol symbol && !symbol.isQualified() && exp.caddr() instanceof List params && checkParamListForm(params)))
       throw malformedExp(exp);
     var body = exp.cdddr();
-    spartan.Runtime.currentNS().bind(symbol.intern(), new Macro(makeProcedure(params, body, Scope.EMPTY)));
+    spartan.Runtime.currentPackage().bind(symbol.intern(), new Macro(makeProcedure(params, body, Scope.EMPTY)));
     return new LoadConst(Nil.VALUE, next);
   }
   
@@ -1096,9 +1097,9 @@ public class Compiler
   private Optional<Datum> lookup(Symbol s)
   {
     if (s instanceof QualifiedSymbol qs)
-      return spartan.Runtime.getNS(Symbol.of(qs.nameSpace())).flatMap(ns -> ns.lookup(Symbol.of(qs.baseName())));
+      return spartan.Runtime.getPackage(Symbol.of(qs.packageName())).flatMap(ns -> ns.lookup(Symbol.of(qs.baseName())));
     else
-      return spartan.Runtime.currentNS().lookup(s.intern());
+      return spartan.Runtime.currentPackage().lookup(s.intern());
   }
   
   /* Compile a combination (i.e., special forms, procedure application, and macro expansion. */

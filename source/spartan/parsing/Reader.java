@@ -480,6 +480,21 @@ public class Reader implements AutoCloseable
     return symbol;
   }
   
+  private Symbol readKeyword()
+  {
+    var position = getTokenPosition();
+    var text = new StringBuilder();
+    
+    text.append((char)lastChar);
+
+    while (isSymbolFollow(peekChar())) {
+      getChar();
+      text.append((char)lastChar);
+    }
+    
+    return Symbol.of(text.toString());
+  }
+  
   private Text readText()
   {
     var text = new StringBuilder();
@@ -580,6 +595,8 @@ public class Reader implements AutoCloseable
       return readNumber();
     if (isDigit(lastChar))
       return readNumber();
+    if (lastChar == ':')
+      return readKeyword();
     if (isSymbolStart(lastChar))
       return readSymbol();
     if (lastChar == '\"')

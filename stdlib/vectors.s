@@ -1,17 +1,15 @@
 
 ; Standard vector library
 
-(namespace 'spartan.vector)
+(in-package 'spartan.core)
 
-(import 'spartan.core)
-
-(defun map! (f v)
+(defun vector-map! (f v)
   (let [(i 0) (n (length v))]
     (while (< i n)
       (set! (v i) (f (v i)))
       (inc! i))))
 
-(defun map (f v)
+(defun vector-map (f v)
   (let [(result (copy v))]
     (map! f result)
     result))
@@ -23,46 +21,46 @@
       (dec! i))
     result))
 
-(defun for-each (f v)
+(defun vector-for-each (f v)
   (let [(i 0) (n (length v))]
     (while (< i n)
       (f (v i))
       (inc! i))))
 
-(defun for-each/index (f v)
+(defun vector-for-each/index (f v)
   (let [(i 0) (n (length v))]
     (while (< i n)
       (f i (v i))
       (inc! i))))
 
-(defun filter (f v)
+(defun vector-filter (f v)
   (let [(result (vector))]
-    (for-each (fun (x) (if (f x) (append! result x))) v)
+    (vector-for-each (fun (x) (if (f x) (vector-append! result x))) v)
     result))
 
-(defun reduce (f e v)
+(defun vector-reduce (f e v)
   (let [(result e)]
-    (for-each (fun (x) (set! result (f result x))) v)
+    (vector-for-each (fun (x) (set! result (f result x))) v)
     result))
 
-(defun swap! (v i j)
+(defun vector-swap! (v i j)
   (let ((temp (v i)))
     (set! (v i) (v j))
     (set! (v j) temp)))
 
-(defun reverse! (v)
+(defun vector-reverse! (v)
   (let [(i 0) (j (- (length v) 1))]
     (while (< i j)
-      (swap! v i j)
+      (vector-swap! v i j)
       (inc! i)
       (dec! j))))
 
-(defun reverse (v)
+(defun vector-reverse (v)
   (let [(result (copy v))]
-    (reverse! result)
+    (vector-reverse! result)
     result))
 
-(defun unfold (g n)
+(defun vector-unfold (g n)
   (def result (make-vector n nil))
   (let [(i 0)]
     (while (< i n)
@@ -76,7 +74,7 @@
 ; It receives two arguments and returns true if the first precedes the second, and false otherwise.
 ; The sort is stable: equivalent elements (according to the comparison function) maintain their original relative positions.
 
-(defun sort (compare v)
+(defun vector-sort (compare v)
   
   (defun sort (source from to dest)    
     (if (> (- to from) 1)

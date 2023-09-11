@@ -1,11 +1,6 @@
 package spartan;
 
-import spartan.builtins.CoreNS;
-import spartan.builtins.ListNS;
-import spartan.builtins.VectorNS;
-import spartan.builtins.StringNS;
-import spartan.builtins.PortNS;
-import spartan.builtins.TableNS;
+import spartan.builtins.CorePackage;
 import spartan.data.Symbol;
 import spartan.data.Datum;
 import java.util.Map;
@@ -14,57 +9,49 @@ import java.util.Optional;
 
 public final class Runtime
 {
-  public static Namespace currentNS()
+  public static Package currentPackage()
   {
-    return currentNS;
+    return currentPackage;
   }
   
-  public static void currentNS(Namespace ns)
+  public static void currentPackage(Package pkg)
   {
-    currentNS = ns;
+    currentPackage = pkg;
   }
   
-  public static void enterNS(Symbol ns)
+  public static void enterPackage(Symbol pkgName)
   {
-    currentNS = getOrCreateNS(ns);
+    currentPackage = getOrCreatePackage(pkgName);
   }
   
-  public static Optional<Namespace> getNS(Symbol ns)
+  public static Optional<Package> getPackage(Symbol pkgName)
   {
-    return Optional.ofNullable(nameSpaces.get(ns));
+    return Optional.ofNullable(packages.get(pkgName));
   }
   
-  public static Namespace getOrCreateNS(Symbol ns)
+  public static Package getOrCreatePackage(Symbol pkgName)
   {
-    return nameSpaces.computeIfAbsent(ns, (name) -> new Namespace(name, CoreNS.getInstance()));
+    return packages.computeIfAbsent(pkgName, (name) -> new Package(name, CorePackage.getInstance()));
   }
   
-  public static void addNS(Namespace ns)
+  public static void addPackage(Package pkg)
   {
-    nameSpaces.put(ns.name(), ns);
+    packages.put(pkg.name(), pkg);
   }
     
   public static void boot()
   {
-    var coreNS = CoreNS.getInstance();
-    addNS(coreNS);
-    
-    
-    //addNS(new ListNS());
-    addNS(new VectorNS());
-    addNS(new StringNS());
-    addNS(new TableNS());
-    //addNS(new PortNS());
-    currentNS(coreNS);
+    var corePackage = CorePackage.getInstance();
+    addPackage(corePackage);
+    currentPackage(corePackage);
     Loader.load(Config.BUILTINS_FILE_PATH);
-    var userNS = new Namespace(Symbol.of("user"), coreNS);
-    //userNS.importAllFrom(coreNS);
-    addNS(userNS);    
-    currentNS(userNS);
+    var userPackage = new Package(Symbol.of("user"), corePackage);
+    addPackage(userPackage);
+    currentPackage(userPackage);
   }
   
   private Runtime() { }
   
-  private static final Map<Symbol, Namespace> nameSpaces = new IdentityHashMap<>();
-  private static Namespace currentNS;
+  private static final Map<Symbol, Package> packages = new IdentityHashMap<>();
+  private static Package currentPackage;
 }

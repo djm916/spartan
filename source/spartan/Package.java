@@ -2,7 +2,6 @@ package spartan;
 
 import spartan.data.Symbol;
 import spartan.data.Datum;
-import spartan.data.Macro;
 import spartan.data.List;
 import spartan.errors.InvalidArgument;
 import spartan.errors.UnboundVariable;
@@ -10,17 +9,17 @@ import java.util.Map;
 import java.util.IdentityHashMap;
 import java.util.Optional;
 
-public class Namespace
+public class Package
 {
-  public Namespace(Symbol name)
+  public Package(Symbol name)
   {
     this.name = name;
   }
   
-  public Namespace(Symbol name, Namespace imported)
+  public Package(Symbol name, Package p)
   {
     this.name = name;
-    importAllFrom(imported);
+    doImport(p);
   }
   
   public Symbol name()
@@ -28,28 +27,15 @@ public class Namespace
     return name;
   }
   
-  public void importChecked(Namespace ns, Symbol s)
+  public void doImport(Package p, Symbol s)
   {
-    bind(s, ns.lookup(s).orElseThrow(() -> new UnboundVariable(ns.name(), s)));
+    bind(s, p.lookup(s).orElseThrow(() -> new UnboundVariable(p.name(), s)));
   }
   
-  public void importFrom(Namespace ns, List args)
+  public void doImport(Package p)
   {
-    if (args.isEmpty())
-      importAllFrom(ns);
-    else {
-      for (; !args.isEmpty(); args = args.cdr()) {
-        if (!(args.car() instanceof Symbol s))
-          throw new InvalidArgument();
-        importChecked(ns, s);
-      }
-    }
-  }
-  
-  public void importAllFrom(Namespace ns)
-  {
-    for (var s : ns.bindings.entrySet()) {
-      importChecked(ns, s.getKey());
+    for (var s : p.bindings.entrySet()) {
+      doImport(p, s.getKey());
     }
   }
   
@@ -61,7 +47,7 @@ public class Namespace
   {
     bindings.put(name, val);
   }
-    
+  
   /** Lookup a variable by name, optionally returning its bound value.
       @param name The variable to look up
       @return The (optional) value of the variable

@@ -4,7 +4,7 @@
 ; This file is pre-loaded when the interpreter starts and
 ; itself loads several other files.
 
-(namespace 'spartan.core)
+(in-package 'spartan.core)
 
 (defmacro inc! (var)
   `(set! ,var (+ 1 ,var)))
@@ -64,7 +64,7 @@
 (def require
   (let ((*files-loaded* ()))
     (fun (filename)
-      (unless (spartan.list:contains? filename *files-loaded*)
+      (unless (contains? filename *files-loaded*)
         (set! *files-loaded* (cons filename *files-loaded*))
         (load filename)))))
 

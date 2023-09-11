@@ -1,23 +1,23 @@
 package spartan.builtins;
 
 import spartan.data.*;
-import spartan.Namespace;
+import spartan.Package;
 
-public final class CoreNS extends Namespace
+public final class CorePackage extends Package
 {
-  public static CoreNS getInstance()
+  public static CorePackage getInstance()
   {
     if (instance == null)
-      instance = new CoreNS();
+      instance = new CorePackage();
     return instance;
   }
   
-  private CoreNS()
+  private CorePackage()
   {
     super(Symbol.of("spartan.core"));
   }
   
-  private static CoreNS instance = null;
+  private static CorePackage instance = null;
   
   // populate this namespace
   {
@@ -43,7 +43,10 @@ public final class CoreNS extends Namespace
     bind(Symbol.of("set-at!"), CoreLib.SET_AT);
     bind(Symbol.of("length"), CoreLib.LENGTH);
     bind(Symbol.of("empty?"), CoreLib.IS_EMPTY);
-    bind(Symbol.of("namespace"), CoreLib.NAMESPACE);
+    
+    /* Package procedures */
+    
+    bind(Symbol.of("in-package"), CoreLib.IN_PACKAGE);
     bind(Symbol.of("import"), CoreLib.IMPORT);
     
     /* Symbol related procedures */
@@ -136,6 +139,43 @@ public final class CoreNS extends Namespace
     //bind(Symbol.of("nth"), ListLib.NTH);
     //bind(Symbol.of("set-nth!"), ListLib.SET_NTH);
     bind(Symbol.of("nth-tail"), ListLib.NTH_TAIL);
-    bind(Symbol.of("set-nth-tail!"), ListLib.SET_NTH_TAIL);    
+    bind(Symbol.of("set-nth-tail!"), ListLib.SET_NTH_TAIL);
+    
+    /* Vector procedures */
+    
+    bind(Symbol.of("vector"), VectorLib.FROM_LIST);
+    bind(Symbol.of("make-vector"), VectorLib.MAKE);
+    bind(Symbol.of("vector-copy"), VectorLib.COPY);
+    bind(Symbol.of("vector-append!"), VectorLib.APPEND);
+    bind(Symbol.of("vector-insert!"), VectorLib.INSERT);
+    bind(Symbol.of("vector-remove!"), VectorLib.REMOVE);
+    
+    /* String procedures */
+    
+    bind(Symbol.of("string-concat"), StringLib.CONCAT);
+    bind(Symbol.of("string-join"), StringLib.JOIN);
+    bind(Symbol.of("string-substr"), StringLib.SUBSTR);
+    bind(Symbol.of("string-reverse"), StringLib.REVERSE);
+    bind(Symbol.of("string-hash"), StringLib.HASH);
+    
+    /* Port procedures */
+    
+    bind(Symbol.of("port-open"), PortLib.OPEN);
+    bind(Symbol.of("port-close"), PortLib.CLOSE);
+    bind(Symbol.of("port-read"), PortLib.READ);
+    bind(Symbol.of("port-write"), PortLib.WRITE);
+    bind(Symbol.of("stdin"), InputPort.STDIN);
+    bind(Symbol.of("stdout"), OutputPort.STDOUT);
+    bind(Symbol.of("port-open?"), PortLib.IS_OPEN);
+    bind(Symbol.of("port-position"), PortLib.POSITION);
+    bind(Symbol.of("port-seek"), PortLib.SEEK);
+    bind(Symbol.of("port-length"), PortLib.LENGTH);
+        
+    /* Table procedures */
+    
+    bind(Symbol.of("table"), TableLib.FROM_LIST);
+    bind(Symbol.of("table-contains?"), TableLib.CONTAINS);
+    bind(Symbol.of("table-keys"), TableLib.KEYS);
+    bind(Symbol.of("table-values"), TableLib.VALUES);
   }
 }
