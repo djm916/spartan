@@ -5,6 +5,7 @@ import spartan.errors.Error;
 import spartan.errors.TypeMismatch;
 import spartan.errors.InvalidArgument;
 import spartan.errors.NoSuchPackage;
+import spartan.errors.WrongNumberArgs;
 import spartan.runtime.VirtualMachine;
 import spartan.Config;
 import spartan.parsing.Reader;
@@ -29,36 +30,46 @@ public final class CoreLib
       return lhs.compareTo(rhs);
     throw new TypeMismatch();
   }
-  
+    
   // (import package [:as package-alias] symbol [:as symbol-alias] ...)
   
-  public static void doImport(List args)
+  public static void parseImportArgs(List args)
   {
-    if (!(args.car() instanceof Symbol pkgName && pkgName.isSimple()))
+    if (!(args.car() instanceof Symbol pkgName))
+      throw new TypeMismatch();
+    if (!pkgName.isSimple())
       throw new InvalidArgument();
     var pkg = spartan.Runtime.getPackage(pkgName).orElseThrow(() -> new NoSuchPackage(pkgName));
     args = args.cdr();
-    
     if (!args.isEmpty() && args.car() == Symbol.KW_AS) {
       args = args.cdr();
-      if (!(args.car() instanceof Symbol pkgAlias && pkgAlias.isSimple()))
+      if (args.isEmpty())
+        throw new WrongNumberArgs();
+      if (!(args.car() instanceof Symbol pkgAlias))
+        throw new TypeMismatch();
+      if (!pkgAlias.isSimple())
         throw new InvalidArgument();
       spartan.Runtime.currentPackage().addPackageAlias(pkgAlias, pkg);
       args = args.cdr();
     }
-    
     if (args.isEmpty()) {
       spartan.Runtime.currentPackage().doImport(pkg);
     }
     else {
       while (!args.isEmpty()) {
-        if (!(args.car() instanceof Symbol symbol && symbol.isSimple()))
-          throw new InvalidArgument();        
+        if (!(args.car() instanceof Symbol symbol))
+          throw new TypeMismatch();
+        if (!symbol.isSimple())
+          throw new InvalidArgument();
         if (!args.cdr().isEmpty() && args.cadr() == Symbol.KW_AS) {
           args = args.cddr();
-          if (!(args.car() instanceof Symbol symbolAlias && symbolAlias.isSimple()))
+          if (args.isEmpty())
+            throw new WrongNumberArgs();
+          if (!(args.car() instanceof Symbol alias))
+            throw new TypeMismatch();
+          if (!alias.isSimple())
             throw new InvalidArgument();
-          spartan.Runtime.currentPackage().doImport(pkg, symbolAlias);
+          spartan.Runtime.currentPackage().doImport(pkg, symbol, alias);
         }
         else {
           spartan.Runtime.currentPackage().doImport(pkg, symbol);
@@ -428,7 +439,7 @@ public final class CoreLib
   
   public static final Primitive IMPORT = new Primitive(1, true) {
     public void apply(VirtualMachine vm) {
-      doImport(vm.popRestArgs());
+      parseImportArgs(vm.popRestArgs());
       vm.result = Nil.VALUE;
       vm.popFrame();
     }

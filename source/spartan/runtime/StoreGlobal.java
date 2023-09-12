@@ -3,7 +3,7 @@ package spartan.runtime;
 import spartan.data.Symbol;
 import spartan.parsing.Position;
 import spartan.errors.NoSuchPackage;
-import spartan.errors.UnboundVariable;
+import spartan.errors.UnboundSymbol;
 
 public final class StoreGlobal extends Inst
 {  

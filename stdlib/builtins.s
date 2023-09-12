@@ -67,11 +67,6 @@
       (unless (contains? filename *files-loaded*)
         (set! *files-loaded* (cons filename *files-loaded*))
         (load filename)))))
-
-(defmacro unless (test & body)
-  `(if ,test
-    nil
-    (do ,@body)))
     
 (defun memoize (proc) 
   (let ((value-ready? false)

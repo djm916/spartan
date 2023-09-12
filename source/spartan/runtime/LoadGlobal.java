@@ -3,7 +3,7 @@ package spartan.runtime;
 import spartan.data.Symbol;
 import spartan.parsing.Position;
 import spartan.errors.NoSuchPackage;
-import spartan.errors.UnboundVariable;
+import spartan.errors.UnboundSymbol;
 
 public final class LoadGlobal extends Inst
 {
@@ -20,7 +20,7 @@ public final class LoadGlobal extends Inst
     vm.result = spartan.Runtime.getPackage(packageName)
                 .orElseThrow(() -> new NoSuchPackage(packageName, position))
                 .lookup(baseName)
-                .orElseThrow(() -> new UnboundVariable(packageName, baseName, position));
+                .orElseThrow(() -> new UnboundSymbol(packageName, baseName, position));
     vm.control = next;
   }
   

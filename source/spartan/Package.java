@@ -4,7 +4,7 @@ import spartan.data.Symbol;
 import spartan.data.Datum;
 import spartan.data.List;
 import spartan.errors.InvalidArgument;
-import spartan.errors.UnboundVariable;
+import spartan.errors.UnboundSymbol;
 import java.util.Map;
 import java.util.IdentityHashMap;
 import java.util.Optional;
@@ -28,9 +28,14 @@ public class Package
     return name;
   }
   
-  public void doImport(Package p, Symbol s)
+  public void doImport(Package pkg, Symbol symbol)
   {
-    bind(s, p.lookup(s).orElseThrow(() -> new UnboundVariable(p.name(), s)));
+    bind(symbol, pkg.lookup(symbol).orElseThrow(() -> new UnboundSymbol(pkg.name(), symbol)));
+  }
+  
+  public void doImport(Package pkg, Symbol symbol, Symbol alias)
+  {
+    bind(alias, pkg.lookup(symbol).orElseThrow(() -> new UnboundSymbol(pkg.name(), symbol)));
   }
   
   public void doImport(Package p)
