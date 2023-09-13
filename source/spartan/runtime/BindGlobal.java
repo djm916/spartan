@@ -3,11 +3,11 @@ package spartan.runtime;
 import spartan.data.Symbol;
 import spartan.parsing.Position;
 import spartan.errors.NoSuchPackage;
-import spartan.errors.UnboundSymbol;
+import spartan.errors.MultipleDefinition;
 
-public final class StoreGlobal extends Inst
+public final class BindGlobal extends Inst
 {  
-  public StoreGlobal(Symbol packageName, Symbol baseName, Position position, Inst next)
+  public BindGlobal(Symbol packageName, Symbol baseName, Position position, Inst next)
   {
     super(next);
     this.packageName = packageName;
@@ -19,7 +19,7 @@ public final class StoreGlobal extends Inst
   {
     spartan.Runtime.getPackage(packageName)
                    .orElseThrow(() -> new NoSuchPackage(packageName, position))
-                   .store(baseName, vm.result, () -> new UnboundSymbol(packageName, baseName, position));
+                   .bind(baseName, vm.result, () -> new MultipleDefinition(baseName, position));
     vm.control = next;
   }
 

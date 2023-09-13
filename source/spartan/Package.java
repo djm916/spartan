@@ -5,22 +5,26 @@ import spartan.data.Datum;
 import spartan.data.List;
 import spartan.errors.InvalidArgument;
 import spartan.errors.UnboundSymbol;
+import spartan.errors.MultipleDefinition;
 import java.util.Map;
 import java.util.IdentityHashMap;
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class Package
 {
+  /*
   public Package(Symbol name)
   {
     this.name = name;
   }
+  */
   
-  public Package(Symbol name, Package p)
+  public Package(Symbol name, Package parent)
   {
     this.name = name;
-    doImport(p);
+    this.parent = parent;
   }
   
   public Symbol name()
@@ -59,8 +63,23 @@ public class Package
       If the variable is already bound, its value is replaced.
       @param name The variable to bind
   */
+  
   public void bind(Symbol name, Datum val)
   {
+    bindings.put(name, val);
+  }
+  
+  public void bind(Symbol name, Datum val, Supplier<MultipleDefinition> onError)
+  {
+    if (bindings.containsKey(name))
+      throw onError.get();
+    bindings.put(name, val);
+  }
+  
+  public void store(Symbol name, Datum val, Supplier<UnboundSymbol> onError)
+  {
+    if (!bindings.containsKey(name))
+      throw onError.get();
     bindings.put(name, val);
   }
   
@@ -70,7 +89,7 @@ public class Package
   */
   public Optional<Datum> lookup(Symbol name)
   {
-    return Optional.ofNullable(bindings.get(name));
+    return Optional.ofNullable(bindings.get(name)).or(() -> parent == null ? Optional.empty() : parent.lookup(name));
   }
   
   public String toString()
@@ -84,4 +103,5 @@ public class Package
   private final Symbol name;
   private final Map<Symbol, Datum> bindings = new IdentityHashMap<>();
   private final Map<Symbol, Package> packageAliases = new IdentityHashMap<>();
+  private final Package parent;
 }

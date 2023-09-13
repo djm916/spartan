@@ -7,7 +7,7 @@ import spartan.parsing.PositionMap;
 import spartan.parsing.Position;
 import spartan.errors.Error;
 import spartan.errors.SyntaxError;
-import spartan.errors.WrongNumberArgs;
+import spartan.errors.MultipleDefinition;
 import spartan.runtime.VirtualMachine;
 import spartan.Config;
 import java.util.logging.Logger;
@@ -195,7 +195,7 @@ public class Compiler
       throw malformedExp(exp);
     var init = exp.caddr();  
     return compile(init, scope, false,
-           new StoreGlobal(spartan.Runtime.currentPackage().name(), s.intern(), positionMap.get(s),
+           new BindGlobal(spartan.Runtime.currentPackage().name(), s.intern(), positionMap.get(s),
            new LoadConst(Nil.VALUE, next)));
   }
   
@@ -1065,7 +1065,8 @@ public class Compiler
     if (!(exp.length() >= 4 && exp.cadr() instanceof Symbol symbol && !symbol.isQualified() && exp.caddr() instanceof List params && checkParamListForm(params)))
       throw malformedExp(exp);
     var body = exp.cdddr();
-    spartan.Runtime.currentPackage().bind(symbol.intern(), new Macro(makeProcedure(params, body, Scope.EMPTY)));
+    var macro = new Macro(makeProcedure(params, body, Scope.EMPTY));
+    spartan.Runtime.currentPackage().bind(symbol.intern(), macro, () -> new MultipleDefinition(symbol, positionMap.get(symbol)));
     return new LoadConst(Nil.VALUE, next);
   }
   

@@ -16,7 +16,7 @@ public final class CorePackage extends Package
   
   private CorePackage()
   {
-    super(Symbol.of(NAME));
+    super(Symbol.of(NAME), null);
   }
   
   private static CorePackage instance = null;
