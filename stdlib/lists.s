@@ -23,8 +23,8 @@
 
 (defun for-each (f xs)
   (if (not (empty? xs))
-    (do (f (car xs))
-        (for-each f (cdr xs)))))
+    (begin (f (car xs))
+           (for-each f (cdr xs)))))
 
 (defun filter (f xs)
   (if (empty? xs) ()

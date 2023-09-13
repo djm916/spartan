@@ -2,8 +2,10 @@ package spartan.errors;
 
 public class TypeMismatch extends Error
 {
+  private static final String MSG_FMT = "type mismatch";
+  
   public TypeMismatch()
   {
-    super("type mismatch");
+    super(MSG_FMT);
   }
 }

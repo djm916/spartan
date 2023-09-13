@@ -14,13 +14,13 @@
 
 (defmacro when (test & body)
   `(if ,test
-     (do ,@body)
+     (begin ,@body)
      nil))
 
 (defmacro unless (test & body)
   `(if ,test
     nil
-    (do ,@body)))
+    (begin ,@body)))
 
 (defmacro swap! (a b)
   (let ((tmp (gensym)))

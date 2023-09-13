@@ -5,13 +5,15 @@ import spartan.data.Symbol;
 
 public class UnboundSymbol extends Error
 {
-  public UnboundSymbol(Symbol pkg, Symbol s)
+  private static final String MSG_FMT = "unable to resolve symbol \"%s:%s\"";
+  
+  public UnboundSymbol(Symbol pkg, Symbol sym)
   {
-    super("unbound symbol \"" + pkg.repr() + ":" + s.repr());
+    this(pkg, sym, null);
   }
   
-  public UnboundSymbol(Symbol pkg, Symbol s, Position p)
+  public UnboundSymbol(Symbol pkg, Symbol sym, Position pos)
   {
-    super("unbound symbol \"" + pkg.repr() + ":" + s.repr() + "\"", p);
+    super(String.format(MSG_FMT, pkg.repr(), sym.repr()), pos);
   }
 }

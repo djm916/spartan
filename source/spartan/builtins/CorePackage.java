@@ -2,6 +2,7 @@ package spartan.builtins;
 
 import spartan.data.*;
 import spartan.Package;
+import java.util.Optional;
 
 public final class CorePackage extends Package
 {
@@ -12,6 +13,12 @@ public final class CorePackage extends Package
     if (instance == null)
       instance = new CorePackage();
     return instance;
+  }
+  
+  @Override // Package
+  public Optional<Datum> lookup(Symbol name)
+  {
+    return Optional.ofNullable(bindings.get(name));
   }
   
   private CorePackage()
@@ -132,17 +139,19 @@ public final class CorePackage extends Package
     bind(Symbol.of("cdddr"), ListLib.CDDDR);
     bind(Symbol.of("cadr"), ListLib.CADR);
     bind(Symbol.of("caddr"), ListLib.CADDR);
-    bind(Symbol.of("concat"), ListLib.CONCAT);
-    bind(Symbol.of("append"), ListLib.APPEND);
-    bind(Symbol.of("reverse"), ListLib.REVERSE);
-    //bind(Symbol.of("remove!"), ListLib.REMOVE);
-    //bind(Symbol.of("remove"), ListLib.REMOVED);
     bind(Symbol.of("set-car!"), ListLib.SET_CAR);
     bind(Symbol.of("set-cdr!"), ListLib.SET_CDR);
     //bind(Symbol.of("nth"), ListLib.NTH);
     //bind(Symbol.of("set-nth!"), ListLib.SET_NTH);
-    bind(Symbol.of("nth-tail"), ListLib.NTH_TAIL);
-    bind(Symbol.of("set-nth-tail!"), ListLib.SET_NTH_TAIL);
+    bind(Symbol.of("nth-cdr"), ListLib.NTH_TAIL);
+    bind(Symbol.of("set-nth-cdr!"), ListLib.SET_NTH_TAIL);
+    //bind(Symbol.of("list-ref"), ListLib.REF);
+    //bind(Symbol.of("list-set!"), ListLib.SET);
+    bind(Symbol.of("concat"), ListLib.CONCAT);
+    bind(Symbol.of("append"), ListLib.APPEND);
+    //bind(Symbol.of("reverse"), ListLib.REVERSE);
+    //bind(Symbol.of("remove!"), ListLib.REMOVE);
+    //bind(Symbol.of("remove"), ListLib.REMOVED);
     
     /* Vector procedures */
     
@@ -163,12 +172,12 @@ public final class CorePackage extends Package
     
     /* Port procedures */
     
+    bind(Symbol.of("standard-input-port"), InputPort.STDIN);
+    bind(Symbol.of("standard-output-port"), OutputPort.STDOUT);
     bind(Symbol.of("port-open"), PortLib.OPEN);
     bind(Symbol.of("port-close"), PortLib.CLOSE);
     bind(Symbol.of("port-read"), PortLib.READ);
-    bind(Symbol.of("port-write"), PortLib.WRITE);
-    bind(Symbol.of("stdin"), InputPort.STDIN);
-    bind(Symbol.of("stdout"), OutputPort.STDOUT);
+    bind(Symbol.of("port-write"), PortLib.WRITE);    
     bind(Symbol.of("port-open?"), PortLib.IS_OPEN);
     bind(Symbol.of("port-position"), PortLib.POSITION);
     bind(Symbol.of("port-seek"), PortLib.SEEK);

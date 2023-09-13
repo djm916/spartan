@@ -43,7 +43,7 @@
                          [(c (v left) (v right)) left]
                          [else right]))]
         (if (c (v child) (v root))
-          (do
+          (begin
             (vector-swap! v root child)
             (set! root child)
             (set! left (+ 1 (* 2 root)))

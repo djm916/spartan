@@ -4,13 +4,15 @@ import spartan.parsing.Position;
 
 public class WrongNumberArgs extends Error
 {
+  private static final String MSG_FMT = "incorrect number of arguments";
+  
   public WrongNumberArgs()
   {
-    super("incorrect number of arguments");
+    this(null);
   }
   
   public WrongNumberArgs(Position pos)
   {
-    super("incorrect number of arguments", pos);
+    super(MSG_FMT, pos);
   }
 }

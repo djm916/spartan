@@ -191,7 +191,7 @@ public class Compiler
   
   private Inst compileDef(List exp, Scope scope, Inst next)
   {
-    if (!(exp.length() == 3 && exp.cadr() instanceof Symbol s && !s.isQualified()))
+    if (!(exp.length() == 3 && exp.cadr() instanceof Symbol s && s.isSimple()))
       throw malformedExp(exp);
     var init = exp.caddr();  
     return compile(init, scope, false,
@@ -361,7 +361,7 @@ public class Compiler
 
   private Inst compileLet(List exp, Scope scope, boolean tail, Inst next)
   {
-    if (exp.length() < 3 || !(exp.cadr() instanceof List bindings) || !checkBindingListForm(bindings))
+    if (!(exp.length() >= 3 && exp.cadr() instanceof List bindings && checkBindingListForm(bindings)))
       throw malformedExp(exp);
 
     var body = exp.cddr();
@@ -377,37 +377,56 @@ public class Compiler
            new PopEnv(next)))));
   }
   
-  /* Compile the "rec" special form, a shorthand for defining and invoking recursive procedures
-  
-     Syntax:     (rec f ((var1 init1) ... (varN initN)) body...)
-      
-     Transform:  (letrec ((f (fun (var1 ... varN) body..)))
-                   (f init1 ... initN))
+  /* Compiles the "let*" special form, for sequential binding
+
+     Syntax:  (let* ((symb1 init1)
+                     ...
+                     (symbN initN))
+                body...)
+
+     Compilation:
+
+           push-env N
+           <<init1>>
+           store-local 0 0
+           ...
+           <<initN>>
+           store-local 0 N-1
+           <<body>>
+           pop-env
+     next: ...
   */
-  private Inst compileRec(List exp, Scope scope, boolean tail, Inst next)
+  private Inst compileLetStar(List exp, Scope scope, boolean tail, Inst next)
   {
-    if (exp.length() < 4 || !(exp.cadr() instanceof Symbol f) || !(exp.caddr() instanceof List bindings))
+    if (!(exp.length() >= 3 && exp.cadr() instanceof List bindings && checkBindingListForm(bindings)))
       throw malformedExp(exp);
-    
-    var xform = transformRec(f, bindings, exp.cdddr());
-    
-    if (Config.LOG_DEBUG)
-      log.info(() -> String.format("rec transform: %s => %s", exp.repr(), xform.repr()));
-    
-    try {
-      return compile(xform, scope, tail, next);
-    }
-    catch (Error err) {
-      err.setPosition(positionMap.get(exp));
-      throw err;
-    }
+
+    var body = exp.cddr();
+    int numBindings = bindings.length();
+    var vars = extractVars(bindings);
+    var extendedScope = scope.extend(vars);
+
+    return new PushEnv(numBindings,
+           compileSequentialBindings(bindings, 0, scope.extend(),
+           compileSequence(body, extendedScope, tail,
+           new PopEnv(next))));
   }
   
-  private List transformRec(Symbol f, List bindings, List body)
+  /* Generate the binding sequence of a let* expression */
+  
+  private Inst compileSequentialBindings(List bindings, int offset, Scope scope, Inst next)
   {
-    var vars = extractVars(bindings);
-    var inits = extractInits(bindings);
-    return List.of(Symbol.LETREC, List.cons(List.of(f, List.cons(Symbol.FUN, List.cons(vars, body))), List.EMPTY), List.cons(f, inits));
+    if (bindings.isEmpty())
+      return next;
+
+    var binding = (List) bindings.car();
+    var symb = (Symbol) binding.car();
+    var init = binding.cadr();
+
+    return compile(init, scope, false,
+                   new StoreLocal0(offset,
+                   compileSequentialBindings(bindings.cdr(), offset + 1, scope.bind(symb),
+                   next)));
   }
   
   /* Compiles the "letrec" special form, for recursive and mutally-recursive functions
@@ -435,7 +454,7 @@ public class Compiler
   */
   private Inst compileLetRec(List exp, Scope scope, boolean tail, Inst next)
   {
-    if (exp.length() < 3 || !(exp.cadr() instanceof List bindings) || !checkBindingListForm(bindings))
+    if (!(exp.length() >= 3 && exp.cadr() instanceof List bindings && checkBindingListForm(bindings)))
       throw malformedExp(exp);
 
     var body = exp.cddr();
@@ -475,64 +494,55 @@ public class Compiler
              compileInitRecEnv(offset + 1, numBindings, next));
   }
   
-  /* Compiles the "let*" special form, for sequential binding
-
-     Syntax:  (let* ((symb1 init1)
-                     ...
-                     (symbN initN))
-                body...)
-
-     Compilation:
-
-           push-env N
-           <<init1>>
-           store-local 0 0
-           ...
-           <<initN>>
-           store-local 0 N-1
-           <<body>>
-           pop-env
-     next: ...
+  /* Compile the "rec" special form, a shorthand for defining and invoking recursive procedures
+  
+     Syntax:     (rec f ((var1 init1) ... (varN initN)) body...)
+      
+     Transform:  (letrec ((f (fun (var1 ... varN) body..)))
+                   (f init1 ... initN))
   */
-  private Inst compileLetStar(List exp, Scope scope, boolean tail, Inst next)
+  private Inst compileRec(List exp, Scope scope, boolean tail, Inst next)
   {
-    if (exp.length() < 3 || !(exp.cadr() instanceof List bindings) || !checkBindingListForm(bindings))
+    if (!(exp.length() >= 4 && exp.cadr() instanceof Symbol s && s.isSimple() && exp.caddr() instanceof List bindings && checkBindingListForm(bindings)))
       throw malformedExp(exp);
-
-    var body = exp.cddr();
-    int numBindings = bindings.length();
-    var vars = extractVars(bindings);
-    var extendedScope = scope.extend(vars);
-
-    return new PushEnv(numBindings,
-           compileSequentialBindings(bindings, 0, scope.extend(),
-           compileSequence(body, extendedScope, tail,
-           new PopEnv(next))));
+    
+    var xform = transformRec(s, bindings, exp.cdddr());
+    
+    if (Config.LOG_DEBUG)
+      log.info(() -> String.format("rec transform: %s => %s", exp.repr(), xform.repr()));
+    
+    try {
+      return compile(xform, scope, tail, next);
+    }
+    catch (Error err) {
+      err.setPosition(positionMap.get(exp));
+      throw err;
+    }
   }
   
-  /* Generate the binding sequence of a let* expression */
-  
-  private Inst compileSequentialBindings(List bindings, int offset, Scope scope, Inst next)
+  private List transformRec(Symbol f, List bindings, List body)
   {
-    if (bindings.isEmpty())
-      return next;
-
-    var binding = (List) bindings.car();
-    var symb = (Symbol) binding.car();
-    var init = binding.cadr();
-
-    return compile(init, scope, false,
-                   new StoreLocal0(offset,
-                   compileSequentialBindings(bindings.cdr(), offset + 1, scope.bind(symb),
-                   next)));
+    var vars = extractVars(bindings);
+    var inits = extractInits(bindings);
+    return List.of(Symbol.LETREC, List.cons(List.of(f, List.cons(Symbol.FUN, List.cons(vars, body))), List.EMPTY), List.cons(f, inits));
   }
   
-  /* Check that a binding list is well-formed */
+  /* Check that a binding list for a "let" expression is well-formed */
   
   private boolean checkBindingListForm(List bindings)
   {
     for (; !bindings.isEmpty(); bindings = bindings.cdr())
-      if (!(bindings.car() instanceof List pair && pair.length() == 2 && pair.car() instanceof Symbol s && !s.isQualified()))
+      if (!(bindings.car() instanceof List list && list.length() == 2 && list.car() instanceof Symbol s && s.isSimple()))
+        return false;
+    return true;
+  }
+  
+  /* Check that a binding list for a "do" expression is well-formed */
+  
+  private boolean checkDoBindingListForm(List bindings)
+  {
+    for (; !bindings.isEmpty(); bindings = bindings.cdr())
+      if (!(bindings.car() instanceof List list && list.length() == 3 && list.car() instanceof Symbol s && s.isSimple()))
         return false;
     return true;
   }
@@ -545,7 +555,7 @@ public class Compiler
   private boolean checkParamListForm(List params)
   {
     for (; !params.isEmpty(); params = params.cdr())
-      if (!(params.car() instanceof Symbol param && !param.isQualified()) || (param.equals(Symbol.AMPERSAND) && (params.cdr().isEmpty() || !params.cddr().isEmpty())))
+      if (!(params.car() instanceof Symbol param && param.isSimple()) || (param.equals(Symbol.AMPERSAND) && (params.cdr().isEmpty() || !params.cddr().isEmpty())))
         return false;
     return true;
   }
@@ -564,16 +574,22 @@ public class Compiler
     return true;
   }
 
-  // Extract the variables from a binding list
+  // Extract the variables (first element) from a list of bindings
   private List extractVars(List bindings)
   {
-    return bindings.map(pair -> ((List)pair).car());
+    return bindings.map(list -> ((List)list).car());
   }
 
-  // Extract the initializers from a binding list
+  // Extract the initializer expressions (second element) from a list of bindings
   private List extractInits(List bindings)
   {
-    return bindings.map(pair -> ((List)pair).cadr());
+    return bindings.map(list -> ((List)list).cadr());
+  }
+  
+  // Extract the step expressions (third element) from a list of bindings
+  private List extractSteps(List bindings)
+  {
+    return bindings.map(list -> ((List)list).caddr());
   }
   
   /* Generate the argument-evaluation sequence of a procedure application */
@@ -833,12 +849,12 @@ public class Compiler
                       next));
   }
 
-  /* Compiles the "do" special form.
+  /* Compiles the "begin" special form.
 
-     Syntax: (do exp...)
+     Syntax: (begin exp...)
   */
 
-  private Inst compileDo(List exp, Scope scope, boolean tail, Inst next)
+  private Inst compileBegin(List exp, Scope scope, boolean tail, Inst next)
   {
     if (exp.length() < 2)
       throw malformedExp(exp);
@@ -873,6 +889,87 @@ public class Compiler
                           new LoadConst(Nil.VALUE, next)));
     jump.setTarget(loop);
     return loop;
+  }
+  
+  /* Compile the "do" special form.
+   
+     Syntax: (do ((var1 init1 step1) ...)
+               (test result)
+               body ...)
+     
+     Compilation:
+     
+           ; pre-iteration initialization sequence
+
+           <<initN>>
+           push-arg
+           ...
+           <<init1>>
+           push-arg
+           push-env N
+           pop-arg
+           store-local 0 0
+           ...
+           pop-arg
+           store-local 0 N-1
+            
+           ; iteration test and body
+
+     loop: <<test>>
+           branch done body
+
+           ; evaluate loop body for side-effect
+
+     body: <<exp1>>
+           ...
+           <<expN>>
+           
+           ; update step
+
+           <<stepN>>
+           push-arg
+           ...
+           <<step1>>
+           push-arg
+           pop-arg
+           store-local 0 0
+           ...
+           pop-arg
+           store-local 0 N-1
+           
+           jump loop
+            
+     done: <<result>>
+           pop-env
+  */
+  private Inst compileDo(List exp, Scope scope, boolean tail, Inst next)
+  {
+    if (!(exp.length() >= 3 && exp.cadr() instanceof List bindings && checkDoBindingListForm(bindings)
+      && exp.caddr() instanceof List caddr && caddr.length() == 2))
+      throw malformedExp(exp);
+    
+    int numBindings = bindings.length();
+    var vars = extractVars(bindings);
+    var inits = extractInits(bindings);
+    var steps = extractSteps(bindings);
+    var extendedScope = scope.extend(vars);
+    var test = caddr.car();
+    var result = caddr.cadr();
+    var body = exp.cdddr();
+    
+    var jump = new Jump();
+    var loop = compile(test, extendedScope, false,
+               new Branch(compile(result, extendedScope, tail,
+                          new PopEnv(next)),
+                          compileSequence(body, scope, false,
+                          compilePushArgs(steps, extendedScope,
+                          compileBindLocals(0, numBindings,                          
+                          jump)))));
+    jump.setTarget(loop);                          
+    return compilePushArgs(inits, scope,
+           new PushEnv(numBindings,
+           compileBindLocals(0, numBindings,
+           loop)));
   }
   
   // (quote x)
@@ -1062,7 +1159,7 @@ public class Compiler
 
   private Inst compileDefmacro(List exp, Scope scope, Inst next)
   {
-    if (!(exp.length() >= 4 && exp.cadr() instanceof Symbol symbol && !symbol.isQualified() && exp.caddr() instanceof List params && checkParamListForm(params)))
+    if (!(exp.length() >= 4 && exp.cadr() instanceof Symbol symbol && symbol.isSimple() && exp.caddr() instanceof List params && checkParamListForm(params)))
       throw malformedExp(exp);
     var body = exp.cdddr();
     var macro = new Macro(makeProcedure(params, body, Scope.EMPTY));
@@ -1098,7 +1195,7 @@ public class Compiler
   private Optional<Datum> lookup(Symbol s)
   {
     if (s instanceof QualifiedSymbol qs)
-      return spartan.Runtime.getPackage(Symbol.of(qs.packageName())).flatMap(ns -> ns.lookup(Symbol.of(qs.baseName())));
+      return spartan.Runtime.getPackage(Symbol.of(qs.packageName())).flatMap(pkg -> pkg.lookup(Symbol.of(qs.baseName())));
     else
       return spartan.Runtime.currentPackage().lookup(s.intern());
   }
@@ -1109,6 +1206,12 @@ public class Compiler
   {
     // Handle special forms
     if (exp.car() instanceof Symbol s) {
+      if (s.equals(Symbol.DEF))
+        return compileDef(exp, scope, next);
+      if (s.equals(Symbol.DEFUN))
+        return compileDefun(exp, scope, next);
+      if (s.equals(Symbol.DEFMACRO))
+        return compileDefmacro(exp, scope, next);
       if (s.equals(Symbol.IF))
         return compileIf(exp, scope, tail, next);
       if (s.equals(Symbol.LET))
@@ -1117,14 +1220,8 @@ public class Compiler
         return compileLetStar(exp, scope, tail, next);
       if (s.equals(Symbol.LETREC))
         return compileLetRec(exp, scope, tail, next);
-      if (s.equals(Symbol.DO))
-        return compileDo(exp, scope, tail, next);
-      if (s.equals(Symbol.DEF))
-        return compileDef(exp, scope, next);
-      if (s.equals(Symbol.DEFUN))
-        return compileDefun(exp, scope, next);
-      if (s.equals(Symbol.DEFMACRO))
-        return compileDefmacro(exp, scope, next);
+      if (s.equals(Symbol.BEGIN))
+        return compileBegin(exp, scope, tail, next);      
       if (s.equals(Symbol.FUN))
         return compileFun(exp, scope, next);
       if (s.equals(Symbol.QUOTE))
@@ -1141,6 +1238,8 @@ public class Compiler
         return compileSet(exp, scope, tail, next);
       if (s.equals(Symbol.WHILE))
         return compileWhile(exp, scope, tail, next);
+      if (s.equals(Symbol.DO))
+        return compileDo(exp, scope, tail, next);
       if (s.equals(Symbol.CALL_CC))
         return compileCallCC(exp, scope, tail, next);
       if (s.equals(Symbol.REC))

@@ -5,13 +5,15 @@ import spartan.parsing.Position;
 
 public class NoSuchPackage extends Error
 {
-  public NoSuchPackage(Symbol ns)
+  private static final String MSG_FMT = "package \"%s\" does not exist";
+  
+  public NoSuchPackage(Symbol pkg)
   {
-    super("no such package: \"" + ns.repr() + "\"", null);
+    this(pkg, null);
   }
   
-  public NoSuchPackage(Symbol ns, Position pos)
+  public NoSuchPackage(Symbol pkg, Position pos)
   {
-    super("no such package: \"" + ns.repr() + "\"", pos);
+    super(String.format(MSG_FMT, pkg.repr()), pos);
   }
 }

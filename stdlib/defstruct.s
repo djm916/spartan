@@ -77,7 +77,7 @@
   (map (fun (field) (generate-mutator name field)) fields))
 
 (defmacro defstruct (name fields)
-  `(do
+  `(begin
      ,(generate-constructor name fields)
      ,@(generate-accessors name fields)
      ,@(generate-mutators name fields)

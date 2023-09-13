@@ -13,7 +13,8 @@ permits QualifiedSymbol
   public static final Symbol FUN = new Symbol("fun");
   public static final Symbol IF = new Symbol("if");
   public static final Symbol COND = new Symbol("cond");
-  public static final Symbol ELSE = new Symbol("else");  
+  public static final Symbol ELSE = new Symbol("else");
+  public static final Symbol BEGIN = new Symbol("begin");
   public static final Symbol QUOTE = new Symbol("quote");
   public static final Symbol QUASIQUOTE = new Symbol("quasiquote");
   public static final Symbol UNQUOTE = new Symbol("unquote");  
@@ -21,8 +22,8 @@ permits QualifiedSymbol
   public static final Symbol LET = new Symbol("let");
   public static final Symbol LETSTAR = new Symbol("let*");
   public static final Symbol LETREC = new Symbol("letrec");
-  public static final Symbol DO = new Symbol("do");
   public static final Symbol WHILE = new Symbol("while");
+  public static final Symbol DO = new Symbol("do");
   public static final Symbol SET = new Symbol("set!");
   public static final Symbol AND = new Symbol("and");
   public static final Symbol OR = new Symbol("or");

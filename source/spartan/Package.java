@@ -25,43 +25,79 @@ public class Package
     return name;
   }
   
+  /**
+   * Import a symbol from another package into this package
+   *
+   * @param pkg The package to import from
+   * @param symbol The symbol to import
+   * @throws UnboundSymbol if symbol is not present in package
+   * @throws MultipleDefinition if symbol is already present in this package
+   */
   public void doImport(Package pkg, Symbol symbol)
   {
     bind(symbol, pkg.lookup(symbol).orElseThrow(() -> new UnboundSymbol(pkg.name(), symbol)), () -> new MultipleDefinition(symbol));
   }
   
+  /**
+   * Import a symbol from another package into this package, using an alias
+   *
+   * @param pkg The package to import from
+   * @param symbol The symbol to import
+   * @throws UnboundSymbol if symbol is not present in package
+   * @throws MultipleDefinition if symbol is already present in this package
+   */
   public void doImport(Package pkg, Symbol symbol, Symbol alias)
   {
     bind(alias, pkg.lookup(symbol).orElseThrow(() -> new UnboundSymbol(pkg.name(), symbol)), () -> new MultipleDefinition(symbol));
   }
   
-  public void doImport(Package p)
+  /**
+   * Import all symbols from another package into this package
+   *
+   * @param pkg The package to import from
+   * @param symbol The symbol to import
+   * @throws UnboundSymbol if symbol is not present in package
+   * @throws MultipleDefinition if symbol is already present in this package
+   */
+  public void doImport(Package pkg)
   {
-    for (var s : p.bindings.entrySet()) {
-      doImport(p, s.getKey());
+    for (var symbol : pkg.bindings.keySet()) {
+      doImport(pkg, symbol);
     }
   }
   
-  public void addPackageAlias(Symbol s, Package p)
+  /**
+   * Add a local package alias into this package
+   *
+   * @param pkgName The alias for the package
+   * @param pkg The package to create an alias for
+   */
+  public void addPackageAlias(Symbol pkgName, Package pkg)
   {
-    packageAliases.put(s, p);
+    localPkgAliases.put(pkgName, pkg);
   }
   
+  /**
+   * Get a local package alias
+   *
+   * @param pkgName A package alias
+   * @return The (optional) package aliased by pkgName
+   */
   public Optional<Package> getPackageAlias(Symbol pkgName)
   {
-    return Optional.ofNullable(packageAliases.get(pkgName));
+    return Optional.ofNullable(localPkgAliases.get(pkgName));
   }
   
-  /** Bind a variable to a given value.
-      If the variable is already bound, its value is replaced.
-      @param name The variable to bind
-  */
-  
-  protected void bind(Symbol name, Datum val)
-  {
-    bindings.put(name, val);
-  }
-  
+  /**
+   * Bind a symbol to a value
+   *
+   * If the symbol is not present in this package, binds the given symbol to the given value.
+   * Otherwise, throws a MultipleDefinition exception.
+   *
+   * @param name The symbol to bind
+   * @param val The symbol's value
+   * @throws MultipleDefinition If symbol is already present in this package
+   */
   public void bind(Symbol name, Datum val, Supplier<MultipleDefinition> onError)
   {
     if (bindings.containsKey(name))
@@ -69,6 +105,29 @@ public class Package
     bindings.put(name, val);
   }
   
+  /**
+   * Bind a symbol to a value
+   *
+   * If the symbol is already present in this package, its value is replaced.
+   * 
+   * @param name The symbol to bind
+   * @param name The symbol's value
+   */ 
+  protected void bind(Symbol name, Datum val)
+  {
+    bindings.put(name, val);
+  }
+  
+  /**
+   * Set the value of a symbol
+   *
+   * If the symbol is present in this package, sets the value of the given symbol to the given value.
+   * Otherwise, throws a UnboundSymbol exception.
+   *
+   * @param name The symbol to bind
+   * @param val The symbol's value
+   * @throws UnboundSymbol If symbol is not present in this package
+   */
   public void store(Symbol name, Datum val, Supplier<UnboundSymbol> onError)
   {
     if (!bindings.containsKey(name))
@@ -76,13 +135,15 @@ public class Package
     bindings.put(name, val);
   }
   
-  /** Lookup a variable by name, optionally returning its bound value.
-      @param name The variable to look up
-      @return The (optional) value of the variable
-  */
+  /**
+   * Lookup the value of a symbol
+   * 
+   * @param name The symbol to look up
+   * @return The (optional) value of the symbol
+   */
   public Optional<Datum> lookup(Symbol name)
   {
-    return Optional.ofNullable(bindings.get(name)).or(() -> parent == null ? Optional.empty() : parent.lookup(name));
+    return Optional.ofNullable(bindings.get(name)).or(() -> parent.lookup(name));
   }
   
   public String toString()
@@ -93,8 +154,8 @@ public class Package
               .collect(Collectors.joining(", ", "{", "}")));
   }
   
-  private final Symbol name;
-  private final Map<Symbol, Datum> bindings = new IdentityHashMap<>();
-  private final Map<Symbol, Package> packageAliases = new IdentityHashMap<>();
-  private final Package parent;
+  protected final Symbol name;
+  protected final Map<Symbol, Datum> bindings = new IdentityHashMap<>();
+  protected final Map<Symbol, Package> localPkgAliases = new IdentityHashMap<>();
+  protected final Package parent;
 }
