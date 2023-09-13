@@ -14,13 +14,6 @@ import java.util.stream.Collectors;
 
 public class Package
 {
-  /*
-  public Package(Symbol name)
-  {
-    this.name = name;
-  }
-  */
-  
   public Package(Symbol name, Package parent)
   {
     this.name = name;
@@ -34,12 +27,12 @@ public class Package
   
   public void doImport(Package pkg, Symbol symbol)
   {
-    bind(symbol, pkg.lookup(symbol).orElseThrow(() -> new UnboundSymbol(pkg.name(), symbol)));
+    bind(symbol, pkg.lookup(symbol).orElseThrow(() -> new UnboundSymbol(pkg.name(), symbol)), () -> new MultipleDefinition(symbol));
   }
   
   public void doImport(Package pkg, Symbol symbol, Symbol alias)
   {
-    bind(alias, pkg.lookup(symbol).orElseThrow(() -> new UnboundSymbol(pkg.name(), symbol)));
+    bind(alias, pkg.lookup(symbol).orElseThrow(() -> new UnboundSymbol(pkg.name(), symbol)), () -> new MultipleDefinition(symbol));
   }
   
   public void doImport(Package p)
@@ -64,7 +57,7 @@ public class Package
       @param name The variable to bind
   */
   
-  public void bind(Symbol name, Datum val)
+  protected void bind(Symbol name, Datum val)
   {
     bindings.put(name, val);
   }
