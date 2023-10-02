@@ -127,7 +127,7 @@ public final class ListLib
     }
   };
     
-  public static final Primitive NTH_TAIL = new Primitive(2, false) {
+  public static final Primitive NTH_CDR = new Primitive(2, false) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof List list && vm.popArg() instanceof IInt index))
         throw new TypeMismatch();
@@ -136,12 +136,30 @@ public final class ListLib
     }
   };
   
-  public static final Primitive SET_NTH_TAIL = new Primitive(3, false) {
+  public static final Primitive SET_NTH_CDR = new Primitive(3, false) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof List list && vm.popArg() instanceof IInt index && vm.popArg() instanceof List tail))
         throw new TypeMismatch();
       list.setTail(index.intValue(), tail);
       vm.result = Nil.VALUE;
+      vm.popFrame();
+    }
+  };
+  
+  public static final Primitive LENGTH = new Primitive(1, false) {
+    public void apply(VirtualMachine vm) {
+      if (!(vm.popArg() instanceof List list))
+        throw new TypeMismatch();
+      vm.result = Int.valueOf(list.length());
+      vm.popFrame();
+    }
+  };
+  
+  public static final Primitive IS_EMPTY = new Primitive(1, false) {
+    public void apply(VirtualMachine vm) {
+      if (!(vm.popArg() instanceof List list))
+        throw new TypeMismatch();
+      vm.result = Bool.valueOf(list.isEmpty());
       vm.popFrame();
     }
   };

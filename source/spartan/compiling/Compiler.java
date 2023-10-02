@@ -737,7 +737,7 @@ public class Compiler
    */
   private Inst compileFun(List exp, Scope scope, Inst next)
   {
-    if (exp.length() < 3 || !(exp.cadr() instanceof List params) || !checkParamListForm(params))
+    if (!(exp.length() >= 3 && exp.cadr() instanceof List params && checkParamListForm(params)))
       throw malformedExp(exp);
     var body = exp.cddr();
     return new MakeClosure(makeProcedure(params, body, scope), next);
@@ -981,10 +981,22 @@ public class Compiler
     
     if (exp.cadr() instanceof Symbol s)
       return new LoadConst(s.intern(), next);
+    else if (exp.cadr() instanceof List list)
+      return new LoadConst(quoteList(list), next);
     else
       return new LoadConst(exp.cadr(), next);
   }
 
+  private List quoteList(List list)
+  {
+    return list.map(
+      x -> switch (x) {
+        case Symbol s -> s.intern();
+        case List l -> quoteList(l);
+        default -> x;
+      });
+  }
+  
   // Compile a (quasiquote x) form by reducing it to an equivalent
   // list form and compiling the result.
 

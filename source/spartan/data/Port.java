@@ -61,7 +61,7 @@ permits InputPort, OutputPort, FilePort
     throw unsupportedOperation();
   }
   
-  public long length()
+  public long size()
   {
     throw unsupportedOperation();
   }

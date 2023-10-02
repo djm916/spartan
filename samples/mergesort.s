@@ -1,6 +1,4 @@
 
-(require "stdlib/vectors.s")
-
 (def N 20)
 
 (def random-nums (vector-unfold rand N))

@@ -98,7 +98,7 @@ public final class FilePort extends Port
   }
   
   @Override // Port
-  public long length()
+  public long size()
   {
     try {
       return channel.size();

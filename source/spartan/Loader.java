@@ -11,6 +11,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.InvalidPathException;
 import java.util.logging.Logger;
+import java.util.Set;
+import java.util.HashSet;
 
 /**
  * Loads source files.
@@ -55,6 +57,11 @@ public final class Loader
   public static void load(Path file)
   {
     var path = resolvePath(file);
+    
+    if (loadedFiles.contains(path))
+      return;
+    
+    loadedFiles.add(path);
     
     if (Config.LOG_DEBUG)
       log.info(() -> "loading \"" + path + "\"");
@@ -104,19 +111,20 @@ public final class Loader
   {
     // Absolute path doesn't require search of SPARTAN_PATH
     if (path.isAbsolute())
-      return path;
+      return path.normalize();
     
     // Search paths in environment variable SPARTAN_PATH
     for (var searchDir : Config.LOAD_SEARCH_DIRS) {
       var tryPath = searchDir.resolve(path);
       if (Config.LOG_DEBUG)
         log.info(() -> String.format("trying %s", tryPath));
-      if (Files.exists(path))
-        return path;
+      if (Files.exists(tryPath))
+        return tryPath.normalize().toAbsolutePath();
     }
     
     throw new LoadError(path.toString()); // No file was found
   }
   
   private static final Logger log = Logger.getLogger(Loader.class.getName());
+  private static final Set<Path> loadedFiles = new HashSet<>();
 }

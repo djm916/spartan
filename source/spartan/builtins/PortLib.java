@@ -6,8 +6,6 @@ import spartan.runtime.VirtualMachine;
 
 public final class PortLib
 {
-  // (port/open path flags)
-  
   public static final Primitive OPEN = new Primitive(2, false) {    
     public void apply(VirtualMachine vm) {      
       if (!(vm.popArg() instanceof Text file && vm.popArg() instanceof Text flags))
@@ -16,8 +14,6 @@ public final class PortLib
       vm.popFrame();
     }
   };
-  
-  // (port/close port)
   
   public static final Primitive CLOSE = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
@@ -29,8 +25,6 @@ public final class PortLib
     }
   };
   
-  // (port/open? port)
-  
   public static final Primitive IS_OPEN = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Port port))
@@ -39,8 +33,6 @@ public final class PortLib
       vm.popFrame();
     }
   };
-  
-  // (port/read port buffer start count)
   
   public static final Primitive READ = new Primitive(4, false) {
     public void apply(VirtualMachine vm) {
@@ -51,8 +43,6 @@ public final class PortLib
     }
   };
   
-  // (port/write port buffer start count)
-  
   public static final Primitive WRITE = new Primitive(4, false) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Port port && vm.popArg() instanceof Bytes bytes && vm.popArg() instanceof IInt start && vm.popArg() instanceof IInt count))
@@ -62,8 +52,6 @@ public final class PortLib
     }
   };
   
-  // (port/position port)
-  
   public static final Primitive POSITION = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Port port))
@@ -72,8 +60,6 @@ public final class PortLib
       vm.popFrame();
     }
   };
-  
-  // (port/seek port position)
   
   public static final Primitive SEEK = new Primitive(2, false) {
     public void apply(VirtualMachine vm) {
@@ -85,13 +71,11 @@ public final class PortLib
     }
   };
   
-  // (port/length port)
-  
-  public static final Primitive LENGTH = new Primitive(1, false) {
+  public static final Primitive SIZE = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Port port))
         throw new TypeMismatch();
-      vm.result = Int.valueOf(port.length());
+      vm.result = Int.valueOf(port.size());
       vm.popFrame();
     }
   };

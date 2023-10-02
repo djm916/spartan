@@ -43,14 +43,14 @@
       (car xs)
       (find f (cdr xs)))))
 
-(defun index (f xs)
+(defun find-index (f xs)
   (rec loop ((i 0) (xs xs))
     (cond [(empty? xs)  -1]
           [(f (car xs)) i]
           [else         (loop (+ 1 i) (cdr xs))])))
 
 (defun contains? (x xs)
-  (> (index (fun (y) (= x y)) xs) 0))
+  (>= (find-index (fun (y) (= x y)) xs) 0))
 
 (defun remove (f xs)
   (filter (fun (x) (not (f x))) xs))

@@ -39,12 +39,12 @@ public final class CorePackage extends Package
     bind(Symbol.of("nil"), Nil.VALUE);
     bind(Symbol.of("true"), Bool.TRUE);
     bind(Symbol.of("false"), Bool.FALSE);    
+    bind(Symbol.of("not"), CoreLib.NOT);    
     bind(Symbol.of("apply"), CoreLib.APPLY);
     bind(Symbol.of("print"), CoreLib.PRINT);
     bind(Symbol.of("print-line"), CoreLib.PRINT_LINE);
     bind(Symbol.of("type"), CoreLib.TYPE);    
-    bind(Symbol.of("load"), CoreLib.LOAD);
-    bind(Symbol.of("not"), CoreLib.NOT);    
+    bind(Symbol.of("load"), CoreLib.LOAD);    
     bind(Symbol.of("gensym"), CoreLib.GENSYM);
     bind(Symbol.of("identity-hash"), CoreLib.IDENTITY_HASH);
     bind(Symbol.of("error"), CoreLib.ERROR);
@@ -57,7 +57,7 @@ public final class CorePackage extends Package
     
     bind(Symbol.of("in-package"), CoreLib.IN_PACKAGE);
     bind(Symbol.of("import"), CoreLib.IMPORT);
-    bind(Symbol.of("print-package"), CoreLib.PRINT_PACKAGE);
+    //bind(Symbol.of("print-package"), CoreLib.PRINT_PACKAGE);
     
     /* Symbol related procedures */
     
@@ -143,16 +143,18 @@ public final class CorePackage extends Package
     bind(Symbol.of("set-cdr!"), ListLib.SET_CDR);
     //bind(Symbol.of("nth"), ListLib.NTH);
     //bind(Symbol.of("set-nth!"), ListLib.SET_NTH);
-    bind(Symbol.of("nth-cdr"), ListLib.NTH_TAIL);
-    bind(Symbol.of("set-nth-cdr!"), ListLib.SET_NTH_TAIL);
+    bind(Symbol.of("nth-cdr"), ListLib.NTH_CDR);
+    bind(Symbol.of("set-nth-cdr!"), ListLib.SET_NTH_CDR);
     //bind(Symbol.of("list-ref"), ListLib.REF);
     //bind(Symbol.of("list-set!"), ListLib.SET);
     bind(Symbol.of("concat"), ListLib.CONCAT);
     bind(Symbol.of("append"), ListLib.APPEND);
+    //bind(Symbol.of("length"), ListLib.LENGTH);
     //bind(Symbol.of("reverse"), ListLib.REVERSE);
     //bind(Symbol.of("remove!"), ListLib.REMOVE);
     //bind(Symbol.of("remove"), ListLib.REMOVED);
-    
+    //bind(Symbol.of("empty?"), ListLib.IS_EMPTY);
+        
     /* Vector procedures */
     
     bind(Symbol.of("vector"), VectorLib.FROM_LIST);
@@ -161,6 +163,7 @@ public final class CorePackage extends Package
     bind(Symbol.of("vector-append!"), VectorLib.APPEND);
     bind(Symbol.of("vector-insert!"), VectorLib.INSERT);
     bind(Symbol.of("vector-remove!"), VectorLib.REMOVE);
+    bind(Symbol.of("vector-length"), VectorLib.LENGTH);
     
     /* String procedures */
     
@@ -169,20 +172,21 @@ public final class CorePackage extends Package
     bind(Symbol.of("string-substr"), StringLib.SUBSTR);
     bind(Symbol.of("string-reverse"), StringLib.REVERSE);
     bind(Symbol.of("string-hash"), StringLib.HASH);
+    bind(Symbol.of("string-length"), StringLib.LENGTH);
     
     /* Port procedures */
     
     bind(Symbol.of("standard-input-port"), InputPort.STDIN);
     bind(Symbol.of("standard-output-port"), OutputPort.STDOUT);
-    bind(Symbol.of("port-open"), PortLib.OPEN);
+    bind(Symbol.of("port-open-file"), PortLib.OPEN);
     bind(Symbol.of("port-close"), PortLib.CLOSE);
     bind(Symbol.of("port-read"), PortLib.READ);
     bind(Symbol.of("port-write"), PortLib.WRITE);    
     bind(Symbol.of("port-open?"), PortLib.IS_OPEN);
     bind(Symbol.of("port-position"), PortLib.POSITION);
     bind(Symbol.of("port-seek"), PortLib.SEEK);
-    bind(Symbol.of("port-length"), PortLib.LENGTH);
-        
+    bind(Symbol.of("port-size"), PortLib.SIZE);
+    
     /* Table procedures */
     
     bind(Symbol.of("table"), TableLib.FROM_LIST);

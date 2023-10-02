@@ -60,13 +60,6 @@
           (true
            `(fun (,(car args)) ,(loop (cdr args))))))
   (loop args))
-
-(def require
-  (let ((*files-loaded* ()))
-    (fun (filename)
-      (unless (contains? filename *files-loaded*)
-        (set! *files-loaded* (cons filename *files-loaded*))
-        (load filename)))))
     
 (defun memoize (proc) 
   (let ((value-ready? false)
