@@ -1211,12 +1211,16 @@ public class Compiler
     }
   }
   
-  private Optional<Datum> lookup(Symbol s)
+  private Optional<Macro> lookupMacro(Symbol s)
   {
     if (s instanceof QualifiedSymbol qs)
-      return spartan.Runtime.getPackage(Symbol.of(qs.packageName())).flatMap(pkg -> pkg.lookup(Symbol.of(qs.baseName())));
+      return spartan.Runtime.getPackage(Symbol.of(qs.packageName()))
+             .flatMap(pkg -> pkg.lookup(Symbol.of(qs.baseName())))
+             .flatMap(value -> value.right());
     else
-      return spartan.Runtime.currentPackage().lookup(s.intern());
+      return spartan.Runtime.currentPackage()
+             .lookup(s.intern())
+             .flatMap(value -> value.right());
   }
   
   /* Compile a combination (i.e., special forms, procedure application, and macro expansion. */
@@ -1224,18 +1228,10 @@ public class Compiler
   private Inst compileCombo(List exp, Scope scope, boolean tail, Inst next)
   {
     if (exp.car() instanceof Symbol s) {
-      /*
       return Optional.ofNullable(specialForms.get(s))
-             .map(form -> form.compile(exp, scope, tail, next)
-             .or(() -> lookupMacro(s).map(macro -> compileExpandMacro(macro, exp, scope, tail, next))
+             .map(form -> form.compile(exp, scope, tail, next))
+             .or(() -> lookupMacro(s).map(macro -> compileExpandMacro(macro, exp, scope, tail, next)))
              .orElseGet(() -> compileApply(exp, scope, tail, next));
-      */
-      var form = specialForms.get(s);
-      if (form != null)
-        return form.compile(exp, scope, tail, next);
-      var maybeMacro = lookup(s);
-      if (maybeMacro.isPresent() && maybeMacro.get() instanceof Macro macro)
-        return compileExpandMacro(macro, exp, scope, tail, next);
     }
     return compileApply(exp, scope, tail, next);
   }

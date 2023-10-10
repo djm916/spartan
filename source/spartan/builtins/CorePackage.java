@@ -14,16 +14,10 @@ public final class CorePackage extends Package
       instance = new CorePackage();
     return instance;
   }
-  
-  @Override // Package
-  public Optional<Datum> lookup(Symbol name)
-  {
-    return Optional.ofNullable(bindings.get(name));
-  }
-  
+    
   private CorePackage()
   {
-    super(Symbol.of(NAME), null);
+    super(Symbol.of(NAME), Package.NONE);
   }
   
   private static CorePackage instance = null;

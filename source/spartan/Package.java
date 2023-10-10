@@ -2,10 +2,12 @@ package spartan;
 
 import spartan.data.Symbol;
 import spartan.data.Datum;
+import spartan.compiling.Macro;
 import spartan.data.List;
 import spartan.errors.InvalidArgument;
 import spartan.errors.UnboundSymbol;
 import spartan.errors.MultipleDefinition;
+import spartan.util.Either;
 import java.util.Map;
 import java.util.IdentityHashMap;
 import java.util.Optional;
@@ -14,6 +16,13 @@ import java.util.stream.Collectors;
 
 public class Package
 {
+  public static final Package NONE = new Package(null, null) {
+    public Optional<Either<Datum, Macro>> lookup(Symbol name)
+    {
+      return Optional.empty();
+    }
+  };
+  
   public Package(Symbol name, Package parent)
   {
     this.name = name;
@@ -98,24 +107,36 @@ public class Package
    * @param val The symbol's value
    * @throws MultipleDefinition If symbol is already present in this package
    */
-  public void bind(Symbol name, Datum val, Supplier<MultipleDefinition> onError)
+  public void bind(Symbol name, Datum value, Supplier<MultipleDefinition> onError)
+  {
+    bind(name, Either.fromLeft(value), onError);
+  }
+  
+  public void bind(Symbol name, Macro value, Supplier<MultipleDefinition> onError)
+  {
+    bind(name, Either.fromRight(value), onError);
+  }
+  
+  public void bind(Symbol name, Either<Datum, Macro> value, Supplier<MultipleDefinition> onError)
   {
     if (bindings.containsKey(name))
       throw onError.get();
-    bindings.put(name, val);
+    bindings.put(name, value);
   }
   
-  /**
-   * Bind a symbol to a value
-   *
-   * If the symbol is already present in this package, its value is replaced.
-   * 
-   * @param name The symbol to bind
-   * @param name The symbol's value
-   */ 
-  protected void bind(Symbol name, Datum val)
+  protected void bind(Symbol name, Either<Datum, Macro> value)
+  {    
+    bindings.put(name, value);
+  }
+  
+  public void bind(Symbol name, Datum value)
   {
-    bindings.put(name, val);
+    bind(name, Either.fromLeft(value));
+  }
+  
+  public void bind(Symbol name, Macro value)
+  {
+    bind(name, Either.fromRight(value));
   }
   
   /**
@@ -128,11 +149,11 @@ public class Package
    * @param val The symbol's value
    * @throws UnboundSymbol If symbol is not present in this package
    */
-  public void store(Symbol name, Datum val, Supplier<UnboundSymbol> onError)
+  public void store(Symbol name, Datum value, Supplier<UnboundSymbol> onError)
   {
     if (!bindings.containsKey(name))
       throw onError.get();
-    bindings.put(name, val);
+    bindings.put(name, Either.fromLeft(value));
   }
   
   /**
@@ -141,21 +162,13 @@ public class Package
    * @param name The symbol to look up
    * @return The (optional) value of the symbol
    */
-  public Optional<Datum> lookup(Symbol name)
+  public Optional<Either<Datum, Macro>> lookup(Symbol name)
   {
     return Optional.ofNullable(bindings.get(name)).or(() -> parent.lookup(name));
   }
   
-  public String toString()
-  {
-    return String.format("package %s %s", name.repr(),
-      bindings.entrySet().stream()
-              .map(e -> e.getKey().repr() + " => " + e.getValue().repr())
-              .collect(Collectors.joining(", ", "{", "}")));
-  }
-  
   protected final Symbol name;
-  protected final Map<Symbol, Datum> bindings = new IdentityHashMap<>();
+  protected final Map<Symbol, Either<Datum, Macro>> bindings = new IdentityHashMap<>();
   protected final Map<Symbol, Package> localPkgAliases = new IdentityHashMap<>();
   protected final Package parent;
 }

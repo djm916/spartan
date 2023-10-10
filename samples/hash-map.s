@@ -1,4 +1,4 @@
-(require "stdlib/hash-map.s")
+(load "stdlib/hash-map.s")
 
 (import 'spartan.hash-map :as 'hmap)
 
