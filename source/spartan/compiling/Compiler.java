@@ -12,6 +12,13 @@ import spartan.runtime.VirtualMachine;
 import spartan.Config;
 import java.util.logging.Logger;
 import java.util.Optional;
+import java.util.Map;
+import static java.util.Map.entry;
+
+interface ISpecialForm
+{
+  Inst compile(List exp, Scope scope, boolean tail, Inst next);
+}
 
 /**
  * Compiles source expressions into executable bytecodes.
@@ -189,7 +196,7 @@ public class Compiler
       return new StoreGlobal(spartan.Runtime.currentPackage().name(), s.intern(), positionMap.get(s), new LoadConst(Nil.VALUE, next));
   }
   
-  private Inst compileDef(List exp, Scope scope, Inst next)
+  private Inst compileDef(List exp, Scope scope, boolean tail, Inst next)
   {
     if (!(exp.length() == 3 && exp.cadr() instanceof Symbol s && s.isSimple()))
       throw malformedExp(exp);
@@ -204,7 +211,7 @@ public class Compiler
      Syntax: (defun symbol (params...) body...)
   */
   
-  private Inst compileDefun(List exp, Scope scope, Inst next)
+  private Inst compileDefun(List exp, Scope scope, boolean tail, Inst next)
   {
     if (exp.length() < 4)
       throw malformedExp(exp);
@@ -735,7 +742,7 @@ public class Compiler
    *         (fun (args... & rest) body...)
    *
    */
-  private Inst compileFun(List exp, Scope scope, Inst next)
+  private Inst compileFun(List exp, Scope scope, boolean tail, Inst next)
   {
     if (!(exp.length() >= 3 && exp.cadr() instanceof List params && checkParamListForm(params)))
       throw malformedExp(exp);
@@ -974,7 +981,7 @@ public class Compiler
   
   // (quote x)
 
-  private Inst compileQuote(List exp, Inst next)
+  private Inst compileQuote(List exp, Scope scope, boolean tail, Inst next)
   {
     if (exp.length() != 2)
       throw malformedExp(exp);
@@ -1000,7 +1007,7 @@ public class Compiler
   // Compile a (quasiquote x) form by reducing it to an equivalent
   // list form and compiling the result.
 
-  private Inst compileQuasiquote(List exp, Scope scope, Inst next)
+  private Inst compileQuasiquote(List exp, Scope scope, boolean tail, Inst next)
   {
     if (exp.length() != 2)
       throw malformedExp(exp);
@@ -1169,7 +1176,7 @@ public class Compiler
      which is then compiled and evaluated. 
   */
 
-  private Inst compileDefmacro(List exp, Scope scope, Inst next)
+  private Inst compileDefmacro(List exp, Scope scope, boolean tail, Inst next)
   {
     if (!(exp.length() >= 4 && exp.cadr() instanceof Symbol symbol && symbol.isSimple() && exp.caddr() instanceof List params && checkParamListForm(params)))
       throw malformedExp(exp);
@@ -1216,58 +1223,17 @@ public class Compiler
   
   private Inst compileCombo(List exp, Scope scope, boolean tail, Inst next)
   {
-    // Handle special forms
     if (exp.car() instanceof Symbol s) {
-      if (s.equals(Symbol.DEF))
-        return compileDef(exp, scope, next);
-      if (s.equals(Symbol.DEFUN))
-        return compileDefun(exp, scope, next);
-      if (s.equals(Symbol.DEFMACRO))
-        return compileDefmacro(exp, scope, next);
-      if (s.equals(Symbol.IF))
-        return compileIf(exp, scope, tail, next);
-      if (s.equals(Symbol.LET))
-        return compileLet(exp, scope, tail, next);
-      if (s.equals(Symbol.LETSTAR))
-        return compileLetStar(exp, scope, tail, next);
-      if (s.equals(Symbol.LETREC))
-        return compileLetRec(exp, scope, tail, next);
-      if (s.equals(Symbol.BEGIN))
-        return compileBegin(exp, scope, tail, next);      
-      if (s.equals(Symbol.FUN))
-        return compileFun(exp, scope, next);
-      if (s.equals(Symbol.QUOTE))
-        return compileQuote(exp, next);
-      if (s.equals(Symbol.QUASIQUOTE))
-        return compileQuasiquote(exp, scope, next);
-      if (s.equals(Symbol.OR))
-        return compileOr(exp, scope, tail, next);
-      if (s.equals(Symbol.AND))
-        return compileAnd(exp, scope, tail, next);
-      if (s.equals(Symbol.COND))
-        return compileCond(exp, scope, tail, next);      
-      if (s.equals(Symbol.SET))
-        return compileSet(exp, scope, tail, next);
-      if (s.equals(Symbol.WHILE))
-        return compileWhile(exp, scope, tail, next);
-      if (s.equals(Symbol.DO))
-        return compileDo(exp, scope, tail, next);
-      if (s.equals(Symbol.CALL_CC))
-        return compileCallCC(exp, scope, tail, next);
-      if (s.equals(Symbol.REC))
-        return compileRec(exp, scope, tail, next);
-      if (s.equals(Symbol.RETURN))
-        return compileReturn(exp, scope, tail, next);
-      // Handle macros
+      var form = specialForms.get(s);
+      if (form != null)
+        return form.compile(exp, scope, tail, next);
       var maybeMacro = lookup(s);
-      if (maybeMacro.isPresent() && maybeMacro.get() instanceof Macro m)
-        return compileExpandMacro(m, exp, scope, tail, next);
+      if (maybeMacro.isPresent() && maybeMacro.get() instanceof Macro macro)
+        return compileExpandMacro(macro, exp, scope, tail, next);
     }
-    
-    // Handle procedure application
     return compileApply(exp, scope, tail, next);
   }
-
+    
   /* This is the top-level compilation function that dispatches on the type of the expression. */
   
   private Inst compile(Datum exp, Scope scope, boolean tail, Inst next)
@@ -1279,7 +1245,27 @@ public class Compiler
     else 
       return compileCombo((List)exp, scope, tail, next);
   }
-
+  
+  private final Map<Symbol, ISpecialForm> specialForms = Map.ofEntries(
+    Map.entry(Symbol.DEF, this::compileDef),
+    Map.entry(Symbol.DEFUN, this::compileDefun),
+    Map.entry(Symbol.DEFMACRO, this::compileDefmacro),
+    Map.entry(Symbol.IF, this::compileIf),
+    Map.entry(Symbol.COND, this::compileCond),
+    Map.entry(Symbol.LET, this::compileLet),
+    Map.entry(Symbol.LETSTAR, this::compileLetStar),
+    Map.entry(Symbol.LETREC, this::compileLetRec),
+    Map.entry(Symbol.FUN, this::compileFun),
+    Map.entry(Symbol.BEGIN, this::compileBegin),
+    Map.entry(Symbol.SET, this::compileSet),
+    Map.entry(Symbol.WHILE, this::compileWhile),
+    Map.entry(Symbol.QUOTE, this::compileQuote),
+    Map.entry(Symbol.QUASIQUOTE, this::compileQuasiquote),
+    Map.entry(Symbol.OR, this::compileOr),
+    Map.entry(Symbol.AND, this::compileAnd),
+    Map.entry(Symbol.CALL_CC, this::compileCallCC)
+  );
+  
   private PositionMap positionMap;
   private final VirtualMachine vm;
   private static final Logger log = Logger.getLogger(Compiler.class.getName());

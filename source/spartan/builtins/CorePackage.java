@@ -150,7 +150,7 @@ public final class CorePackage extends Package
     bind(Symbol.of("concat"), ListLib.CONCAT);
     bind(Symbol.of("append"), ListLib.APPEND);
     //bind(Symbol.of("length"), ListLib.LENGTH);
-    //bind(Symbol.of("reverse"), ListLib.REVERSE);
+    bind(Symbol.of("reverse"), ListLib.REVERSE);
     //bind(Symbol.of("remove!"), ListLib.REMOVE);
     //bind(Symbol.of("remove"), ListLib.REMOVED);
     //bind(Symbol.of("empty?"), ListLib.IS_EMPTY);

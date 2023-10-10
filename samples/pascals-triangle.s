@@ -1,5 +1,5 @@
 
-(require "stdlib/vectors.s")
+;(require "stdlib/vectors.s")
 
 ; level  row
 ; ----------------

@@ -3,7 +3,7 @@
 ;
 ; We define an infinite stream of prime numbers, and display the first N prime numbers.
 
-(require "stdlib/streams.s")
+(load "stdlib/streams.s")
 
 ; Returns a function that determines if y is NOT a factor of its argument x
 (defun not-factor? (y) (fun (x) (not (= (remainder x y) 0))))

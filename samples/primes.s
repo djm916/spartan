@@ -1,5 +1,5 @@
 
-(require "samples/prime-sieve.s")
+(load "samples/prime-sieve.s")
 
 ; Define a stream of prime numbers using the prime generator defined above
 (def primes (make-stream (make-prime-generator)))
