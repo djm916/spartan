@@ -35,7 +35,7 @@ public class Package
    */
   public void doImport(Package pkg, Symbol symbol)
   {
-    bind(symbol, pkg.lookup(symbol).orElseThrow(() -> new UnboundSymbol(pkg.name(), symbol)), () -> new MultipleDefinition(symbol));
+    doImport(pkg, symbol, symbol);
   }
   
   /**
@@ -48,7 +48,7 @@ public class Package
    */
   public void doImport(Package pkg, Symbol symbol, Symbol alias)
   {
-    bind(alias, pkg.lookup(symbol).orElseThrow(() -> new UnboundSymbol(pkg.name(), symbol)), () -> new MultipleDefinition(symbol));
+    bind(alias, pkg.lookup(symbol).orElseThrow(() -> new UnboundSymbol(pkg.name(), symbol)), () -> new MultipleDefinition(alias));
   }
   
   /**

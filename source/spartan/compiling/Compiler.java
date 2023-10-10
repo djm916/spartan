@@ -1224,6 +1224,12 @@ public class Compiler
   private Inst compileCombo(List exp, Scope scope, boolean tail, Inst next)
   {
     if (exp.car() instanceof Symbol s) {
+      /*
+      return Optional.ofNullable(specialForms.get(s))
+             .map(form -> form.compile(exp, scope, tail, next)
+             .or(() -> lookupMacro(s).map(macro -> compileExpandMacro(macro, exp, scope, tail, next))
+             .orElseGet(() -> compileApply(exp, scope, tail, next));
+      */
       var form = specialForms.get(s);
       if (form != null)
         return form.compile(exp, scope, tail, next);
