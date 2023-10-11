@@ -1,5 +1,7 @@
 package spartan.data;
 
+import spartan.util.WeakCache;
+
 public sealed class Symbol implements Datum, IEq
 permits QualifiedSymbol
 {

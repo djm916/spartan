@@ -1,4 +1,4 @@
-package spartan.data;
+package spartan.util;
 
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -13,7 +13,7 @@ import java.util.function.Supplier;
  * @param K the type of key
  * @param V the type of value
  */
-class WeakCache<K, V>
+public class WeakCache<K, V>
 {
   int size()
   {
@@ -29,7 +29,7 @@ class WeakCache<K, V>
    * @param supplier a value supplier
    * @return the value associated with key
    */
-  V get(K key, Supplier<V> supplier)
+  public V get(K key, Supplier<V> supplier)
   {
     var ref = cache.get(key);
     if (ref == null || ref.get() == null)

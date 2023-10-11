@@ -46,6 +46,7 @@ public final class CorePackage extends Package
     bind(Symbol.of("set-at!"), CoreLib.SET_AT);
     bind(Symbol.of("length"), CoreLib.LENGTH);
     bind(Symbol.of("empty?"), CoreLib.IS_EMPTY);
+    bind(Symbol.of("macroexpand-1"), CoreLib.MACROEXPAND1);
     
     /* Package procedures */
     

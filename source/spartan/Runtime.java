@@ -2,7 +2,9 @@ package spartan;
 
 import spartan.builtins.CorePackage;
 import spartan.data.Symbol;
+import spartan.data.QualifiedSymbol;
 import spartan.data.Datum;
+import spartan.compiling.Macro;
 import java.util.Map;
 import java.util.IdentityHashMap;
 import java.util.Optional;
@@ -61,6 +63,18 @@ public final class Runtime
   public static void addPackage(Package pkg)
   {
     packages.put(pkg.name(), pkg);
+  }
+  
+  public static Optional<Macro> lookupMacro(Symbol s)
+  {
+    if (s instanceof QualifiedSymbol qs)
+      return getPackage(Symbol.of(qs.packageName()))
+             .flatMap(pkg -> pkg.lookup(Symbol.of(qs.baseName())))
+             .flatMap(value -> value.right());
+    else
+      return currentPackage()
+             .lookup(s.intern())
+             .flatMap(value -> value.right());
   }
   
   public static void boot()

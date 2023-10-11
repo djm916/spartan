@@ -79,6 +79,16 @@ public final class CoreLib
     }
   }
   
+  public static Datum macroExpand1(Datum form)
+  {
+    if (!(form instanceof List list && !list.isEmpty() && list.car() instanceof Symbol symbol))
+      return Nil.VALUE;
+    var args = list.cdr();
+    return spartan.Runtime.lookupMacro(symbol)
+           .map(macro -> macro.expand(new VirtualMachine(), args))
+           .orElse(Nil.VALUE);
+  }
+  
   public static final Primitive NOT = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
       vm.result = not(vm.popArg());
@@ -441,6 +451,14 @@ public final class CoreLib
     public void apply(VirtualMachine vm) {
       parseImportArgs(vm.popRestArgs());
       vm.result = Nil.VALUE;
+      vm.popFrame();
+    }
+  };
+  
+  public static final Primitive MACROEXPAND1 = new Primitive(1, false) {
+    public void apply(VirtualMachine vm) {
+      var form = vm.popArg();
+      vm.result = macroExpand1(form);
       vm.popFrame();
     }
   };
