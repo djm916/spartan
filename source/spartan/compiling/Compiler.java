@@ -8,6 +8,7 @@ import spartan.parsing.Position;
 import spartan.errors.Error;
 import spartan.errors.SyntaxError;
 import spartan.errors.MultipleDefinition;
+import spartan.errors.MacroExpandError;
 import spartan.runtime.VirtualMachine;
 import spartan.Config;
 import java.util.logging.Logger;
@@ -1198,16 +1199,12 @@ public class Compiler
   private Inst compileExpandMacro(Macro macro, List exp, Scope scope, boolean tail, Inst next)
   {
     var args = exp.cdr();
-    
     try {
       var xform = macro.expand(vm, args);
-      if (Config.LOG_DEBUG)
-        log.info(() -> String.format("macro transform: %s => %s", exp.repr(), xform.repr()));
       return compile(xform, scope, tail, next);
     }
     catch (Error err) {
-      err.setPosition(positionMap.get(exp));
-      throw err;
+      throw new MacroExpandError(((Symbol)exp.car()).name(), positionMap.get(exp), err);
     }
   }
   
@@ -1218,12 +1215,13 @@ public class Compiler
     if (exp.car() instanceof Symbol s) {
       return Optional.ofNullable(specialForms.get(s))
              .map(form -> form.compile(exp, scope, tail, next))
-             .or(() -> spartan.Runtime.lookupMacro(s).map(macro -> compileExpandMacro(macro, exp, scope, tail, next)))
+             .or(() -> spartan.Runtime.lookupMacro(s)
+                       .map(macro -> compileExpandMacro(macro, exp, scope, tail, next)))
              .orElseGet(() -> compileApply(exp, scope, tail, next));
     }
     return compileApply(exp, scope, tail, next);
   }
-    
+  
   /* This is the top-level compilation function that dispatches on the type of the expression. */
   
   private Inst compile(Datum exp, Scope scope, boolean tail, Inst next)
