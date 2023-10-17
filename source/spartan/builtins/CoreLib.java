@@ -85,7 +85,7 @@ public final class CoreLib
       return Nil.VALUE;
     var args = list.cdr();
     return spartan.Runtime.lookupMacro(symbol)
-           .map(macro -> macro.expand(new VirtualMachine(), args))
+           .map(macro -> macro.expand(new VirtualMachine(), args, null))
            .orElse(Nil.VALUE);
   }
   

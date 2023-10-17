@@ -1198,13 +1198,18 @@ public class Compiler
   */
   private Inst compileExpandMacro(Macro macro, List exp, Scope scope, boolean tail, Inst next)
   {
+    var macroName = (Symbol)exp.car();
     var args = exp.cdr();
-    try {
-      var xform = macro.expand(vm, args);
+    var xform = macro.expand(vm, args, positionMap.get(exp));
+    
+    if (Config.LOG_DEBUG)
+      log.info(() -> String.format("macro transform: %s => %s", exp.repr(), xform.repr()));
+    
+    try {      
       return compile(xform, scope, tail, next);
     }
     catch (Error err) {
-      throw new MacroExpandError(((Symbol)exp.car()).name(), positionMap.get(exp), err);
+      throw new MacroExpandError(macroName.name(), positionMap.get(exp), err);
     }
   }
   

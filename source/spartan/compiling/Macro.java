@@ -4,6 +4,7 @@ import spartan.runtime.VirtualMachine;
 import spartan.runtime.Inst;
 import spartan.data.Datum;
 import spartan.data.List;
+import spartan.parsing.Position;
 import spartan.errors.WrongNumberArgs;
 
 public final class Macro
@@ -14,12 +15,12 @@ public final class Macro
     this.body = proc.body();
   }
   
-  public Datum expand(VirtualMachine vm, List args)
+  public Datum expand(VirtualMachine vm, List args, Position position)
   {
     int numArgs = args.length();
     if (!sig.matches(numArgs))
-      throw new WrongNumberArgs();
-    vm.pushFrame(null, null);
+      throw new WrongNumberArgs(position);
+    vm.pushFrame(null, position);
     vm.args = args;
     vm.eval(body);
     return vm.result;
