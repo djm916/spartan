@@ -98,7 +98,7 @@ public final class VirtualMachine
   {
     if (!(result instanceof IFun f))
       throw new TypeMismatch();
-    if (!f.arityMatches(numArgs))
+    if (!f.signature().matches(numArgs))
       throw new WrongNumberArgs();
     f.apply(this);
   }

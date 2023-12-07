@@ -8,6 +8,7 @@ import java.util.Spliterators;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import java.util.stream.Collectors;
+import spartan.compiling.Signature;
 import spartan.errors.TypeMismatch;
 import spartan.errors.NoSuchElement;
 import spartan.runtime.VirtualMachine;
@@ -220,9 +221,9 @@ permits EmptyList
   }
   
   @Override // IFun
-  public boolean arityMatches(int numArgs)
+  public Signature signature()
   {
-    return numArgs == 1;
+    return SIG;
   }
   
   @Override // ILen
@@ -291,6 +292,19 @@ permits EmptyList
   public Stream<Datum> stream()
   {
     return StreamSupport.stream(spliterator(), false);
+  }
+  
+  public Datum[] toArray()
+  {
+    return toArray(this);
+  }
+  
+  private static Datum[] toArray(List list)
+  {
+    var result = new Datum[list.length()];
+    for (int i = 0; !list.isEmpty(); ++i, list = list.cdr())
+      result[i] = list.car();
+    return result;
   }
   
   private static int length(List list)
@@ -377,6 +391,7 @@ permits EmptyList
     this.rest = rest;
   }
   
+  private static final Signature SIG = new Signature(1, false);
   private Datum first;
   private List rest;  
 }

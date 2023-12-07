@@ -2,6 +2,7 @@ package spartan.data;
 
 import spartan.runtime.Frame;
 import spartan.runtime.VirtualMachine;
+import spartan.compiling.Signature;
 
 public final class Continuation implements Datum, IFun
 {
@@ -24,11 +25,12 @@ public final class Continuation implements Datum, IFun
     vm.popFrame();
   }
   
-  @Override
-  public boolean arityMatches(int numArgs)
+  @Override // IFun
+  public Signature signature()
   {
-    return numArgs == 1;
+    return SIG;
   }
   
+  private static final Signature SIG = new Signature(1, false);
   private final Frame savedFrame;
 }

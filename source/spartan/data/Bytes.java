@@ -6,6 +6,7 @@ import spartan.errors.IndexOutOfBounds;
 import spartan.errors.InvalidArgument;
 import spartan.errors.TypeMismatch;
 import spartan.runtime.VirtualMachine;
+import spartan.compiling.Signature;
 import spartan.Config;
 import java.nio.ByteBuffer;
 import java.nio.BufferUnderflowException;
@@ -109,9 +110,9 @@ public final class Bytes implements Datum, ILen, IAssoc, IFun
   }
   
   @Override // IFun
-  public boolean arityMatches(int numArgs)
+  public Signature signature()
   {
-    return numArgs == 1;
+    return SIG;
   }
   
   public String decode(int start, int count, Charset encoding)
@@ -124,5 +125,6 @@ public final class Bytes implements Datum, ILen, IAssoc, IFun
     }
   }
   
+  private static final Signature SIG = new Signature(1, false);
   private final ByteBuffer buffer;
 }

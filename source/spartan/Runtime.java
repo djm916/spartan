@@ -77,6 +77,18 @@ public final class Runtime
              .flatMap(value -> value.right());
   }
   
+  public static Optional<Datum> lookup(Symbol s)
+  {
+    if (s instanceof QualifiedSymbol qs)
+      return getPackage(Symbol.of(qs.packageName()))
+             .flatMap(pkg -> pkg.lookup(Symbol.of(qs.baseName())))
+             .flatMap(value -> value.left());
+    else
+      return currentPackage()
+             .lookup(s.intern())
+             .flatMap(value -> value.left());
+  }
+  
   public static void boot()
   {
     var corePackage = CorePackage.getInstance();

@@ -14,17 +14,17 @@ public abstract class Primitive implements Datum, IFun
     this.sig = sig;
   }
   
-  @Override // IFun
+  @Override // Datum
   public String type()
   {
     return "procedure";
   }
   
   @Override // IFun
-  public boolean arityMatches(int numArgs)
+  public Signature signature()
   {
-    return sig.matches(numArgs);
+    return sig;
   }
-  
+    
   private final Signature sig;
 }

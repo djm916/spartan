@@ -374,8 +374,8 @@ public class Compiler
 
     var body = exp.cddr();
     int numBindings = bindings.length();
-    var vars = extractVars(bindings);
-    var inits = extractInits(bindings);
+    var vars = extractFirst(bindings);
+    var inits = extractSecond(bindings);
     var extendedScope = scope.extend(vars);
 
     return compilePushArgs(inits, scope,
@@ -411,7 +411,7 @@ public class Compiler
 
     var body = exp.cddr();
     int numBindings = bindings.length();
-    var vars = extractVars(bindings);
+    var vars = extractFirst(bindings);
     var extendedScope = scope.extend(vars);
 
     return new PushEnv(numBindings,
@@ -467,8 +467,8 @@ public class Compiler
 
     var body = exp.cddr();
     int numBindings = bindings.length();
-    var vars = extractVars(bindings);
-    var inits = extractInits(bindings);
+    var vars = extractFirst(bindings);
+    var inits = extractSecond(bindings);
     var extendedScope = scope.extend(vars);
 
     return new PushEnv(numBindings,
@@ -530,8 +530,8 @@ public class Compiler
   
   private List transformRec(Symbol f, List bindings, List body)
   {
-    var vars = extractVars(bindings);
-    var inits = extractInits(bindings);
+    var vars = extractFirst(bindings);
+    var inits = extractSecond(bindings);
     return List.of(Symbol.LETREC, List.cons(List.of(f, List.cons(Symbol.FUN, List.cons(vars, body))), List.EMPTY), List.cons(f, inits));
   }
   
@@ -568,6 +568,25 @@ public class Compiler
     return true;
   }
 
+  /* Check that a typed parameter list is well-formed
+   * 
+   * <typed-parameter-list> => "(" <typed-parameter>* <rest-parameter>? ")"
+   * <typed-parameter> => "(" <symbol> <symbol> ")"
+   * <rest-parameter> => "&" <symbol>
+   */
+  private boolean checkTypedParamListForm(List params)
+  {
+    for (; !params.isEmpty(); params = params.cdr())
+      if (!(params.car() instanceof List param && checkTypedParamForm(param)) || (Symbol.AMPERSAND.equals(param) && (params.cdr().isEmpty() || !params.cddr().isEmpty())))
+        return false;
+    return true;
+  }
+  
+  private boolean checkTypedParamForm(List param)
+  {
+    return param.length() == 2 && param.car() instanceof Symbol name && name.isSimple() && param.cadr() instanceof Symbol type && type.isSimple();
+  }
+  
   /* Check that a clause list is well-formed
    * 
    * <clause-list> => "(" <clause>+ <else-clause>? ")"
@@ -582,20 +601,20 @@ public class Compiler
     return true;
   }
 
-  // Extract the variables (first element) from a list of bindings
-  private List extractVars(List bindings)
+  // Extract the first sub-element from each element in a list of lists
+  private List extractFirst(List bindings)
   {
     return bindings.map(list -> ((List)list).car());
   }
 
-  // Extract the initializer expressions (second element) from a list of bindings
-  private List extractInits(List bindings)
+  // Extract the second sub-element from each element in a list of lists
+  private List extractSecond(List bindings)
   {
     return bindings.map(list -> ((List)list).cadr());
   }
   
-  // Extract the step expressions (third element) from a list of bindings
-  private List extractSteps(List bindings)
+  // Extract the third sub-element from each element in a list of lists
+  private List extractThird(List bindings)
   {
     return bindings.map(list -> ((List)list).caddr());
   }
@@ -957,9 +976,9 @@ public class Compiler
       throw malformedExp(exp);
     
     int numBindings = bindings.length();
-    var vars = extractVars(bindings);
-    var inits = extractInits(bindings);
-    var steps = extractSteps(bindings);
+    var vars = extractFirst(bindings);
+    var inits = extractSecond(bindings);
+    var steps = extractThird(bindings);
     var extendedScope = scope.extend(vars);
     var test = caddr.car();
     var result = caddr.cadr();
@@ -1213,6 +1232,45 @@ public class Compiler
     }
   }
   
+  private MultiMethod getOrCreateMultiMethod(Symbol name, Signature signature)
+  {
+    var binding = spartan.Runtime.currentPackage().lookup(name).flatMap(value -> value.left());
+    if (binding.isPresent()) {
+      if (!(binding.get() instanceof MultiMethod mm))
+        throw new Error(String.format("symbol \"%s\" does not name a generic function", name.str()));
+      return mm;
+    }
+    else {
+      var mm = new MultiMethod(signature);
+      spartan.Runtime.currentPackage().bind(name, mm, () -> new MultipleDefinition(name));
+      return mm;
+    }
+  }
+  
+  /* Compile a multi method
+  
+     Syntax: (defmethod <symbol> <typed-parameters> <body>)
+     
+  */
+  private Inst compileDefmethod(List exp, Scope scope, boolean tail, Inst next)
+  {
+    if (!(exp.length() >= 3 && exp.cadr() instanceof Symbol symbol && symbol.isSimple() && exp.caddr() instanceof List params && checkTypedParamListForm(params)))
+      throw malformedExp(exp);
+    var numParams = params.length();
+    var paramNames = extractFirst(params);
+    var paramTypes = extractSecond(params);
+    var body = exp.cdddr();
+    var method = new Closure(makeProcedure(paramNames, body, Scope.EMPTY), null);    
+    try {
+      getOrCreateMultiMethod(symbol.intern(), method.signature()).addMethod(paramTypes, method);
+    }
+    catch (Error err) {
+      err.setPosition(positionMap.get(exp));
+      throw err;
+    }
+    return new LoadConst(Nil.VALUE, next);
+  }
+  
   /* Compile a combination (i.e., special forms, procedure application, and macro expansion. */
   
   private Inst compileCombo(List exp, Scope scope, boolean tail, Inst next)
@@ -1243,6 +1301,7 @@ public class Compiler
     Map.entry(Symbol.DEF, this::compileDef),
     Map.entry(Symbol.DEFUN, this::compileDefun),
     Map.entry(Symbol.DEFMACRO, this::compileDefmacro),
+    Map.entry(Symbol.DEFMETHOD, this::compileDefmethod),
     Map.entry(Symbol.IF, this::compileIf),
     Map.entry(Symbol.COND, this::compileCond),
     Map.entry(Symbol.LET, this::compileLet),

@@ -7,6 +7,7 @@ import spartan.errors.TypeMismatch;
 import spartan.errors.WrongNumberArgs;
 import spartan.errors.NoSuchElement;
 import spartan.runtime.VirtualMachine;
+import spartan.compiling.Signature;
 
 public final class Table implements Datum, IAssoc, ILen, IFun
 {
@@ -101,9 +102,9 @@ public final class Table implements Datum, IAssoc, ILen, IFun
   }
   
   @Override // IFun
-  public boolean arityMatches(int numArgs)
+  public Signature signature()
   {
-    return numArgs == 1;
+    return SIG;
   }
   
   public List keys()
@@ -123,6 +124,7 @@ public final class Table implements Datum, IAssoc, ILen, IFun
     return builder.build();
   }
   
+  private static final Signature SIG = new Signature(1, false);
   private static final int DEFAULT_CAPACITY = 8;
   private final IdentityHashMap<Symbol, Datum> map;
 }

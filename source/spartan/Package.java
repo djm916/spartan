@@ -166,7 +166,7 @@ public class Package
   {
     return Optional.ofNullable(bindings.get(name)).or(() -> parent.lookup(name));
   }
-  
+    
   protected final Symbol name;
   protected final Map<Symbol, Either<Datum, Macro>> bindings = new IdentityHashMap<>();
   protected final Map<Symbol, Package> localPkgAliases = new IdentityHashMap<>();

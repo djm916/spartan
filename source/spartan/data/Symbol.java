@@ -12,6 +12,7 @@ permits QualifiedSymbol
   public static final Symbol DEF = new Symbol("def");
   public static final Symbol DEFUN = new Symbol("defun");
   public static final Symbol DEFMACRO = new Symbol("defmacro");
+  public static final Symbol DEFMETHOD = new Symbol("defmethod");
   public static final Symbol FUN = new Symbol("fun");
   public static final Symbol IF = new Symbol("if");
   public static final Symbol COND = new Symbol("cond");

@@ -12,6 +12,7 @@ import spartan.errors.InvalidArgument;
 import spartan.errors.TypeMismatch;
 import spartan.errors.NoSuchElement;
 import spartan.runtime.VirtualMachine;
+import spartan.compiling.Signature;
 
 public final class Vector implements Datum, IAssoc, ILen, IFun, Iterable<Datum>
 {
@@ -144,11 +145,11 @@ public final class Vector implements Datum, IAssoc, ILen, IFun, Iterable<Datum>
   }
   
   @Override // IFun
-  public boolean arityMatches(int numArgs)
+  public Signature signature()
   {
-    return numArgs == 1;
+    return SIG;
   }
-  
+    
   @Override // Iterable
   public Iterator<Datum> iterator()
   {
@@ -165,7 +166,8 @@ public final class Vector implements Datum, IAssoc, ILen, IFun, Iterable<Datum>
   {
     return StreamSupport.stream(spliterator(), false);
   }
-    
+  
+  private static final Signature SIG = new Signature(1, false);
   private static final int DEFAULT_INITIAL_CAPACITY = 8;
   private final ArrayList<Datum> elems;
 }

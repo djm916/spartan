@@ -15,25 +15,25 @@ public final class Closure implements Datum, IFun
     this.locals = locals;
   }
   
-  @Override
+  @Override // Datum
   public String type()
   {
     return "procedure";
   }
   
-  @Override
+  @Override // IFun
   public void apply(VirtualMachine vm)
   {    
     vm.locals = locals;
     vm.control = body;
   }
   
-  @Override
-  public boolean arityMatches(int numArgs)
+  @Override // IFun
+  public Signature signature()
   {
-    return sig.matches(numArgs);
+    return sig;
   }
-  
+    
   private final Inst body;
   private final Signature sig;
   private final LocalEnv locals;  
