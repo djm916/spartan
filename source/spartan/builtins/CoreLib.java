@@ -169,7 +169,7 @@ public final class CoreLib
   
   public static final Primitive TYPE = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
-      vm.result = Symbol.of(vm.popArg().type());
+      vm.result = Symbol.of(vm.popArg().type().name());
       vm.popFrame();
     }
   };
@@ -470,6 +470,16 @@ public final class CoreLib
       var pkg = spartan.Runtime.getPackage(pkgName).orElseThrow(() -> new NoSuchPackage(pkgName));
       System.out.println(pkg.toString());
       vm.result = Nil.VALUE;
+      vm.popFrame();
+    }
+  };
+  
+  public static final Primitive MAKE_STRUCT = new Primitive(1, true) {
+    public void apply(VirtualMachine vm) {
+      if (!(vm.popArg() instanceof Symbol structName))
+        throw new TypeMismatch();
+      Type structType = TypeRegistry.register(structName.str().intern());
+      vm.result = Struct.create(structType, vm.popRestArgs());
       vm.popFrame();
     }
   };

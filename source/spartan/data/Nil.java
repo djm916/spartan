@@ -5,9 +5,9 @@ public final class Nil implements Datum, IEq
   public static final Nil VALUE = new Nil();
   
   @Override
-  public String type()
+  public Type type()
   {
-    return "nil";
+    return TypeRegistry.NIL_TYPE;
   }
   
   @Override

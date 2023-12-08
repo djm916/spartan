@@ -53,9 +53,9 @@ public final class Vector implements Datum, IAssoc, ILen, IFun, Iterable<Datum>
   }
     
   @Override // Datum
-  public String type()
+  public Type type()
   {
-    return "vector";
+    return TypeRegistry.VECTOR_TYPE;
   }
     
   @Override // ILen

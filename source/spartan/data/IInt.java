@@ -43,9 +43,9 @@ permits Int, BigInt
   IRatio over(BigInt rhs);
   
   @Override // Datum
-  default String type()
+  default Type type()
   {
-    return "integer";
+    return TypeRegistry.INTEGER_TYPE;
   }
   
   String formatInt(int base);

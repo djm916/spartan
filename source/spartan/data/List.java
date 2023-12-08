@@ -119,9 +119,9 @@ permits EmptyList
   }
   
   @Override
-  public String type()
+  public Type type()
   {
-    return "list";
+    return TypeRegistry.LIST_TYPE;
   }
   
   @Override

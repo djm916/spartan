@@ -9,39 +9,40 @@ import spartan.errors.NoSuchElement;
 import spartan.runtime.VirtualMachine;
 import spartan.compiling.Signature;
 
-public final class Table implements Datum, IAssoc, ILen, IFun
+public final class Struct implements Datum, IAssoc, ILen, IFun
 {
-  public static Table fromList(List elems)
+  public static Struct create(Type type, List members)
   {
-    var result = new Table();
-    while (!elems.isEmpty()) {      
-      var key = elems.car();
-      elems = elems.cdr();
-      if (elems.isEmpty())
+    var result = new Struct(type, members.length());
+    while (!members.isEmpty()) {
+      var key = members.car();
+      members = members.cdr();
+      if (members.isEmpty())
         throw new WrongNumberArgs();
-      var val = elems.car();
+      var val = members.car();
       result.set(key, val);
-      elems = elems.cdr();
+      members = members.cdr();
     }
     return result;
   }
   
-  public Table()
+  public Struct(Type type)
   {
-    this(DEFAULT_CAPACITY);
+    this(type, DEFAULT_CAPACITY);
   }
   
-  public Table(int capacity)
+  public Struct(Type type, int capacity)
   {
+    this.type = type;
     this.map = new IdentityHashMap<>(capacity);
   }
   
   @Override // Datum
   public Type type()
   {
-    return TypeRegistry.TABLE_TYPE;
+    return type;
   }
-    
+  
   public Datum get(Symbol key)
   {
     var value = map.get(key);
@@ -54,13 +55,7 @@ public final class Table implements Datum, IAssoc, ILen, IFun
   {
     map.put(key, value);
   }
-  
-  public Datum findOrElse(Datum key, Datum theDefault)
-  {
-    var value = map.get(key);
-    return value == null ? theDefault : value;
-  }
-  
+    
   public boolean contains(Datum key)
   {
     return map.get(key) == null;
@@ -126,5 +121,6 @@ public final class Table implements Datum, IAssoc, ILen, IFun
   
   private static final Signature SIG = new Signature(1, false);
   private static final int DEFAULT_CAPACITY = 8;
+  private final Type type;
   private final IdentityHashMap<Symbol, Datum> map;
 }

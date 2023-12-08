@@ -7,7 +7,7 @@ permits QualifiedSymbol
 {
   private static WeakCache<String, Symbol> cache = new WeakCache<>();
   private static int nextUniqueId;
-  private final String name;    // full (qualified or unqualified) print name of the symbol
+  private final String name;    // full (qualified or unqualified) print name of the symbol  
   
   public static final Symbol DEF = new Symbol("def");
   public static final Symbol DEFUN = new Symbol("defun");
@@ -62,9 +62,9 @@ permits QualifiedSymbol
   }
   
   @Override // Datum
-  public String type()
+  public Type type()
   {
-    return "symbol";
+    return TypeRegistry.SYMBOL_TYPE;
   }
   
   @Override // Datum

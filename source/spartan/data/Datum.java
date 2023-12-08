@@ -2,7 +2,7 @@ package spartan.data;
 
 public interface Datum
 {
-  String type();
+  Type type();
   
   /* Returns a String representation of this object, intended to be machine-readable.
   
@@ -22,7 +22,7 @@ public interface Datum
   */
   default String repr()
   {
-    return String.format("#<%s @ 0x%x>", type(), System.identityHashCode(this));
+    return String.format("#<%s @ 0x%x>", type().name(), System.identityHashCode(this));
   }
   
   /* Returns a String representation of this object, intended to be human-readable.

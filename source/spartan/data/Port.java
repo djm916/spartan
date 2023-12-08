@@ -24,9 +24,9 @@ permits InputPort, OutputPort, FilePort
   }
   
   @Override
-  public String type()
+  public Type type()
   {
-    return "port";
+    return TypeRegistry.PORT_TYPE;
   }
   
   public void close()

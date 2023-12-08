@@ -13,9 +13,9 @@ public final class Text implements Datum, ILen, IEq, IOrd
   }
     
   @Override // Datum
-  public String type()
+  public Type type()
   {
-    return "string";
+    return TypeRegistry.STRING_TYPE;
   }
   
   @Override // Datum
@@ -109,4 +109,3 @@ public final class Text implements Datum, ILen, IEq, IOrd
   
   private final String value;
 }
-  

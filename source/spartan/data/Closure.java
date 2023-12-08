@@ -16,9 +16,9 @@ public final class Closure implements Datum, IFun
   }
   
   @Override // Datum
-  public String type()
+  public Type type()
   {
-    return "procedure";
+    return TypeRegistry.PROCEDURE_TYPE;
   }
   
   @Override // IFun

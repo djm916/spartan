@@ -11,10 +11,10 @@ public final class Continuation implements Datum, IFun
     this.savedFrame = frame;
   }
   
-  @Override
-  public String type()
+  @Override // Datum
+  public Type type()
   {
-    return "procedure";
+    return TypeRegistry.PROCEDURE_TYPE;
   }
   
   @Override

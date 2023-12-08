@@ -188,5 +188,7 @@ public final class CorePackage extends Package
     bind(Symbol.of("table-contains?"), TableLib.CONTAINS);
     bind(Symbol.of("table-keys"), TableLib.KEYS);
     bind(Symbol.of("table-values"), TableLib.VALUES);
+    
+    bind(Symbol.of("make-struct"), CoreLib.MAKE_STRUCT);
   }
 }

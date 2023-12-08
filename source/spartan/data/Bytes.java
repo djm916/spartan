@@ -30,9 +30,9 @@ public final class Bytes implements Datum, ILen, IAssoc, IFun
   }
   
   @Override
-  public String type()
+  public Type type()
   {
-    return "bytes";
+    return TypeRegistry.BYTES_TYPE;
   }
   
   public Bytes(int capacity)

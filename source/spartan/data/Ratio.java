@@ -39,9 +39,9 @@ public final class Ratio implements Datum, INum, IRatio, IReal, IComplex, IEq, I
   }
   
   @Override
-  public String type()
+  public Type type()
   {
-    return "rational";
+    return TypeRegistry.RATIONAL_TYPE;
   }
   
   @Override

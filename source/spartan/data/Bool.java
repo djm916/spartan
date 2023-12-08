@@ -10,10 +10,10 @@ public final class Bool implements Datum, IEq
     return value ? TRUE : FALSE;
   }
   
-  @Override
-  public String type()
+  @Override // Datum
+  public Type type()
   {
-    return "boolean";
+    return TypeRegistry.BOOLEAN_TYPE;
   }
 
   @Override
