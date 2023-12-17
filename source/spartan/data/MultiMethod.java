@@ -1,6 +1,6 @@
 package spartan.data;
 
-import spartan.data.IFun;
+//import spartan.data.IFun;
 import spartan.compiling.Signature;
 //import spartan.runtime.LocalEnv;
 //import spartan.runtime.Inst;
@@ -13,26 +13,10 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.Arrays;
 
-public final class MultiMethod implements Datum, IFun
+public class MultiMethod implements Datum, IFun
 {
-  private static class TypeSignature
+  public static class TypeSignature
   {
-    static TypeSignature fromArgs(List args)
-    {
-      var result = new String[args.length()];
-      for (int i = 0; !args.isEmpty(); i++, args = args.cdr())
-        result[i] = args.car().type().name();
-      return new TypeSignature(result);
-    }
-    
-    static TypeSignature fromTypes(List types)
-    {
-      var result = new String[types.length()];
-      for (int i = 0; !types.isEmpty(); i++, types = types.cdr())
-        result[i] = ((Symbol)types.car()).name();
-      return new TypeSignature(result);
-    }
-    
     @Override
     public boolean equals(Object other)
     {
@@ -44,20 +28,25 @@ public final class MultiMethod implements Datum, IFun
     {
       return hashCode;
     }
-        
-    private TypeSignature(String... types)
+    
+    public TypeSignature(Type... types)
     {
       this.types = types;
       this.hashCode = Arrays.hashCode(types);
     }
     
-    private final String[] types;
+    private final Type[] types;
     private final int hashCode;
   }
   
   public MultiMethod(Signature sig)
   {
     this.sig = sig;
+  }
+  
+  public MultiMethod(int numArgs, boolean isVariadic)
+  {
+    this(new Signature(numArgs, isVariadic));
   }
   
   @Override // Datum
@@ -69,8 +58,11 @@ public final class MultiMethod implements Datum, IFun
   @Override // IFun
   public void apply(VirtualMachine vm)
   {
-    var key = TypeSignature.fromArgs(vm.args);
-    var method = Optional.ofNullable(methodTable.get(key)).orElseThrow(() -> new TypeMismatch());
+    var argTypes = vm.args.stream().limit(sig.requiredArgs()).map(arg -> arg.type()).toArray(Type[]::new);
+    var key = new TypeSignature(argTypes);
+    var method = Optional.ofNullable(methodTable.get(key))
+                 .or(() -> defaultMethod)
+                 .orElseThrow(() -> new TypeMismatch());
     method.apply(vm);
   }
   
@@ -80,16 +72,29 @@ public final class MultiMethod implements Datum, IFun
     return sig;
   }
   
-  public void addMethod(List paramTypes, IFun method)
+  public void addMethod(TypeSignature signature, IFun method)
+  {
+    addMethod(signature.types, method);
+  }
+  
+  public void addMethod(Type[] types, IFun method)
   {
     if (!sig.equals(method.signature()))
       throw new Error("invalid signature in generic function definition");
-    var key = TypeSignature.fromTypes(paramTypes);
+    var key = new TypeSignature(types);
     if (methodTable.containsKey(key))
       throw new Error("multiple definition of generic function");
     methodTable.put(key, method);
   }
   
+  public void addDefault(IFun method)
+  {
+    if (!sig.equals(method.signature()))
+      throw new Error("invalid signature in generic function definition");
+    defaultMethod = Optional.of(method);
+  }
+  
   private final Signature sig;
   private final HashMap<TypeSignature, IFun> methodTable = new HashMap<>();
+  private Optional<IFun> defaultMethod = Optional.empty();
 }

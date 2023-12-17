@@ -1258,7 +1258,9 @@ public class Compiler
       throw malformedExp(exp);
     var numParams = params.length();
     var paramNames = extractFirst(params);
-    var paramTypes = extractSecond(params);
+    var paramTypes = extractSecond(params).stream()
+                     .map(typeName -> TypeRegistry.register(typeName.str().intern()))
+                     .toArray(Type[]::new);
     var body = exp.cdddr();
     var method = new Closure(makeProcedure(paramNames, body, Scope.EMPTY), null);    
     try {

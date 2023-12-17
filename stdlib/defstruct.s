@@ -30,15 +30,10 @@
 (defun generate-constructor-name (name)
   (string->symbol (string-concat "make-" (symbol->string name))))
 
-; Generate the entries for the underlying structure representation
-(defun generate-entries (fields)
-  (if (empty? fields) ()
-    `(',(car fields) ,(car fields) ,@(generate-entries (cdr fields)))))
-
 ; Generate the structure constructor
 (defun generate-constructor (name fields)
   `(defun ,(generate-constructor-name name) ,fields
-     (spartan.core:make-struct ',name ,@(generate-entries fields))))
+     (spartan.core:make-struct ',name (list ,@fields))))
 
 ; Generate the name of a structure type predicate
 (defun generate-predicate-name (name)
@@ -47,37 +42,13 @@
 ; Generate the structure type predicate
 (defun generate-predicate (name)
   `(defun ,(generate-predicate-name name) (self)
-     (spartan.core:= (type self) ',name)))
-
-; Generate the name of a structure accessor
-;(defun generate-accessor-name (name field)
-;  (string->symbol (string-concat (symbol->string name) "-" (symbol->string field))))
-
-; Generate a structure accessor
-;(defun generate-accessor (name field)
-;  `(defun ,(generate-accessor-name name field) (,name)
-;     (,name ',field)))
-
-; Generate a list of all structure accessors
-;(defun generate-accessors (name fields)
-;  (map (fun (field) (generate-accessor name field)) fields))
-
-; Generate the name of a structure mutator
-;(defun generate-mutator-name (name field)
-;  (string->symbol (string-concat (symbol->string name) "-set-" (symbol->string field) "!")))
-
-; Generate a structure mutator
-;(defun generate-mutator (name field)
-;  `(defun ,(generate-mutator-name name field) (,name ,field)
-;     (set! (,name ',field) ,field)))
-
-; Generate a list of all structure mutators
-;(defun generate-mutators (name fields)
-;  (map (fun (field) (generate-mutator name field)) fields))
+     (spartan.core:= (spartan.core:type self) ',name)))
 
 (defmacro defstruct (name fields)
   `(begin
+     ; Register struct type
+     (spartan.core:register-struct-type ',name ',fields)
+     ; Define constructor
      ,(generate-constructor name fields)
-     ;,@(generate-accessors name fields)
-     ;,@(generate-mutators name fields)
+     ; Define type predicate
      ,(generate-predicate name)))

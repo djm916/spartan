@@ -1,5 +1,5 @@
 
-(require "stdlib/priority-queue.s")
+(load "stdlib/priority-queue.s")
 
 (import 'spartan.priority-queue :as 'pq)
 

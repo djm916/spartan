@@ -189,6 +189,10 @@ public final class CorePackage extends Package
     bind(Symbol.of("table-keys"), TableLib.KEYS);
     bind(Symbol.of("table-values"), TableLib.VALUES);
     
+    bind(Symbol.of("register-struct-type"), CoreLib.MAKE_STRUCT_TYPE);
     bind(Symbol.of("make-struct"), CoreLib.MAKE_STRUCT);
+    
+    bind(Symbol.of("repr"), CoreLib.GENERIC_REPR);
+    bind(Symbol.of("at"), CoreLib.GENERIC_AT);
   }
 }

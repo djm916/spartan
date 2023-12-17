@@ -6,6 +6,7 @@ import spartan.errors.TypeMismatch;
 import spartan.errors.InvalidArgument;
 import spartan.errors.NoSuchPackage;
 import spartan.errors.WrongNumberArgs;
+import spartan.errors.UnboundSymbol;
 import spartan.runtime.VirtualMachine;
 import spartan.Config;
 import spartan.parsing.Reader;
@@ -474,13 +475,76 @@ public final class CoreLib
     }
   };
   
-  public static final Primitive MAKE_STRUCT = new Primitive(1, true) {
+  // (register-struct-type struct-name field-names)
+  
+  public static final Primitive MAKE_STRUCT_TYPE = new Primitive(2, false) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Symbol structName))
         throw new TypeMismatch();
-      Type structType = TypeRegistry.register(structName.str().intern());
-      vm.result = Struct.create(structType, vm.popRestArgs());
+      if (!(vm.popArg() instanceof List fields))
+        throw new TypeMismatch();
+      StructDescriptor.register(structName, fields);
+      vm.result = Nil.VALUE;
       vm.popFrame();
     }
   };
+  
+  // (make-struct struct-name field-inits)
+  
+  public static final Primitive MAKE_STRUCT = new Primitive(2, false) {
+    public void apply(VirtualMachine vm) {
+      if (!(vm.popArg() instanceof Symbol structName))
+        throw new TypeMismatch();
+      if (!(vm.popArg() instanceof List fieldInits))
+        throw new TypeMismatch();
+      var structDesc = StructDescriptor.forName(structName)
+                       .orElseThrow(() -> new UnboundSymbol(spartan.Runtime.currentPackage().name(), structName));
+      vm.result = new Struct(structDesc, fieldInits);
+      vm.popFrame();
+    }
+  };
+  
+  public static final MultiMethod GENERIC_REPR = new MultiMethod(1, false) {
+    {
+      addDefault(new Primitive(1, false) {
+        public void apply(VirtualMachine vm) {
+          vm.result = new Text(vm.popArg().repr());
+          vm.popFrame();
+        }
+      });
+    }
+  };
+  
+  public static final MultiMethod GENERIC_AT = new MultiMethod(2, false) {
+    {
+      addDefault(AT);
+    }
+  };
+  
+  public static final MultiMethod GENERIC_SET_AT = new MultiMethod(3, false) {
+    {
+      addDefault(SET_AT);
+    }
+  };
+  
+    /*
+    {
+      addMethod(new TypeSignature(TypeRegistry.INTEGER_TYPE),
+        new Primitive(1, false) {
+          public void apply(VirtualMachine vm) {
+            vm.result = new Text(((IInt)vm.popArg()).repr());
+            vm.popFrame();
+          }
+        });
+      
+      addMethod(new TypeSignature(TypeRegistry.REAL_TYPE),
+        new Primitive(1, false) {
+          public void apply(VirtualMachine vm) {
+            vm.result = new Text(((Real)vm.popArg()).repr());
+            vm.popFrame();
+          }
+        });
+    }
+    */
+
 }
