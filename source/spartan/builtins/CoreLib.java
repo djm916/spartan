@@ -31,54 +31,6 @@ public final class CoreLib
       return lhs.compareTo(rhs);
     throw new TypeMismatch();
   }
-    
-  // (import package [:as package-alias] symbol [:as symbol-alias] ...)
-  
-  public static void parseImportArgs(List args)
-  {
-    if (!(args.car() instanceof Symbol pkgName))
-      throw new TypeMismatch();
-    if (!pkgName.isSimple())
-      throw new InvalidArgument();
-    var pkg = spartan.Runtime.getPackage(pkgName).orElseThrow(() -> new NoSuchPackage(pkgName));
-    args = args.cdr();
-    if (!args.isEmpty() && args.car() == Symbol.KW_AS) {
-      args = args.cdr();
-      if (args.isEmpty())
-        throw new WrongNumberArgs();
-      if (!(args.car() instanceof Symbol pkgAlias))
-        throw new TypeMismatch();
-      if (!pkgAlias.isSimple())
-        throw new InvalidArgument();
-      spartan.Runtime.currentPackage().addPackageAlias(pkgAlias, pkg);
-      args = args.cdr();
-    }
-    if (args.isEmpty()) {
-      spartan.Runtime.currentPackage().doImport(pkg);
-    }
-    else {
-      while (!args.isEmpty()) {
-        if (!(args.car() instanceof Symbol symbol))
-          throw new TypeMismatch();
-        if (!symbol.isSimple())
-          throw new InvalidArgument();
-        if (!args.cdr().isEmpty() && args.cadr() == Symbol.KW_AS) {
-          args = args.cddr();
-          if (args.isEmpty())
-            throw new WrongNumberArgs();
-          if (!(args.car() instanceof Symbol alias))
-            throw new TypeMismatch();
-          if (!alias.isSimple())
-            throw new InvalidArgument();
-          spartan.Runtime.currentPackage().doImport(pkg, symbol, alias);
-        }
-        else {
-          spartan.Runtime.currentPackage().doImport(pkg, symbol);
-        }
-        args = args.cdr();
-      }
-    }
-  }
   
   public static Datum macroExpand1(Datum form)
   {
@@ -437,25 +389,7 @@ public final class CoreLib
       vm.popFrame();
     }
   };
-  
-  public static final Primitive IN_PACKAGE = new Primitive(1, false) {
-    public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof Symbol pkgName))
-        throw new TypeMismatch();
-      spartan.Runtime.enterPackage(pkgName);
-      vm.result = Nil.VALUE;
-      vm.popFrame();
-    }
-  };
-  
-  public static final Primitive IMPORT = new Primitive(1, true) {
-    public void apply(VirtualMachine vm) {
-      parseImportArgs(vm.popRestArgs());
-      vm.result = Nil.VALUE;
-      vm.popFrame();
-    }
-  };
-  
+    
   public static final Primitive MACROEXPAND1 = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
       var form = vm.popArg();

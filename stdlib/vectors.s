@@ -1,7 +1,7 @@
 
 ; Standard vector library
 
-(in-package 'spartan.core)
+(in-package spartan.core)
 
 (defun vector-map! (f v)
   (let [(i 0) (n (length v))]

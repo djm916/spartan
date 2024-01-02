@@ -1,6 +1,6 @@
 (load "stdlib/hash-map.s")
 
-(import 'spartan.hash-map :as 'hmap)
+(import spartan.hash-map :as hmap)
 
 ; Test example
 

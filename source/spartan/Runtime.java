@@ -4,6 +4,7 @@ import spartan.builtins.CorePackage;
 import spartan.data.Symbol;
 import spartan.data.QualifiedSymbol;
 import spartan.data.Datum;
+import spartan.data.Package;
 import spartan.compiling.Macro;
 import java.util.Map;
 import java.util.IdentityHashMap;

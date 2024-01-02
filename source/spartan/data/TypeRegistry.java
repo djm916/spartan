@@ -22,6 +22,7 @@ public final class TypeRegistry
   public static final Type BYTES_TYPE = register("bytes");
   public static final Type STRING_TYPE = register("string");
   public static final Type PORT_TYPE = register("port");
+  public static final Type PACKAGE_TYPE = register("package");
   
   public static Type register(String typeName)
   {

@@ -24,7 +24,7 @@
 ; (p 'x)                ; returns the x value of point p
 ; (set! (p 'x) new-x)   ; sets the x value of point p
 
-(in-package 'spartan.core)
+(in-package spartan.core)
 
 ; Generate the name of a structure constructor
 (defun generate-constructor-name (name)

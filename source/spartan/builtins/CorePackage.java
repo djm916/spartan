@@ -1,10 +1,9 @@
 package spartan.builtins;
 
 import spartan.data.*;
-import spartan.Package;
 import java.util.Optional;
 
-public final class CorePackage extends Package
+public final class CorePackage extends spartan.data.Package
 {
   public static final String NAME = "spartan.core";
   
@@ -17,7 +16,7 @@ public final class CorePackage extends Package
     
   private CorePackage()
   {
-    super(Symbol.of(NAME), Package.NONE);
+    super(Symbol.of(NAME), spartan.data.Package.NONE);
   }
   
   private static CorePackage instance = null;
@@ -50,13 +49,25 @@ public final class CorePackage extends Package
     
     /* Package procedures */
     
-    bind(Symbol.of("in-package"), CoreLib.IN_PACKAGE);
-    bind(Symbol.of("import"), CoreLib.IMPORT);
+    bind(Symbol.of("current-package"), PackageLib.CURRENT_PACKAGE);
+    bind(Symbol.of("set-current-package!"), PackageLib.SET_CURRENT_PACKAGE);
+    bind(Symbol.of("make-package"), PackageLib.MAKE_PACKAGE);
+    bind(Symbol.of("find-package"), PackageLib.FIND_PACKAGE);
+    bind(Symbol.of("try-find-package"), PackageLib.TRY_FIND_PACKAGE);
+    bind(Symbol.of("package-bound-symbols"), PackageLib.BOUND_SYMBOLS);
+    bind(Symbol.of("package-add-local-alias"), PackageLib.ADD_LOCAL_ALIAS);
+    bind(Symbol.of("package-bind"), PackageLib.BIND);
+    bind(Symbol.of("package-resolve"), PackageLib.RESOLVE);
+    
     //bind(Symbol.of("print-package"), CoreLib.PRINT_PACKAGE);
     
     /* Symbol related procedures */
     
     bind(Symbol.of("symbol-intern"), CoreLib.SYMBOL_INTERN);
+    //bind(Symbol.of("make-symbol"), CoreLib.MAKE_SYMBOL);
+    //bind(Symbol.of("symbol-package"), CoreLib.SYMBOL_PACKAGE);
+    //bind(Symbol.of("symbol-name"), CoreLib.SYMBOL_NAME);
+    //bind(Symbol.of("symbol-qualified?"), CoreLib.SYMBOL_QUALIFIED);
     
     /* Type predicates */
     

@@ -5,7 +5,7 @@
 ;
 ; Given a procedure f and a list xs = (x1 x2 ... xN), (map f xs) returns a new list ((f x1) (f x2) ... (f xN))
 
-(in-package 'spartan.core)
+(in-package spartan.core)
 
 (defun map (f xs)
   (if (empty? xs) ()

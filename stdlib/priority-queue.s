@@ -1,5 +1,5 @@
 
-(in-package 'spartan.priority-queue)
+(in-package spartan.priority-queue)
 
 (defstruct queue-impl (comparator vector))
 

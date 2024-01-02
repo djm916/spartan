@@ -1,9 +1,6 @@
-package spartan;
+package spartan.data;
 
-import spartan.data.Symbol;
-import spartan.data.Datum;
 import spartan.compiling.Macro;
-import spartan.data.List;
 import spartan.errors.InvalidArgument;
 import spartan.errors.UnboundSymbol;
 import spartan.errors.MultipleDefinition;
@@ -13,8 +10,9 @@ import java.util.IdentityHashMap;
 import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.Set;
 
-public class Package
+public class Package implements Datum
 {
   public static final Package NONE = new Package(null, null) {
     public Optional<Either<Datum, Macro>> lookup(Symbol name)
@@ -22,6 +20,12 @@ public class Package
       return Optional.empty();
     }
   };
+  
+  @Override // Datum
+  public Type type()
+  {
+    return TypeRegistry.PACKAGE_TYPE;
+  }
   
   public Package(Symbol name, Package parent)
   {
@@ -166,7 +170,12 @@ public class Package
   {
     return Optional.ofNullable(bindings.get(name)).or(() -> parent.lookup(name));
   }
-    
+  
+  public Set<Symbol> symbols()
+  {
+    return bindings.keySet();
+  }
+  
   protected final Symbol name;
   protected final Map<Symbol, Either<Datum, Macro>> bindings = new IdentityHashMap<>();
   protected final Map<Symbol, Package> localPkgAliases = new IdentityHashMap<>();

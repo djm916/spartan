@@ -1,4 +1,4 @@
-(in-package 'spartan.hash-map)
+(in-package spartan.hash-map)
 
 (defstruct map-impl (hash equal? table size))
 

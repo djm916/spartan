@@ -4,7 +4,13 @@
 ; This file is pre-loaded when the interpreter starts and
 ; itself loads several other files.
 
-(in-package 'spartan.core)
+(set-current-package! (find-package 'spartan.core))
+
+(defmacro in-package (package-name)
+  `(let ((package (try-find-package ',package-name)))
+     (if (nil? package)
+       (set! package (make-package ',package-name)))
+     (set-current-package! package)))
 
 (defmacro inc! (var)
   `(set! ,var (+ 1 ,var)))
@@ -90,7 +96,14 @@
       (set! xs (cdr xs)))
   hi))
 
+;(defmacro rec (symbol bindings & body)
+;  (let ((vars (map bindings (fun (pair) (car pair))))
+;        (inits (map bindings (fun (pair) (cadr pair)))))
+;    `(letrec ((,symbol (fun vars ,@body)))
+;       (apply ,symbol inits))))
+
 (load "stdlib/lists.s")
 (load "stdlib/vectors.s")
 (load "stdlib/defstruct.s")
 (load "stdlib/streams.s")
+(load "stdlib/import.s")

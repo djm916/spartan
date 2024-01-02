@@ -28,7 +28,7 @@ public class StructDescriptor
     registry.put(name, result);
     return result;
   }
-  
+    
   private StructDescriptor(Symbol name, int numSlots)
   {
     this.name = name;

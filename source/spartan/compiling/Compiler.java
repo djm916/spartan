@@ -1310,6 +1310,7 @@ public class Compiler
     Map.entry(Symbol.LETSTAR, this::compileLetStar),
     Map.entry(Symbol.LETREC, this::compileLetRec),
     Map.entry(Symbol.FUN, this::compileFun),
+    Map.entry(Symbol.REC, this::compileRec),
     Map.entry(Symbol.BEGIN, this::compileBegin),
     Map.entry(Symbol.SET, this::compileSet),
     Map.entry(Symbol.WHILE, this::compileWhile),

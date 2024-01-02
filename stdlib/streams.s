@@ -21,7 +21,7 @@
 ; gen   A generator procedure that produces succesive stream values
 ;       each time it is called.
 
-(in-package 'spartan.core)
+(in-package spartan.core)
 
 (defun make-stream (gen)
   (delay
