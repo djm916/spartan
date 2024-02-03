@@ -509,6 +509,35 @@ public class Compiler
      Transform:  (letrec ((f (fun (var1 ... varN) body..)))
                    (f init1 ... initN))
   */
+  /* Compiles the "rec" special form
+
+     Syntax:  (rec label ((var1 init1) ... (varN initN)) body...)
+     
+     Equivalent to: (letrec ((label (fun (var1 ... varN) body..)))
+                      (label init1 ... initN))
+     
+     Compilation:
+
+           <<initN>>
+           push-arg
+           ...
+           <<init1>>
+           push-arg
+           push-env N
+     tailEntry:
+           pop-arg
+           store-local 0 0
+           ...
+           pop-arg
+           store-local 0 N-1
+           <<body>>
+           pop-env
+     next: ...
+     
+     Within body, a tail call of the form (label arg1 ... argN) shall be compiled as:
+     
+           
+  */
   private Inst compileRec(List exp, Scope scope, boolean tail, Inst next)
   {
     if (!(exp.length() >= 4 && exp.cadr() instanceof Symbol s && s.isSimple() && exp.caddr() instanceof List bindings && checkBindingListForm(bindings)))
@@ -709,9 +738,10 @@ public class Compiler
              new Apply(1, position))));
     else
       return new PushFrame(next, position,
+             new MakeCont(
              new PushArg(
              compile(proc, scope, tail,           
-             new Apply(1, position))));
+             new Apply(1, position)))));
   }
   
   /* Compiles a sequence of expressions.
@@ -1217,18 +1247,29 @@ public class Compiler
   */
   private Inst compileExpandMacro(Macro macro, List exp, Scope scope, boolean tail, Inst next)
   {
-    var macroName = (Symbol)exp.car();
+    var position = positionMap.get(exp);    
+    var macroName = (Symbol)exp.car();    
     var args = exp.cdr();
-    var xform = macro.expand(vm, args, positionMap.get(exp));
+    var xform = macro.expand(vm, args, position);
     
     if (Config.LOG_DEBUG)
       log.info(() -> String.format("macro transform: %s => %s", exp.repr(), xform.repr()));
     
-    try {      
-      return compile(xform, scope, tail, next);
+    // augment source position map for the resulting generated code
+    augmentSourceMap(xform, position);
+    return compile(xform, scope, tail, next);    
+  }
+  
+  private void augmentSourceMap(Datum exp, Position position)
+  {
+    if (exp instanceof List list) {
+      positionMap.put(exp, position);
+      for (var elem : list) {
+        augmentSourceMap(elem, position);
+      }
     }
-    catch (Error err) {
-      throw new MacroExpandError(macroName.name(), positionMap.get(exp), err);
+    else if (exp instanceof Symbol) {
+      positionMap.put(exp, position);
     }
   }
   
@@ -1317,8 +1358,8 @@ public class Compiler
     Map.entry(Symbol.QUOTE, this::compileQuote),
     Map.entry(Symbol.QUASIQUOTE, this::compileQuasiquote),
     Map.entry(Symbol.OR, this::compileOr),
-    Map.entry(Symbol.AND, this::compileAnd),
-    Map.entry(Symbol.CALL_CC, this::compileCallCC)
+    Map.entry(Symbol.AND, this::compileAnd)
+    //Map.entry(Symbol.CALL_CC, this::compileCallCC)
   );
   
   private PositionMap positionMap;

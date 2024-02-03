@@ -3,28 +3,18 @@
 
 ; Usage: spartan factors.s N
 
-; Returns a function that determines if y is NOT a factor of its argument x
-(defun not-factor? (y) (fun (x) (not (= (remainder x y) 0))))
+(defun integer-stream (n)
+  (stream-cons n (integer-stream (+ 1 n))))
+  
+(defun divisible? (x y) (= (remainder x y) 0))
 
-; Generate the integers starting from a given value
-(defun make-int-generator (start)
-  (fun ()
-    (let ((next start))
-      (inc! start)
-      next)))
-
-; Generate the primes using the Sieve of Eratosthenes algorithm
-(defun make-prime-generator ()
-  ; Begin with the stream of all natural numbers from 2 (as 0 and 1 are not prime)
-  (def nats (make-stream (make-int-generator 2)))
-  (fun ()
-    (let ((next-prime (stream-car nats))) ; The first value is a prime
-      ; Filter out all the rest of the numbers that are a multiple of this prime
-      (set! nats (stream-filter (not-factor? next-prime) nats))
-      next-prime)))
+(defun prime-sieve (s)
+  (stream-cons (stream-car s)
+               (prime-sieve (stream-filter (fun (n) (not (divisible? n (stream-car s))))
+                                           (stream-cdr s)))))
 
 (defun prime-factors (n)
-  (def primes (make-stream (make-prime-generator)))
+  (def primes (prime-sieve (integer-stream 2)))
   (def factors ())
   (while (> n 1)
     (let ((p (stream-car primes)))

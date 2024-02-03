@@ -23,11 +23,11 @@
 
 (in-package spartan.core)
 
-; Add an element to the front of a stream
-
-(defmacro stream-cons (e s) `(delay (list ,e ,s)))
-
-;(defmacro stream-cons (e s) `(cons ,e (delay ,s)))
+(defun make-stream (gen)
+  (delay
+    (let ((next (gen)))
+      (if (nil? next) ()
+        (list next (make-stream gen))))))
 
 ; Return the first element of a stream
 
@@ -37,31 +37,45 @@
 
 (defun stream-cdr (s) (cadr (force s)))
 
+; Add an element to the front of a stream
+
+(defun stream-cons (e s) (delay (list e s)))
+
 ; Determine if a stream is empty
 
 (defun stream-empty? (s) (empty? (force s)))
 
-; The empty stream
-
-(def stream-empty (delay ()))
-
 (defun stream-map (f s)
-  (if (stream-empty? s) s
-    (stream-cons (f (stream-car s)) (stream-map f (stream-cdr s)))))
+  (defun gen ()
+    (if (stream-empty? s) nil
+      (let ((next (f (stream-car s))))
+        (set! s (stream-cdr s))
+        next)))
+  (make-stream gen))
 
 (defun stream-for-each (f s)
-  (if (stream-empty? s) nil
-    (begin (f (stream-car s))
-           (stream-for-each f (stream-cdr s)))))
+  (cond ((stream-empty? s) nil)
+        (else (f (stream-car s))
+              (stream-for-each f (stream-cdr s)))))
 
 (defun stream-filter (f s)
-  (cond ((stream-empty? s) s)
-        ((f (stream-car s)) (stream-cons (stream-car s) (stream-filter f (stream-cdr s))))
-        (else (stream-filter f (stream-cdr s)))))
+  (defun gen ()
+    (if (stream-empty? s) nil
+      (let ((next (stream-car s)))
+        (set! s (stream-cdr s))
+        (if (f next)
+          next
+          (gen)))))
+  (make-stream gen))
 
 (defun stream-take (n s)
-  (if (or (stream-empty? s) (= n 0)) stream-empty
-    (stream-cons (stream-car s) (stream-take (- n 1) (stream-cdr s)))))
+  (defun gen ()
+    (if (or (stream-empty? s) (= n 0)) nil
+      (let ((next (stream-car s)))
+        (set! s (stream-cdr s))
+        (set! n (- n 1))
+        next)))
+  (make-stream gen))
 
 (defun stream-reduce (f i s)
   (if (stream-empty? s) i
@@ -72,5 +86,10 @@
     (cons (stream-car s) (stream->list (stream-cdr s)))))
 
 (defun stream-enumerate (i s)
-  (if (stream-empty? s) ()
-    (stream-cons (list i (stream-car s)) (stream-enumerate (+ i 1) (stream-cdr s)))))
+  (defun gen ()
+    (if (stream-empty? s) nil
+      (let ((next (list i (stream-car s))))
+        (set! s (stream-cdr s))
+        (set! i (+ 1 i))
+        next)))
+  (make-stream gen))

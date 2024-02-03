@@ -100,7 +100,17 @@ public final class CoreLib
       vm.apply(vm.args.length());
     }
   };
-    
+  
+  public static final Primitive CALL_CC = new Primitive(1, false) {
+    public void apply(VirtualMachine vm) {
+      //if (! (vm.popArg() instanceof Closure proc))
+        //throw new TypeMismatch();
+      vm.result = vm.popArg();
+      vm.args = List.of(new Continuation(vm.frame));
+      vm.apply(1);
+    }
+  };
+  
   public static final Primitive PRINT = new Primitive(1, true) {
     public void apply(VirtualMachine vm) {
       while (!vm.args.isEmpty())

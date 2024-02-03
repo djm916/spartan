@@ -46,14 +46,13 @@ public class Error extends RuntimeException
   {
     var message = new StringBuilder();
     
-    if (position == null)
-      message.append(String.format("error: unknown source: %s", getMessage()));
-    else
-      message.append(String.format("error: %s: %s", position, getMessage()));
+    message.append(String.format("error: %s: %s", (position == null ? "unknown source" : position), getMessage()));
     
-    if (backTrace != null)
+    if (backTrace != null && !backTrace.isEmpty()) {
+      message.append("\nbacktrace:");
       for (Position position : backTrace)
-        message.append(String.format("\n\tfrom %s", position));
+        message.append(String.format("\n\t%s", position));
+    }
     
     return message.toString();
   }

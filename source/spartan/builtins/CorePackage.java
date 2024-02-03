@@ -34,6 +34,7 @@ public final class CorePackage extends spartan.data.Package
     bind(Symbol.of("false"), Bool.FALSE);    
     bind(Symbol.of("not"), CoreLib.NOT);    
     bind(Symbol.of("apply"), CoreLib.APPLY);
+    bind(Symbol.of("call/cc"), CoreLib.CALL_CC);
     bind(Symbol.of("print"), CoreLib.PRINT);
     bind(Symbol.of("print-line"), CoreLib.PRINT_LINE);
     bind(Symbol.of("type"), CoreLib.TYPE);    
