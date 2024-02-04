@@ -4,6 +4,7 @@ import java.io.*;
 import java.nio.file.Path;
 import spartan.data.*;
 import spartan.errors.SyntaxError;
+import spartan.errors.SourceInfo;
 import spartan.Config;
 
 class MutablePosition
@@ -226,8 +227,9 @@ public class Reader implements AutoCloseable
     
   private SyntaxError syntaxError(String message)
   {
-    discardRemainingInput();    
-    return new SyntaxError(message, getTokenPosition());
+    discardRemainingInput();
+    var position = getTokenPosition();
+    return new SyntaxError(message, new SourceInfo(null, position));
   }
 
   private SyntaxError malformedNumeric()

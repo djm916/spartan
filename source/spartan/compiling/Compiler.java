@@ -5,10 +5,10 @@ import spartan.data.*;
 import spartan.parsing.SourceDatum;
 import spartan.parsing.PositionMap;
 import spartan.parsing.Position;
+import spartan.errors.SourceInfo;
 import spartan.errors.Error;
 import spartan.errors.SyntaxError;
 import spartan.errors.MultipleDefinition;
-import spartan.errors.MacroExpandError;
 import spartan.runtime.VirtualMachine;
 import spartan.Config;
 import java.util.logging.Logger;
@@ -49,8 +49,8 @@ public class Compiler
   /** Convenience method for creating instances of SyntaxError for malformed expressions. */
   private SyntaxError malformedExp(Datum exp)
   {
-    return new SyntaxError("malformed expression", positionMap.get(exp));
-  }  
+    return new SyntaxError("malformed expression", new SourceInfo(exp, positionMap.get(exp)));
+  }
   
   /**
    * Determines if an expression is self-evaluating.
@@ -103,9 +103,9 @@ public class Compiler
   private Inst compileGlobalVarRef(Symbol s, Inst next)
   {
     if (s instanceof QualifiedSymbol qs)
-      return new LoadGlobal(Symbol.of(qs.packageName()), Symbol.of(qs.baseName()), positionMap.get(qs), next);
+      return new LoadGlobal(Symbol.of(qs.packageName()), Symbol.of(qs.baseName()), new SourceInfo(qs, positionMap.get(qs)), next);
     else
-      return new LoadGlobal(spartan.Runtime.currentPackage().name(), s.intern(), positionMap.get(s), next);
+      return new LoadGlobal(spartan.Runtime.currentPackage().name(), s.intern(), new SourceInfo(s, positionMap.get(s)), next);
   }
   
   /* Compile the "set!" special form, a generalized assignment statement.
@@ -141,7 +141,7 @@ public class Compiler
       return compile(xform, scope, tail, next);
     }
     catch (Error err) {
-      err.setPosition(positionMap.get(exp));
+      err.setSource(new SourceInfo(xform, positionMap.get(exp)));
       throw err;
     }
   }
@@ -192,9 +192,11 @@ public class Compiler
   private Inst compileSetGlobalVar(Symbol s, Inst next)
   {
     if (s instanceof QualifiedSymbol qs)
-      return new StoreGlobal(Symbol.of(qs.packageName()), Symbol.of(qs.baseName()), positionMap.get(qs), new LoadConst(Nil.VALUE, next));
+      return new StoreGlobal(Symbol.of(qs.packageName()), Symbol.of(qs.baseName()), new SourceInfo(qs, positionMap.get(qs)),
+             new LoadConst(Nil.VALUE, next));
     else
-      return new StoreGlobal(spartan.Runtime.currentPackage().name(), s.intern(), positionMap.get(s), new LoadConst(Nil.VALUE, next));
+      return new StoreGlobal(spartan.Runtime.currentPackage().name(), s.intern(), new SourceInfo(s, positionMap.get(s)),
+             new LoadConst(Nil.VALUE, next));
   }
   
   private Inst compileDef(List exp, Scope scope, boolean tail, Inst next)
@@ -203,7 +205,7 @@ public class Compiler
       throw malformedExp(exp);
     var init = exp.caddr();  
     return compile(init, scope, false,
-           new BindGlobal(spartan.Runtime.currentPackage().name(), s.intern(), positionMap.get(s),
+           new BindGlobal(spartan.Runtime.currentPackage().name(), s.intern(), new SourceInfo(exp, positionMap.get(s)),
            new LoadConst(Nil.VALUE, next)));
   }
   
@@ -226,7 +228,7 @@ public class Compiler
       return compile(xform, scope, false, next);
     }
     catch (Error err) {
-      err.setPosition(positionMap.get(exp));
+      err.setSource(new SourceInfo(xform, positionMap.get(exp)));
       throw err;
     }
   }
@@ -552,7 +554,7 @@ public class Compiler
       return compile(xform, scope, tail, next);
     }
     catch (Error err) {
-      err.setPosition(positionMap.get(exp));
+      err.setSource(new SourceInfo(xform, positionMap.get(exp)));
       throw err;
     }
   }
@@ -695,16 +697,17 @@ public class Compiler
     var args = exp.cdr();
     int numArgs = args.length();
     var position = positionMap.get(exp);
+    var source = new SourceInfo(exp, position);
     
     if (tail) // Tail call optimization: omit call frame, return directly to the caller
       return compilePushArgs(args, scope,
              compile(proc, scope, false,
-             new Apply(numArgs, position)));
+             new Apply(numArgs, source)));
     else
       return new PushFrame(next, position,
              compilePushArgs(args, scope,
              compile(proc, scope, false,
-             new Apply(numArgs, position))));
+             new Apply(numArgs, source))));
   }
 
   /* Compile the "call/cc" form, or "call-with-current-continuation"
@@ -719,8 +722,7 @@ public class Compiler
            <<proc>>    
            apply
      next: ...
-  */
-  
+    
   private Inst compileCallCC(List exp, Scope scope, boolean tail, Inst next)
   {
     if (exp.length() != 2)
@@ -743,6 +745,7 @@ public class Compiler
              compile(proc, scope, tail,           
              new Apply(1, position)))));
   }
+  */
   
   /* Compiles a sequence of expressions.
      The sequence elements are evaluated in order.
@@ -1071,7 +1074,7 @@ public class Compiler
       return compile(xform, scope, false, next);
     }
     catch (Error err) {
-      err.setPosition(positionMap.get(exp));
+      err.setSource(new SourceInfo(exp, positionMap.get(exp)));
       throw err;
     }
   }
@@ -1232,7 +1235,7 @@ public class Compiler
       throw malformedExp(exp);
     var body = exp.cdddr();
     var macro = new Macro(makeProcedure(params, body, Scope.EMPTY));
-    spartan.Runtime.currentPackage().bind(symbol.intern(), macro, () -> new MultipleDefinition(symbol, positionMap.get(symbol)));
+    spartan.Runtime.currentPackage().bind(symbol.intern(), macro, () -> new MultipleDefinition(symbol, new SourceInfo(exp, positionMap.get(symbol))));
     return new LoadConst(Nil.VALUE, next);
   }
   
@@ -1247,10 +1250,11 @@ public class Compiler
   */
   private Inst compileExpandMacro(Macro macro, List exp, Scope scope, boolean tail, Inst next)
   {
-    var position = positionMap.get(exp);    
+    var position = positionMap.get(exp);
+    var source = new SourceInfo(exp, position);
     var macroName = (Symbol)exp.car();    
     var args = exp.cdr();
-    var xform = macro.expand(vm, args, position);
+    var xform = macro.expand(vm, args, source);
     
     if (Config.LOG_DEBUG)
       log.info(() -> String.format("macro transform: %s => %s", exp.repr(), xform.repr()));
@@ -1308,7 +1312,7 @@ public class Compiler
       getOrCreateMultiMethod(symbol.intern(), method.signature()).addMethod(paramTypes, method);
     }
     catch (Error err) {
-      err.setPosition(positionMap.get(exp));
+      err.setSource(new SourceInfo(exp, positionMap.get(exp)));
       throw err;
     }
     return new LoadConst(Nil.VALUE, next);

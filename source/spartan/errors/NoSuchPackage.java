@@ -1,7 +1,6 @@
 package spartan.errors;
 
 import spartan.data.Symbol;
-import spartan.parsing.Position;
 
 public class NoSuchPackage extends Error
 {
@@ -12,8 +11,8 @@ public class NoSuchPackage extends Error
     this(pkg, null);
   }
   
-  public NoSuchPackage(Symbol pkg, Position pos)
+  public NoSuchPackage(Symbol pkg, SourceInfo source)
   {
-    super(String.format(MSG_FMT, pkg.repr()), pos);
+    super(String.format(MSG_FMT, pkg.repr()), source);
   }
 }

@@ -1,7 +1,6 @@
 package spartan.errors;
 
 import spartan.data.Symbol;
-import spartan.parsing.Position;
 
 public class MultipleDefinition extends Error
 {
@@ -12,8 +11,8 @@ public class MultipleDefinition extends Error
     this(s, null);
   }
   
-  public MultipleDefinition(Symbol s, Position pos)
+  public MultipleDefinition(Symbol s, SourceInfo source)
   {
-    super(String.format(MSG_FMT, s.repr()), pos);
+    super(String.format(MSG_FMT, s.repr()), source);
   }
 }

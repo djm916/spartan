@@ -1,6 +1,5 @@
 package spartan.errors;
 
-import spartan.parsing.Position;
 import spartan.data.Symbol;
 
 public class UnboundSymbol extends Error
@@ -12,8 +11,8 @@ public class UnboundSymbol extends Error
     this(pkg, sym, null);
   }
   
-  public UnboundSymbol(Symbol pkg, Symbol sym, Position pos)
+  public UnboundSymbol(Symbol pkg, Symbol sym, SourceInfo source)
   {
-    super(String.format(MSG_FMT, pkg.repr(), sym.repr()), pos);
+    super(String.format(MSG_FMT, pkg.repr(), sym.repr()), source);
   }
 }

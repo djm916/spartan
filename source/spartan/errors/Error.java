@@ -1,5 +1,6 @@
 package spartan.errors;
 
+import spartan.errors.SourceInfo;
 import spartan.parsing.Position;
 import java.util.List;
 
@@ -10,20 +11,20 @@ public class Error extends RuntimeException
     super(message);
   }
   
-  public Error(String message, Position position)
+  public Error(String message, SourceInfo source)
   {
     super(message);
-    this.position = position;
+    this.source = source;
   }
   
-  public Position getPosition()
+  public SourceInfo getSource()
   {
-    return position;
+    return source;
   }
   
-  public void setPosition(Position position)
+  public void setSource(SourceInfo source)
   {
-    this.position = position;
+    this.source = source;
   }
   
   public List<Position> getBackTrace()
@@ -45,8 +46,10 @@ public class Error extends RuntimeException
   public String toString()
   {
     var message = new StringBuilder();
+    var posStr = (source.position() == null ? "unknown source" : source.position());
+    var expStr = (source.exp() == null ? "none" : source.exp().repr());
     
-    message.append(String.format("error: %s: %s", (position == null ? "unknown source" : position), getMessage()));
+    message.append(String.format("error: %s: %s in expression: %s", posStr, getMessage(), expStr));
     
     if (backTrace != null && !backTrace.isEmpty()) {
       message.append("\nbacktrace:");
@@ -57,6 +60,6 @@ public class Error extends RuntimeException
     return message.toString();
   }
 
-  private Position position;
+  private SourceInfo source;
   private List<Position> backTrace;
 }

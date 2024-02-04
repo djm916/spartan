@@ -1,6 +1,6 @@
 package spartan.runtime;
 
-import spartan.parsing.Position;
+import spartan.errors.SourceInfo;
 import spartan.errors.Error;
 
 /**
@@ -12,11 +12,11 @@ public final class Apply extends Inst
    * @param numArgs the number of arguments being applied
    * @param position the source position where this application occurs
    */
-  public Apply(int numArgs, Position position)
+  public Apply(int numArgs, SourceInfo source)
   {
     super(null);
     this.numArgs = numArgs;
-    this.position = position;
+    this.source = source;
   }
   
   @Override
@@ -26,11 +26,11 @@ public final class Apply extends Inst
       vm.apply(numArgs);
     }
     catch (Error err) {
-      err.setPosition(position);
+      err.setSource(source);
       throw err;
     }
   }
 
   private final int numArgs;
-  private final Position position;
+  private final SourceInfo source;
 }

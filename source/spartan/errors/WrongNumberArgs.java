@@ -1,7 +1,5 @@
 package spartan.errors;
 
-import spartan.parsing.Position;
-
 public class WrongNumberArgs extends Error
 {
   private static final String MSG_FMT = "incorrect number of arguments";
@@ -11,8 +9,8 @@ public class WrongNumberArgs extends Error
     this(null);
   }
   
-  public WrongNumberArgs(Position pos)
+  public WrongNumberArgs(SourceInfo source)
   {
-    super(MSG_FMT, pos);
+    super(MSG_FMT, source);
   }
 }
