@@ -419,6 +419,19 @@ public final class CoreLib
     }
   };
   
+  public static final Primitive PRINT_TRACEBACK = new Primitive(0, false) {
+    public void apply(VirtualMachine vm) {
+      var backTrace = vm.generateBackTrace();
+      if (backTrace != null && !backTrace.isEmpty()) {
+        System.out.println("\nbacktrace:");
+        for (spartan.parsing.Position position : backTrace)
+          System.out.print(String.format("\n\t%s", position));
+      }
+      vm.result = Nil.VALUE;
+      vm.popFrame();
+    }
+  };
+  
   // (register-struct-type struct-name field-names)
   
   public static final Primitive MAKE_STRUCT_TYPE = new Primitive(2, false) {

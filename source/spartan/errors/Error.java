@@ -46,10 +46,10 @@ public class Error extends RuntimeException
   public String toString()
   {
     var message = new StringBuilder();
-    var posStr = (source.position() == null ? "unknown source" : source.position());
-    var expStr = (source.exp() == null ? "none" : source.exp().repr());
+    var pos = (source.position() == null ? "unknown source" : source.position());
+    var exp = (source.exp() == null ? "none" : source.exp().repr());
     
-    message.append(String.format("error: %s: %s in expression: %s", posStr, getMessage(), expStr));
+    message.append(String.format("error: %s: %s in expression: %s", pos, getMessage(), exp));
     
     if (backTrace != null && !backTrace.isEmpty()) {
       message.append("\nbacktrace:");

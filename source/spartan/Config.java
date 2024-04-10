@@ -17,7 +17,9 @@ public final class Config
   
   /** Enables or disables debug logging. Configured with the "spartan.debug" Java system property. Should
       be "true" or "false". Defaults to "false". */
-  public static final boolean LOG_DEBUG = Boolean.valueOf(System.getProperty("spartan.debug", "false"));
+  public static final boolean LOG_DEBUG = Boolean.valueOf(System.getProperty("spartan.debug-logging", "false"));
+  
+  public static final boolean TAIL_CALLS = Boolean.valueOf(System.getProperty("spartan.optimize-tail-calls", "true"));
   
   /** The default character encoding for converting to and from binary data.
       This encoding is assumed when reading source code files. */

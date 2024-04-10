@@ -111,12 +111,12 @@ public final class VirtualMachine
     frame = null;
   }
   
-  private java.util.List<Position> generateBackTrace()
+  public java.util.List<Position> generateBackTrace()
   {
     var backTrace = new java.util.ArrayList<Position>();
-    for (; frame != null; frame = frame.parent())
-      if (frame.position() != null)
-        backTrace.add(frame.position());
+    for (var f = this.frame; f != null; f = f.parent())
+      if (f.position() != null)
+        backTrace.add(f.position());
     return backTrace;
   }
 }

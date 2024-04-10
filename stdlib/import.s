@@ -9,6 +9,12 @@
         (package-bind target-package alias (package-resolve source-package symbol))
         (loop (cdr elems))))))
 
+; <import-declaration> => (import <package-name> <import-specifiers>)
+; <import-specifiers> => <import-specifier>*
+; <import-specifier> => <symbol> (:as <alias>)?
+; <package-name> => <symbol>
+; <alias> => <symbol>
+
 (defmacro import (package-name & args)
   
   (let ((imported-symbols ())

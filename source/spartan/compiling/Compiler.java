@@ -699,7 +699,7 @@ public class Compiler
     var position = positionMap.get(exp);
     var source = new SourceInfo(exp, position);
     
-    if (tail) // Tail call optimization: omit call frame, return directly to the caller
+    if (tail && Config.TAIL_CALLS) // Tail call optimization: omit call frame, return directly to the caller
       return compilePushArgs(args, scope,
              compile(proc, scope, false,
              new Apply(numArgs, source)));

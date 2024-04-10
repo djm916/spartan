@@ -107,3 +107,4 @@
 (load "stdlib/defstruct.s")
 (load "stdlib/streams.s")
 (load "stdlib/import.s")
+(load "stdlib/except.s")
