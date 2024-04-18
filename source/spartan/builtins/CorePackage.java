@@ -58,6 +58,7 @@ public final class CorePackage extends spartan.data.Package
     bind(Symbol.of("try-find-package"), PackageLib.TRY_FIND_PACKAGE);
     bind(Symbol.of("package-bound-symbols"), PackageLib.BOUND_SYMBOLS);
     bind(Symbol.of("package-add-local-alias"), PackageLib.ADD_LOCAL_ALIAS);
+    bind(Symbol.of("package-import"), PackageLib.IMPORT);
     bind(Symbol.of("package-bind"), PackageLib.BIND);
     bind(Symbol.of("package-resolve"), PackageLib.RESOLVE);
     

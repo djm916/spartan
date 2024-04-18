@@ -1,10 +1,9 @@
 package spartan.data;
 
-import spartan.compiling.Macro;
 import spartan.errors.InvalidArgument;
 import spartan.errors.UnboundSymbol;
 import spartan.errors.MultipleDefinition;
-import spartan.util.Either;
+//import spartan.util.Either;
 import java.util.Map;
 import java.util.IdentityHashMap;
 import java.util.Optional;
@@ -15,7 +14,7 @@ import java.util.Set;
 public class Package implements Datum
 {
   public static final Package NONE = new Package(null, null) {
-    public Optional<Either<Datum, Macro>> lookup(Symbol name)
+    public Optional<Datum> lookup(Symbol name)
     {
       return Optional.empty();
     }
@@ -113,34 +112,14 @@ public class Package implements Datum
    */
   public void bind(Symbol name, Datum value, Supplier<MultipleDefinition> onError)
   {
-    bind(name, Either.fromLeft(value), onError);
-  }
-  
-  public void bind(Symbol name, Macro value, Supplier<MultipleDefinition> onError)
-  {
-    bind(name, Either.fromRight(value), onError);
-  }
-  
-  public void bind(Symbol name, Either<Datum, Macro> value, Supplier<MultipleDefinition> onError)
-  {
     if (bindings.containsKey(name))
       throw onError.get();
     bindings.put(name, value);
   }
   
-  protected void bind(Symbol name, Either<Datum, Macro> value)
+  public void bind(Symbol name, Datum value)
   {    
     bindings.put(name, value);
-  }
-  
-  public void bind(Symbol name, Datum value)
-  {
-    bind(name, Either.fromLeft(value));
-  }
-  
-  public void bind(Symbol name, Macro value)
-  {
-    bind(name, Either.fromRight(value));
   }
   
   /**
@@ -157,7 +136,7 @@ public class Package implements Datum
   {
     if (!bindings.containsKey(name))
       throw onError.get();
-    bindings.put(name, Either.fromLeft(value));
+    bindings.put(name, value);
   }
   
   /**
@@ -166,7 +145,7 @@ public class Package implements Datum
    * @param name The symbol to look up
    * @return The (optional) value of the symbol
    */
-  public Optional<Either<Datum, Macro>> lookup(Symbol name)
+  public Optional<Datum> lookup(Symbol name)
   {
     return Optional.ofNullable(bindings.get(name)).or(() -> parent.lookup(name));
   }
@@ -177,7 +156,7 @@ public class Package implements Datum
   }
   
   protected final Symbol name;
-  protected final Map<Symbol, Either<Datum, Macro>> bindings = new IdentityHashMap<>();
+  protected final Map<Symbol, Datum> bindings = new IdentityHashMap<>();
   protected final Map<Symbol, Package> localPkgAliases = new IdentityHashMap<>();
   protected final Package parent;
 }

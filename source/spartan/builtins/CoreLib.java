@@ -10,6 +10,7 @@ import spartan.errors.UnboundSymbol;
 import spartan.runtime.VirtualMachine;
 import spartan.Config;
 import spartan.parsing.Reader;
+import spartan.errors.SourceInfo;
 
 public final class CoreLib
 {
@@ -38,7 +39,7 @@ public final class CoreLib
       return Nil.VALUE;
     var args = list.cdr();
     return spartan.Runtime.lookupMacro(symbol)
-           .map(macro -> macro.expand(new VirtualMachine(), args, null))
+           .map(macro -> macro.expand(new VirtualMachine(), args, new SourceInfo(form, null)))
            .orElse(Nil.VALUE);
   }
   

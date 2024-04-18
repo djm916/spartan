@@ -1,18 +1,21 @@
 (in-package spartan.core)
 
-(defun package-import (target-package source-package import-specifiers)
+; 
+
+(defun do-imports (target-package source-package import-specifiers)
   (rec loop ((elems import-specifiers))
     (if (empty? elems) ()
       (let* ((elem (car elems))
              (symbol (if (list? elem) (car elem) elem))
              (alias (if (list? elem) (cadr elem) symbol)))
         (package-bind target-package alias (package-resolve source-package symbol))
+        ;(package-import target-package source-package symbol alias)
         (loop (cdr elems))))))
 
-; <import-declaration> => (import <package-name> <import-specifiers>)
-; <import-specifiers> => <import-specifier>*
+
+; <import-statement> => (import <package> <alias>? <import-specifier>*)
 ; <import-specifier> => <symbol> (:as <alias>)?
-; <package-name> => <symbol>
+; <package> => <symbol>
 ; <alias> => <symbol>
 
 (defmacro import (package-name & args)
@@ -55,5 +58,5 @@
                                   `(package-bound-symbols source-package)
                                   `',imported-symbols)))
        ,@(if (nil? local-alias) () `((package-add-local-alias target-package source-package ',local-alias)))
-       (package-import target-package source-package import-specifiers))))
+       (do-imports target-package source-package import-specifiers))))
        

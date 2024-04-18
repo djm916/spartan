@@ -20,7 +20,6 @@ public final class LoadGlobal extends Inst
     vm.result = spartan.Runtime.getPackage(packageName)
                 .orElseThrow(() -> new NoSuchPackage(packageName, source))
                 .lookup(baseName)
-                .flatMap(value -> value.left())
                 .orElseThrow(() -> new UnboundSymbol(packageName, baseName, source));
     vm.control = next;
   }

@@ -5,7 +5,7 @@ import spartan.data.Symbol;
 import spartan.data.QualifiedSymbol;
 import spartan.data.Datum;
 import spartan.data.Package;
-import spartan.compiling.Macro;
+import spartan.data.Macro;
 import java.util.Map;
 import java.util.IdentityHashMap;
 import java.util.Optional;
@@ -68,26 +68,30 @@ public final class Runtime
   
   public static Optional<Macro> lookupMacro(Symbol s)
   {
+    return lookup(s)
+           .filter(datum -> datum instanceof Macro)
+           .map(macro -> (Macro)macro);
+    /*
     if (s instanceof QualifiedSymbol qs)
       return getPackage(Symbol.of(qs.packageName()))
-             .flatMap(pkg -> pkg.lookup(Symbol.of(qs.baseName())))
-             .flatMap(value -> value.right());
+             .flatMap(pkg -> pkg.lookup(Symbol.of(qs.baseName())));
+             .filter(datum -> datum instanceof Macro)
+             .map(macro -> (Macro)macro);
     else
       return currentPackage()
              .lookup(s.intern())
-             .flatMap(value -> value.right());
+             .filter(datum -> datum instanceof Macro)
+             .map(macro -> (Macro)macro);
+     */
   }
   
   public static Optional<Datum> lookup(Symbol s)
   {
     if (s instanceof QualifiedSymbol qs)
       return getPackage(Symbol.of(qs.packageName()))
-             .flatMap(pkg -> pkg.lookup(Symbol.of(qs.baseName())))
-             .flatMap(value -> value.left());
+             .flatMap(pkg -> pkg.lookup(Symbol.of(qs.baseName())));
     else
-      return currentPackage()
-             .lookup(s.intern())
-             .flatMap(value -> value.left());
+      return currentPackage().lookup(s.intern());
   }
   
   public static void boot()

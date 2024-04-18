@@ -80,7 +80,7 @@ public final class PackageLib
         throw new TypeMismatch();
       if (!symbol.isSimple())
         throw new InvalidArgument();
-      vm.result = pkg.lookup(symbol).flatMap(value -> value.left()).orElseThrow(() -> new UnboundSymbol(pkg.name(), symbol));
+      vm.result = pkg.lookup(symbol).orElseThrow(() -> new UnboundSymbol(pkg.name(), symbol));
       vm.popFrame();
     }
   };
@@ -105,6 +105,26 @@ public final class PackageLib
       if (!alias.isSimple())
         throw new InvalidArgument();
       targetPackage.addPackageAlias(alias, sourcePackage);
+      vm.result = Nil.VALUE;
+      vm.popFrame();
+    }
+  };
+  
+  public static final Primitive IMPORT = new Primitive(4, false) {
+    public void apply(VirtualMachine vm) {
+      if (!(vm.popArg() instanceof spartan.data.Package targetPackage))
+        throw new TypeMismatch();
+      if (!(vm.popArg() instanceof spartan.data.Package sourcePackage))
+        throw new TypeMismatch();
+      if (!(vm.popArg() instanceof Symbol symbol))
+        throw new TypeMismatch();
+      if (!symbol.isSimple())
+        throw new InvalidArgument();
+      if (!(vm.popArg() instanceof Symbol alias))
+        throw new TypeMismatch();
+      if (!alias.isSimple())
+        throw new InvalidArgument();
+      targetPackage.doImport(sourcePackage, symbol, alias);
       vm.result = Nil.VALUE;
       vm.popFrame();
     }

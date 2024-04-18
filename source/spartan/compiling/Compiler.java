@@ -1279,7 +1279,7 @@ public class Compiler
   
   private MultiMethod getOrCreateMultiMethod(Symbol name, Signature signature)
   {
-    var binding = spartan.Runtime.currentPackage().lookup(name).flatMap(value -> value.left());
+    var binding = spartan.Runtime.currentPackage().lookup(name);
     if (binding.isPresent()) {
       if (!(binding.get() instanceof MultiMethod mm))
         throw new Error(String.format("symbol \"%s\" does not name a generic function", name.str()));
@@ -1318,7 +1318,76 @@ public class Compiler
     return new LoadConst(Nil.VALUE, next);
   }
   
-  /* Compile a combination (i.e., special forms, procedure application, and macro expansion. */
+  /* Compiles the "match" special form.
+     
+     Syntax: (match exp
+               (pattern1 body1)
+               ...
+               (patternN bodyN))
+     
+     Compilation:
+
+             <<exp>>
+             push-env N_max
+     test1:  match pattern1 body1 test2
+     body1:  <<body1>>
+             jump next
+             ...
+     testN:  match patternN bodyN no_match
+             branch bodyN none
+     bodyN:  <<bodyN>>
+             jump next
+     no_match:
+             raise PatternMatchFailure
+     next:   pop-env
+             ...
+     
+  */
+  
+  /*
+  private Inst compileMatch(List exp, Scope scope, boolean tail, Inst next)
+  {
+    if (exp.length() < 2 || !checkMatchClauseForm(exp.cdr()))
+      throw malformedExp(exp);
+
+    return compile(exp.cadr(), scope, tail,
+           new PushEnv(maxNumBindings,
+           compileMatchClauses(exp.cddr(), scope, tail,
+           new PopEnv(next))));
+  }
+
+  private Inst compileMatchClauses(List clauses, Scope scope, boolean tail, Inst next)
+  {
+    if (clauses.isEmpty())
+      return new LoadConst(Nil.VALUE, next);
+
+    var clause = (List) clauses.car();
+    var pattern = clause.car();
+    var body = clause.cdr();
+
+    if (Symbol.ELSE.equals(test))
+      return compileSequence(body, scope, tail, next);
+
+    return new Match(pattern,
+                     compileSequence(body, scope, tail, next),
+                     compileMatchClauses(clauses.cdr(), scope, tail, next));
+  }
+  */
+  
+  /* Compile a combination (i.e., special forms, procedure application, and macro expansion.
+     
+     Evaluation rules:
+     
+     A form (<exp0> <exp1> ... <expN>) is evaluated using the following rules:
+     
+     1. If <exp0> is a symbol that names a special form, then the rules of that
+        special form apply.
+        
+     2. If <exp0> is a symbol bound to a macro, then macroexpansion occurs.
+        
+     3. Otherwise, <exp0> is assumed to evaluate to a procedure and the rules
+        of procedure application apply.
+  */
   
   private Inst compileCombo(List exp, Scope scope, boolean tail, Inst next)
   {

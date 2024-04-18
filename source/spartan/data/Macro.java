@@ -1,18 +1,24 @@
-package spartan.compiling;
+package spartan.data;
 
+import spartan.compiling.Procedure;
+import spartan.compiling.Signature;
 import spartan.runtime.VirtualMachine;
 import spartan.runtime.Inst;
-import spartan.data.Datum;
-import spartan.data.List;
 import spartan.errors.SourceInfo;
 import spartan.errors.WrongNumberArgs;
 
-public final class Macro
+public final class Macro implements Datum
 {
   public Macro(Procedure proc)
   {
     this.sig = proc.sig();
     this.body = proc.body();
+  }
+  
+  @Override // Datum
+  public Type type()
+  {
+    return TypeRegistry.MACRO_TYPE;
   }
   
   public Datum expand(VirtualMachine vm, List args, SourceInfo source)

@@ -16,6 +16,7 @@ public final class TypeRegistry
   public static final Type RATIONAL_TYPE = register("rational");
   public static final Type COMPLEX_TYPE = register("complex");
   public static final Type PROCEDURE_TYPE = register("procedure");
+  public static final Type MACRO_TYPE = register("macro");
   public static final Type LIST_TYPE = register("list");
   public static final Type VECTOR_TYPE = register("vector");
   public static final Type TABLE_TYPE = register("table");  
