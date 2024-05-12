@@ -53,6 +53,13 @@
 (defmacro pipe (x & fs)
   `((compose ,@fs) ,x))
 
+(defmacro ->> (arg form & forms)
+  (let ((result (append form arg)))
+    (while (not (empty? forms))
+      (set! result (append (car forms) result))
+      (set! forms (cdr forms)))
+    result))
+
 ; (curry () ...) => (fun () ...)
 ; (curry (x) ...) => (fun (x) ...)
 ; (curry (x y) ...) => (fun (x) (fun (y) ...))
