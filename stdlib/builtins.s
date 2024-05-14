@@ -46,19 +46,10 @@
       `(,(car fs) ,(loop (cdr fs)))))
   `(fun (,x) ,(loop (reverse fs))))
 
-; (pipe x f) => (f x)
-; (pipe x f g) => (g (f x))
-; (pipe x f g h) => (h (g (f x)))
-
-(defmacro pipe (x & fs)
-  `((compose ,@fs) ,x))
 
 (defmacro ->> (arg form & forms)
   (let ((result (append form arg)))
-    (while (not (empty? forms))
-      (set! result (append (car forms) result))
-      (set! forms (cdr forms)))
-    result))
+    (fold-right append result forms)))
 
 ; (curry () ...) => (fun () ...)
 ; (curry (x) ...) => (fun (x) ...)
