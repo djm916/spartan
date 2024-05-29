@@ -2,7 +2,6 @@ package spartan.data;
 
 import spartan.runtime.Frame;
 import spartan.runtime.VirtualMachine;
-import spartan.compiling.Signature;
 
 public final class Continuation implements Datum, IFun
 {
@@ -31,6 +30,6 @@ public final class Continuation implements Datum, IFun
     return SIG;
   }
   
-  private static final Signature SIG = new Signature(1, false);
+  private static final Signature SIG = Signature.fixed(1);
   private final Frame savedFrame;
 }

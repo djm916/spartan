@@ -48,6 +48,6 @@
             (import-specifiers ,(if (empty? imported-symbols)
                                   `(package-symbols source-package)
                                   `',imported-symbols)))
-       ,@(if (nil? local-alias) () `((package-add-alias *package* source-package ',local-alias)))
+       ,@(if (nil? local-alias) () `((package-add-alias ',package-name ',local-alias)))
        (%import source-package import-specifiers))))
        

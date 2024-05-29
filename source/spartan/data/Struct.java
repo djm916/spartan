@@ -3,7 +3,6 @@ package spartan.data;
 import java.util.stream.Collectors;
 import spartan.errors.TypeMismatch;
 import spartan.runtime.VirtualMachine;
-import spartan.compiling.Signature;
 
 public final class Struct implements Datum, IAssoc, IFun
 {
@@ -48,7 +47,7 @@ public final class Struct implements Datum, IAssoc, IFun
     return SIG;
   }
   
-  private static final Signature SIG = new Signature(1, false);
+  private static final Signature SIG = Signature.fixed(1);
   private final StructDescriptor desc;
   private final Datum[] slots;
 }

@@ -8,7 +8,6 @@ import java.util.Spliterators;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import java.util.stream.Collectors;
-import spartan.compiling.Signature;
 import spartan.errors.TypeMismatch;
 import spartan.errors.NoSuchElement;
 import spartan.runtime.VirtualMachine;
@@ -391,7 +390,7 @@ permits EmptyList
     this.rest = rest;
   }
   
-  private static final Signature SIG = new Signature(1, false);
+  private static final Signature SIG = Signature.fixed(1);
   private Datum first;
   private List rest;  
 }

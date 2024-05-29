@@ -1,7 +1,6 @@
 package spartan.data;
 
 import spartan.compiling.Procedure;
-import spartan.compiling.Signature;
 import spartan.runtime.VirtualMachine;
 import spartan.runtime.Inst;
 import spartan.errors.SourceInfo;

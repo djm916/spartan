@@ -1142,10 +1142,11 @@ public class Compiler
     if (isVariadic)
       params = params.remove(Symbol.AMPERSAND::equals);
     var extendedScope = scope.extend(params);
-    return new Procedure(
-      isVariadic ? compileVariadicProc(body, extendedScope, requiredArgs)
-                 : compileFixedProc(body, extendedScope, requiredArgs),
-      new Signature(requiredArgs, isVariadic));
+    return isVariadic
+      ? new Procedure(compileVariadicProc(body, extendedScope, requiredArgs),
+                      Signature.variadic(requiredArgs))
+      : new Procedure(compileFixedProc(body, extendedScope, requiredArgs),
+                      Signature.fixed(requiredArgs));
   }
   
   /* Compile the body of a procedure with a fixed number of arguments N

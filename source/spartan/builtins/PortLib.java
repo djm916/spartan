@@ -6,7 +6,9 @@ import spartan.runtime.VirtualMachine;
 
 public final class PortLib
 {
-  public static final Primitive OPEN = new Primitive(2, false) {    
+  // (open-file file-path open-mode)
+  
+  public static final Primitive OPEN = new Primitive(Signature.fixed(2)) {    
     public void apply(VirtualMachine vm) {      
       if (!(vm.popArg() instanceof Text file && vm.popArg() instanceof Text flags))
         throw new TypeMismatch();
@@ -15,7 +17,9 @@ public final class PortLib
     }
   };
   
-  public static final Primitive CLOSE = new Primitive(1, false) {
+  // (port-close port)
+  
+  public static final Primitive CLOSE = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Port port))
         throw new TypeMismatch();
@@ -25,7 +29,9 @@ public final class PortLib
     }
   };
   
-  public static final Primitive IS_OPEN = new Primitive(1, false) {
+  // (port-open? port)
+  
+  public static final Primitive IS_OPEN = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Port port))
         throw new TypeMismatch();
@@ -34,7 +40,9 @@ public final class PortLib
     }
   };
   
-  public static final Primitive READ = new Primitive(4, false) {
+  // (port-read port buffer start end)
+  
+  public static final Primitive READ = new Primitive(Signature.fixed(4)) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Port port && vm.popArg() instanceof Bytes bytes && vm.popArg() instanceof IInt start && vm.popArg() instanceof IInt count))
         throw new TypeMismatch();
@@ -43,7 +51,9 @@ public final class PortLib
     }
   };
   
-  public static final Primitive WRITE = new Primitive(4, false) {
+  // (port-write port buffer start end)
+  
+  public static final Primitive WRITE = new Primitive(Signature.fixed(4)) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Port port && vm.popArg() instanceof Bytes bytes && vm.popArg() instanceof IInt start && vm.popArg() instanceof IInt count))
         throw new TypeMismatch();
@@ -52,7 +62,9 @@ public final class PortLib
     }
   };
   
-  public static final Primitive POSITION = new Primitive(1, false) {
+  // (port-position port)
+  
+  public static final Primitive POSITION = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Port port))
         throw new TypeMismatch();
@@ -61,7 +73,9 @@ public final class PortLib
     }
   };
   
-  public static final Primitive SEEK = new Primitive(2, false) {
+  // (port-seek port position)
+  
+  public static final Primitive SEEK = new Primitive(Signature.fixed(2)) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Port port && vm.popArg() instanceof IInt position))
         throw new TypeMismatch();
@@ -71,7 +85,9 @@ public final class PortLib
     }
   };
   
-  public static final Primitive SIZE = new Primitive(1, false) {
+  // (port-size port)
+  
+  public static final Primitive SIZE = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Port port))
         throw new TypeMismatch();

@@ -12,7 +12,7 @@ public final class PackageLib
 {
   // (make-package package-name)
   
-  public static final Primitive MAKE = new Primitive(1, false) {
+  public static final Primitive MAKE = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Symbol pkgName))
         throw new TypeMismatch();
@@ -25,7 +25,7 @@ public final class PackageLib
   
   // (current-package)
   
-  public static final Primitive CURRENT_PACKAGE = new Primitive(0, false) {
+  public static final Primitive CURRENT_PACKAGE = new Primitive(Signature.fixed(0)) {
     public void apply(VirtualMachine vm) {
       vm.result = spartan.Runtime.currentPackage();
       vm.popFrame();
@@ -34,7 +34,7 @@ public final class PackageLib
   
   // (find-package package-name)
   
-  public static final Primitive FIND = new Primitive(1, false) {
+  public static final Primitive FIND = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Symbol pkgName))
         throw new TypeMismatch();
@@ -45,7 +45,7 @@ public final class PackageLib
   
   // (package-exists? package-name)
   
-  public static final Primitive EXISTS = new Primitive(1, false) {
+  public static final Primitive EXISTS = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Symbol pkgName))
         throw new TypeMismatch();
@@ -54,7 +54,7 @@ public final class PackageLib
     }
   };
   
-  public static final Primitive TRY_FIND_PACKAGE = new Primitive(1, false) {
+  public static final Primitive TRY_FIND_PACKAGE = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Symbol pkgName))
         throw new TypeMismatch();
@@ -67,7 +67,7 @@ public final class PackageLib
   // (package-bind package symbol value)
   // (package-bind symbol value [package])
   
-  public static final Primitive BIND = new Primitive(3, false) {
+  public static final Primitive BIND = new Primitive(Signature.fixed(3)) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof spartan.data.Package pkg))
         throw new TypeMismatch();
@@ -85,7 +85,7 @@ public final class PackageLib
   // (package-resolve package symbol)
   // (package-resolve symbol [package])
   
-  public static final Primitive RESOLVE = new Primitive(2, false) {
+  public static final Primitive RESOLVE = new Primitive(Signature.fixed(2)) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof spartan.data.Package pkg))
         throw new TypeMismatch();
@@ -100,7 +100,7 @@ public final class PackageLib
   
   // (package-symbols [package])
   
-  public static final Primitive SYMBOLS = new Primitive(1, false) {
+  public static final Primitive SYMBOLS = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof spartan.data.Package pkg))
         throw new TypeMismatch();
@@ -110,18 +110,21 @@ public final class PackageLib
   };
   
   // (package-alias target-package source-package alias)
-  // (package-alias original-package alias [package])
+  // (package-alias package-name alias [package])
   
-  public static final Primitive ADD_ALIAS = new Primitive(3, false) {
+  public static final Primitive ADD_ALIAS = new Primitive(Signature.variadic(2, 1)) {    
     public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof spartan.data.Package targetPackage))
-        throw new TypeMismatch();
-      if (!(vm.popArg() instanceof spartan.data.Package sourcePackage))
+      if (!(vm.popArg() instanceof Symbol pkgName))
         throw new TypeMismatch();
       if (!(vm.popArg() instanceof Symbol alias))
+        throw new TypeMismatch();      
+      if (!((vm.args.isEmpty() ? spartan.Runtime.currentPackage() : vm.popArg()) instanceof spartan.data.Package targetPackage))
         throw new TypeMismatch();
+      if (!pkgName.isSimple())
+        throw new InvalidArgument();
       if (!alias.isSimple())
         throw new InvalidArgument();
+      var sourcePackage = spartan.Runtime.getPackage(pkgName).orElseThrow(() -> new NoSuchPackage(pkgName));
       targetPackage.addPackageAlias(alias, sourcePackage);
       vm.result = Nil.VALUE;
       vm.popFrame();

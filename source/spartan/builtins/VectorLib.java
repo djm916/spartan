@@ -6,14 +6,14 @@ import spartan.runtime.VirtualMachine;
 
 public final class VectorLib
 {  
-  public static final Primitive FROM_LIST = new Primitive(0, true) {
+  public static final Primitive FROM_LIST = new Primitive(Signature.variadic(0)) {
     public void apply(VirtualMachine vm) {
       vm.result = Vector.fromList(vm.popRestArgs());
       vm.popFrame();
     }
   };
   
-  public static final Primitive MAKE = new Primitive(2, false) {
+  public static final Primitive MAKE = new Primitive(Signature.fixed(2)) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof IInt n))
         throw new TypeMismatch();      
@@ -22,7 +22,7 @@ public final class VectorLib
     }
   };
   
-  public static final Primitive REF = new Primitive(2, false) {
+  public static final Primitive REF = new Primitive(Signature.fixed(2)) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Vector vector && vm.popArg() instanceof IInt index))
         throw new TypeMismatch();
@@ -31,7 +31,7 @@ public final class VectorLib
     }
   };
   
-  public static final Primitive SET = new Primitive(3, false) {
+  public static final Primitive SET = new Primitive(Signature.fixed(3)) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Vector vector && vm.popArg() instanceof IInt index))
         throw new TypeMismatch();
@@ -42,7 +42,7 @@ public final class VectorLib
     }
   };
   
-  public static final Primitive LENGTH = new Primitive(1, false) {
+  public static final Primitive LENGTH = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Vector vector))
         throw new TypeMismatch();
@@ -51,7 +51,7 @@ public final class VectorLib
     }
   };
   
-  public static final Primitive COPY = new Primitive(1, false) {
+  public static final Primitive COPY = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Vector vector))
         throw new TypeMismatch();      
@@ -60,7 +60,7 @@ public final class VectorLib
     }
   };
   
-  public static final Primitive APPEND = new Primitive(2, false) {
+  public static final Primitive APPEND = new Primitive(Signature.fixed(2)) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Vector v))
         throw new TypeMismatch();
@@ -71,7 +71,7 @@ public final class VectorLib
     }
   };
   
-  public static final Primitive INSERT = new Primitive(3, false) {
+  public static final Primitive INSERT = new Primitive(Signature.fixed(3)) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Vector v && vm.popArg() instanceof IInt i))
         throw new TypeMismatch();
@@ -82,7 +82,7 @@ public final class VectorLib
     }
   };
   
-  public static final Primitive REMOVE = new Primitive(2, false) {
+  public static final Primitive REMOVE = new Primitive(Signature.fixed(2)) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Vector v && vm.popArg() instanceof IInt i))
         throw new TypeMismatch();

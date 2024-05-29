@@ -12,7 +12,6 @@ import spartan.errors.InvalidArgument;
 import spartan.errors.TypeMismatch;
 import spartan.errors.NoSuchElement;
 import spartan.runtime.VirtualMachine;
-import spartan.compiling.Signature;
 
 public final class Vector implements Datum, IAssoc, ILen, IFun, Iterable<Datum>
 {
@@ -167,7 +166,7 @@ public final class Vector implements Datum, IAssoc, ILen, IFun, Iterable<Datum>
     return StreamSupport.stream(spliterator(), false);
   }
   
-  private static final Signature SIG = new Signature(1, false);
+  private static final Signature SIG = Signature.fixed(1);
   private static final int DEFAULT_INITIAL_CAPACITY = 8;
   private final ArrayList<Datum> elems;
 }

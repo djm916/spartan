@@ -5,15 +5,19 @@ import spartan.runtime.VirtualMachine;
 import spartan.errors.TypeMismatch;
 
 public final class StringLib
-{  
-  public static final Primitive CONCAT = new Primitive(0, true) {
+{
+  // (string:concat ...)
+  
+  public static final Primitive CONCAT = new Primitive(Signature.variadic(0)) {
     public void apply(VirtualMachine vm) {
       vm.result = Text.concat(vm.popRestArgs());
       vm.popFrame();
     }
   };
   
-  public static final Primitive JOIN = new Primitive(1, true) {
+  // (string:join delim ...)
+  
+  public static final Primitive JOIN = new Primitive(Signature.variadic(1)) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Text delim))
         throw new TypeMismatch();
@@ -22,16 +26,24 @@ public final class StringLib
     }
   };
   
-  public static final Primitive SUBSTR = new Primitive(3, false) {
+  // (string:substring string start [end])
+  
+  public static final Primitive SUBSTR = new Primitive(Signature.variadic(2, 1)) {
     public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof Text text && vm.popArg() instanceof IInt start && vm.popArg() instanceof IInt end))
+      if (!(vm.popArg() instanceof Text str))
         throw new TypeMismatch();
-      vm.result = text.substring(start.intValue(), end.intValue());
+      if (!(vm.popArg() instanceof IInt start))
+        throw new TypeMismatch();
+      if (!((vm.args.isEmpty() ? str.length() : vm.popArg()) instanceof IInt end))
+        throw new TypeMismatch();
+      vm.result = str.substring(start.intValue(), end.intValue());
       vm.popFrame();
     }
   };
   
-  public static final Primitive REVERSE = new Primitive(1, false) {
+  // (string:reverse string)
+  
+  public static final Primitive REVERSE = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Text text))
         throw new TypeMismatch();
@@ -40,7 +52,9 @@ public final class StringLib
     }
   };
   
-  public static final Primitive HASH = new Primitive(1, false) {
+  // (string:hash string)
+  
+  public static final Primitive HASH = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Text text))
         throw new TypeMismatch();
@@ -49,7 +63,9 @@ public final class StringLib
     }
   };
   
-  public static final Primitive LENGTH = new Primitive(1, false) {
+  // (string:length string)
+  
+  public static final Primitive LENGTH = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Text text))
         throw new TypeMismatch();

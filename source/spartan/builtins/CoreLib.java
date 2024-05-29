@@ -43,56 +43,56 @@ public final class CoreLib
            .orElse(Nil.VALUE);
   }
   
-  public static final Primitive NOT = new Primitive(1, false) {
+  public static final Primitive NOT = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       vm.result = not(vm.popArg());
       vm.popFrame();
     }
   };
  
-  public static final Primitive EQ = new Primitive(2, false) {
+  public static final Primitive EQ = new Primitive(Signature.fixed(2)) {
     public void apply(VirtualMachine vm) {
       vm.result = Bool.valueOf(isEqual(vm.popArg(), vm.popArg()));
       vm.popFrame();
     }
   };
 
-  public static final Primitive NE = new Primitive(2, false) {
+  public static final Primitive NE = new Primitive(Signature.fixed(2)) {
     public void apply(VirtualMachine vm) {
       vm.result = Bool.valueOf(!isEqual(vm.popArg(), vm.popArg()));
       vm.popFrame();
     }
   };
   
-  public static final Primitive LT = new Primitive(2, false) {
+  public static final Primitive LT = new Primitive(Signature.fixed(2)) {
     public void apply(VirtualMachine vm) {
       vm.result = Bool.valueOf(compareTo(vm.popArg(), vm.popArg()) < 0);
       vm.popFrame();
     }
   };
   
-  public static final Primitive LE = new Primitive(2, false) {
+  public static final Primitive LE = new Primitive(Signature.fixed(2)) {
     public void apply(VirtualMachine vm) {
       vm.result = Bool.valueOf(compareTo(vm.popArg(), vm.popArg()) <= 0);
       vm.popFrame();
     }
   };
   
-  public static final Primitive GT = new Primitive(2, false) {
+  public static final Primitive GT = new Primitive(Signature.fixed(2)) {
     public void apply(VirtualMachine vm) {
       vm.result = Bool.valueOf(compareTo(vm.popArg(), vm.popArg()) > 0);
       vm.popFrame();
     }
   };
   
-  public static final Primitive GE = new Primitive(2, false) {
+  public static final Primitive GE = new Primitive(Signature.fixed(2)) {
     public void apply(VirtualMachine vm) {
       vm.result = Bool.valueOf(compareTo(vm.popArg(), vm.popArg()) >= 0);
       vm.popFrame();
     }
   };
     
-  public static final Primitive APPLY = new Primitive(2, false) {
+  public static final Primitive APPLY = new Primitive(Signature.fixed(2)) {
     public void apply(VirtualMachine vm) {
       vm.result = vm.popArg();
       if (! (vm.popArg() instanceof List args))
@@ -102,7 +102,7 @@ public final class CoreLib
     }
   };
   
-  public static final Primitive CALL_CC = new Primitive(1, false) {
+  public static final Primitive CALL_CC = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       //if (! (vm.popArg() instanceof Closure proc))
         //throw new TypeMismatch();
@@ -112,7 +112,7 @@ public final class CoreLib
     }
   };
   
-  public static final Primitive PRINT = new Primitive(1, true) {
+  public static final Primitive PRINT = new Primitive(Signature.variadic(0)) {
     public void apply(VirtualMachine vm) {
       while (!vm.args.isEmpty())
         System.out.print(vm.popArg().str());
@@ -121,7 +121,7 @@ public final class CoreLib
     }
   };
   
-  public static final Primitive PRINT_LINE = new Primitive(0, true) {
+  public static final Primitive PRINT_LINE = new Primitive(Signature.variadic(0)) {
     public void apply(VirtualMachine vm) {
       while (!vm.args.isEmpty())
         System.out.print(vm.popArg().str());
@@ -131,14 +131,14 @@ public final class CoreLib
     }
   };
   
-  public static final Primitive TYPE = new Primitive(1, false) {
+  public static final Primitive TYPE = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       vm.result = Symbol.of(vm.popArg().type().name());
       vm.popFrame();
     }
   };
   
-  public static final Primitive LOAD = new Primitive(1, false) {
+  public static final Primitive LOAD = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Text file))
         throw new TypeMismatch();
@@ -152,7 +152,7 @@ public final class CoreLib
     }
   };
   
-  public static final Primitive SYMBOL_TO_TEXT = new Primitive(1, false) {
+  public static final Primitive SYMBOL_TO_TEXT = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Symbol x))
         throw new TypeMismatch();
@@ -161,7 +161,7 @@ public final class CoreLib
     }
   };
    
-  public static final Primitive TEXT_TO_SYMBOL = new Primitive(1, false) {
+  public static final Primitive TEXT_TO_SYMBOL = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Text x))
         throw new TypeMismatch();
@@ -170,21 +170,21 @@ public final class CoreLib
     }
   };
   
-  public static final Primitive GENSYM = new Primitive(0, false) {
+  public static final Primitive GENSYM = new Primitive(Signature.fixed(0)) {
     public void apply(VirtualMachine vm) {
       vm.result = Symbol.generateUnique();
       vm.popFrame();
     }
   };
     
-  public static final Primitive IDENTITY_HASH = new Primitive(1, false) {
+  public static final Primitive IDENTITY_HASH = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       vm.result = Int.valueOf(System.identityHashCode(vm.popArg()));
       vm.popFrame();
     }
   };
 
-  public static final Primitive TEXT_TO_BYTES = new Primitive(1, false) {
+  public static final Primitive TEXT_TO_BYTES = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Text text))
         throw new TypeMismatch();
@@ -193,7 +193,7 @@ public final class CoreLib
     }
   };
   
-  public static final Primitive TEXT_TO_INT = new Primitive(1, false) {
+  public static final Primitive TEXT_TO_INT = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Text text))
         throw new TypeMismatch();
@@ -207,7 +207,7 @@ public final class CoreLib
     }
   };
   
-  public static final Primitive BYTES_TO_TEXT = new Primitive(3, false) {
+  public static final Primitive BYTES_TO_TEXT = new Primitive(Signature.fixed(3)) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Bytes bytes && vm.popArg() instanceof IInt start && vm.popArg() instanceof IInt count))
         throw new TypeMismatch();
@@ -216,7 +216,7 @@ public final class CoreLib
     }
   };
     
-  public static final Primitive ERROR = new Primitive(1, false) {
+  public static final Primitive ERROR = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Text errMsg))
         throw new TypeMismatch();
@@ -226,133 +226,129 @@ public final class CoreLib
   
   // (format-decimal num [precision])
   
-  public static final Primitive FORMAT_DECIMAL = new Primitive(1, true) {
+  public static final Primitive FORMAT_DECIMAL = new Primitive(Signature.variadic(1, 1)) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof IReal num))
         throw new TypeMismatch();
-      var args = vm.popRestArgs();
-      var precision = 2;
-      if (!args.isEmpty() && args.car() instanceof IInt arg)
-        precision = arg.intValue();
-      vm.result = new Text(num.formatDec(precision));
+      if (!((vm.args.isEmpty() ? Int.valueOf(2) : vm.popArg()) instanceof IInt prec))
+        throw new TypeMismatch();
+      vm.result = new Text(num.formatDec(prec.intValue()));
       vm.popFrame();
     }
   };
   
   // (format-int num [base])
   
-  public static final Primitive FORMAT_INT = new Primitive(1, true) {
+  public static final Primitive FORMAT_INT = new Primitive(Signature.variadic(1, 1)) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof IInt num))
         throw new TypeMismatch();
-      var args = vm.popRestArgs();
-      int base = 10;
-      if (!args.isEmpty() && args.car() instanceof IInt arg)
-        base = arg.intValue();
-      vm.result = new Text(num.formatInt(base));
+      if (!((vm.args.isEmpty() ? Int.valueOf(10) : vm.popArg()) instanceof IInt base))
+        throw new TypeMismatch();
+      vm.result = new Text(num.formatInt(base.intValue()));
       vm.popFrame();
     }
   };
   
-  public static final Primitive IS_NIL = new Primitive(1, false) {
+  public static final Primitive IS_NIL = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       vm.result = Bool.valueOf(vm.popArg() instanceof Nil);
       vm.popFrame();
     }
   };
   
-  public static final Primitive IS_BOOL = new Primitive(1, false) {
+  public static final Primitive IS_BOOL = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       vm.result = Bool.valueOf(vm.popArg() instanceof Bool);
       vm.popFrame();
     }
   };
   
-  public static final Primitive IS_INT = new Primitive(1, false) {
+  public static final Primitive IS_INT = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       vm.result = Bool.valueOf(vm.popArg() instanceof IInt);
       vm.popFrame();
     }
   };
   
-  public static final Primitive IS_REAL = new Primitive(1, false) {
+  public static final Primitive IS_REAL = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       vm.result = Bool.valueOf(vm.popArg() instanceof IReal);
       vm.popFrame();
     }
   };
   
-  public static final Primitive IS_COMPLEX = new Primitive(1, false) {
+  public static final Primitive IS_COMPLEX = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       vm.result = Bool.valueOf(vm.popArg() instanceof Complex);
       vm.popFrame();
     }
   };
   
-  public static final Primitive IS_NUMBER = new Primitive(1, false) {
+  public static final Primitive IS_NUMBER = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       vm.result = Bool.valueOf(vm.popArg() instanceof INum);
       vm.popFrame();
     }
   };
   
-  public static final Primitive IS_SYMBOL = new Primitive(1, false) {
+  public static final Primitive IS_SYMBOL = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       vm.result = Bool.valueOf(vm.popArg() instanceof Symbol);
       vm.popFrame();
     }
   };
   
-  public static final Primitive IS_TEXT = new Primitive(1, false) {
+  public static final Primitive IS_TEXT = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       vm.result = Bool.valueOf(vm.popArg() instanceof Text);
       vm.popFrame();
     }
   };
   
-  public static final Primitive IS_CALLABLE = new Primitive(1, false) {
+  public static final Primitive IS_CALLABLE = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       vm.result = Bool.valueOf(vm.popArg() instanceof IFun);
       vm.popFrame();
     }
   };
   
-  public static final Primitive IS_VECTOR = new Primitive(1, false) {
+  public static final Primitive IS_VECTOR = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       vm.result = Bool.valueOf(vm.popArg() instanceof Vector);
       vm.popFrame();
     }
   };
   
-  public static final Primitive IS_LIST = new Primitive(1, false) {
+  public static final Primitive IS_LIST = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       vm.result = Bool.valueOf(vm.popArg() instanceof List);
       vm.popFrame();
     }
   };
   
-  public static final Primitive IS_PORT = new Primitive(1, false) {
+  public static final Primitive IS_PORT = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       vm.result = Bool.valueOf(vm.popArg() instanceof Port);
       vm.popFrame();
     }
   };
   
-  public static final Primitive IS_BYTES = new Primitive(1, false) {
+  public static final Primitive IS_BYTES = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       vm.result = Bool.valueOf(vm.popArg() instanceof Bytes);
       vm.popFrame();
     }
   };
   
-  public static final Primitive IS_TABLE = new Primitive(1, false) {
+  public static final Primitive IS_TABLE = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       vm.result = Bool.valueOf(vm.popArg() instanceof Table);
       vm.popFrame();
     }
   };
   
-  public static final Primitive AT = new Primitive(2, false) {
+  public static final Primitive AT = new Primitive(Signature.fixed(2)) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof IAssoc c))
         throw new TypeMismatch();
@@ -362,7 +358,7 @@ public final class CoreLib
     }
   };
   
-  public static final Primitive SET_AT = new Primitive(3, false) {
+  public static final Primitive SET_AT = new Primitive(Signature.fixed(3)) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof IAssoc c))
         throw new TypeMismatch();
@@ -374,7 +370,7 @@ public final class CoreLib
     }
   };
   
-  public static final Primitive LENGTH = new Primitive(1, false) {
+  public static final Primitive LENGTH = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof ILen c))
         throw new TypeMismatch();
@@ -383,7 +379,7 @@ public final class CoreLib
     }
   };
   
-  public static final Primitive IS_EMPTY = new Primitive(1, false) {
+  public static final Primitive IS_EMPTY = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof ILen c))
         throw new TypeMismatch();
@@ -392,7 +388,7 @@ public final class CoreLib
     }
   };
   
-  public static final Primitive SYMBOL_INTERN = new Primitive(1, false) {
+  public static final Primitive SYMBOL_INTERN = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Symbol s))
         throw new TypeMismatch();
@@ -401,7 +397,7 @@ public final class CoreLib
     }
   };
     
-  public static final Primitive MACROEXPAND1 = new Primitive(1, false) {
+  public static final Primitive MACROEXPAND1 = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       var form = vm.popArg();
       vm.result = macroExpand1(form);
@@ -409,7 +405,7 @@ public final class CoreLib
     }
   };
   
-  public static final Primitive PRINT_PACKAGE = new Primitive(1, false) {
+  public static final Primitive PRINT_PACKAGE = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Symbol pkgName))
         throw new TypeMismatch();
@@ -420,7 +416,7 @@ public final class CoreLib
     }
   };
   
-  public static final Primitive PRINT_TRACEBACK = new Primitive(0, false) {
+  public static final Primitive PRINT_TRACEBACK = new Primitive(Signature.fixed(0)) {
     public void apply(VirtualMachine vm) {
       var backTrace = vm.generateBackTrace();
       if (backTrace != null && !backTrace.isEmpty()) {
@@ -435,7 +431,7 @@ public final class CoreLib
   
   // (register-struct-type struct-name field-names)
   
-  public static final Primitive MAKE_STRUCT_TYPE = new Primitive(2, false) {
+  public static final Primitive MAKE_STRUCT_TYPE = new Primitive(Signature.fixed(2)) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Symbol structName))
         throw new TypeMismatch();
@@ -449,7 +445,7 @@ public final class CoreLib
   
   // (make-struct struct-name field-inits)
   
-  public static final Primitive MAKE_STRUCT = new Primitive(2, false) {
+  public static final Primitive MAKE_STRUCT = new Primitive(Signature.fixed(2)) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Symbol structName))
         throw new TypeMismatch();
@@ -462,7 +458,8 @@ public final class CoreLib
     }
   };
   
-  public static final MultiMethod GENERIC_REPR = new MultiMethod(1, false) {
+  /*
+  public static final MultiMethod GENERIC_REPR = new MultiMethod(Signature.fixed(1)) {
     {
       addDefault(new Primitive(1, false) {
         public void apply(VirtualMachine vm) {
@@ -473,18 +470,18 @@ public final class CoreLib
     }
   };
     
-  public static final MultiMethod GENERIC_AT = new MultiMethod(2, false) {
+  public static final MultiMethod GENERIC_AT = new MultiMethod(Signature.fixed(2)) {
     {
       addDefault(AT);
     }
   };
   
-  public static final MultiMethod GENERIC_SET_AT = new MultiMethod(3, false) {
+  public static final MultiMethod GENERIC_SET_AT = new MultiMethod(Signature.fixed(3)) {
     {
       addDefault(SET_AT);
     }
   };
-  
+  */
     /*
     {
       addMethod(new TypeSignature(TypeRegistry.INTEGER_TYPE),

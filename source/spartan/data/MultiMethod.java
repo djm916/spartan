@@ -1,7 +1,6 @@
 package spartan.data;
 
 //import spartan.data.IFun;
-import spartan.compiling.Signature;
 //import spartan.runtime.LocalEnv;
 //import spartan.runtime.Inst;
 import spartan.runtime.VirtualMachine;
@@ -51,12 +50,7 @@ public class MultiMethod implements Datum, IFun
   {
     this.sig = sig;
   }
-  
-  public MultiMethod(int numArgs, boolean isVariadic)
-  {
-    this(new Signature(numArgs, isVariadic));
-  }
-  
+    
   @Override // Datum
   public Type type()
   {

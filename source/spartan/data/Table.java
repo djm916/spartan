@@ -7,7 +7,6 @@ import spartan.errors.TypeMismatch;
 import spartan.errors.WrongNumberArgs;
 import spartan.errors.NoSuchElement;
 import spartan.runtime.VirtualMachine;
-import spartan.compiling.Signature;
 
 public final class Table implements Datum, IAssoc, ILen, IFun
 {
@@ -124,7 +123,7 @@ public final class Table implements Datum, IAssoc, ILen, IFun
     return builder.build();
   }
   
-  private static final Signature SIG = new Signature(1, false);
+  private static final Signature SIG = Signature.fixed(1);
   private static final int DEFAULT_CAPACITY = 8;
   private final IdentityHashMap<Symbol, Datum> map;
 }

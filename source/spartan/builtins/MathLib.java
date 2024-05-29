@@ -154,7 +154,7 @@ public final class MathLib
     throw new TypeMismatch();
   }
   
-  public static final Primitive ADD = new Primitive(2, true) {
+  public static final Primitive ADD = new Primitive(Signature.variadic(2)) {
     public void apply(VirtualMachine vm) {
       vm.result = add(vm.popArg(), vm.popArg());
       while (vm.args != List.EMPTY)
@@ -163,14 +163,14 @@ public final class MathLib
     }
   };
   
-  public static final Primitive SUB = new Primitive(2, false) {
+  public static final Primitive SUB = new Primitive(Signature.fixed(2)) {
     public void apply(VirtualMachine vm) {
       vm.result = sub(vm.popArg(), vm.popArg());
       vm.popFrame();
     }
   };
   
-  public static final Primitive MUL = new Primitive(2, true) {
+  public static final Primitive MUL = new Primitive(Signature.variadic(2)) {
     public void apply(VirtualMachine vm) {
       vm.result = mul(vm.popArg(), vm.popArg());
       while (vm.args != List.EMPTY)
@@ -179,133 +179,133 @@ public final class MathLib
     }
   };
   
-  public static final Primitive DIV = new Primitive(2, false) {
+  public static final Primitive DIV = new Primitive(Signature.fixed(2)) {
     public void apply(VirtualMachine vm) {
       vm.result = div(vm.popArg(), vm.popArg());
       vm.popFrame();
     }
   };
   
-  public static final Primitive QUOTIENT = new Primitive(2, false) {
+  public static final Primitive QUOTIENT = new Primitive(Signature.fixed(2)) {
     public void apply(VirtualMachine vm) {
       vm.result = quotient(vm.popArg(), vm.popArg());
       vm.popFrame();
     }
   };
   
-  public static final Primitive REMAINDER = new Primitive(2, false) {
+  public static final Primitive REMAINDER = new Primitive(Signature.fixed(2)) {
     public void apply(VirtualMachine vm) {
       vm.result = remainder(vm.popArg(), vm.popArg());
       vm.popFrame();
     }
   };
   
-  public static final Primitive NEG = new Primitive(1, false) {
+  public static final Primitive NEG = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       vm.result = neg(vm.popArg());
       vm.popFrame();
     }
   };
   
-  public static final Primitive ABS = new Primitive(1, false) {
+  public static final Primitive ABS = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       vm.result = abs(vm.popArg());
       vm.popFrame();
     }
   };
   
-  public static final Primitive FLOOR = new Primitive(1, false) {
+  public static final Primitive FLOOR = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       vm.result = floor(vm.popArg());
       vm.popFrame();
     }
   };
   
-  public static final Primitive CEILING = new Primitive(1, false) {
+  public static final Primitive CEILING = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       vm.result = ceiling(vm.popArg());
       vm.popFrame();
     }
   };
   
-  public static final Primitive ROUND = new Primitive(1, false) {
+  public static final Primitive ROUND = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       vm.result = round(vm.popArg());
       vm.popFrame();
     }
   };
   
-  public static final Primitive EXP = new Primitive(2, false) {
+  public static final Primitive EXP = new Primitive(Signature.fixed(2)) {
     public void apply(VirtualMachine vm) {
       vm.result = exp(vm.popArg(), vm.popArg());
       vm.popFrame();
     }
   };
   
-  public static final Primitive LOG = new Primitive(2, false) {
+  public static final Primitive LOG = new Primitive(Signature.fixed(2)) {
     public void apply(VirtualMachine vm) {
       vm.result = log(vm.popArg(), vm.popArg());
       vm.popFrame();
     }
   };
   
-  public static final Primitive SIN = new Primitive(1, false) {
+  public static final Primitive SIN = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       vm.result = sin(vm.popArg());
       vm.popFrame();
     }
   };
   
-  public static final Primitive COS = new Primitive(1, false) {
+  public static final Primitive COS = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       vm.result = cos(vm.popArg());
       vm.popFrame();
     }
   };
   
-  public static final Primitive TAN = new Primitive(1, false) {
+  public static final Primitive TAN = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       vm.result = tan(vm.popArg());
       vm.popFrame();
     }
   };
   
-  public static final Primitive ASIN = new Primitive(1, false) {
+  public static final Primitive ASIN = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       vm.result = asin(vm.popArg());
       vm.popFrame();
     }
   };
   
-  public static final Primitive ACOS = new Primitive(1, false) {
+  public static final Primitive ACOS = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       vm.result = acos(vm.popArg());
       vm.popFrame();
     }
   };
   
-  public static final Primitive ATAN = new Primitive(1, false) {
+  public static final Primitive ATAN = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       vm.result = atan(vm.popArg());
       vm.popFrame();
     }
   };
     
-  public static final Primitive RAND = new Primitive(0, false) {
+  public static final Primitive RAND = new Primitive(Signature.fixed(0)) {
     public void apply(VirtualMachine vm) {
       vm.result = new Real(Config.DEFAULT_RNG.nextDouble());
       vm.popFrame();
     }
   };
   
-  public static final Primitive MAKE_COMPLEX = new Primitive(2, false) {
+  public static final Primitive MAKE_COMPLEX = new Primitive(Signature.fixed(2)) {
     public void apply(VirtualMachine vm) {
       vm.result = makeComplex(vm.popArg(), vm.popArg());
       vm.popFrame();
     }
   };
     
-  public static final Primitive REAL = new Primitive(1, false) {
+  public static final Primitive REAL = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof IComplex c))
         throw new TypeMismatch();
@@ -314,7 +314,7 @@ public final class MathLib
     }
   };
   
-  public static final Primitive IMAG = new Primitive(1, false) {
+  public static final Primitive IMAG = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof IComplex c))
         throw new TypeMismatch();
@@ -323,7 +323,7 @@ public final class MathLib
     }
   };
   
-  public static final Primitive ANGLE = new Primitive(1, false) {
+  public static final Primitive ANGLE = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof IComplex c))
         throw new TypeMismatch();
@@ -332,7 +332,7 @@ public final class MathLib
     }
   };
   
-  public static final Primitive MAGNITUDE = new Primitive(1, false) {
+  public static final Primitive MAGNITUDE = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof IComplex c))
         throw new TypeMismatch();
@@ -341,14 +341,14 @@ public final class MathLib
     }
   };
   
-  public static final Primitive MAKE_RATIO = new Primitive(2, false) {
+  public static final Primitive MAKE_RATIO = new Primitive(Signature.fixed(2)) {
     public void apply(VirtualMachine vm) {
       vm.result = makeRatio(vm.popArg(), vm.popArg());
       vm.popFrame();
     }
   };
   
-  public static final Primitive NUMERATOR = new Primitive(1, false) {
+  public static final Primitive NUMERATOR = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof IRatio q))
         throw new TypeMismatch();
@@ -357,7 +357,7 @@ public final class MathLib
     }
   };
   
-  public static final Primitive DENOMINATOR = new Primitive(1, false) {
+  public static final Primitive DENOMINATOR = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof IRatio q))
         throw new TypeMismatch();
