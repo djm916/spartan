@@ -30,10 +30,6 @@ public final class Config
     
   public static final Path HOME_DIR = initHomeDir();
   
-  /** This source file (which is pre-loaded) bootstraps the initial environment with
-      a core set of built-in procedures and macros. */
-  public static final Path BUILTINS_FILE_PATH = initBuiltinsPath();
-  
   /** The list of directories to search when loading a file. Populated from the environment variable
       SPARTANPATH. SPARTANPATH must contain a list of directories, separated by a (system-specific) delimiter.
       If SPARTANPATH is not set, defaults to the current working directory. */
@@ -49,47 +45,45 @@ public final class Config
     
   private Config() {}
   
+  private static String getEnv(String key, String def)
+  {
+    var result = System.getenv(key);
+    return result == null ? def : result;
+  }
+  
   private static Path initHomeDir()
   {
-    var spartanHome = System.getenv("SPARTANHOME");
+    var spartanHome = getEnv("SPARTANHOME", ".");
     
     if (LOG_DEBUG)
       log.info(() -> String.format("SPARTANHOME is \"%s\"", spartanHome));
-    
-    if (spartanHome == null) {
-      System.err.println("SPARTANHOME environment variable is not defined.\n" +
-                         "Please set it to the base path of the Spartan installation directory.");
-      System.exit(-1);
-    }
     
     try {
       return Path.of(spartanHome);
     }
     catch (InvalidPathException ex) {
-      throw new Error(String.format("invalid SPARTANHOME \"%s\"", spartanHome));
+      System.err.println("warning: SPARTANHOME is invalid or not set. Defaulting to current directory.\n");
+      return Path.of(".");
     }
   }
   
   private static List<Path> initLoadSearchDirs()
   {
-    var spartanPath = System.getenv("SPARTANPATH");
-    if (spartanPath == null)
-      spartanPath = ".";
+    var spartanPath = getEnv("SPARTANPATH", ".");
+    
+    if (LOG_DEBUG)
+      log.info(() -> String.format("SPARTANPATH is \"%s\"", spartanPath));
     
     var searchDirs = spartanPath.split(System.getProperty("path.separator"));
     try {
       return Stream.of(searchDirs).map(Path::of).toList();
     }
     catch (InvalidPathException ex) {
-      throw new Error(String.format("invalid SPARTANPATH \"%s\"", spartanPath));
+      System.err.println("warning: SPARTANPATH is invalid or not set. Defaulting to current directory.\n");
+      return List.of(Path.of("."));
     }
   }
-  
-  private static Path initBuiltinsPath()
-  {
-    return HOME_DIR.resolve(Path.of("stdlib", "builtins.s"));
-  }
-  
+    
   private static OSType getOSType()
   {
     var osName = System.getProperty("os.name");

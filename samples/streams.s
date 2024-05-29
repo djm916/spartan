@@ -9,10 +9,6 @@
 
 (def squares (stream-map (fun (x) (* x x)) nats))
 
-;(def even-squares (stream-filter (fun (x) (= (remainder x 2) 0)) squares))
-
 (print-line "Integers = " (stream->list nats))
 (print-line "Squares = " (stream->list squares))
-;(print-line (stream->list (stream-enumerate 1 squares)))
-;(print-line "Even squares = " (stream->list even-squares))
-;(print-line "Sum of squares = " (stream-reduce + 0 nats))
+(print-line "Sum of squares = " (stream-reduce + 0 squares))

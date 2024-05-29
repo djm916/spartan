@@ -92,18 +92,17 @@ public final class Loader
     }
   }
   
-  public static void loadDLL(String file)
+  public static void loadDLL(Path path)
   {
     try {
-      var libPath = Config.HOME_DIR.resolve(file);
       if (Config.LOG_DEBUG)
-        log.info(String.format("loading \"%s\"", libPath.toString()));
-      System.load(libPath.toString());
+        log.info(String.format("loading \"%s\"", path.toString()));
+      System.load(path.toString());
     }
     catch (UnsatisfiedLinkError | InvalidPathException ex) {
       if (Config.LOG_DEBUG)
-        log.severe(String.format("unable to load \"%s\": %s", file, ex.toString()));
-      throw new LoadError(file);
+        log.severe(String.format("unable to load \"%s\": %s", path.toString(), ex.toString()));
+      throw new LoadError(path.toString());
     }
   }
   

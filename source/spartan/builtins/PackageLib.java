@@ -9,7 +9,22 @@ import spartan.errors.UnboundSymbol;
 import spartan.runtime.VirtualMachine;
 
 public final class PackageLib
-{  
+{
+  // (make-package package-name)
+  
+  public static final Primitive MAKE = new Primitive(1, false) {
+    public void apply(VirtualMachine vm) {
+      if (!(vm.popArg() instanceof Symbol pkgName))
+        throw new TypeMismatch();
+      var pkg = new spartan.data.Package(pkgName, CorePackage.INSTANCE);
+      spartan.Runtime.addPackage(pkg);
+      vm.result = pkg;
+      vm.popFrame();
+    }
+  };
+  
+  // (current-package)
+  
   public static final Primitive CURRENT_PACKAGE = new Primitive(0, false) {
     public void apply(VirtualMachine vm) {
       vm.result = spartan.Runtime.currentPackage();
@@ -17,32 +32,24 @@ public final class PackageLib
     }
   };
   
-  public static final Primitive SET_CURRENT_PACKAGE = new Primitive(1, false) {
-    public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof spartan.data.Package pkg))
-        throw new TypeMismatch();
-      spartan.Runtime.currentPackage(pkg);
-      vm.result = Nil.VALUE;
-      vm.popFrame();
-    }
-  };
+  // (find-package package-name)
   
-  public static final Primitive MAKE_PACKAGE = new Primitive(1, false) {
-    public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof Symbol pkgName))
-        throw new TypeMismatch();
-      var pkg = new spartan.data.Package(pkgName, CorePackage.getInstance());
-      spartan.Runtime.addPackage(pkg);
-      vm.result = pkg;
-      vm.popFrame();
-    }
-  };
-  
-  public static final Primitive FIND_PACKAGE = new Primitive(1, false) {
+  public static final Primitive FIND = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Symbol pkgName))
         throw new TypeMismatch();
       vm.result = spartan.Runtime.getPackage(pkgName).orElseThrow(() -> new NoSuchPackage(pkgName));
+      vm.popFrame();
+    }
+  };
+  
+  // (package-exists? package-name)
+  
+  public static final Primitive EXISTS = new Primitive(1, false) {
+    public void apply(VirtualMachine vm) {
+      if (!(vm.popArg() instanceof Symbol pkgName))
+        throw new TypeMismatch();
+      vm.result = Bool.valueOf(spartan.Runtime.getPackage(pkgName).isPresent());
       vm.popFrame();
     }
   };
@@ -56,6 +63,9 @@ public final class PackageLib
       vm.popFrame();
     }
   };
+  
+  // (package-bind package symbol value)
+  // (package-bind symbol value [package])
   
   public static final Primitive BIND = new Primitive(3, false) {
     public void apply(VirtualMachine vm) {
@@ -72,6 +82,9 @@ public final class PackageLib
     }
   };
   
+  // (package-resolve package symbol)
+  // (package-resolve symbol [package])
+  
   public static final Primitive RESOLVE = new Primitive(2, false) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof spartan.data.Package pkg))
@@ -85,7 +98,9 @@ public final class PackageLib
     }
   };
   
-  public static final Primitive BOUND_SYMBOLS = new Primitive(1, false) {
+  // (package-symbols [package])
+  
+  public static final Primitive SYMBOLS = new Primitive(1, false) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof spartan.data.Package pkg))
         throw new TypeMismatch();
@@ -93,8 +108,11 @@ public final class PackageLib
       vm.popFrame();
     }
   };
-      
-  public static final Primitive ADD_LOCAL_ALIAS = new Primitive(3, false) {
+  
+  // (package-alias target-package source-package alias)
+  // (package-alias original-package alias [package])
+  
+  public static final Primitive ADD_ALIAS = new Primitive(3, false) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof spartan.data.Package targetPackage))
         throw new TypeMismatch();
@@ -105,26 +123,6 @@ public final class PackageLib
       if (!alias.isSimple())
         throw new InvalidArgument();
       targetPackage.addPackageAlias(alias, sourcePackage);
-      vm.result = Nil.VALUE;
-      vm.popFrame();
-    }
-  };
-  
-  public static final Primitive IMPORT = new Primitive(4, false) {
-    public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof spartan.data.Package targetPackage))
-        throw new TypeMismatch();
-      if (!(vm.popArg() instanceof spartan.data.Package sourcePackage))
-        throw new TypeMismatch();
-      if (!(vm.popArg() instanceof Symbol symbol))
-        throw new TypeMismatch();
-      if (!symbol.isSimple())
-        throw new InvalidArgument();
-      if (!(vm.popArg() instanceof Symbol alias))
-        throw new TypeMismatch();
-      if (!alias.isSimple())
-        throw new InvalidArgument();
-      targetPackage.doImport(sourcePackage, symbol, alias);
       vm.result = Nil.VALUE;
       vm.popFrame();
     }

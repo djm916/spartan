@@ -2,27 +2,36 @@ package spartan.builtins;
 
 import spartan.data.*;
 import java.util.Optional;
+import java.util.logging.Logger;
 
 public final class CorePackage extends spartan.data.Package
 {
+  private static final Logger log = Logger.getLogger(CorePackage.class.getName());
+  
   public static final String NAME = "spartan.core";
   
+  public static final CorePackage INSTANCE = new CorePackage();
+  
+  /*
   public static CorePackage getInstance()
   {
     if (instance == null)
       instance = new CorePackage();
     return instance;
   }
-    
+  */
+  
   private CorePackage()
   {
     super(Symbol.of(NAME), spartan.data.Package.NONE);
   }
   
-  private static CorePackage instance = null;
-  
-  // populate this namespace
   {
+    // populate the package
+    
+    if (spartan.Config.LOG_DEBUG)
+      log.info(() -> String.format("initializing package %s", NAME));
+    
     bind(Symbol.of("="), CoreLib.EQ);
     bind(Symbol.of("/="), CoreLib.NE);
     bind(Symbol.of("<"), CoreLib.LT);
@@ -48,17 +57,16 @@ public final class CorePackage extends spartan.data.Package
     bind(Symbol.of("empty?"), CoreLib.IS_EMPTY);
     bind(Symbol.of("macroexpand-1"), CoreLib.MACROEXPAND1);
     bind(Symbol.of("print-traceback"), CoreLib.PRINT_TRACEBACK);
+    bind(Symbol.of("*package*"), this);
     
-    /* Package procedures */
+    /* Package-related procedures */
     
-    bind(Symbol.of("current-package"), PackageLib.CURRENT_PACKAGE);
-    bind(Symbol.of("set-current-package!"), PackageLib.SET_CURRENT_PACKAGE);
-    bind(Symbol.of("make-package"), PackageLib.MAKE_PACKAGE);
-    bind(Symbol.of("find-package"), PackageLib.FIND_PACKAGE);
-    bind(Symbol.of("try-find-package"), PackageLib.TRY_FIND_PACKAGE);
-    bind(Symbol.of("package-bound-symbols"), PackageLib.BOUND_SYMBOLS);
-    bind(Symbol.of("package-add-local-alias"), PackageLib.ADD_LOCAL_ALIAS);
-    bind(Symbol.of("package-import"), PackageLib.IMPORT);
+    bind(Symbol.of("make-package"), PackageLib.MAKE);
+    bind(Symbol.of("find-package"), PackageLib.FIND);
+    bind(Symbol.of("package-exists?"), PackageLib.EXISTS);
+    bind(Symbol.of("package-symbols"), PackageLib.SYMBOLS);
+    bind(Symbol.of("package-add-alias"), PackageLib.ADD_ALIAS);
+    //bind(Symbol.of("package-bound?"), PackageLib.BOUND);
     bind(Symbol.of("package-bind"), PackageLib.BIND);
     bind(Symbol.of("package-resolve"), PackageLib.RESOLVE);
     
@@ -150,20 +158,7 @@ public final class CorePackage extends spartan.data.Package
     bind(Symbol.of("caddr"), ListLib.CADDR);
     bind(Symbol.of("set-car!"), ListLib.SET_CAR);
     bind(Symbol.of("set-cdr!"), ListLib.SET_CDR);
-    //bind(Symbol.of("nth"), ListLib.NTH);
-    //bind(Symbol.of("set-nth!"), ListLib.SET_NTH);
-    bind(Symbol.of("nth-cdr"), ListLib.NTH_CDR);
-    bind(Symbol.of("set-nth-cdr!"), ListLib.SET_NTH_CDR);
-    //bind(Symbol.of("list-ref"), ListLib.REF);
-    //bind(Symbol.of("list-set!"), ListLib.SET);
-    bind(Symbol.of("concat"), ListLib.CONCAT);
-    bind(Symbol.of("append"), ListLib.APPEND);
-    //bind(Symbol.of("length"), ListLib.LENGTH);
-    bind(Symbol.of("reverse"), ListLib.REVERSE);
-    //bind(Symbol.of("remove!"), ListLib.REMOVE);
-    //bind(Symbol.of("remove"), ListLib.REMOVED);
-    //bind(Symbol.of("empty?"), ListLib.IS_EMPTY);
-        
+            
     /* Vector procedures */
     
     bind(Symbol.of("vector"), VectorLib.FROM_LIST);
@@ -206,7 +201,7 @@ public final class CorePackage extends spartan.data.Package
     bind(Symbol.of("register-struct-type"), CoreLib.MAKE_STRUCT_TYPE);
     bind(Symbol.of("make-struct"), CoreLib.MAKE_STRUCT);
     
-    bind(Symbol.of("repr"), CoreLib.GENERIC_REPR);
-    bind(Symbol.of("at"), CoreLib.GENERIC_AT);
+    //bind(Symbol.of("repr"), CoreLib.GENERIC_REPR);
+    //bind(Symbol.of("at"), CoreLib.GENERIC_AT);
   }
 }

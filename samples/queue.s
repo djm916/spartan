@@ -4,8 +4,6 @@
 ; A queue is implemented here as a list containing the elements currently in the queue,
 ; and a (pointer to) the last element of that list (allowing constant-time push).
 
-(require "stdlib/defstruct.s")
-
 (defstruct __queue-impl (front back))
 
 (defun queue ()

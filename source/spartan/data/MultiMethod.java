@@ -17,6 +17,14 @@ public class MultiMethod implements Datum, IFun
 {
   public static class TypeSignature
   {
+    public static TypeSignature of(List args)
+    {
+      var argTypes = new Type[args.length()];
+      for (int i = 0; !args.isEmpty(); ++i)
+        argTypes[i] = args.car().type();
+      return new TypeSignature(argTypes);
+    }
+    
     @Override
     public boolean equals(Object other)
     {
@@ -58,9 +66,7 @@ public class MultiMethod implements Datum, IFun
   @Override // IFun
   public void apply(VirtualMachine vm)
   {
-    var argTypes = vm.args.stream().limit(sig.requiredArgs()).map(arg -> arg.type()).toArray(Type[]::new);
-    var key = new TypeSignature(argTypes);
-    var method = Optional.ofNullable(methodTable.get(key))
+    var method = Optional.ofNullable(methodTable.get(TypeSignature.of(vm.args)))
                  .or(() -> defaultMethod)
                  .orElseThrow(() -> new TypeMismatch());
     method.apply(vm);

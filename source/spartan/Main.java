@@ -7,6 +7,7 @@ import picocli.CommandLine.Parameters;
 import picocli.CommandLine.ITypeConverter;
 import java.util.concurrent.Callable;
 import java.util.logging.Logger;
+import java.nio.file.Path;
 import spartan.data.List;
 import spartan.data.Text;
 import spartan.data.Symbol;
@@ -44,11 +45,11 @@ public class Main implements Callable<Integer>
   }
   
   public Integer call() throws Exception
-  {
+  {    
     // Load JNI Libraries
     if (Config.OS_TYPE == Config.OSType.WINDOWS) {
       try {
-        Loader.loadDLL("libspartan.dll");
+        Loader.loadDLL(Config.HOME_DIR.resolve(Path.of("libspartan.dll")));
       }
       catch (LoadError err) {
         System.err.println(err.getMessage());
@@ -69,7 +70,7 @@ public class Main implements Callable<Integer>
     // 
     if (scriptPath != null) {
       // Bind symbol containing the list of script arguments, as string/text values
-      spartan.Runtime.currentPackage().bind(Symbol.of("command-line-args"), List.of(scriptArgs));
+      spartan.Runtime.currentPackage().bind(Symbol.of("*command-line-args*"), List.of(scriptArgs));
       
       try {
         Loader.load(scriptPath);

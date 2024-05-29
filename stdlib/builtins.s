@@ -4,13 +4,19 @@
 ; This file is pre-loaded when the interpreter starts and
 ; itself loads several other files.
 
-(set-current-package! (find-package 'spartan.core))
+(set! spartan.core:*package* (find-package 'spartan.core))
+
+;(defmacro in-package (package-name)
+;  `(let ((package (try-find-package ',package-name)))
+;     (if (nil? package)
+;       (set! package (make-package ',package-name)))
+;     (set! spartan.core:*package* package)))
 
 (defmacro in-package (package-name)
-  `(let ((package (try-find-package ',package-name)))
-     (if (nil? package)
-       (set! package (make-package ',package-name)))
-     (set-current-package! package)))
+  `(set! spartan.core:*package*
+         (if (package-exists? ',package-name)
+             (find-package ',package-name)
+             (make-package ',package-name))))
 
 (defmacro inc! (var)
   `(set! ,var (+ 1 ,var)))
@@ -65,19 +71,6 @@
            `(fun (,(car args)) ,(loop (cdr args))))))
   (loop args))
     
-(defun memoize (proc) 
-  (let ((value-ready? false)
-        (cached-value nil))
-    (fun ()
-      (unless value-ready?
-        (set! cached-value (proc))
-        (set! value-ready? true))
-      cached-value)))
-
-(defmacro delay (exp) `(memoize (fun () ,exp)))
-
-(defun force (p) (p))
-
 (defun min (x & xs)
   (let ((lo x))
     (while (not (empty? xs))
@@ -103,6 +96,7 @@
 (load "stdlib/lists.s")
 (load "stdlib/vectors.s")
 (load "stdlib/defstruct.s")
+(load "stdlib/promises.s")
 (load "stdlib/streams.s")
 (load "stdlib/import.s")
 (load "stdlib/except.s")

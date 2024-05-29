@@ -7,6 +7,19 @@
 
 (in-package spartan.core)
 
+(defun append (xs x)
+  (if (empty? xs) (list x)
+    (cons (car xs) (append (cdr xs) x))))
+
+(defun concat (xs ys)
+  (if (empty? xs) ys
+    (cons (car xs) (concat (cdr xs) ys))))
+
+(defun reverse (xs)
+  (rec loop ((xs xs) (sx ()))
+    (if (empty? xs) sx
+      (loop (cdr xs) (cons (car xs) sx)))))
+
 (defun map (f xs)
   (if (empty? xs) ()
     (cons (f (car xs))

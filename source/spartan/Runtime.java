@@ -9,6 +9,8 @@ import spartan.data.Macro;
 import java.util.Map;
 import java.util.IdentityHashMap;
 import java.util.Optional;
+import java.util.logging.Logger;
+import java.nio.file.Path;
 
 public final class Runtime
 {
@@ -17,7 +19,7 @@ public final class Runtime
    */
   public static Package currentPackage()
   {
-    return currentPackage;
+    return (Package) CorePackage.INSTANCE.lookup(Symbol.of("*package*")).get();
   }
   
   /**
@@ -25,7 +27,7 @@ public final class Runtime
    */
   public static void currentPackage(Package pkg)
   {
-    currentPackage = pkg;
+    CorePackage.INSTANCE.bind(Symbol.of("*package*"), pkg);
   }
   
   /**
@@ -33,7 +35,7 @@ public final class Runtime
    */
   public static void enterPackage(Symbol pkgName)
   {
-    currentPackage = getOrCreatePackage(pkgName);
+    currentPackage(getOrCreatePackage(pkgName));
   }
   
   /**
@@ -45,7 +47,7 @@ public final class Runtime
   public static Optional<Package> getPackage(Symbol pkgName)
   {
     //return Optional.ofNullable(packages.get(pkgName));
-    return currentPackage.getPackageAlias(pkgName)
+    return currentPackage().getPackageAlias(pkgName)
            .or(() -> Optional.ofNullable(packages.get(pkgName)));
   }
   
@@ -55,7 +57,7 @@ public final class Runtime
    */
   public static Package getOrCreatePackage(Symbol pkgName)
   {
-    return packages.computeIfAbsent(pkgName, (name) -> new Package(name, CorePackage.getInstance()));
+    return packages.computeIfAbsent(pkgName, (name) -> new Package(name, CorePackage.INSTANCE));
   }
   
   /**
@@ -96,10 +98,12 @@ public final class Runtime
   
   public static void boot()
   {
-    var corePackage = CorePackage.getInstance();
+    if (Config.LOG_DEBUG)
+      log.info(() -> String.format("initializing runtime environment"));
+    var corePackage = CorePackage.INSTANCE;
     addPackage(corePackage);
     currentPackage(corePackage);
-    Loader.load(Config.BUILTINS_FILE_PATH);
+    Loader.load(Config.HOME_DIR.resolve(Path.of("stdlib", "builtins.s")));
     var userPackage = new Package(Symbol.of("user"), corePackage);
     addPackage(userPackage);
     currentPackage(userPackage);
@@ -108,5 +112,5 @@ public final class Runtime
   private Runtime() { }
   
   private static final Map<Symbol, Package> packages = new IdentityHashMap<>();
-  private static Package currentPackage;
+  private static final Logger log = Logger.getLogger(Runtime.class.getName());
 }

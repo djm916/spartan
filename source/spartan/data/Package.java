@@ -86,7 +86,7 @@ public class Package implements Datum
    */
   public void addPackageAlias(Symbol pkgName, Package pkg)
   {
-    localPkgAliases.put(pkgName, pkg);
+    aliases.put(pkgName, pkg);
   }
   
   /**
@@ -97,7 +97,7 @@ public class Package implements Datum
    */
   public Optional<Package> getPackageAlias(Symbol pkgName)
   {
-    return Optional.ofNullable(localPkgAliases.get(pkgName));
+    return Optional.ofNullable(aliases.get(pkgName));
   }
   
   /**
@@ -157,6 +157,6 @@ public class Package implements Datum
   
   protected final Symbol name;
   protected final Map<Symbol, Datum> bindings = new IdentityHashMap<>();
-  protected final Map<Symbol, Package> localPkgAliases = new IdentityHashMap<>();
+  protected final Map<Symbol, Package> aliases = new IdentityHashMap<>();
   protected final Package parent;
 }

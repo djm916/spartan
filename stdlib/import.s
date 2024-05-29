@@ -2,18 +2,16 @@
 
 ; 
 
-(defun do-imports (target-package source-package import-specifiers)
+(defun %import (source-package import-specifiers)
   (rec loop ((elems import-specifiers))
     (if (empty? elems) ()
       (let* ((elem (car elems))
              (symbol (if (list? elem) (car elem) elem))
              (alias (if (list? elem) (cadr elem) symbol)))
-        (package-bind target-package alias (package-resolve source-package symbol))
-        ;(package-import target-package source-package symbol alias)
+        (package-bind *package* alias (package-resolve source-package symbol))
         (loop (cdr elems))))))
 
-
-; <import-statement> => (import <package> <alias>? <import-specifier>*)
+; <import-statement> => (import <package> (:as <alias>)? <import-specifier>*)
 ; <import-specifier> => <symbol> (:as <alias>)?
 ; <package> => <symbol>
 ; <alias> => <symbol>
@@ -46,17 +44,10 @@
         (set! imported-symbols (cons (list symbol alias) imported-symbols))
         (set! args (cdr args))))
     
-    ;`(let ((target-package (current-package))
-    ;       (source-package (find-package ',package-name)))
-    ;   ,(if (nil? local-alias) () `(package-add-local-alias target-package source-package ',local-alias))
-    ;   (package-import target-package source-package ,(if (empty? imported-symbols) `(package-bound-symbols source-package) `',imported-symbols)))))
-    
-    
-    `(let* ((target-package (current-package))
-            (source-package (find-package ',package-name))
+    `(let* ((source-package (find-package ',package-name))
             (import-specifiers ,(if (empty? imported-symbols)
-                                  `(package-bound-symbols source-package)
+                                  `(package-symbols source-package)
                                   `',imported-symbols)))
-       ,@(if (nil? local-alias) () `((package-add-local-alias target-package source-package ',local-alias)))
-       (do-imports target-package source-package import-specifiers))))
+       ,@(if (nil? local-alias) () `((package-add-alias *package* source-package ',local-alias)))
+       (%import source-package import-specifiers))))
        
