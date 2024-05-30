@@ -3,13 +3,20 @@
 ; 
 
 (defun %import (source-package import-specifiers)
-  (rec loop ((elems import-specifiers))
-    (if (empty? elems) ()
-      (let* ((elem (car elems))
-             (symbol (if (list? elem) (car elem) elem))
-             (alias (if (list? elem) (cadr elem) symbol)))
-        (package-bind *package* alias (package-resolve source-package symbol))
-        (loop (cdr elems))))))
+  (for ((specifiers import-specifiers (cdr specifiers)))
+    ((empty? specifiers) nil)
+    (let* ((spec (car specifiers))
+           (symbol (if (list? spec) (car spec) spec))
+           (alias (if (list? spec) (cadr spec) symbol)))
+      (package-bind *package* alias (package-resolve source-package symbol)))))
+      
+;  (rec loop ((elems import-specifiers))
+;    (if (empty? elems) ()
+;      (let* ((elem (car elems))
+;             (symbol (if (list? elem) (car elem) elem))
+;             (alias (if (list? elem) (cadr elem) symbol)))
+;        (package-bind *package* alias (package-resolve source-package symbol))
+;        (loop (cdr elems))))))
 
 ; <import-statement> => (import <package> (:as <alias>)? <import-specifier>*)
 ; <import-specifier> => <symbol> (:as <alias>)?
@@ -23,7 +30,7 @@
     
     ; parse optional local package alias
     (if (and (not (empty? args)) (= (car args) :as))
-      (begin
+      (do
         (set! args (cdr args))
         (if (empty? args)
           (error "malformed expression"))
@@ -35,7 +42,7 @@
       (let* ((symbol (car args))
              (alias symbol))
         (if (and (not (empty? (cdr args))) (= (cadr args) :as))
-          (begin
+          (do
             (set! args (cdr args))
             (set! args (cdr args))
             (if (empty? args)

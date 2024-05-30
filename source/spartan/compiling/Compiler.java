@@ -578,7 +578,7 @@ public class Compiler
   
   /* Check that a binding list for a "do" expression is well-formed */
   
-  private boolean checkDoBindingListForm(List bindings)
+  private boolean checkForBindingsForm(List bindings)
   {
     for (; !bindings.isEmpty(); bindings = bindings.cdr())
       if (!(bindings.car() instanceof List list && list.length() == 3 && list.car() instanceof Symbol s && s.isSimple()))
@@ -909,12 +909,12 @@ public class Compiler
                       next));
   }
 
-  /* Compiles the "begin" special form.
+  /* Compiles the "do" special form.
 
-     Syntax: (begin exp...)
+     Syntax: (do exp...)
   */
 
-  private Inst compileBegin(List exp, Scope scope, boolean tail, Inst next)
+  private Inst compileDo(List exp, Scope scope, boolean tail, Inst next)
   {
     if (exp.length() < 2)
       throw malformedExp(exp);
@@ -951,9 +951,9 @@ public class Compiler
     return loop;
   }
   
-  /* Compile the "do" special form.
+  /* Compile the "for" special form.
    
-     Syntax: (do ((var1 init1 step1) ...)
+     Syntax: (for ((var1 init1 step1) ...)
                (test result)
                body ...)
      
@@ -1002,9 +1002,9 @@ public class Compiler
      done: <<result>>
            pop-env
   */
-  private Inst compileDo(List exp, Scope scope, boolean tail, Inst next)
+  private Inst compileFor(List exp, Scope scope, boolean tail, Inst next)
   {
-    if (!(exp.length() >= 3 && exp.cadr() instanceof List bindings && checkDoBindingListForm(bindings)
+    if (!(exp.length() >= 3 && exp.cadr() instanceof List bindings && checkForBindingsForm(bindings)
       && exp.caddr() instanceof List caddr && caddr.length() == 2))
       throw malformedExp(exp);
     
@@ -1017,11 +1017,16 @@ public class Compiler
     var result = caddr.cadr();
     var body = exp.cdddr();
     
+    //System.out.println("for vars = " + vars.repr());
+    //System.out.println("for inits = " + inits.repr());
+    //System.out.println("for steps = " + steps.repr());
+    //System.out.println("for caddr = " + caddr.repr());
+    
     var jump = new Jump();
     var loop = compile(test, extendedScope, false,
-               new Branch(compile(result, extendedScope, tail,
+               new Branch(compile(result, extendedScope, false,
                           new PopEnv(next)),
-                          compileSequence(body, scope, false,
+                          compileSequence(body, extendedScope, false,
                           compilePushArgs(steps, extendedScope,
                           compileBindLocals(0, numBindings,                          
                           jump)))));
@@ -1425,8 +1430,9 @@ public class Compiler
     Map.entry(Symbol.LETSTAR, this::compileLetStar),
     Map.entry(Symbol.LETREC, this::compileLetRec),
     Map.entry(Symbol.FUN, this::compileFun),
+    Map.entry(Symbol.DO, this::compileDo),
+    Map.entry(Symbol.FOR, this::compileFor),
     Map.entry(Symbol.REC, this::compileRec),
-    Map.entry(Symbol.BEGIN, this::compileBegin),
     Map.entry(Symbol.SET, this::compileSet),
     Map.entry(Symbol.WHILE, this::compileWhile),
     Map.entry(Symbol.QUOTE, this::compileQuote),

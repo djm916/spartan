@@ -178,7 +178,7 @@ public final class CorePackage extends spartan.data.Package
     bind(Symbol.of("string-hash"), StringLib.HASH);
     bind(Symbol.of("string-length"), StringLib.LENGTH);
     
-    /* Port procedures */
+    /* I/O and Port procedures */
     
     bind(Symbol.of("standard-input-port"), InputPort.STDIN);
     bind(Symbol.of("standard-output-port"), OutputPort.STDOUT);
@@ -197,6 +197,8 @@ public final class CorePackage extends spartan.data.Package
     bind(Symbol.of("table-contains?"), TableLib.CONTAINS);
     bind(Symbol.of("table-keys"), TableLib.KEYS);
     bind(Symbol.of("table-values"), TableLib.VALUES);
+    
+    /* Structure related procedures */
     
     bind(Symbol.of("register-struct-type"), CoreLib.MAKE_STRUCT_TYPE);
     bind(Symbol.of("make-struct"), CoreLib.MAKE_STRUCT);

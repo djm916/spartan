@@ -45,7 +45,7 @@
      (spartan.core:= (spartan.core:type self) ',name)))
 
 (defmacro defstruct (name fields)
-  `(begin
+  `(do
      ; Register struct type
      (spartan.core:register-struct-type ',name ',fields)
      ; Define constructor

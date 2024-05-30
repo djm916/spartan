@@ -10,7 +10,7 @@
   (if (not (promise? p))
     p)
   (if (not (p 'has-value?))
-    (begin
+    (do
       (set! (p 'value) ((p 'thunk)))
       (set! (p 'has-value?) true)))
   (p 'value))

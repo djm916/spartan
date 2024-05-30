@@ -51,8 +51,8 @@
 
 (defun stream-for-each (f s)
   (if (stream-empty? s) nil
-    (begin (f (stream-car s))
-           (stream-for-each f (stream-cdr s)))))
+    (do (f (stream-car s))
+        (stream-for-each f (stream-cdr s)))))
 
 (defun stream-filter (f s)
   (cond ((stream-empty? s) s)

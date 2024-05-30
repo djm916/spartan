@@ -24,6 +24,6 @@
       (set! primes (stream-cdr primes))))
   factors)
 
-(def N (string->int (car command-line-args)))
+(def N (string->int (car *command-line-args*)))
 
 (print-line (prime-factors N))
