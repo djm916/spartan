@@ -1,12 +1,8 @@
 package spartan.builtins;
 
+import spartan.data.*;
+import spartan.data.Void; // shadows java.lang.Void
 import spartan.errors.TypeMismatch;
-import spartan.data.Primitive;
-import spartan.data.Signature;
-import spartan.data.Bytes;
-import spartan.data.IInt;
-import spartan.data.Int;
-import spartan.data.Nil;
 import spartan.runtime.VirtualMachine;
 
 public final class BytesLib

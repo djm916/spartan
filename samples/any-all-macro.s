@@ -16,7 +16,7 @@
 ;
 
 (defmacro any? (& xs)
-  (if (empty? xs)
+  (if (null? xs)
     false
     `(if ,(car xs) true (any? ,@(cdr xs)))))
 
@@ -28,7 +28,7 @@
 ;
 
 (defmacro all? (& xs)
-  (if (empty? xs)
+  (if (null? xs)
     true
     `(if (not ,(car xs)) false (all? ,@(cdr xs)))))
 

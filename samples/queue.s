@@ -4,43 +4,41 @@
 ; A queue is implemented here as a list containing the elements currently in the queue,
 ; and a (pointer to) the last element of that list (allowing constant-time push).
 
-(defstruct __queue-impl (front back))
+(defrecord queue-type (front back))
 
 (defun queue ()
-  (__queue-impl () ()))
+  (make-queue-type () ()))
 
 (defun queue? (self)
-  (__queue-impl? self))
+  (queue-type? self))
 
-(defun queue:empty? (self)
-  (empty? (__queue-impl:front self)))
-  ;(and (empty? (__queue-impl:front self)) 
-   ;    (empty? (__queue-impl:back self))))
+(defun empty? (self)
+  (null? (queue-type-front self)))
 
-(defun queue:push (self item)
-  (let ((node (cons item ())))
-    (cond ((queue:empty? self)
-             (__queue-impl:set-front! self node)
-             (__queue-impl:set-back! self node))
-          (else
-             (set-cdr! (__queue-impl:back self) node)
-             (__queue-impl:set-back! self node)))))
+(defun push (self item)
+  (let [(node (cons item ()))]
+    (cond [(empty? self)
+             (queue-type-set-front! self node)
+             (queue-type-set-back! self node)]
+          [else
+             (set-cdr! (queue-type-back self) node)
+             (queue-type-set-back! self node)])))
 
-(defun queue:pop (self)
-  (cond ((queue:empty? self) nil)
-        (else
-          (let ((node (__queue-impl:front self)))
-            (__queue-impl:set-front! self (cdr node))
-            (if (empty? (__queue-impl:front self))
-              (__queue-impl:set-back! self ()))
-            (car node)))))
+(defun pop (self)
+  (cond [(empty? self) void]
+        [else
+          (let [(node (queue-type-front self))]
+            (queue-type-set-front! self (cdr node))
+            (if (null? (queue-type-front self))
+              (queue-type-set-back! self ()))
+            (car node))]))
 
 (def q (queue))
 (print-line "is queue? " (queue? q))
-(queue:push q 1)
-(queue:push q 2)
-(queue:push q 3)
-(print-line "popped " (queue:pop q))
-(print-line "popped " (queue:pop q))
-(print-line "popped " (queue:pop q))
-(print-line "queue empty? " (queue:empty? q))
+(push q 1)
+(push q 2)
+(push q 3)
+(print-line "popped " (pop q))
+(print-line "popped " (pop q))
+(print-line "popped " (pop q))
+(print-line "queue empty? " (empty? q))

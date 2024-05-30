@@ -1,10 +1,13 @@
 
 (in-package spartan.core)
 
-(defstruct exception (name message))
+(defrecord exception (name message))
 
 (defun *default-handler* (ex)
-  (let ((message (string-concat "unhandled exception " (symbol->string (ex 'name)) ": " (ex 'message))))
+  (let ((message (string-concat "unhandled exception "
+                                (symbol->string (exception-name ex))
+                                ": "
+                                (exception-message ex))))
     (error message)))
   ;(print-line "unhandled exception " ex " was raised.")
   ;(print-traceback))
@@ -14,7 +17,7 @@
 
 ;(def *handlers* (list (list *default-handler* *top-level-continuation*)))
 
-(def *handlers* (list (list *default-handler* nil)))
+(def *handlers* (list (list *default-handler* void)))
 
 (defun push-handler (h k)
   (set! *handlers* (cons (list h k) *handlers*)))

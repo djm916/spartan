@@ -2,16 +2,16 @@
 (defun not-factor? (y) (fun (x) (not (= (remainder x y) 0))))
 
 (defun range (lo hi)
-  (reverse
+  (list-reverse
     (rec loop ((n lo) (result ()))
       (if (< hi n) result
         (loop (+ 1 n) (cons n result))))))
 
 (defun prime-sieve (n)
   (defun prime-sieve (xs)
-    (if (empty? xs) ()
+    (if (null? xs) ()
       (let* ((x (car xs))
-             (xs (filter (not-factor? x) xs)))
+             (xs (list-filter (not-factor? x) xs)))
         (cons x (prime-sieve xs)))))
   (prime-sieve (range 2 n)))
 

@@ -4,7 +4,7 @@
 
 (defun %import (source-package import-specifiers)
   (for ((specifiers import-specifiers (cdr specifiers)))
-    ((empty? specifiers) nil)
+    ((null? specifiers) void)
     (let* ((spec (car specifiers))
            (symbol (if (list? spec) (car spec) spec))
            (alias (if (list? spec) (cadr spec) symbol)))
@@ -26,22 +26,22 @@
 (defmacro import (package-name & args)
   
   (let ((imported-symbols ())
-        (local-alias nil))
+        (local-alias void))
     
     ; parse optional local package alias
-    (if (and (not (empty? args)) (= (car args) :as))
+    (if (and (not (null? args)) (= (car args) :as))
       (do
         (set! args (cdr args))
-        (if (empty? args)
+        (if (null? args)
           (error "malformed expression"))
         (set! local-alias (car args))
         (set! args (cdr args))))
     
     ; parse imported symbols with optional aliases
-    (while (not (empty? args))
+    (while (not (null? args))
       (let* ((symbol (car args))
              (alias symbol))
-        (if (and (not (empty? (cdr args))) (= (cadr args) :as))
+        (if (and (not (null? (cdr args))) (= (cadr args) :as))
           (do
             (set! args (cdr args))
             (set! args (cdr args))
@@ -52,9 +52,9 @@
         (set! args (cdr args))))
     
     `(let* ((source-package (find-package ',package-name))
-            (import-specifiers ,(if (empty? imported-symbols)
+            (import-specifiers ,(if (null? imported-symbols)
                                   `(package-symbols source-package)
                                   `',imported-symbols)))
-       ,@(if (nil? local-alias) () `((package-add-alias ',package-name ',local-alias)))
+       ,@(if (void? local-alias) () `((package-add-alias ',package-name ',local-alias)))
        (%import source-package import-specifiers))))
        

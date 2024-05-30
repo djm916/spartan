@@ -1,6 +1,7 @@
 package spartan.builtins;
 
 import spartan.data.*;
+import spartan.data.Void; // shadows java.lang.Void
 import spartan.errors.Error;
 import spartan.errors.TypeMismatch;
 import spartan.errors.InvalidArgument;
@@ -36,11 +37,11 @@ public final class CoreLib
   public static Datum macroExpand1(Datum form)
   {
     if (!(form instanceof List list && !list.isEmpty() && list.car() instanceof Symbol symbol))
-      return Nil.VALUE;
+      return Void.VALUE;
     var args = list.cdr();
     return spartan.Runtime.lookupMacro(symbol)
            .map(macro -> macro.expand(new VirtualMachine(), args, new SourceInfo(form, null)))
-           .orElse(Nil.VALUE);
+           .orElse(Void.VALUE);
   }
   
   public static final Primitive NOT = new Primitive(Signature.fixed(1)) {
@@ -116,7 +117,7 @@ public final class CoreLib
     public void apply(VirtualMachine vm) {
       while (!vm.args.isEmpty())
         System.out.print(vm.popArg().str());
-      vm.result = Nil.VALUE;
+      vm.result = Void.VALUE;
       vm.popFrame();
     }
   };
@@ -126,7 +127,7 @@ public final class CoreLib
       while (!vm.args.isEmpty())
         System.out.print(vm.popArg().str());
       System.out.println();
-      vm.result = Nil.VALUE;
+      vm.result = Void.VALUE;
       vm.popFrame();
     }
   };
@@ -146,7 +147,7 @@ public final class CoreLib
         spartan.Loader.load(file.str());
       }
       finally {
-        vm.result = Nil.VALUE;
+        vm.result = Void.VALUE;
         vm.popFrame();
       }
     }
@@ -250,13 +251,13 @@ public final class CoreLib
     }
   };
   
-  public static final Primitive IS_NIL = new Primitive(Signature.fixed(1)) {
+  public static final Primitive IS_VOID = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
-      vm.result = Bool.valueOf(vm.popArg() instanceof Nil);
+      vm.result = Bool.valueOf(vm.popArg() instanceof Void);
       vm.popFrame();
     }
   };
-  
+    
   public static final Primitive IS_BOOL = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       vm.result = Bool.valueOf(vm.popArg() instanceof Bool);
@@ -365,7 +366,7 @@ public final class CoreLib
       var k = vm.popArg();
       var v = vm.popArg();
       c.set(k, v);
-      vm.result = Nil.VALUE;
+      vm.result = Void.VALUE;
       vm.popFrame();
     }
   };
@@ -388,6 +389,12 @@ public final class CoreLib
     }
   };
   
+  //
+  // Symbol related procedures
+  //
+  
+  // (symbol-intern symbol)
+  
   public static final Primitive SYMBOL_INTERN = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Symbol s))
@@ -396,7 +403,57 @@ public final class CoreLib
       vm.popFrame();
     }
   };
-    
+  
+  // (make-symbol base-name [package-name])
+  
+  public static final Primitive MAKE_SYMBOL = new Primitive(Signature.variadic(1, 1)) {
+    public void apply(VirtualMachine vm) {
+      if (!(vm.popArg() instanceof Text baseName))
+        throw new TypeMismatch();
+      if (!((vm.args.isEmpty() ? spartan.Runtime.currentPackage().name().name() : vm.popArg()) instanceof Text pkgName))
+        throw new TypeMismatch();
+      vm.result = new QualifiedSymbol(pkgName.str(), baseName.str());
+      vm.popFrame();
+    }
+  };
+  
+  // (symbol-package symbol)
+  
+  public static final Primitive SYMBOL_PACKAGE = new Primitive(Signature.fixed(1)) {
+    public void apply(VirtualMachine vm) {
+      if (!(vm.popArg() instanceof Symbol s))
+        throw new TypeMismatch();
+      vm.result = s instanceof QualifiedSymbol qs ? new Text(qs.packageName()) : Void.VALUE;
+      vm.popFrame();
+    }
+  };
+  
+  // (symbol-basename symbol)
+  
+  public static final Primitive SYMBOL_BASENAME = new Primitive(Signature.fixed(1)) {
+    public void apply(VirtualMachine vm) {
+      if (!(vm.popArg() instanceof Symbol s))
+        throw new TypeMismatch();
+      vm.result = s instanceof QualifiedSymbol qs ? new Text(qs.baseName()) : new Text(s.name());
+      vm.popFrame();
+    }
+  };
+  
+  // (symbol-qualified? symbol)
+  
+  public static final Primitive SYMBOL_IS_QUALIFIED = new Primitive(Signature.fixed(1)) {
+    public void apply(VirtualMachine vm) {
+      if (!(vm.popArg() instanceof Symbol s))
+        throw new TypeMismatch();
+      vm.result = Bool.valueOf(s.isQualified());
+      vm.popFrame();
+    }
+  };
+  
+  //
+  // Macro expansion
+  //
+  
   public static final Primitive MACROEXPAND1 = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       var form = vm.popArg();
@@ -411,7 +468,7 @@ public final class CoreLib
         throw new TypeMismatch();
       var pkg = spartan.Runtime.getPackage(pkgName).orElseThrow(() -> new NoSuchPackage(pkgName));
       System.out.println(pkg.toString());
-      vm.result = Nil.VALUE;
+      vm.result = Void.VALUE;
       vm.popFrame();
     }
   };
@@ -424,40 +481,77 @@ public final class CoreLib
         for (spartan.parsing.Position position : backTrace)
           System.out.print(String.format("\n\t%s", position));
       }
-      vm.result = Nil.VALUE;
+      vm.result = Void.VALUE;
       vm.popFrame();
     }
   };
   
-  // (register-struct-type struct-name field-names)
+  // (register-record-type record-name fields)
   
-  public static final Primitive MAKE_STRUCT_TYPE = new Primitive(Signature.fixed(2)) {
+  public static final Primitive REGISTER_RECORD_TYPE = new Primitive(Signature.fixed(2)) {
     public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof Symbol structName))
+      if (!(vm.popArg() instanceof Symbol name))
         throw new TypeMismatch();
       if (!(vm.popArg() instanceof List fields))
         throw new TypeMismatch();
-      StructDescriptor.register(structName, fields);
-      vm.result = Nil.VALUE;
+      RecordDescriptor.register(name, fields);
+      vm.result = Void.VALUE;
       vm.popFrame();
     }
   };
   
-  // (make-struct struct-name field-inits)
+  // (record-constructor record-name)
   
-  public static final Primitive MAKE_STRUCT = new Primitive(Signature.fixed(2)) {
+  public static final Primitive RECORD_CONSTRUCTOR = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof Symbol structName))
+      if (!(vm.popArg() instanceof Symbol name))
         throw new TypeMismatch();
-      if (!(vm.popArg() instanceof List fieldInits))
-        throw new TypeMismatch();
-      var structDesc = StructDescriptor.forName(structName)
-                       .orElseThrow(() -> new UnboundSymbol(spartan.Runtime.currentPackage().name(), structName));
-      vm.result = new Struct(structDesc, fieldInits);
+      var rtd = RecordDescriptor.forName(name).orElseThrow(() -> new Error("record type does not exist"));
+      vm.result = rtd.constructor();
       vm.popFrame();
     }
   };
   
+  // (record-predicate record-name)
+  
+  public static final Primitive RECORD_PREDICATE = new Primitive(Signature.fixed(1)) {
+    public void apply(VirtualMachine vm) {
+      if (!(vm.popArg() instanceof Symbol name))
+        throw new TypeMismatch();
+      var rtd = RecordDescriptor.forName(name).orElseThrow(() -> new Error("record type does not exist"));
+      vm.result = rtd.predicate();
+      vm.popFrame();
+    }
+  };
+
+  // (record-accessor record-name field-name)
+  
+  public static final Primitive RECORD_ACCESSOR = new Primitive(Signature.fixed(2)) {
+    public void apply(VirtualMachine vm) {
+      if (!(vm.popArg() instanceof Symbol name))
+        throw new TypeMismatch();
+      if (!(vm.popArg() instanceof Symbol field))
+        throw new TypeMismatch();
+      var rtd = RecordDescriptor.forName(name).orElseThrow(() -> new Error("record type does not exist"));
+      vm.result = rtd.accessor(field);
+      vm.popFrame();
+    }
+  };
+  
+  // (record-mutator record-name field-name)
+  
+  public static final Primitive RECORD_MUTATOR = new Primitive(Signature.fixed(2)) {
+    public void apply(VirtualMachine vm) {
+      if (!(vm.popArg() instanceof Symbol name))
+        throw new TypeMismatch();
+      if (!(vm.popArg() instanceof Symbol field))
+        throw new TypeMismatch();
+      var rtd = RecordDescriptor.forName(name).orElseThrow(() -> new Error("record type does not exist"));
+      vm.result = rtd.mutator(field);
+      vm.popFrame();
+    }
+  };
+    
   /*
   public static final MultiMethod GENERIC_REPR = new MultiMethod(Signature.fixed(1)) {
     {

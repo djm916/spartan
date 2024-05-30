@@ -425,9 +425,9 @@ public class Reader implements AutoCloseable
   /** Read a symbol with the following grammar:
    *
    * <symbol> -> <qualified-symbol> | <bare-symbol>
-   * <qualified-symbol> => <namespace>:<local-name>
-   * <namespace> => <bare-symbol>
-   * <local-name> => <bare-symbol>
+   * <qualified-symbol> => <package-name>:<base-name>
+   * <package-name> => <bare-symbol>
+   * <base-name> => <bare-symbol>
    * <bare-symbol> -> <symbol-start-char> <symbol-follow-char>*
    *
    */
@@ -453,31 +453,28 @@ public class Reader implements AutoCloseable
     return symbol;
   }
   
-  /** Read the 
-   *
-   * <keyword-symbol> -> ":" <symbol>
+  /** Read the base-name part of a package-qualified symbol
    *
    */
-  private QualifiedSymbol readQualifiedSymbol(String nameSpace, StringBuilder text, Position position)
+  private QualifiedSymbol readQualifiedSymbol(String pkgName, StringBuilder text, Position position)
   {
-    // the namespace separator ":" is part of the symbol's full name
-    getChar();      
-    text.append((char)lastChar);
-    // save index where bare name starts
+    getChar();
+    text.append((char)lastChar); // the separator ":" is part of the symbol's full name
+    // save index where base name starts
     var splitIndex = text.length();
-    // ensure the bare name is not empty and begins a valid symbol
+    // ensure the base name is not empty and begins a valid symbol
     if (!isSymbolStart(peekChar()))
       throw syntaxError("malformed symbol");
     getChar();
     text.append((char)lastChar);
-    // read the rest of the bare name
+    // read the rest of the base name
     while (isSymbolFollow(peekChar())) {
       getChar();
       text.append((char)lastChar);
     }
     var name = text.toString();
-    var bareName = name.substring(splitIndex);
-    var symbol = new QualifiedSymbol(text.toString(), nameSpace, bareName);
+    var baseName = name.substring(splitIndex);
+    var symbol = new QualifiedSymbol(text.toString(), pkgName, baseName);
     positionMap.put(symbol, position);
     return symbol;
   }

@@ -4,31 +4,31 @@
 (in-package spartan.core)
 
 (defun vector-map! (f v)
-  (let [(i 0) (n (length v))]
+  (let [(i 0) (n (vector-length v))]
     (while (< i n)
-      (set! (v i) (f (v i)))
+      (vector-set! v i (f (vector-ref v i)))
       (inc! i))))
 
 (defun vector-map (f v)
-  (let [(result (copy v))]
-    (map! f result)
+  (let [(result (vector-copy v))]
+    (vector-map! f result)
     result))
 
 (defun vector->list (v)
-  (let [(i (- (length v) 1)) (result ())]
+  (let [(i (- (vector-length v) 1)) (result ())]
     (while (>= i 0)
       (set! result (cons (v i) result))
       (dec! i))
     result))
 
 (defun vector-for-each (f v)
-  (let [(i 0) (n (length v))]
+  (let [(i 0) (n (vector-length v))]
     (while (< i n)
       (f (v i))
       (inc! i))))
 
 (defun vector-for-each/index (f v)
-  (let [(i 0) (n (length v))]
+  (let [(i 0) (n (vector-length v))]
     (while (< i n)
       (f i (v i))
       (inc! i))))
@@ -44,27 +44,27 @@
     result))
 
 (defun vector-swap! (v i j)
-  (let ((temp (v i)))
-    (set! (v i) (v j))
-    (set! (v j) temp)))
+  (let ((temp (vector-ref v i)))
+    (vector-set! v i (vector-ref v j))
+    (vector-set! v j temp)))
 
 (defun vector-reverse! (v)
-  (let [(i 0) (j (- (length v) 1))]
+  (let [(i 0) (j (- (vector-length v) 1))]
     (while (< i j)
       (vector-swap! v i j)
       (inc! i)
       (dec! j))))
 
 (defun vector-reverse (v)
-  (let [(result (copy v))]
+  (let [(result (vector-copy v))]
     (vector-reverse! result)
     result))
 
 (defun vector-unfold (g n)
-  (def result (make-vector n nil))
+  (def result (make-vector n void))
   (let [(i 0)]
     (while (< i n)
-      (set! (result i) (g))
+      (vector-set! result i (g i))
       (inc! i)))
   result)
 
@@ -84,32 +84,36 @@
         (merge source from mid to dest))))
   
   (defun merge (source from mid to dest)    
-    (let ((i from) (j mid) (k from))
+    (let [(i from) (j mid) (k from)]
       
       (while (and (< i mid) (< j to))
-        (let [(x (source i)) (y (source j))]
-          (cond [(compare x y) (set! (dest k) x)
-                               (inc! i)
-                               (inc! k)]
-                [else (set! (dest k) y)
-                      (inc! j)
-                      (inc! k)])))
+        (let [(x (vector-ref source i))
+              (y (vector-ref source j))]
+          (cond [(compare x y)
+                   (vector-set! dest k x)
+                   (inc! i)
+                   (inc! k)]
+                [else
+                   (vector-set! dest k y)
+                   (inc! j)
+                   (inc! k)])))
       
       (while (< i mid)
-        (set! (dest k) (source i))
+        (vector-set! dest k (vector-ref source i))
         (inc! i)
         (inc! k))
       
       (while (< j to)
-        (set! (dest k) (source j))
+        (vector-set! dest k (vector-ref source j))
         (inc! j)
         (inc! k))
       
       (set! k from)
       (while (< k to)
-        (set! (source k) (dest k))
+        (vector-set! source k (vector-ref dest k))
         (inc! k))))
       
-   (let* [(n (length v)) (dest (make-vector n nil))]
+   (let* [(n    (vector-length v))
+          (dest (make-vector n void))]
      (sort v 0 n dest)
      dest))

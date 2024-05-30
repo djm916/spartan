@@ -47,15 +47,15 @@
 (defmacro compose (& fs)
   (def x (gensym))
   (defun loop (fs)
-    (if (empty? (cdr fs))
+    (if (null? (cdr fs))
       `(,(car fs) ,x)
       `(,(car fs) ,(loop (cdr fs)))))
-  `(fun (,x) ,(loop (reverse fs))))
+  `(fun (,x) ,(loop (list-reverse fs))))
 
 
 (defmacro ->> (arg form & forms)
-  (let ((result (append form arg)))
-    (fold-right append result forms)))
+  (let ((result (list-append form arg)))
+    (list-fold-right list-append result forms)))
 
 ; (curry () ...) => (fun () ...)
 ; (curry (x) ...) => (fun (x) ...)
@@ -95,7 +95,7 @@
 
 (load "stdlib/lists.s")
 (load "stdlib/vectors.s")
-(load "stdlib/defstruct.s")
+(load "stdlib/defrecord.s")
 (load "stdlib/promises.s")
 (load "stdlib/streams.s")
 (load "stdlib/import.s")

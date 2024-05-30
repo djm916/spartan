@@ -1,16 +1,16 @@
 
 (in-package spartan.core)
 
-(defstruct promise (thunk has-value? value))
+(defrecord promise (thunk has-value value))
 
 (defmacro delay (exp)
-  `(make-promise (fun () ,exp) false nil))
+  `(make-promise (fun () ,exp) false void))
 
 (defun force (p)
   (if (not (promise? p))
     p)
-  (if (not (p 'has-value?))
+  (if (not (promise-has-value p))
     (do
-      (set! (p 'value) ((p 'thunk)))
-      (set! (p 'has-value?) true)))
-  (p 'value))
+      (promise-set-value! p ((promise-thunk p)))
+      (promise-set-has-value! p true)))
+  (promise-value p))

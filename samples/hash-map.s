@@ -1,28 +1,46 @@
 (load "stdlib/hash-map.s")
 
-(import spartan.hash-map :as hmap)
+(import spartan.hashmap :as hashmap)
 
 ; Test example
 
-(def h (hmap:make-hash-map string-hash =))
+(def h (hashmap:make-hashmap string-hash =))
 
-(print-line "hashmap? " (hmap:hash-map? h))
-(print-line "size = " (hmap:size h))
-(print-line "empty? " (hmap:empty? h))
+(print-line "hashmap? " (hashmap:hashmap? h))
 
-(hmap:insert! h "a" 1)
-(hmap:insert! h "b" 2)
-(hmap:insert! h "c" 3)
-(hmap:insert! h "d" 4)
-(hmap:insert! h "e" 5)
+(print-line "An empty hash map: ")
+(print-line "size = " (hashmap:size h))
+(print-line "empty? " (hashmap:empty? h))
 
-(print-line "a => " (hmap:find h "a"))
-(print-line "b => " (hmap:find h "b"))
-(print-line "c => " (hmap:find h "c"))
-(print-line "d => " (hmap:find h "d"))
-(print-line "e => " (hmap:find h "e"))
+(def elems '(("a" 1) ("b" 2) ("c" 3) ("d" 4) ("e" 5)))
 
-(print-line (hmap:entries h))
-(print-line (hmap:keys h))
-(print-line (hmap:values h))
-(print-line (hmap:size h))
+(print-line "Inserting " elems " ...")
+
+(for ((e elems (cdr e)))
+  ((null? e) void)
+  (let ((pair (car e)))
+    (hashmap:insert! h (car pair) (cadr pair))))
+
+(print-line "Key lookup:")
+
+(for ((e elems (cdr e)))
+  ((null? e) void)
+  (let ((pair (car e)))
+    (print-line (car pair) " => " (hashmap:find h (car pair)))))
+
+(print-line "entries = " (hashmap:entries h))
+(print-line "keys = " (hashmap:keys h))
+(print-line "values = " (hashmap:values h))
+(print-line "size = " (hashmap:size h))
+
+(print-line "Removing all keys...")
+
+(for ((e elems (cdr e)))
+  ((null? e) void)
+  (let ((pair (car e)))
+    (hashmap:remove! h (car pair))))
+
+(print-line "entries = " (hashmap:entries h))
+(print-line "keys = " (hashmap:keys h))
+(print-line "values = " (hashmap:values h))
+(print-line "size = " (hashmap:size h))

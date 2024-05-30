@@ -1,12 +1,8 @@
 package spartan.builtins;
 
+import spartan.data.*;
+import spartan.data.Void; // shadows java.lang.Void
 import spartan.runtime.VirtualMachine;
-import spartan.data.Primitive;
-import spartan.data.Signature;
-import spartan.data.Table;
-import spartan.data.Nil;
-import spartan.data.Int;
-import spartan.data.Bool;
 import spartan.errors.TypeMismatch;
 
 public final class TableLib

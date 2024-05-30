@@ -9,6 +9,9 @@ permits QualifiedSymbol
   private static int nextUniqueId;
   private final String name;    // full (qualified or unqualified) print name of the symbol  
   
+  /*
+     Define symbols for each of the special forms recognized by the compiler.
+  */
   public static final Symbol DEF = new Symbol("def");
   public static final Symbol DEFUN = new Symbol("defun");
   public static final Symbol DEFMACRO = new Symbol("defmacro");
@@ -40,11 +43,11 @@ permits QualifiedSymbol
   public static final Symbol Q_CAR = new QualifiedSymbol("spartan.core", "car");
   public static final Symbol Q_CDR = new QualifiedSymbol("spartan.core", "cdr");
   public static final Symbol Q_CONS = new QualifiedSymbol("spartan.core", "cons");
-  public static final Symbol Q_CONCAT = new QualifiedSymbol("spartan.core", "concat");
+  public static final Symbol Q_CONCAT = new QualifiedSymbol("spartan.core", "list-concat");
   public static final Symbol Q_SET_CAR = new QualifiedSymbol("spartan.core", "set-car!");
   public static final Symbol Q_SET_CDR = new QualifiedSymbol("spartan.core", "set-cdr!");
   public static final Symbol Q_SET_AT = new QualifiedSymbol("spartan.core", "set-at!");
-  public static final Symbol KW_AS = Symbol.of(":as");
+  //public static final Symbol KW_AS = Symbol.of(":as");
   
   /**
    * Returns an interned symbol with the given name.

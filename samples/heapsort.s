@@ -5,7 +5,7 @@
 
 (def N 20)
 
-(def random-ints (vector-unfold rand N))
+(def random-ints (vector-unfold (fun (i) (rand)) N))
 
 (def q (pq:make-priority-queue <))
 

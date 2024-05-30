@@ -63,6 +63,34 @@ public final class StringLib
     }
   };
   
+  /**
+  
+  // (string-ref str idx)
+  
+  public static final Primitive REF = new Primitive(Signature.fixed(2)) {
+    public void apply(VirtualMachine vm) {
+      if (!(vm.popArg() instanceof Text str && vm.popArg() instanceof IInt index))
+        throw new TypeMismatch();
+      vm.result = Text.get(index.intValue());
+      vm.popFrame();
+    }
+  };
+  
+  // (string-set! str idx val)
+  
+  public static final Primitive SET = new Primitive(Signature.fixed(3)) {
+    public void apply(VirtualMachine vm) {
+      if (!(vm.popArg() instanceof Text str && vm.popArg() instanceof IInt index))
+        throw new TypeMismatch();
+      var item = vm.popArg();
+      str.set(index.intValue(), item);
+      vm.result = Nil.VALUE;
+      vm.popFrame();
+    }
+  };
+  
+  */
+  
   // (string:length string)
   
   public static final Primitive LENGTH = new Primitive(Signature.fixed(1)) {

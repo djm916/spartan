@@ -1,6 +1,7 @@
 package spartan.builtins;
 
 import spartan.data.*;
+import spartan.data.Void; // shadows java.lang.Void
 import spartan.errors.TypeMismatch;
 import spartan.runtime.VirtualMachine;
 
@@ -24,7 +25,7 @@ public final class PortLib
       if (!(vm.popArg() instanceof Port port))
         throw new TypeMismatch();
       port.close();
-      vm.result = Nil.VALUE;
+      vm.result = Void.VALUE;
       vm.popFrame();
     }
   };
@@ -80,7 +81,7 @@ public final class PortLib
       if (!(vm.popArg() instanceof Port port && vm.popArg() instanceof IInt position))
         throw new TypeMismatch();
       port.seek(position.longValue());
-      vm.result = Nil.VALUE;
+      vm.result = Void.VALUE;
       vm.popFrame();
     }
   };

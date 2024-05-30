@@ -12,48 +12,56 @@ import spartan.errors.TypeMismatch;
 import spartan.errors.NoSuchElement;
 import spartan.runtime.VirtualMachine;
 
-final class EmptyList extends List
+final class Null extends List
 {
-  EmptyList()
+  public static final Null VALUE = new Null();
+  
+  @Override // Datum
+  public boolean boolValue()
   {
-    super(null, null);
+    return false;
   }
   
-  @Override
+  @Override // List
   public boolean isEmpty()
   {
     return true;
   }
   
-  @Override
+  @Override // List
   public Datum car()
   {
     throw new NoSuchElement();
   }
   
-  @Override
+  @Override // List
   public void setCar(Datum x)
   {
     throw new NoSuchElement();
   }
   
-  @Override
+  @Override // List
   public List cdr()
   {
     throw new NoSuchElement();
   }
   
-  @Override
+  @Override // List
   public void setCdr(List x)
   {
     throw new NoSuchElement();
   }
+  
+  private Null()
+  {
+    super(null, null);
+  }
 }
 
 public sealed class List implements Datum, ILen, IAssoc, IFun, Iterable<Datum>
-permits EmptyList
+permits Null
 {
-  public static final List EMPTY = new EmptyList();
+  public static final List EMPTY = Null.VALUE;
   
   public static class Builder
   {

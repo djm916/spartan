@@ -2,6 +2,7 @@ package spartan.compiling;
 
 import spartan.runtime.*;
 import spartan.data.*;
+import spartan.data.Void; // shadows java.lang.Void
 import spartan.parsing.SourceDatum;
 import spartan.parsing.PositionMap;
 import spartan.parsing.Position;
@@ -61,7 +62,7 @@ public class Compiler
   private static boolean isSelfEval(Datum exp)
   {
     return exp == List.EMPTY
-        || exp == Nil.VALUE
+        || exp == Void.VALUE
         || exp instanceof INum
         || exp instanceof Bool
         || exp instanceof Text
@@ -183,20 +184,20 @@ public class Compiler
   {
     if (i.depth() == 0)
       return new StoreLocal0(i.offset(),
-             new LoadConst(Nil.VALUE, next));
+             new LoadConst(Void.VALUE, next));
     else
       return new StoreLocal(i.depth(), i.offset(),
-             new LoadConst(Nil.VALUE, next));
+             new LoadConst(Void.VALUE, next));
   }
   
   private Inst compileSetGlobalVar(Symbol s, Inst next)
   {
     if (s instanceof QualifiedSymbol qs)
       return new StoreGlobal(Symbol.of(qs.packageName()), Symbol.of(qs.baseName()), new SourceInfo(qs, positionMap.get(qs)),
-             new LoadConst(Nil.VALUE, next));
+             new LoadConst(Void.VALUE, next));
     else
       return new StoreGlobal(spartan.Runtime.currentPackage().name(), s.intern(), new SourceInfo(s, positionMap.get(s)),
-             new LoadConst(Nil.VALUE, next));
+             new LoadConst(Void.VALUE, next));
   }
   
   private Inst compileDef(List exp, Scope scope, boolean tail, Inst next)
@@ -206,7 +207,7 @@ public class Compiler
     var init = exp.caddr();  
     return compile(init, scope, false,
            new BindGlobal(spartan.Runtime.currentPackage().name(), s.intern(), new SourceInfo(exp, positionMap.get(s)),
-           new LoadConst(Nil.VALUE, next)));
+           new LoadConst(Void.VALUE, next)));
   }
   
   /* Compile "defun" special form
@@ -271,7 +272,7 @@ public class Compiler
 
     var pred = exp.cadr();
     var sub = exp.caddr();
-    var alt = length == 4 ? exp.cadddr() : Nil.VALUE;
+    var alt = length == 4 ? exp.cadddr() : Void.VALUE;
 
     return compile(pred, scope, false,
            new Branch(compile(sub, scope, tail, next),
@@ -328,7 +329,7 @@ public class Compiler
   private Inst compileCondClauses(List clauses, Scope scope, boolean tail, Inst next)
   {
     if (clauses.isEmpty())
-      return new LoadConst(Nil.VALUE, next);
+      return new LoadConst(Void.VALUE, next);
 
     var clause = (List) clauses.car();
     var test = clause.car();
@@ -474,7 +475,7 @@ public class Compiler
     var extendedScope = scope.extend(vars);
 
     return new PushEnv(numBindings,
-           new LoadConst(Nil.VALUE,
+           new LoadConst(Void.VALUE,
            compileInitRecEnv(0, numBindings,
            compileRecursiveBindings(inits, 0, extendedScope,
            compileSequence(body, extendedScope, tail,
@@ -946,7 +947,7 @@ public class Compiler
     var jump = new Jump();
     var loop = compile(pred, scope, false,
                new Branch(compileSequence(body, scope, false, jump),
-                          new LoadConst(Nil.VALUE, next)));
+                          new LoadConst(Void.VALUE, next)));
     jump.setTarget(loop);
     return loop;
   }
@@ -1242,7 +1243,7 @@ public class Compiler
     var body = exp.cdddr();
     var macro = new Macro(makeProcedure(params, body, Scope.EMPTY));
     spartan.Runtime.currentPackage().bind(symbol.intern(), macro, () -> new MultipleDefinition(symbol, new SourceInfo(exp, positionMap.get(symbol))));
-    return new LoadConst(Nil.VALUE, next);
+    return new LoadConst(Void.VALUE, next);
   }
   
   /* Compile a macro call
@@ -1321,7 +1322,7 @@ public class Compiler
       err.setSource(new SourceInfo(exp, positionMap.get(exp)));
       throw err;
     }
-    return new LoadConst(Nil.VALUE, next);
+    return new LoadConst(Void.VALUE, next);
   }
   
   /* Compiles the "match" special form.

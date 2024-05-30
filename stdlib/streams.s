@@ -39,7 +39,7 @@
 
 ; Determine if a stream is empty
 
-(defun stream-empty? (s) (empty? (force s)))
+(defun stream-empty? (s) (null? (force s)))
 
 ; The empty stream
 
@@ -50,7 +50,7 @@
     (stream-cons (f (stream-car s)) (stream-map f (stream-cdr s)))))
 
 (defun stream-for-each (f s)
-  (if (stream-empty? s) nil
+  (if (stream-empty? s) void
     (do (f (stream-car s))
         (stream-for-each f (stream-cdr s)))))
 

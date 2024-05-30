@@ -3,7 +3,7 @@ package spartan.builtins;
 import spartan.data.Primitive;
 import spartan.data.Signature;
 import spartan.data.List;
-import spartan.data.Nil;
+import spartan.data.Void;
 import spartan.data.Int;
 import spartan.data.IInt;
 import spartan.data.Bool;
@@ -113,7 +113,7 @@ public final class ListLib
       if (!(vm.popArg() instanceof List list))
         throw new TypeMismatch();
       list.setCar(vm.popArg());
-      vm.result = Nil.VALUE;
+      vm.result = Void.VALUE;
       vm.popFrame();
     }
   };
@@ -123,7 +123,7 @@ public final class ListLib
       if (!(vm.popArg() instanceof List list && vm.popArg() instanceof List cdr))
         throw new TypeMismatch();
       list.setCdr(cdr);
-      vm.result = Nil.VALUE;
+      vm.result = Void.VALUE;
       vm.popFrame();
     }
   };
@@ -142,7 +142,7 @@ public final class ListLib
       if (!(vm.popArg() instanceof List list && vm.popArg() instanceof IInt index && vm.popArg() instanceof List tail))
         throw new TypeMismatch();
       list.setTail(index.intValue(), tail);
-      vm.result = Nil.VALUE;
+      vm.result = Void.VALUE;
       vm.popFrame();
     }
   };
@@ -156,11 +156,9 @@ public final class ListLib
     }
   };
   
-  public static final Primitive IS_EMPTY = new Primitive(Signature.fixed(1)) {
+  public static final Primitive IS_NULL = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof List list))
-        throw new TypeMismatch();
-      vm.result = Bool.valueOf(list.isEmpty());
+      vm.result = Bool.valueOf(vm.popArg() == List.EMPTY);
       vm.popFrame();
     }
   };

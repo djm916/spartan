@@ -8,7 +8,7 @@ public final class TypeRegistry
   private static int nextTypeId = 0;
   private static final Map<String, Type> typeMap = new IdentityHashMap<>();
   
-  public static final Type NIL_TYPE = register("nil");
+  public static final Type VOID_TYPE = register("void");
   public static final Type BOOLEAN_TYPE = register("boolean");
   public static final Type SYMBOL_TYPE = register("symbol");
   public static final Type INTEGER_TYPE = register("integer");

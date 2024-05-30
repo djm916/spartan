@@ -2,7 +2,7 @@ package spartan.data;
 
 public final class QualifiedSymbol extends Symbol
 {
-  private final String packageName;   // namespace (qualified) portion
+  private final String packageName;   // package (qualified) portion
   private final String baseName;    // base (unqualified) portion
   
   /**
