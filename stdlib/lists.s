@@ -7,13 +7,21 @@
 
 (in-package spartan.core)
 
-(defun list-append (xs x)
-  (if (null? xs) (list x)
-    (cons (car xs) (list-append (cdr xs) x))))
+(defun list-empty? (x)
+  (and (list? x) (not (null? x))))
+
+(defun list-ref (xs i)
+  (car (list-drop i xs)))
+
+(defun list-set! (xs i e)
+  (set-car! (list-drop i xs)))
 
 (defun list-concat (xs ys)
   (if (null? xs) ys
     (cons (car xs) (list-concat (cdr xs) ys))))
+
+(defun list-append (xs e)
+  (list-concat xs (list e)))
 
 (defun list-reverse (xs)
   (rec loop ((xs xs) (sx ()))
@@ -32,7 +40,7 @@
 
 (defun list-flat-map (f xs)
   (apply list-concat
-         (list-map (fun (x) (list-map f x)) xs)))
+         (list-map (fun (xs) (list-map f xs)) xs)))
 
 (defun list-for-each (f xs)
   (if (not (null? xs))
@@ -46,21 +54,21 @@
       (list-filter f (cdr xs)))))
 
 (defun list-filter! (f xs)
-  (cond ((null? xs)  ())
-        ((f (car xs))      (set-cdr! xs (list-filter! f (cdr xs))) xs)
-        (else              (list-filter! f (cdr xs)))))
+  (cond [(null? xs)    ()]
+        [(f (car xs))  (set-cdr! xs (filter! f (cdr xs))) xs]
+        [else          (list-filter! f (cdr xs))]))
 
 (defun list-find (f xs)
-  (if (null? xs) false
+  (if (null? xs) void
     (if (f (car xs))
       (car xs)
       (list-find f (cdr xs)))))
 
 (defun list-find-index (f xs)
-  (rec loop ((i 0) (xs xs))
-    (cond ((null? xs)  -1)
-          ((f (car xs))      i)
-          (else              (loop (+ 1 i) (cdr xs))))))
+  (rec loop [(i 0) (xs xs)]
+    (cond [(null? xs)    -1]
+          [(f (car xs))  i]
+          [else          (loop (+ 1 i) (cdr xs))])))
 
 (defun list-contains? (x xs)
   (>= (list-find-index (fun (y) (= x y)) xs) 0))
@@ -100,10 +108,10 @@
 (defun list-fold-right (f i xs)
   (if (null? xs) i
     (f (car xs) (list-fold-right f i (cdr xs)))))
-  
+
 (defun list-unfold-left (gen)
   (let ((next-elem (gen)))
-    (if (nil? next-elem) ()
+    (if (void? next-elem) ()
         (cons next-elem (list-unfold-left gen)))))
 
 (defun list-unfold-right (gen)
@@ -114,7 +122,7 @@
   (loop ()))
 
 (defun list-enumerate (xs i)
-  (if (empty? xs) ()
+  (if (null? xs) ()
     (cons (list i (car xs))
           (list-enumerate (cdr xs) (+ 1 i)))))
 

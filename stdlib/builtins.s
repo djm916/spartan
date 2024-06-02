@@ -6,6 +6,25 @@
 
 (set! spartan.core:*package* (find-package 'spartan.core))
 
+(defun %quasiquote (exp)
+  (defun unquote? (form)
+    (and (list? form) (not (null? form)) (symbol? (car form)) (= (car form) 'unquote)))
+  (defun unquote-splicing? (form)
+    (and (list? form) (not (null? form)) (symbol? (car form)) (= (car form) 'unquote-splicing)))
+  (cond [(null? exp) ()]
+        [(not (list? exp)) (list 'quote exp)]
+        [else
+          (let [(subexp (car exp))]
+            (cond [(unquote? subexp)
+                     (list 'spartan.core:cons (cadr subexp) (%quasiquote (cdr exp)))]
+                  [(unquote-splicing? subexp)
+                     (list 'spartan.core:list-concat (cadr subexp) (%quasiquote (cdr exp)))]
+                  [else
+                     (list 'spartan.core:cons (%quasiquote (car exp)) (%quasiquote (cdr exp)))]))]))
+
+(defmacro quasiquote (exp)
+  (%quasiquote exp))
+
 ;(defmacro in-package (package-name)
 ;  `(let ((package (try-find-package ',package-name)))
 ;     (if (nil? package)
@@ -26,13 +45,11 @@
 
 (defmacro when (test & body)
   `(if ,test
-     (do ,@body)
-     nil))
+     (do ,@body)))
 
 (defmacro unless (test & body)
-  `(if ,test
-    nil
-    (do ,@body)))
+  `(if (not (,test))
+     (do ,@body)))
 
 (defmacro swap! (a b)
   (let ((tmp (gensym)))
@@ -52,10 +69,16 @@
       `(,(car fs) ,(loop (cdr fs)))))
   `(fun (,x) ,(loop (list-reverse fs))))
 
+; (->> x (f ...)) => (f ... x)
+; (->> x (f ...) (g ...)) => (g ... (f ... x))
+; (->> x (f ...) (g ...) (h ...)) => (h ... (g ... (f ... x)))
 
 (defmacro ->> (arg form & forms)
-  (let ((result (list-append form arg)))
-    (list-fold-right list-append result forms)))
+  (rec loop [(result (list-append form arg))
+             (forms forms)]
+    (if (null? forms)
+      result
+      (loop (list-append (car forms) result) (cdr forms)))))
 
 ; (curry () ...) => (fun () ...)
 ; (curry (x) ...) => (fun (x) ...)
@@ -73,7 +96,7 @@
     
 (defun min (x & xs)
   (let ((lo x))
-    (while (not (empty? xs))
+    (while (not (null? xs))
       (if (< (car xs) lo)
         (set! lo (car xs)))
       (set! xs (cdr xs)))
@@ -81,7 +104,7 @@
 
 (defun max (x & xs)
   (let ((hi x))
-    (while (not (empty? xs))
+    (while (not (null? xs))
       (if (> (car xs) hi)
         (set! hi (car xs)))
       (set! xs (cdr xs)))

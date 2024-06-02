@@ -7,7 +7,7 @@
 ; of recursive variadic procedures with "apply".
 
 (defun sum (init & xs)
-  (if (empty? xs) init
+  (if (null? xs) init
     (apply sum (cons (+ init (car xs)) (cdr xs)))))
 
 (print-line "(sum 0) = " (sum 0))

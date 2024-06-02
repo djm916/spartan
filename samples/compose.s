@@ -18,3 +18,5 @@
   (->> (range 1 100)
        (list-map square)
        (list-fold-left + 0)))
+
+(print-line "sum of squares 1..100 = " (list-fold-left + 0 (list-map square (range 1 100))))

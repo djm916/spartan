@@ -589,8 +589,7 @@ public class Compiler
   
   /* Check that a parameter list is well-formed
    * 
-   * <parameter-list> => "(" <symbol>* <rest-parameter>? ")"
-   * <rest-parameter> => "&" <symbol>
+   * <parameter-list> => "(" <symbol>* ("&" <symbol>)? ")"
    */
   private boolean checkParamListForm(List params)
   {
@@ -1260,7 +1259,7 @@ public class Compiler
     var position = positionMap.get(exp);
     var source = new SourceInfo(exp, position);
     var macroName = (Symbol)exp.car();    
-    var args = exp.cdr();
+    var args = quoteList(exp.cdr());
     var xform = macro.expand(vm, args, source);
     
     if (Config.LOG_DEBUG)
@@ -1437,7 +1436,7 @@ public class Compiler
     Map.entry(Symbol.SET, this::compileSet),
     Map.entry(Symbol.WHILE, this::compileWhile),
     Map.entry(Symbol.QUOTE, this::compileQuote),
-    Map.entry(Symbol.QUASIQUOTE, this::compileQuasiquote),
+    //Map.entry(Symbol.QUASIQUOTE, this::compileQuasiquote),
     Map.entry(Symbol.OR, this::compileOr),
     Map.entry(Symbol.AND, this::compileAnd)
     //Map.entry(Symbol.CALL_CC, this::compileCallCC)

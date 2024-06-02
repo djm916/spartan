@@ -34,7 +34,7 @@
   (def done false)        ; Set to true when the method converges, ending the iteration
                           ; (i.e., the difference between successive approximations
                           ;  is less than some small tolerance value)
-  (def x1 nil)            ; If the method converges, x1 is a better estimate than x0,
+  (def x1 void)           ; If the method converges, x1 is a better estimate than x0,
                           ; and also stores the final result
   ; Iterate Newton's method
   (while (not done)
