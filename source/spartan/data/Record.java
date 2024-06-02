@@ -47,6 +47,11 @@ public final class Record implements Datum
     slots[slot] = value;
   }
   
+  public Datum[] fieldValues()
+  {
+    return slots;
+  }
+  
   private final Type type;
   private final Datum[] slots;
 }

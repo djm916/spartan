@@ -1436,7 +1436,7 @@ public class Compiler
     Map.entry(Symbol.SET, this::compileSet),
     Map.entry(Symbol.WHILE, this::compileWhile),
     Map.entry(Symbol.QUOTE, this::compileQuote),
-    //Map.entry(Symbol.QUASIQUOTE, this::compileQuasiquote),
+    Map.entry(Symbol.QUASIQUOTE, this::compileQuasiquote),
     Map.entry(Symbol.OR, this::compileOr),
     Map.entry(Symbol.AND, this::compileAnd)
     //Map.entry(Symbol.CALL_CC, this::compileCallCC)

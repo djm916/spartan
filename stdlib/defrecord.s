@@ -34,6 +34,14 @@
 (defun generate-mutator-name (name field)
   (string->symbol (string-concat (symbol->string name) "-set-" (symbol->string field) "!")))
 
+; Generate the name of a record destructor
+(defun generate-destructor-name (name)
+  (string->symbol (string-concat "unpack-" (symbol->string name))))
+  
+; Generate the name of a record matcher
+(defun generate-matcher-name (name)
+  (string->symbol (string-concat "with-" (symbol->string name))))
+
 (defmacro defrecord (name fields)
   `(do
      ; Register struct type
@@ -45,5 +53,9 @@
      ; Define accessors
      ,@(spartan.core:list-map (fun (field) `(def ,(generate-accessor-name name field) (spartan.core:record-accessor ',name ',field))) fields)
      ; Define mutators
-     ,@(spartan.core:list-map (fun (field) `(def ,(generate-mutator-name name field) (spartan.core:record-mutator ',name ',field))) fields)))
-
+     ,@(spartan.core:list-map (fun (field) `(def ,(generate-mutator-name name field) (spartan.core:record-mutator ',name ',field))) fields)
+     ; Define destructor
+     (def ,(generate-destructor-name name) (spartan.core:record-destructor ',name))))
+     ; Define matcher
+     ;(defmacro ,(generate-matcher-name name) (arg vars & body)
+      ; `(apply (fun ,vars ,@body) (,(generate-destructor-name name) ,arg)))))

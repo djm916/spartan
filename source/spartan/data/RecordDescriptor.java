@@ -107,6 +107,19 @@ public class RecordDescriptor
     };
   }
   
+  public IFun destructor()
+  {
+    final int typeId = type().id();
+    return new Primitive(Signature.fixed(1)) {
+      public void apply(VirtualMachine vm) {
+        if (!(vm.popArg() instanceof Record record && record.type().id() == typeId))
+          throw new TypeMismatch();
+        vm.result = List.of(record.fieldValues());
+        vm.popFrame();
+      }
+    };
+  }
+  
   private static final Map<Symbol, RecordDescriptor> registry = new IdentityHashMap<>();
   private final Symbol name;
   private final Type type;

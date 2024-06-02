@@ -551,7 +551,19 @@ public final class CoreLib
       vm.popFrame();
     }
   };
-    
+  
+  // (record-destructor record-name)
+  
+  public static final Primitive RECORD_DESTRUCTOR = new Primitive(Signature.fixed(1)) {
+    public void apply(VirtualMachine vm) {
+      if (!(vm.popArg() instanceof Symbol name))
+        throw new TypeMismatch();
+      var rtd = RecordDescriptor.forName(name).orElseThrow(() -> new Error("record type does not exist"));
+      vm.result = rtd.destructor();
+      vm.popFrame();
+    }
+  };
+  
   /*
   public static final MultiMethod GENERIC_REPR = new MultiMethod(Signature.fixed(1)) {
     {

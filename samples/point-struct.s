@@ -10,3 +10,22 @@
 (point-set-x! p 1.0)
 (point-set-y! p 2.0)
 (print-line "p = " (point->string p))
+
+; Experiment with record destructuring
+
+; (record-destructor 'point) returns a procedure of 1 argument, a record of
+; type point, and returns the values of its fields as a list, in the order
+; declared in the definition of the point record
+;(def unpack-point (record-destructor 'point))
+
+;(defmacro with-point (exp & body)
+;  `(apply (fun (x y) ,@body) (unpack-point ,exp)))
+
+;(with-point p
+;  (print-line "in with-point, p = (" x ", " y ")"))
+
+(defmacro with-point (exp vars & body)
+  `(apply (fun ,vars ,@body) (unpack-point ,exp)))
+
+(with-point p (a b)
+  (print-line "in with-point, p = (" a ", " b ")"))

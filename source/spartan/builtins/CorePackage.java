@@ -189,6 +189,7 @@ public final class CorePackage extends spartan.data.Package
     bind(Symbol.of("record-predicate"), CoreLib.RECORD_PREDICATE);
     bind(Symbol.of("record-accessor"), CoreLib.RECORD_ACCESSOR);
     bind(Symbol.of("record-mutator"), CoreLib.RECORD_MUTATOR);    
+    bind(Symbol.of("record-destructor"), CoreLib.RECORD_DESTRUCTOR);
     
     /* Symbol related procedures */
     
