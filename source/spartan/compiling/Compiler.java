@@ -1070,7 +1070,7 @@ public class Compiler
     if (exp.length() != 2)
       throw malformedExp(exp);
 
-    var xform = transformQuasiquote(exp.cadr());
+    var xform = transformQuasiquote(exp.cadr(), 0);
     
     if (Config.LOG_DEBUG)
       log.info(() -> String.format("quasiquote transform: %s => %s", exp.repr(), xform.repr()));
@@ -1086,50 +1086,131 @@ public class Compiler
 
   // Reduce a quasiquote form (quasiquote x) to equivalent list form.
 
-  private List transformQuasiquote(Datum exp)
+/*
+  private List transformQuasiquote(Datum exp, int level)
   {
-    // (quasiquote x) = x, for self-evaluating x
-    
+    if (!(exp instanceof List list)) {
+      return List.of(Symbol.QUOTE, exp);
+    }
+    else if (list.car() instanceof Symbol s && s.equals(Symbol.QUASIQUOTE)) {
+      return transformQuasiquote(list.cadr(), level + 1);
+    }
+    else if (list.car() instanceof Symbol s && s.equals(Symbol.UNQUOTE)) {
+      if (level == 0)
+        return list.cdr();
+      return transformQuasiquote(list.cadr(), level - 1);
+    }
+    else if (list.car() instanceof List inner && inner.car() instanceof Symbol s && s.equals(Symbol.UNQUOTE_SPLICING)) {
+      if (level == 0)
+        return List.cons(Symbol.Q_CONCAT,
+               List.cons(inner.cadr(),
+               List.cons(transformQuasiquote(list.cdr(), level),
+               List.EMPTY)));
+      return List.cons(Symbol.Q_CONCAT,
+             List.cons(transformQuasiquote(inner.cadr(), level - 1),
+             List.cons(transformQuasiquote(list.cdr(), level),
+             List.EMPTY)));
+    }
+    else {
+      return List.cons(Symbol.Q_CONS,
+             List.cons(transformQuasiquote(list.car(), level),
+             List.cons(transformQuasiquote(list.cdr(), level),
+             List.EMPTY)));
+    }
+  }
+*/
+
+  /**
+   * Transform a quasiquoted expression
+   * 
+   * Let QQ(exp, N) denote the quasiquote transformation of exp with nesting
+   * level N. Then QQ is defined as follows:
+   *
+   * QQ(x, N) => (quote x), for non-list value x
+   * QQ(((unquote x) xs...), 0) => (cons x QQ(xs..., 0))
+   * QQ(((unquote x) xs...), N) => (cons QQ((unquote x), N-1) QQ(xs..., N)), N > 0
+   * QQ(((unquote-splicing x) xs...), 0) => (concat x QQ(xs..., 0))
+   * QQ(((unquote-splicing x) xs...), N) => (concat QQ((unquote-splicing x), N-1) QQ(xs..., N)), N > 0
+   * QQ(((quasiquote x) xs...), N) => (cons QQ((quasiquote x), N+1) QQ(xs..., N))
+   * QQ((x xs...), N) => (cons QQ(x, N) QQ(xs..., N))
+   */
+  
+  private List transformQuasiquote(Datum exp, int level)
+  {
     if (exp == List.EMPTY)
       return List.EMPTY;
+    
+    // (quasiquote<N> x) => (quote x), for non-list x
     
     if (!(exp instanceof List list))
       return List.of(Symbol.QUOTE, exp);
     
-    // Check for the unquote and unquote-splicing forms
+    // Check for unquote, unquote-splicing, and nested quasiquote forms
     
     if (list.car() instanceof List form && !form.isEmpty())
-    {      
-      // (quasiquote (unquote x) xs...) => (cons x (quasiquote xs...))
-      
+    {
       if (form.car() instanceof Symbol s && s.equals(Symbol.UNQUOTE)) {
         if (form.length() != 2)
-          throw malformedExp(exp);
+          throw malformedExp(form);
+        
+        // (quasiquote<0> ((unquote x) xs...)) => (cons x (quasiquote<0> xs...))
+        
+        if (level == 0) {
+          return List.cons(Symbol.Q_CONS,
+                 List.cons(form.cadr(),
+                 List.cons(transformQuasiquote(list.cdr(), 0),
+                 List.EMPTY)));
+        }
+        
+        // (quasiquote<N> ((unquote x) xs...)) => (cons (quasiquote<N-1> (unquote x)) (quasiquote<N> xs...))
+        
         return List.cons(Symbol.Q_CONS,
-               List.cons(form.cadr(),
-               List.cons(transformQuasiquote(list.cdr()),
+               List.cons(transformQuasiquote(form, level - 1),
+               List.cons(transformQuasiquote(list.cdr(), level),
                List.EMPTY)));
       }
 
-      // (quasiquote (unquote-splicing x) xs...) => (concat x (quasiquote xs...))    
-      
       if (form.car() instanceof Symbol s && s.equals(Symbol.UNQUOTE_SPLICING)) {
         if (form.length() != 2)
           throw malformedExp(exp);
-        return List.cons(Symbol.Q_CONCAT,
-               List.cons(form.cadr(),
-               List.cons(transformQuasiquote(list.cdr()),
+        
+        // (quasiquote<0> ((unquote-splicing x) xs...)) => (concat x (quasiquote<0> xs...))
+        
+        if (level == 0) {
+          return List.cons(Symbol.Q_CONCAT,
+                 List.cons(form.cadr(),
+                 List.cons(transformQuasiquote(list.cdr(), level),
+                 List.EMPTY)));
+        }
+        
+        // (quasiquote<N> ((unquote-splicing x) xs...)) => (concat (quasiquote<N-1> (unquote-splicing x)) (quasiquote<N> xs...))
+        
+        return List.cons(Symbol.Q_CONS,
+               List.cons(transformQuasiquote(form, level - 1),
+               List.cons(transformQuasiquote(list.cdr(), level),
+               List.EMPTY)));
+      }
+      
+      // (quasiquote<N> ((quasiquote x) xs...)) => (cons (quasiquote<N+1> (quasiquote x)) (quasiquote<N> xs...))
+
+      if (form.car() instanceof Symbol s && s.equals(Symbol.QUASIQUOTE)) {
+        if (form.length() != 2)
+          throw malformedExp(exp);
+
+        return List.cons(Symbol.Q_CONS,
+               List.cons(transformQuasiquote(form, level + 1),
+               List.cons(transformQuasiquote(list.cdr(), level),
                List.EMPTY)));
       }
     }
     
     // General case: recursively transform the car and cdr of the list
     
-    // (quasiquote x xs...) => (cons (quasiquote x) (quasiquote xs...))
+    // (quasiquote<N> (x xs...)) => (cons (quasiquote<N> x) (quasiquote<N> xs...))
 
     return List.cons(Symbol.Q_CONS,
-           List.cons(transformQuasiquote(list.car()),
-           List.cons(transformQuasiquote(list.cdr()),
+           List.cons(transformQuasiquote(list.car(), level),
+           List.cons(transformQuasiquote(list.cdr(), level),
            List.EMPTY)));
   }
   

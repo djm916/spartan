@@ -24,8 +24,9 @@
 ;(with-point p
 ;  (print-line "in with-point, p = (" x ", " y ")"))
 
-(defmacro with-point (exp vars & body)
-  `(apply (fun ,vars ,@body) (unpack-point ,exp)))
+;(defmacro with-point (exp vars & body)
+;  `(apply (fun ,vars ,@body) (unpack-point ,exp)))
 
-(with-point p (a b)
-  (print-line "in with-point, p = (" a ", " b ")"))
+(with-point (make-point 1.0 2.0) (a b)
+  (print-line "in with-point")
+  (print-line "p = (" a ", " b ")"))

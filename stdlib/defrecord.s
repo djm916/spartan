@@ -55,7 +55,9 @@
      ; Define mutators
      ,@(spartan.core:list-map (fun (field) `(def ,(generate-mutator-name name field) (spartan.core:record-mutator ',name ',field))) fields)
      ; Define destructor
-     (def ,(generate-destructor-name name) (spartan.core:record-destructor ',name))))
+     (def ,(generate-destructor-name name) (spartan.core:record-destructor ',name))
      ; Define matcher
      ;(defmacro ,(generate-matcher-name name) (arg vars & body)
-      ; `(apply (fun ,vars ,@body) (,(generate-destructor-name name) ,arg)))))
+      ; `(apply (fun ,',vars ,',@body) (unpack-point ,',arg)))))
+     (defmacro ,(generate-matcher-name name) (arg vars & body)
+       `(apply (fun ,vars ,@body) (unpack-point ,arg)))))

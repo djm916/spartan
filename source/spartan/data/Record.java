@@ -14,16 +14,16 @@ public final class Record implements Datum
    * @param type The record's type
    * @param values The initial values for the record's fields
    */
-  public Record(Type type, Datum... values)
+  public Record(RecordDescriptor rtd, Datum... values)
   {
-    this.type = type;
+    this.rtd = rtd;
     this.slots = values;
   }
   
   @Override // Datum
   public Type type()
   {
-    return type;
+    return rtd.type();
   }
   
   /**
@@ -52,6 +52,6 @@ public final class Record implements Datum
     return slots;
   }
   
-  private final Type type;
+  private final RecordDescriptor rtd;
   private final Datum[] slots;
 }

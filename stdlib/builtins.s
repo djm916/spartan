@@ -22,8 +22,11 @@
                   [else
                      (list 'spartan.core:cons (%quasiquote (car exp)) (%quasiquote (cdr exp)))]))]))
 
-(defmacro quasiquote (exp)
-  (%quasiquote exp))
+
+; quasiquote macro
+; NOTE: turned off; using builtin quasiquote special form!
+;(defmacro quasiquote (exp)
+;  (%quasiquote exp))
 
 ;(defmacro in-package (package-name)
 ;  `(let ((package (try-find-package ',package-name)))

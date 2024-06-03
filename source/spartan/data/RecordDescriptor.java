@@ -57,11 +57,11 @@ public class RecordDescriptor
   
   public IFun accessor(Symbol field)
   {
-    final int typeId = type().id();
+    final var rtd = this;
     final int slot = slot(field);
     return new Primitive(Signature.fixed(1)) {
       public void apply(VirtualMachine vm) {
-        if (!(vm.popArg() instanceof Record record && record.type().id() == typeId))
+        if (!(vm.popArg() instanceof Record record && record.type().id() == rtd.type().id()))
           throw new TypeMismatch();
         vm.result = record.get(slot);
         vm.popFrame();
@@ -71,11 +71,11 @@ public class RecordDescriptor
   
   public IFun mutator(Symbol field)
   {
-    final int typeId = type().id();
+    final var rtd = this;
     final int slot = slot(field);
     return new Primitive(Signature.fixed(2)) {
       public void apply(VirtualMachine vm) {
-        if (!(vm.popArg() instanceof Record record && record.type().id() == typeId))
+        if (!(vm.popArg() instanceof Record record && record.type().id() == rtd.type().id()))
           throw new TypeMismatch();
         record.set(slot, vm.popArg());
         vm.result = Void.VALUE;
@@ -86,11 +86,11 @@ public class RecordDescriptor
   
   public IFun constructor()
   {
-    final var type = type();
+    final var rtd = this;
     final int numSlots = numSlots();
     return new Primitive(Signature.fixed(numSlots)) {
       public void apply(VirtualMachine vm) {
-        vm.result = new Record(type, vm.popRestArgs().toArray());
+        vm.result = new Record(rtd, vm.popRestArgs().toArray());
         vm.popFrame();
       }
     };
@@ -98,10 +98,10 @@ public class RecordDescriptor
   
   public IFun predicate()
   {
-    final int typeId = type().id();
+    final var rtd = this;
     return new Primitive(Signature.fixed(1)) {
       public void apply(VirtualMachine vm) {
-        vm.result = Bool.valueOf(vm.popArg() instanceof Record record && record.type().id() == typeId);
+        vm.result = Bool.valueOf(vm.popArg() instanceof Record record && record.type().id() == rtd.type().id());
         vm.popFrame();
       }
     };
@@ -109,10 +109,10 @@ public class RecordDescriptor
   
   public IFun destructor()
   {
-    final int typeId = type().id();
+    final var rtd = this;
     return new Primitive(Signature.fixed(1)) {
       public void apply(VirtualMachine vm) {
-        if (!(vm.popArg() instanceof Record record && record.type().id() == typeId))
+        if (!(vm.popArg() instanceof Record record && record.type().id() == rtd.type().id()))
           throw new TypeMismatch();
         vm.result = List.of(record.fieldValues());
         vm.popFrame();
