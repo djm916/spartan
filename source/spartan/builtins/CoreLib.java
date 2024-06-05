@@ -486,79 +486,91 @@ public final class CoreLib
     }
   };
   
-  // (register-record-type record-name fields)
+  // (make-record-type record-name fields)
   
-  public static final Primitive REGISTER_RECORD_TYPE = new Primitive(Signature.fixed(2)) {
+  public static final Primitive MAKE_RECORD_TYPE = new Primitive(Signature.fixed(2)) {
+    private void validateFields(List fields) {
+      for (; !fields.isEmpty(); fields = fields.cdr()) {
+        if (!(fields.car() instanceof Symbol f))
+          throw new TypeMismatch();
+        if (!f.isSimple())
+          throw new InvalidArgument();
+      }
+    }
+    private Symbol fullName(Symbol baseName) {
+      return new QualifiedSymbol(spartan.Runtime.currentPackage().name().name(), baseName.name()).intern();
+    }
+    private Symbol[] fieldArray(List fields) {
+      return fields.stream().map(f -> (Symbol)f).toArray(Symbol[]::new);
+    }
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Symbol name))
         throw new TypeMismatch();
       if (!(vm.popArg() instanceof List fields))
         throw new TypeMismatch();
-      RecordDescriptor.register(name, fields);
-      vm.result = Void.VALUE;
+      if (!name.isSimple())
+        throw new InvalidArgument();
+      validateFields(fields);
+      var rtd = new RecordDescriptor(fullName(name), fieldArray(fields));
+      vm.result = rtd;
       vm.popFrame();
     }
   };
   
-  // (record-constructor record-name)
+  // (record-constructor rtd)
   
   public static final Primitive RECORD_CONSTRUCTOR = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof Symbol name))
+      if (!(vm.popArg() instanceof RecordDescriptor rtd))
         throw new TypeMismatch();
-      var rtd = RecordDescriptor.forName(name).orElseThrow(() -> new Error("record type does not exist"));
       vm.result = rtd.constructor();
       vm.popFrame();
     }
   };
   
-  // (record-predicate record-name)
+  // (record-predicate rtd)
   
   public static final Primitive RECORD_PREDICATE = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof Symbol name))
+      if (!(vm.popArg() instanceof RecordDescriptor rtd))
         throw new TypeMismatch();
-      var rtd = RecordDescriptor.forName(name).orElseThrow(() -> new Error("record type does not exist"));
       vm.result = rtd.predicate();
       vm.popFrame();
     }
   };
 
-  // (record-accessor record-name field-name)
+  // (record-accessor rtd field-name)
   
   public static final Primitive RECORD_ACCESSOR = new Primitive(Signature.fixed(2)) {
     public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof Symbol name))
+      if (!(vm.popArg() instanceof RecordDescriptor rtd))
         throw new TypeMismatch();
       if (!(vm.popArg() instanceof Symbol field))
         throw new TypeMismatch();
-      var rtd = RecordDescriptor.forName(name).orElseThrow(() -> new Error("record type does not exist"));
       vm.result = rtd.accessor(field);
       vm.popFrame();
     }
   };
   
-  // (record-mutator record-name field-name)
+  // (record-mutator rtd field-name)
   
   public static final Primitive RECORD_MUTATOR = new Primitive(Signature.fixed(2)) {
     public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof Symbol name))
+      if (!(vm.popArg() instanceof RecordDescriptor rtd))
         throw new TypeMismatch();
       if (!(vm.popArg() instanceof Symbol field))
         throw new TypeMismatch();
-      var rtd = RecordDescriptor.forName(name).orElseThrow(() -> new Error("record type does not exist"));
       vm.result = rtd.mutator(field);
       vm.popFrame();
     }
   };
   
-  // (record-destructor record-name)
+  // (record-destructor rtd)
   
   public static final Primitive RECORD_DESTRUCTOR = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof Symbol name))
+      if (!(vm.popArg() instanceof RecordDescriptor rtd))
         throw new TypeMismatch();
-      var rtd = RecordDescriptor.forName(name).orElseThrow(() -> new Error("record type does not exist"));
       vm.result = rtd.destructor();
       vm.popFrame();
     }

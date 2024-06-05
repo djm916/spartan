@@ -23,7 +23,7 @@ public final class Record implements Datum
   @Override // Datum
   public Type type()
   {
-    return rtd.type();
+    return rtd.instanceType();
   }
   
   /**

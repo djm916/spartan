@@ -3,56 +3,49 @@ package spartan.data;
 import java.util.Map;
 import java.util.IdentityHashMap;
 import java.util.Optional;
+import java.util.Set;
 import spartan.errors.MultipleDefinition;
 import spartan.errors.TypeMismatch;
 import spartan.errors.NoSuchElement;
 import spartan.runtime.VirtualMachine;
 
-public class RecordDescriptor
+public class RecordDescriptor implements Datum
 {
-  public static Optional<RecordDescriptor> forName(Symbol name)
+  public RecordDescriptor(Symbol name, Symbol... fields)
   {
-    return Optional.ofNullable(registry.get(name));
+    this.instanceType = TypeRegistry.register(name);
+    this.fieldSlotMap = new IdentityHashMap<>(fields.length);
+    for (int i = 0; i < fields.length; ++i)
+      fieldSlotMap.put(fields[i], i);
   }
   
-  public static RecordDescriptor register(Symbol name, List fields)
+  @Override // Datum
+  public Type type()
   {
-    if (registry.containsKey(name))
-      throw new MultipleDefinition(name);
-    var numSlots = fields.length();
-    var result = new RecordDescriptor(name, numSlots);
-    for (; !fields.isEmpty(); fields = fields.cdr()) {
-      if (!(fields.car() instanceof Symbol field))
-        throw new TypeMismatch();
-      result.slotMap.put(field, result.slotMap.size());
-    }
-    registry.put(name, result);
-    return result;
-  }
-    
-  private RecordDescriptor(Symbol name, int numSlots)
-  {
-    this.name = name;
-    this.type = TypeRegistry.register(name.str().intern());
-    this.slotMap = new IdentityHashMap<>(numSlots);
+    return TypeRegistry.RECORD_DESC_TYPE;
   }
   
-  int slot(Symbol field)
+  public Type instanceType()
   {
-    var offset = slotMap.get(field);
+    return instanceType;
+  }
+  
+  public int slot(Symbol field)
+  {
+    var offset = fieldSlotMap.get(field);
     if (offset == null)
       throw new NoSuchElement();
     return offset;
   }
   
-  int numSlots()
+  public int numFields()
   {
-    return slotMap.size();
+    return fieldSlotMap.size();
   }
   
-  Type type()
+  public Set<Symbol> fieldNames()
   {
-    return type;
+    return fieldSlotMap.keySet();
   }
   
   public IFun accessor(Symbol field)
@@ -61,7 +54,7 @@ public class RecordDescriptor
     final int slot = slot(field);
     return new Primitive(Signature.fixed(1)) {
       public void apply(VirtualMachine vm) {
-        if (!(vm.popArg() instanceof Record record && record.type().id() == rtd.type().id()))
+        if (!(vm.popArg() instanceof Record record && record.type().id() == rtd.instanceType.id()))
           throw new TypeMismatch();
         vm.result = record.get(slot);
         vm.popFrame();
@@ -75,7 +68,7 @@ public class RecordDescriptor
     final int slot = slot(field);
     return new Primitive(Signature.fixed(2)) {
       public void apply(VirtualMachine vm) {
-        if (!(vm.popArg() instanceof Record record && record.type().id() == rtd.type().id()))
+        if (!(vm.popArg() instanceof Record record && record.type().id() == rtd.instanceType.id()))
           throw new TypeMismatch();
         record.set(slot, vm.popArg());
         vm.result = Void.VALUE;
@@ -87,8 +80,7 @@ public class RecordDescriptor
   public IFun constructor()
   {
     final var rtd = this;
-    final int numSlots = numSlots();
-    return new Primitive(Signature.fixed(numSlots)) {
+    return new Primitive(Signature.fixed(rtd.numFields())) {
       public void apply(VirtualMachine vm) {
         vm.result = new Record(rtd, vm.popRestArgs().toArray());
         vm.popFrame();
@@ -101,7 +93,7 @@ public class RecordDescriptor
     final var rtd = this;
     return new Primitive(Signature.fixed(1)) {
       public void apply(VirtualMachine vm) {
-        vm.result = Bool.valueOf(vm.popArg() instanceof Record record && record.type().id() == rtd.type().id());
+        vm.result = Bool.valueOf(vm.popArg() instanceof Record record && record.type().id() == rtd.instanceType.id());
         vm.popFrame();
       }
     };
@@ -112,7 +104,7 @@ public class RecordDescriptor
     final var rtd = this;
     return new Primitive(Signature.fixed(1)) {
       public void apply(VirtualMachine vm) {
-        if (!(vm.popArg() instanceof Record record && record.type().id() == rtd.type().id()))
+        if (!(vm.popArg() instanceof Record record && record.type().id() == rtd.instanceType.id()))
           throw new TypeMismatch();
         vm.result = List.of(record.fieldValues());
         vm.popFrame();
@@ -120,8 +112,6 @@ public class RecordDescriptor
     };
   }
   
-  private static final Map<Symbol, RecordDescriptor> registry = new IdentityHashMap<>();
-  private final Symbol name;
-  private final Type type;
-  private final Map<Symbol, Integer> slotMap;
+  private final Type instanceType;
+  private final Map<Symbol, Integer> fieldSlotMap;
 }

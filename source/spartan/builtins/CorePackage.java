@@ -182,9 +182,9 @@ public final class CorePackage extends spartan.data.Package
     bind(Symbol.of("table-keys"), TableLib.KEYS);
     bind(Symbol.of("table-values"), TableLib.VALUES);
     
-    /* Structure related procedures */
+    /* Record related procedures */
     
-    bind(Symbol.of("register-record-type"), CoreLib.REGISTER_RECORD_TYPE);
+    bind(Symbol.of("make-record-type"), CoreLib.MAKE_RECORD_TYPE);
     bind(Symbol.of("record-constructor"), CoreLib.RECORD_CONSTRUCTOR);
     bind(Symbol.of("record-predicate"), CoreLib.RECORD_PREDICATE);
     bind(Symbol.of("record-accessor"), CoreLib.RECORD_ACCESSOR);

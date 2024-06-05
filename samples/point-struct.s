@@ -6,9 +6,10 @@
 (def p (make-point 0.0 0.0))
 (print-line "p is " p)
 (print-line "p is a point? " (point? p))
+(print-line "(type p) = " (type p))
 (print-line "p = " (point->string p))
-(point-set-x! p 1.0)
-(point-set-y! p 2.0)
+(point-x-set! p 1.0)
+(point-y-set! p 2.0)
 (print-line "p = " (point->string p))
 
 ; Experiment with record destructuring

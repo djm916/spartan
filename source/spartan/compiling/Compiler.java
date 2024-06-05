@@ -1145,7 +1145,7 @@ public class Compiler
     if (!(exp instanceof List list))
       return List.of(Symbol.QUOTE, exp);
     
-    // Check for unquote, unquote-splicing, and nested quasiquote forms
+    // Handle unquote, unquote-splicing, and nested quasiquote forms
     
     if (list.car() instanceof List form && !form.isEmpty())
     {
@@ -1383,7 +1383,7 @@ public class Compiler
   
      Syntax: (defmethod <symbol> <typed-parameters> <body>)
      
-  */
+  
   private Inst compileDefmethod(List exp, Scope scope, boolean tail, Inst next)
   {
     if (!(exp.length() >= 3 && exp.cadr() instanceof Symbol symbol && symbol.isSimple() && exp.caddr() instanceof List params && checkTypedParamListForm(params)))
@@ -1504,7 +1504,7 @@ public class Compiler
     Map.entry(Symbol.DEF, this::compileDef),
     Map.entry(Symbol.DEFUN, this::compileDefun),
     Map.entry(Symbol.DEFMACRO, this::compileDefmacro),
-    Map.entry(Symbol.DEFMETHOD, this::compileDefmethod),
+    //Map.entry(Symbol.DEFMETHOD, this::compileDefmethod),
     Map.entry(Symbol.IF, this::compileIf),
     Map.entry(Symbol.COND, this::compileCond),
     Map.entry(Symbol.LET, this::compileLet),

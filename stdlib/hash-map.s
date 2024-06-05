@@ -29,7 +29,7 @@
     (let ((node-list (vector-ref table index))
           (new-node (list key value)))
       (vector-set! table index (cons new-node node-list))
-      (map-type-set-size! self (+ 1 size))
+      (map-type-size-set! self (+ 1 size))
       ; Expand table capacity when load factor exceeded
       (if (> (/ size capacity) 0.75)
         (__resize-to-capacity! self)))
@@ -61,7 +61,7 @@
       (if (void? prev)
         (vector-set! table index ())
         (set-cdr! prev (cdr node)))
-      (map-type-set-size! self (- size 1)))))
+      (map-type-size-set! self (- size 1)))))
 
 (defun find-or-default (self key default)
   (def table (map-type-table self))
@@ -129,8 +129,8 @@
   (def old-capacity (vector-length old-table))
   (def new-capacity (* 2 old-capacity))
   (def new-table (make-vector new-capacity ()))
-  (map-type-set-table! self new-table)
-  (map-type-set-size! self 0)
+  (map-type-table-set! self new-table)
+  (map-type-size-set! self 0)
   (let ((index 0))
     (while (< index old-capacity)
       (let ((node-list (vector-ref old-table index)))

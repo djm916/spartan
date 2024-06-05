@@ -11,6 +11,6 @@
     p)
   (if (not (promise-has-value p))
     (do
-      (promise-set-value! p ((promise-thunk p)))
-      (promise-set-has-value! p true)))
+      (promise-value-set! p ((promise-thunk p)))
+      (promise-has-value-set! p true)))
   (promise-value p))
