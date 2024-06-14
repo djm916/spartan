@@ -7,13 +7,18 @@ import spartan.runtime.VirtualMachine;
 
 public final class PortLib
 {
-  // (open-file file-path open-mode)
+  private static Symbol[] parseOpenOptions(List options)
+  {
+    return null;
+  }
   
-  public static final Primitive OPEN = new Primitive(Signature.fixed(2)) {    
-    public void apply(VirtualMachine vm) {      
-      if (!(vm.popArg() instanceof Text file && vm.popArg() instanceof Text flags))
-        throw new TypeMismatch();
-      vm.result = Port.open(file.str(), flags.str());
+  // (port-open-file file-path option...)
+  
+  public static final Primitive OPEN = new Primitive(Signature.variadic(1)) {
+    public void apply(VirtualMachine vm) {
+      if (!(vm.popArg() instanceof Text fileName))
+        throw new TypeMismatch();      
+      vm.result = new FilePort(fileName.str(), vm.popRestArgs());
       vm.popFrame();
     }
   };
@@ -41,7 +46,7 @@ public final class PortLib
     }
   };
   
-  // (port-read port buffer start end)
+  // (port-read port buffer start count)
   
   public static final Primitive READ = new Primitive(Signature.fixed(4)) {
     public void apply(VirtualMachine vm) {
@@ -52,7 +57,7 @@ public final class PortLib
     }
   };
   
-  // (port-write port buffer start end)
+  // (port-write port buffer start count)
   
   public static final Primitive WRITE = new Primitive(Signature.fixed(4)) {
     public void apply(VirtualMachine vm) {

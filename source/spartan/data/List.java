@@ -8,9 +8,10 @@ import java.util.Spliterators;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import java.util.stream.Collectors;
+import java.util.function.Supplier;
+import spartan.errors.Error;
 import spartan.errors.TypeMismatch;
 import spartan.errors.NoSuchElement;
-import spartan.runtime.VirtualMachine;
 
 final class Null extends List
 {
@@ -58,7 +59,7 @@ final class Null extends List
   }
 }
 
-public sealed class List implements Datum, ILen, IAssoc, IFun, Iterable<Datum>
+public sealed class List implements Datum, Iterable<Datum>
 permits Null
 {
   public static final List EMPTY = Null.VALUE;
@@ -203,43 +204,12 @@ permits Null
   {
     setTail(this, index, value);
   }
-  
-  @Override // IAssoc
-  public Datum get(Datum key)
-  {
-    if (!(key instanceof IInt index))
-      throw new TypeMismatch();
-    return get(index.intValue());
-  }
-  
-  @Override // IAssoc
-  public void set(Datum key, Datum value)
-  {
-    if (!(key instanceof IInt index))
-      throw new TypeMismatch();
-    set(index.intValue(), value);
-  }
-  
-  @Override // IFun
-  public void apply(VirtualMachine vm)
-  {
-    vm.result = get(vm.popArg());
-    vm.popFrame();
-  }
-  
-  @Override // IFun
-  public Signature signature()
-  {
-    return SIG;
-  }
-  
-  @Override // ILen
+    
   public int length()
   {
     return length(this);
   }
   
-  @Override // ILen
   public boolean isEmpty()
   {
     return false;
@@ -299,6 +269,11 @@ permits Null
   public Stream<Datum> stream()
   {
     return StreamSupport.stream(spliterator(), false);
+  }
+  
+  public <T extends Datum> Stream<T> streamOfType(Class<T> clazz, Supplier<Error> onError)
+  {
+    return stream().map(e -> { try { return clazz.cast(e); } catch (ClassCastException ex) { throw onError.get(); } });
   }
   
   public Datum[] toArray()
@@ -398,7 +373,6 @@ permits Null
     this.rest = rest;
   }
   
-  private static final Signature SIG = Signature.fixed(1);
   private Datum first;
   private List rest;  
 }

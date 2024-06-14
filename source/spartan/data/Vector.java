@@ -11,9 +11,8 @@ import java.util.stream.Collectors;
 import spartan.errors.InvalidArgument;
 import spartan.errors.TypeMismatch;
 import spartan.errors.NoSuchElement;
-import spartan.runtime.VirtualMachine;
 
-public final class Vector implements Datum, IAssoc, ILen, IFun, Iterable<Datum>
+public final class Vector implements Datum, Iterable<Datum>
 {
   public static Vector fromList(List elems)
   {
@@ -57,13 +56,11 @@ public final class Vector implements Datum, IAssoc, ILen, IFun, Iterable<Datum>
     return TypeRegistry.VECTOR_TYPE;
   }
     
-  @Override // ILen
   public int length()
   {
     return elems.size();
   }
   
-  @Override // ILen
   public boolean isEmpty()
   {
     return elems.isEmpty();
@@ -119,36 +116,7 @@ public final class Vector implements Datum, IAssoc, ILen, IFun, Iterable<Datum>
     for (int i = 0; i < elems.size(); ++i)
       elems.set(i, x);
   }
-  
-  @Override // IAssoc
-  public Datum get(Datum key)
-  {
-    if (!(key instanceof IInt index))
-      throw new TypeMismatch();
-    return get(index.intValue());
-  }
-  
-  @Override // IAssoc
-  public void set(Datum key, Datum value)
-  {
-    if (!(key instanceof IInt index))
-      throw new TypeMismatch();
-    set(index.intValue(), value);
-  }
-  
-  @Override // IFun
-  public void apply(VirtualMachine vm)
-  {
-    vm.result = get(vm.popArg());
-    vm.popFrame();
-  }
-  
-  @Override // IFun
-  public Signature signature()
-  {
-    return SIG;
-  }
-    
+      
   @Override // Iterable
   public Iterator<Datum> iterator()
   {
@@ -166,7 +134,6 @@ public final class Vector implements Datum, IAssoc, ILen, IFun, Iterable<Datum>
     return StreamSupport.stream(spliterator(), false);
   }
   
-  private static final Signature SIG = Signature.fixed(1);
   private static final int DEFAULT_INITIAL_CAPACITY = 8;
   private final ArrayList<Datum> elems;
 }

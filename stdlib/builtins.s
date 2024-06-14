@@ -6,27 +6,37 @@
 
 (set! spartan.core:*package* (find-package 'spartan.core))
 
-(defun %quasiquote (exp)
+(defun %quasiquote (exp level)
   (defun unquote? (form)
     (and (list? form) (not (null? form)) (symbol? (car form)) (= (car form) 'unquote)))
   (defun unquote-splicing? (form)
     (and (list? form) (not (null? form)) (symbol? (car form)) (= (car form) 'unquote-splicing)))
+  (defun quasiquote? (form)
+    (and (list? form) (not (null? form)) (symbol? (car form)) (= (car form) 'quasiquote)))
+  (if (< level 0)
+    (error "unquote or unquote-splicing form must appear within quasiquote"))
   (cond [(null? exp) ()]
         [(not (list? exp)) (list 'quote exp)]
         [else
           (let [(subexp (car exp))]
             (cond [(unquote? subexp)
-                     (list 'spartan.core:cons (cadr subexp) (%quasiquote (cdr exp)))]
+                     (if (= level 0)
+                       (list 'spartan.core:cons (cadr subexp) (%quasiquote (cdr exp) 0))
+                       (list 'spartan.core:cons (%quasiquote subexp (- level 1)) (%quasiquote (cdr exp) level)))]
                   [(unquote-splicing? subexp)
-                     (list 'spartan.core:list-concat (cadr subexp) (%quasiquote (cdr exp)))]
+                     (if (= level 0)
+                       (list 'spartan.core:list-concat (cadr subexp) (%quasiquote (cdr exp) 0))
+                       (list 'spartan.core:cons (%quasiquote subexp (- level 1)) (%quasiquote (cdr exp) level)))]
+                  [(quasiquote? subexp)
+                     (list 'spartan.core:cons (%quasiquote subexp (+ 1 level)) (%quasiquote (cdr exp) level))]
                   [else
-                     (list 'spartan.core:cons (%quasiquote (car exp)) (%quasiquote (cdr exp)))]))]))
+                     (list 'spartan.core:cons (%quasiquote (car exp) level) (%quasiquote (cdr exp) level))]))]))
 
 
 ; quasiquote macro
 ; NOTE: turned off; using builtin quasiquote special form!
-;(defmacro quasiquote (exp)
-;  (%quasiquote exp))
+(defmacro quasiquote (exp)
+  (%quasiquote exp 0))
 
 ;(defmacro in-package (package-name)
 ;  `(let ((package (try-find-package ',package-name)))
@@ -77,11 +87,15 @@
 ; (->> x (f ...) (g ...) (h ...)) => (h ... (g ... (f ... x)))
 
 (defmacro ->> (arg form & forms)
-  (rec loop [(result (list-append form arg))
-             (forms forms)]
-    (if (null? forms)
-      result
-      (loop (list-append (car forms) result) (cdr forms)))))
+  (for ((forms forms (cdr forms))
+        (result (list-append form arg) (list-append (car forms) result)))
+    ((null? forms) result)))
+
+;  (rec loop [(result (list-append form arg))
+;             (forms forms)]
+;    (if (null? forms)
+;      result
+;      (loop (list-append (car forms) result) (cdr forms)))))
 
 ; (curry () ...) => (fun () ...)
 ; (curry (x) ...) => (fun (x) ...)
@@ -113,13 +127,18 @@
       (set! xs (cdr xs)))
   hi))
 
-;(defmacro rec (symbol bindings & body)
-;  (let ((vars (map bindings (fun (pair) (car pair))))
-;        (inits (map bindings (fun (pair) (cadr pair)))))
-;    `(letrec ((,symbol (fun vars ,@body)))
-;       (apply ,symbol inits))))
-
 (load "stdlib/lists.s")
+
+; (rec f ((var1 init1) ... (varN initN)) body...)
+; ==>
+; (letrec ((f (fun (var1 ... varN) body..)))
+;   (f init1 ... initN))
+(defmacro rec (symbol bindings & body)
+  (let ((vars (list-map car bindings))
+        (inits (list-map cadr bindings)))
+    `(letrec ((,symbol (fun ,vars ,@body)))
+       (,symbol ,@inits))))
+
 (load "stdlib/vectors.s")
 (load "stdlib/defrecord.s")
 (load "stdlib/promises.s")

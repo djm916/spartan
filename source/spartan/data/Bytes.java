@@ -5,14 +5,13 @@ import spartan.errors.NoSuchElement;
 import spartan.errors.IndexOutOfBounds;
 import spartan.errors.InvalidArgument;
 import spartan.errors.TypeMismatch;
-import spartan.runtime.VirtualMachine;
 import spartan.Config;
 import java.nio.ByteBuffer;
 import java.nio.BufferUnderflowException;
 import java.nio.BufferOverflowException;
 import java.nio.charset.Charset;
 
-public final class Bytes implements Datum, ILen, IAssoc, IFun
+public final class Bytes implements Datum
 {
   public static Bytes fromList(List elems)
   {
@@ -22,7 +21,7 @@ public final class Bytes implements Datum, ILen, IAssoc, IFun
     for (var e : elems) {
       if (!(e instanceof IInt b))
         throw new TypeMismatch();
-      buffer.put((byte) b.intValue()); // TODO: check for loss of value
+      buffer.put(b.byteValue());
     }
     buffer.flip();
     return new Bytes(buffer);
@@ -79,39 +78,9 @@ public final class Bytes implements Datum, ILen, IAssoc, IFun
     }
   }
   
-  @Override // ILen
   public int length()
   {
     return buffer.capacity();
-  }
-  
-  @Override // IAssoc
-  public Datum get(Datum key)
-  {
-    if (!(key instanceof IInt index))
-      throw new TypeMismatch();
-    return Int.valueOf(get(index.intValue()));
-  }
-  
-  @Override // IAssoc
-  public void set(Datum key, Datum value)
-  {
-    if (!(key instanceof IInt index && value instanceof IInt b))
-      throw new TypeMismatch();
-    set(index.intValue(), (byte) b.intValue());
-  }
-  
-  @Override // IFun
-  public void apply(VirtualMachine vm)
-  {
-    vm.result = get(vm.popArg());
-    vm.popFrame();
-  }
-  
-  @Override // IFun
-  public Signature signature()
-  {
-    return SIG;
   }
   
   public String decode(int start, int count, Charset encoding)
@@ -124,6 +93,5 @@ public final class Bytes implements Datum, ILen, IAssoc, IFun
     }
   }
   
-  private static final Signature SIG = Signature.fixed(1);
   private final ByteBuffer buffer;
 }

@@ -20,7 +20,6 @@ public final class TypeRegistry
   public static final Type MACRO_TYPE = register(Symbol.of("macro"));
   public static final Type LIST_TYPE = register(Symbol.of("list"));
   public static final Type VECTOR_TYPE = register(Symbol.of("vector"));
-  public static final Type TABLE_TYPE = register(Symbol.of("table"));  
   public static final Type BYTES_TYPE = register(Symbol.of("bytes"));
   public static final Type STRING_TYPE = register(Symbol.of("string"));
   public static final Type PORT_TYPE = register(Symbol.of("port"));

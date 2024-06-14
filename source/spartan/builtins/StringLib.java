@@ -6,7 +6,7 @@ import spartan.errors.TypeMismatch;
 
 public final class StringLib
 {
-  // (string:concat ...)
+  // (string-concat s ...)
   
   public static final Primitive CONCAT = new Primitive(Signature.variadic(0)) {
     public void apply(VirtualMachine vm) {
@@ -15,7 +15,7 @@ public final class StringLib
     }
   };
   
-  // (string:join delim ...)
+  // (string-join delimiter s ...)
   
   public static final Primitive JOIN = new Primitive(Signature.variadic(1)) {
     public void apply(VirtualMachine vm) {
@@ -26,7 +26,22 @@ public final class StringLib
     }
   };
   
-  // (string:substring string start [end])
+  // (string-split string separator [limit])
+  
+  public static final Primitive SPLIT = new Primitive(Signature.variadic(2, 3)) {
+    public void apply(VirtualMachine vm) {
+      if (!(vm.popArg() instanceof Text string))
+        throw new TypeMismatch();
+      if (!(vm.popArg() instanceof Text separator))
+        throw new TypeMismatch();
+      if (!((vm.args.isEmpty() ? Int.valueOf(0) : vm.popArg()) instanceof IInt limit))
+        throw new TypeMismatch();
+      vm.result = string.split(separator, limit.intValue());
+      vm.popFrame();
+    }
+  };
+  
+  // (string-substring string start [end])
   
   public static final Primitive SUBSTR = new Primitive(Signature.variadic(2, 1)) {
     public void apply(VirtualMachine vm) {
@@ -41,7 +56,37 @@ public final class StringLib
     }
   };
   
-  // (string:reverse string)
+  // (string-find string substring [start])
+  
+  public static final Primitive FIND = new Primitive(Signature.variadic(2, 1)) {
+    public void apply(VirtualMachine vm) {
+      if (!(vm.popArg() instanceof Text string))
+        throw new TypeMismatch();
+      if (!(vm.popArg() instanceof Text substring))
+        throw new TypeMismatch();
+      if (!((vm.args.isEmpty() ? Int.valueOf(0) : vm.popArg()) instanceof IInt start))
+        throw new TypeMismatch();
+      vm.result = Int.valueOf(string.find(substring, start.intValue()));
+      vm.popFrame();
+    }
+  };
+  
+  // (string-replace string substring replacement)
+  
+  public static final Primitive REPLACE = new Primitive(Signature.fixed(3)) {
+    public void apply(VirtualMachine vm) {
+      if (!(vm.popArg() instanceof Text string))
+        throw new TypeMismatch();
+      if (!(vm.popArg() instanceof Text substring))
+        throw new TypeMismatch();
+      if (!(vm.popArg() instanceof Text replacement))
+        throw new TypeMismatch();
+      vm.result = string.replace(substring, replacement);
+      vm.popFrame();
+    }
+  };
+  
+  // (string-reverse string)
   
   public static final Primitive REVERSE = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
@@ -52,7 +97,7 @@ public final class StringLib
     }
   };
   
-  // (string:hash string)
+  // (string-hash string)
   
   public static final Primitive HASH = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
@@ -91,7 +136,7 @@ public final class StringLib
   
   */
   
-  // (string:length string)
+  // (string-length string)
   
   public static final Primitive LENGTH = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
@@ -101,4 +146,35 @@ public final class StringLib
       vm.popFrame();
     }
   };
+  
+  // (string-empty? string)
+  
+  public static final Primitive IS_EMPTY = new Primitive(Signature.fixed(1)) {
+    public void apply(VirtualMachine vm) {
+      if (!(vm.popArg() instanceof Text text))
+        throw new TypeMismatch();
+      vm.result = Bool.valueOf(text.length() == 0);
+      vm.popFrame();
+    }
+  };
+  
+  /*
+  public static final Primitive CURSOR_START = new Primitive(Signature.fixed(1)) {
+    public void apply(VirtualMachine vm) {
+      if (!(vm.popArg() instanceof Text str))
+        throw new TypeMismatch();
+      vm.result = TextCursor.forStart(str);
+      vm.popFrame();
+    }
+  };
+  
+  public static final Primitive CURSOR_END = new Primitive(Signature.fixed(1)) {
+    public void apply(VirtualMachine vm) {
+      if (!(vm.popArg() instanceof Text str))
+        throw new TypeMismatch();
+      vm.result = TextCursor.forEnd(str);
+      vm.popFrame();
+    }
+  };
+  */
 }

@@ -23,11 +23,6 @@
 (defun list-append (xs e)
   (list-concat xs (list e)))
 
-(defun list-reverse (xs)
-  (rec loop ((xs xs) (sx ()))
-    (if (null? xs) sx
-      (loop (cdr xs) (cons (car xs) sx)))))
-
 (defun list-map (f xs)
   (if (null? xs) ()
     (cons (f (car xs))

@@ -24,13 +24,13 @@
 (defun vector-for-each (f v)
   (let [(i 0) (n (vector-length v))]
     (while (< i n)
-      (f (v i))
+      (f (vector-ref v i))
       (inc! i))))
 
 (defun vector-for-each/index (f v)
   (let [(i 0) (n (vector-length v))]
     (while (< i n)
-      (f i (v i))
+      (f i (vector-ref v i))
       (inc! i))))
 
 (defun vector-filter (f v)

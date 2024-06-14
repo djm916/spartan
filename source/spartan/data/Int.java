@@ -56,6 +56,14 @@ public final class Int implements Datum, INum, IInt, IRatio, IReal, IComplex, IE
   }
   
   @Override
+  public byte byteValue()
+  {
+    if (!(0x00 <= value && value <= 0xFF))
+      throw new IntegerOverflow();
+    return (byte)value;
+  }
+  
+  @Override
   public double doubleValue()
   {
     return (double)value;

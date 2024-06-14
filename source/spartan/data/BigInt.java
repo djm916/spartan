@@ -53,6 +53,15 @@ public final class BigInt implements Datum, INum, IInt, IRatio, IReal, IComplex,
   }
   
   @Override
+  public byte byteValue()
+  {
+    int x = intValue();
+    if (!(0x00 <= x && x <= 0xFF))
+      throw new IntegerOverflow();
+    return (byte)x;
+  }
+  
+  @Override
   public double doubleValue()
   {
     return value.doubleValue();

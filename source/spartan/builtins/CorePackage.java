@@ -73,7 +73,6 @@ public final class CorePackage extends spartan.data.Package
     bind(Symbol.of("callable?"), CoreLib.IS_CALLABLE);
     bind(Symbol.of("port?"), CoreLib.IS_PORT);
     bind(Symbol.of("bytes?"), CoreLib.IS_BYTES);
-    bind(Symbol.of("table?"), CoreLib.IS_TABLE);
     
     /* Math constants & procedures */
 
@@ -117,8 +116,8 @@ public final class CorePackage extends spartan.data.Package
     
     bind(Symbol.of("string->symbol"), CoreLib.TEXT_TO_SYMBOL);
     bind(Symbol.of("symbol->string"), CoreLib.SYMBOL_TO_TEXT);
-    bind(Symbol.of("string->bytes"), CoreLib.TEXT_TO_BYTES); // encode
-    bind(Symbol.of("bytes->string"), CoreLib.BYTES_TO_TEXT); // decode
+    bind(Symbol.of("string->bytes"), CoreLib.STRING_TO_BYTES); // encode
+    bind(Symbol.of("bytes->string"), CoreLib.BYTES_TO_STRING); // decode
     //bind(Symbol.of("string->number"), CoreLib.TEXT_TO_NUMBER);
     bind(Symbol.of("string->int"), CoreLib.TEXT_TO_INT);
     bind(Symbol.of("format-int"), CoreLib.FORMAT_INT);
@@ -138,6 +137,7 @@ public final class CorePackage extends spartan.data.Package
     bind(Symbol.of("set-car!"), ListLib.SET_CAR);
     bind(Symbol.of("set-cdr!"), ListLib.SET_CDR);    
     bind(Symbol.of("list-length"), ListLib.LENGTH);
+    bind(Symbol.of("list-reverse"), ListLib.REVERSE);
     
     /* Vector procedures */
     
@@ -151,17 +151,28 @@ public final class CorePackage extends spartan.data.Package
     bind(Symbol.of("vector-insert!"), VectorLib.INSERT);
     bind(Symbol.of("vector-remove!"), VectorLib.REMOVE);
     
-    /* String procedures */
+    /* String & String Cursor procedures */
     
     //bind(Symbol.of("string-ref"), StringLib.REF);
     //bind(Symbol.of("string-set!"), StringLib.SET);
-    bind(Symbol.of("string-length"), StringLib.LENGTH);
+    //bind(Symbol.of("string-length/bytes"), StringLib.LENGTH_BYTES);
+    //bind(Symbol.of("string-length/codepoints"), StringLib.LENGTH_CODEPOINTS);
+    //bind(Symbol.of("string-length/graphemes"), StringLib.LENGTH_GRAPHEMES);
+    
+    bind(Symbol.of("string-empty?"), StringLib.IS_EMPTY);
     bind(Symbol.of("string-concat"), StringLib.CONCAT);
     bind(Symbol.of("string-join"), StringLib.JOIN);
     bind(Symbol.of("string-substr"), StringLib.SUBSTR);
     bind(Symbol.of("string-reverse"), StringLib.REVERSE);
+    bind(Symbol.of("string-find"), StringLib.FIND);
+    bind(Symbol.of("string-replace"), StringLib.REPLACE);
+    bind(Symbol.of("string-split"), StringLib.SPLIT);
     bind(Symbol.of("string-hash"), StringLib.HASH);
-        
+    //bind(Symbol.of("string-codepoints"), StringLib.CODEPOINTS);
+    //bind(Symbol.of("string-graphemes"), StringLib.GRAPHEMES);
+    //bind(Symbol.of("string-cursor-start"), StringLib.CURSOR_START);
+    //bind(Symbol.of("string-cursor-end"), StringLib.CURSOR_END);
+    
     /* I/O and Port procedures */
     
     bind(Symbol.of("standard-input-port"), InputPort.STDIN);
@@ -175,12 +186,12 @@ public final class CorePackage extends spartan.data.Package
     bind(Symbol.of("port-seek"), PortLib.SEEK);
     bind(Symbol.of("port-size"), PortLib.SIZE);
     
-    /* Table related procedures */
+    /* Bytevector related procedures */
     
-    bind(Symbol.of("table"), TableLib.FROM_LIST);
-    bind(Symbol.of("table-contains?"), TableLib.CONTAINS);
-    bind(Symbol.of("table-keys"), TableLib.KEYS);
-    bind(Symbol.of("table-values"), TableLib.VALUES);
+    bind(Symbol.of("make-bytes"), BytesLib.MAKE);
+    bind(Symbol.of("bytes-ref"), BytesLib.REF);
+    bind(Symbol.of("bytes-set!"), BytesLib.SET);
+    bind(Symbol.of("bytes-length"), BytesLib.LENGTH);
     
     /* Record related procedures */
     
@@ -211,7 +222,5 @@ public final class CorePackage extends spartan.data.Package
     bind(Symbol.of("package-bind"), PackageLib.BIND);
     bind(Symbol.of("package-resolve"), PackageLib.RESOLVE);
     
-    //bind(Symbol.of("repr"), CoreLib.GENERIC_REPR);
-    //bind(Symbol.of("at"), CoreLib.GENERIC_AT);
   }
 }

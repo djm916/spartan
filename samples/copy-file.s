@@ -1,12 +1,13 @@
 
-(def file (port:open "./samples/test.txt" "r"))
-(def buffer (bytes:new 1024))
+(def file (port-open-file "./samples/test.txt" 'read 'blah))
+(def buffer (make-bytes 1024))
 
 (let ((eof false))
   (while (not eof)
-    (let ((bytes-read (port:read file buffer 0 3)))
+    (let ((bytes-read (port-read file buffer 0 3)))
       (set! eof (< bytes-read 0))
       (if (not eof)
-        (port:write port:stdout buffer 0 bytes-read)))))
+        (port-write standard-output-port buffer 0 bytes-read)))))
 
-(port:close file)
+(port-close file)
+

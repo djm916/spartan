@@ -19,4 +19,4 @@
   (if (<= capacity (+ 1 size))
     (push-back (__resize self) item))
   (vector-set! elems back item)
-  (
+  (deque-type-back-set! self (remainder (+ 1 (deque-type-back self)) (deque-type-

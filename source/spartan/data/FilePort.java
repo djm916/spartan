@@ -2,20 +2,68 @@ package spartan.data;
 
 import spartan.errors.Error;
 import spartan.errors.IOError;
+import spartan.errors.TypeMismatch;
 import spartan.errors.InvalidArgument;
 import java.io.IOException;
 import java.io.FileNotFoundException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Path;
+import java.nio.file.OpenOption;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.IdentityHashMap;
+import java.util.Optional;
 import static java.nio.file.StandardOpenOption.*;
 
 public final class FilePort extends Port
 {
-  public FilePort(String fileName)
+  //public FilePort open(String fileName, List 
+  //private final 
+  private static final Map<Symbol, OpenOption> openOptionMap = new IdentityHashMap<>();
+  
+  static {
+    openOptionMap.put(Symbol.of("read"), READ);
+    openOptionMap.put(Symbol.of("write"), WRITE);
+    openOptionMap.put(Symbol.of("create"), CREATE);
+    openOptionMap.put(Symbol.of("append"), APPEND);
+    openOptionMap.put(Symbol.of("truncate"), TRUNCATE_EXISTING);
+  }
+  
+  private Optional<OpenOption> getOption(Symbol option)
   {
+    return Optional.ofNullable(openOptionMap.get(option));
+  }
+  
+  /*
+  private OpenOption[] parseOpenOptions(List options)
+  {
+    var result = new HashSet<OpenOption>();
+    for (var elem : options) {
+      if (!(elem instanceof Symbol kw))
+        throw new TypeMismatch();
+      var opt = openOptionMap.get(kw);
+      if (opt == null)      
+        throw new InvalidArgument();
+      result.add(opt);
+    }
+    return result.toArray(OpenOption[]::new);
+  }
+  */
+  
+  private OpenOption[] parseOpenOptions(List options)
+  {
+    return options.streamOfType(Symbol.class, TypeMismatch::new)
+                  .map(option -> getOption(option).orElseThrow(InvalidArgument::new))
+                  .toArray(OpenOption[]::new);
+  }
+  
+  public FilePort(String fileName, List options)
+  {
+    var openOptions = parseOpenOptions(options);
+    
     try {
-      this.channel = FileChannel.open(Path.of(fileName), READ, WRITE);
+      this.channel = FileChannel.open(Path.of(fileName), openOptions);
     }
     catch (IOException ex) {
       throw new IOError(ex.getMessage());

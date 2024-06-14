@@ -6,6 +6,7 @@ package spartan.data;
 public sealed interface IInt extends INum
 permits Int, BigInt
 {
+  byte byteValue();
   int intValue();
   long longValue();
   

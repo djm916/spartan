@@ -2,10 +2,11 @@ package spartan.data;
 
 import java.nio.charset.Charset;
 import java.nio.CharBuffer;
+import java.util.regex.Pattern;
 import spartan.errors.TypeMismatch;
 import spartan.errors.IndexOutOfBounds;
 
-public final class Text implements Datum, ILen, IEq, IOrd
+public final class Text implements Datum, IEq, IOrd
 {
   public Text(String value)
   {
@@ -30,13 +31,11 @@ public final class Text implements Datum, ILen, IEq, IOrd
     return value;
   }
   
-  @Override // ILen
   public int length()
   {
     return value.length();
   }
   
-  @Override // ILen
   public boolean isEmpty()
   {
     return value.isEmpty();
@@ -105,6 +104,25 @@ public final class Text implements Datum, ILen, IEq, IOrd
   public Text reverse()
   {
     return new Text(new StringBuilder(value).reverse().toString());
+  }
+  
+  public List split(Text separator, int limit)
+  {
+    var partArray = this.value.split(Pattern.quote(separator.value), limit);
+    var result = new List.Builder();
+    for (var part : partArray)
+      result.add(new Text(part));
+    return result.build();
+  }
+  
+  public int find(Text string, int start)
+  {
+    return this.value.indexOf(string.value, start);
+  }
+  
+  public Text replace(Text substring, Text replacement)
+  {
+    return new Text(this.value.replace(substring.value, replacement.value));
   }
   
   private final String value;

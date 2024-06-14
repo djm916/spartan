@@ -109,56 +109,6 @@ public class Compiler
       return new LoadGlobal(spartan.Runtime.currentPackage().name(), s.intern(), new SourceInfo(s, positionMap.get(s)), next);
   }
   
-  /* Compile the "set!" special form, a generalized assignment statement.
-
-     Syntax: (set! <place> <init>)
-     
-     <place> is a form that names a location where a value can be stored and mutated.
-     
-     The exact syntax of <place> is:
-     
-     <place> -> <symbol> | (<exp> <arg>) | (car <exp>) | (cdr <exp>)
-     
-     (set! <symbol> <init>)        ; set the variable <symbol> to <init>
-     (set! (<exp> <arg>) <init>)   ; (set-at! <exp> <arg> <init>)
-     (set! (car <exp>) <init>)     ; (set-car! <exp> <init>)
-     (set! (cdr <exp>) <init>)     ; (set-cdr! <exp> <init>)
-  */
-  private Inst compileSet(List exp, Scope scope, boolean tail, Inst next)
-  {
-    if (!(exp.length() == 3))
-      throw malformedExp(exp);
-    
-    if (exp.cadr() instanceof Symbol)
-      return compileSetVar(exp, scope, next);
-    
-    var xform = transformSet(exp);
-    positionMap.put(xform, positionMap.get(exp));
-    
-    if (Config.LOG_DEBUG)
-      log.info(() -> String.format("set! transform: %s => %s", exp.repr(), xform.repr()));
-    
-    try {
-      return compile(xform, scope, tail, next);
-    }
-    catch (Error err) {
-      err.setSource(new SourceInfo(xform, positionMap.get(exp)));
-      throw err;
-    }
-  }
-  
-  private List transformSet(List exp)
-  {
-    if (!(exp.cadr() instanceof List form && form.length() == 2))
-      throw malformedExp(exp);
-    
-    if (form.car() instanceof Symbol s && s.equals(Symbol.CAR))
-      return List.of(Symbol.Q_SET_CAR, form.cadr(), exp.caddr());
-    else if (form.car() instanceof Symbol s && s.equals(Symbol.CDR))
-      return List.of(Symbol.Q_SET_CDR, form.cadr(), exp.caddr());
-    else
-      return List.of(Symbol.Q_SET_AT, form.car(), form.cadr(), exp.caddr());
-  }
   
   /* Compile a variable assignment.
 
@@ -169,10 +119,11 @@ public class Compiler
 
      Otherwise, assume the symbol is a global variable, and generate a store-global instruction.
   */
-
-  private Inst compileSetVar(List exp, Scope scope, Inst next)
+  private Inst compileSet(List exp, Scope scope, boolean tail, Inst next)
   {
-    var s = (Symbol)exp.cadr();
+    if (!(exp.length() == 3 && exp.cadr() instanceof Symbol s))
+      throw malformedExp(exp);
+    
     var init = exp.caddr();
     return compile(init, scope, false,
            scope.lookup(s)
@@ -980,9 +931,7 @@ public class Compiler
 
            ; evaluate loop body for side-effect
 
-     body: <<exp1>>
-           ...
-           <<expN>>
+     body: <<body>>
            
            ; update step
 
@@ -1288,23 +1237,6 @@ public class Compiler
                new PopFrame())))));
   }
   
-  /**
-   * (return exp)
-   *
-   * Compilation:
-   *
-   * <<exp>>
-   * pop-frame
-   */
-  private Inst compileReturn(List exp, Scope scope, boolean tail, Inst next)
-  {
-    if (exp.length() != 2)
-      throw malformedExp(exp);
-    
-    return compile(exp.cadr(), scope, false,
-           new PopFrame());
-  }
-  
   /* Compile the "defmacro" special form.
      
      Syntax: (defmacro f (param...) body...)
@@ -1363,104 +1295,7 @@ public class Compiler
       positionMap.put(exp, position);
     }
   }
-  
-  private MultiMethod getOrCreateMultiMethod(Symbol name, Signature signature)
-  {
-    var binding = spartan.Runtime.currentPackage().lookup(name);
-    if (binding.isPresent()) {
-      if (!(binding.get() instanceof MultiMethod mm))
-        throw new Error(String.format("symbol \"%s\" does not name a generic function", name.str()));
-      return mm;
-    }
-    else {
-      var mm = new MultiMethod(signature);
-      spartan.Runtime.currentPackage().bind(name, mm, () -> new MultipleDefinition(name));
-      return mm;
-    }
-  }
-  
-  /* Compile a multi method
-  
-     Syntax: (defmethod <symbol> <typed-parameters> <body>)
-     
-  
-  private Inst compileDefmethod(List exp, Scope scope, boolean tail, Inst next)
-  {
-    if (!(exp.length() >= 3 && exp.cadr() instanceof Symbol symbol && symbol.isSimple() && exp.caddr() instanceof List params && checkTypedParamListForm(params)))
-      throw malformedExp(exp);
-    var numParams = params.length();
-    var paramNames = extractFirst(params);
-    var paramTypes = extractSecond(params).stream()
-                     .map(typeName -> TypeRegistry.register(typeName.str().intern()))
-                     .toArray(Type[]::new);
-    var body = exp.cdddr();
-    var method = new Closure(makeProcedure(paramNames, body, Scope.EMPTY), null);    
-    try {
-      getOrCreateMultiMethod(symbol.intern(), method.signature()).addMethod(paramTypes, method);
-    }
-    catch (Error err) {
-      err.setSource(new SourceInfo(exp, positionMap.get(exp)));
-      throw err;
-    }
-    return new LoadConst(Void.VALUE, next);
-  }
-  
-  /* Compiles the "match" special form.
-     
-     Syntax: (match exp
-               (pattern1 body1)
-               ...
-               (patternN bodyN))
-     
-     Compilation:
-
-             <<exp>>
-             push-env N_max
-     test1:  match pattern1 body1 test2
-     body1:  <<body1>>
-             jump next
-             ...
-     testN:  match patternN bodyN no_match
-             branch bodyN none
-     bodyN:  <<bodyN>>
-             jump next
-     no_match:
-             raise PatternMatchFailure
-     next:   pop-env
-             ...
-     
-  */
-  
-  /*
-  private Inst compileMatch(List exp, Scope scope, boolean tail, Inst next)
-  {
-    if (exp.length() < 2 || !checkMatchClauseForm(exp.cdr()))
-      throw malformedExp(exp);
-
-    return compile(exp.cadr(), scope, tail,
-           new PushEnv(maxNumBindings,
-           compileMatchClauses(exp.cddr(), scope, tail,
-           new PopEnv(next))));
-  }
-
-  private Inst compileMatchClauses(List clauses, Scope scope, boolean tail, Inst next)
-  {
-    if (clauses.isEmpty())
-      return new LoadConst(Nil.VALUE, next);
-
-    var clause = (List) clauses.car();
-    var pattern = clause.car();
-    var body = clause.cdr();
-
-    if (Symbol.ELSE.equals(test))
-      return compileSequence(body, scope, tail, next);
-
-    return new Match(pattern,
-                     compileSequence(body, scope, tail, next),
-                     compileMatchClauses(clauses.cdr(), scope, tail, next));
-  }
-  */
-  
+    
   /* Compile a combination (i.e., special forms, procedure application, and macro expansion.
      
      Evaluation rules:
@@ -1504,7 +1339,6 @@ public class Compiler
     Map.entry(Symbol.DEF, this::compileDef),
     Map.entry(Symbol.DEFUN, this::compileDefun),
     Map.entry(Symbol.DEFMACRO, this::compileDefmacro),
-    //Map.entry(Symbol.DEFMETHOD, this::compileDefmethod),
     Map.entry(Symbol.IF, this::compileIf),
     Map.entry(Symbol.COND, this::compileCond),
     Map.entry(Symbol.LET, this::compileLet),
@@ -1513,14 +1347,13 @@ public class Compiler
     Map.entry(Symbol.FUN, this::compileFun),
     Map.entry(Symbol.DO, this::compileDo),
     Map.entry(Symbol.FOR, this::compileFor),
-    Map.entry(Symbol.REC, this::compileRec),
+    //Map.entry(Symbol.REC, this::compileRec),
     Map.entry(Symbol.SET, this::compileSet),
     Map.entry(Symbol.WHILE, this::compileWhile),
     Map.entry(Symbol.QUOTE, this::compileQuote),
-    Map.entry(Symbol.QUASIQUOTE, this::compileQuasiquote),
+    //Map.entry(Symbol.QUASIQUOTE, this::compileQuasiquote),
     Map.entry(Symbol.OR, this::compileOr),
     Map.entry(Symbol.AND, this::compileAnd)
-    //Map.entry(Symbol.CALL_CC, this::compileCallCC)
   );
   
   private PositionMap positionMap;

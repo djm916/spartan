@@ -185,7 +185,9 @@ public final class CoreLib
     }
   };
 
-  public static final Primitive TEXT_TO_BYTES = new Primitive(Signature.fixed(1)) {
+  // (string->bytes string)
+  
+  public static final Primitive STRING_TO_BYTES = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Text text))
         throw new TypeMismatch();
@@ -208,7 +210,9 @@ public final class CoreLib
     }
   };
   
-  public static final Primitive BYTES_TO_TEXT = new Primitive(Signature.fixed(3)) {
+  // (bytes->string bytes start count)
+  
+  public static final Primitive BYTES_TO_STRING = new Primitive(Signature.fixed(3)) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Bytes bytes && vm.popArg() instanceof IInt start && vm.popArg() instanceof IInt count))
         throw new TypeMismatch();
@@ -338,53 +342,6 @@ public final class CoreLib
   public static final Primitive IS_BYTES = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       vm.result = Bool.valueOf(vm.popArg() instanceof Bytes);
-      vm.popFrame();
-    }
-  };
-  
-  public static final Primitive IS_TABLE = new Primitive(Signature.fixed(1)) {
-    public void apply(VirtualMachine vm) {
-      vm.result = Bool.valueOf(vm.popArg() instanceof Table);
-      vm.popFrame();
-    }
-  };
-  
-  public static final Primitive AT = new Primitive(Signature.fixed(2)) {
-    public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof IAssoc c))
-        throw new TypeMismatch();
-      var k = vm.popArg();
-      vm.result = c.get(k);
-      vm.popFrame();
-    }
-  };
-  
-  public static final Primitive SET_AT = new Primitive(Signature.fixed(3)) {
-    public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof IAssoc c))
-        throw new TypeMismatch();
-      var k = vm.popArg();
-      var v = vm.popArg();
-      c.set(k, v);
-      vm.result = Void.VALUE;
-      vm.popFrame();
-    }
-  };
-  
-  public static final Primitive LENGTH = new Primitive(Signature.fixed(1)) {
-    public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof ILen c))
-        throw new TypeMismatch();
-      vm.result = Int.valueOf(c.length());
-      vm.popFrame();
-    }
-  };
-  
-  public static final Primitive IS_EMPTY = new Primitive(Signature.fixed(1)) {
-    public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof ILen c))
-        throw new TypeMismatch();
-      vm.result = Bool.valueOf(c.isEmpty());
       vm.popFrame();
     }
   };
@@ -575,49 +532,4 @@ public final class CoreLib
       vm.popFrame();
     }
   };
-  
-  /*
-  public static final MultiMethod GENERIC_REPR = new MultiMethod(Signature.fixed(1)) {
-    {
-      addDefault(new Primitive(1, false) {
-        public void apply(VirtualMachine vm) {
-          vm.result = new Text(vm.popArg().repr());
-          vm.popFrame();
-        }
-      });
-    }
-  };
-    
-  public static final MultiMethod GENERIC_AT = new MultiMethod(Signature.fixed(2)) {
-    {
-      addDefault(AT);
-    }
-  };
-  
-  public static final MultiMethod GENERIC_SET_AT = new MultiMethod(Signature.fixed(3)) {
-    {
-      addDefault(SET_AT);
-    }
-  };
-  */
-    /*
-    {
-      addMethod(new TypeSignature(TypeRegistry.INTEGER_TYPE),
-        new Primitive(1, false) {
-          public void apply(VirtualMachine vm) {
-            vm.result = new Text(((IInt)vm.popArg()).repr());
-            vm.popFrame();
-          }
-        });
-      
-      addMethod(new TypeSignature(TypeRegistry.REAL_TYPE),
-        new Primitive(1, false) {
-          public void apply(VirtualMachine vm) {
-            vm.result = new Text(((Real)vm.popArg()).repr());
-            vm.popFrame();
-          }
-        });
-    }
-    */
-
 }
