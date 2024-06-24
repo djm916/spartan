@@ -1,20 +1,21 @@
 package spartan.data;
 
 public sealed interface IEq
-permits Void, Bool, Symbol, Text, Int, BigInt, Ratio, Real, Complex
+permits Void, Bool, Symbol, Int, BigInt, Ratio, Real, Complex, Text, Text.Cursor
 {
   default boolean isEqual(IEq rhs)
   {
     return switch (rhs) {
+      case Void x -> isEqual(x);
+      case Bool b -> isEqual(b);      
+      case Symbol s -> isEqual(s);
       case Int z -> isEqual(z);
       case BigInt z -> isEqual(z);
       case Ratio q -> isEqual(q);
       case Real r -> isEqual(r);
-      case Complex c -> isEqual(c);
-      case Symbol s -> isEqual(s);
+      case Complex c -> isEqual(c);      
       case Text s -> isEqual(s);
-      case Bool b -> isEqual(b);
-      case Void x -> isEqual(x);
+      case Text.Cursor c -> isEqual(c);      
     };
   }
   
@@ -49,6 +50,11 @@ permits Void, Bool, Symbol, Text, Int, BigInt, Ratio, Real, Complex
   }
     
   default boolean isEqual(Text rhs)
+  {
+    return false;
+  }
+  
+  default boolean isEqual(Text.Cursor rhs)
   {
     return false;
   }

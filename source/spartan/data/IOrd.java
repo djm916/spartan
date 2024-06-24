@@ -3,7 +3,7 @@ package spartan.data;
 import spartan.errors.TypeMismatch;
 
 public sealed interface IOrd
-permits Int, BigInt, Ratio, Real, Text
+permits Int, BigInt, Ratio, Real, Text, Text.Cursor
 {
   default int compareTo(IOrd rhs)
   {
@@ -13,6 +13,7 @@ permits Int, BigInt, Ratio, Real, Text
       case Ratio q -> compareTo(q);
       case Real r -> compareTo(r);
       case Text s -> compareTo(s);
+      case Text.Cursor i -> compareTo(i);
     };
   }
   
@@ -37,6 +38,11 @@ permits Int, BigInt, Ratio, Real, Text
   }
   
   default int compareTo(Text rhs)
+  {
+    throw new TypeMismatch();
+  }
+  
+  default int compareTo(Text.Cursor rhs)
   {
     throw new TypeMismatch();
   }

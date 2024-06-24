@@ -5,14 +5,93 @@ import java.nio.CharBuffer;
 import java.util.regex.Pattern;
 import spartan.errors.TypeMismatch;
 import spartan.errors.IndexOutOfBounds;
+import spartan.errors.NoSuchElement;
 
 public final class Text implements Datum, IEq, IOrd
 {
+  public static final class Cursor implements Datum, IEq, IOrd
+  {
+    private int next(int currentOffset)
+    {
+      if (currentOffset == string.length())
+        throw new NoSuchElement();
+      int codePoint = string.codePointAt(currentOffset);
+      int nextOffset = currentOffset + (Character.isBmpCodePoint(codePoint) ? 1 : 2);
+      return nextOffset;
+    }
+    
+    private int prev(int currentOffset)
+    {
+      if (currentOffset == 0)
+        throw new NoSuchElement();
+      int codePoint = string.codePointBefore(currentOffset);
+      int prevOffset = currentOffset + (Character.isBmpCodePoint(codePoint) ? -1 : -2);
+      return prevOffset;
+    }
+    
+    public Cursor next()
+    {
+      return new Cursor(string, next(offset));
+    }
+    
+    public Cursor prev()
+    {
+      return new Cursor(string, prev(offset));
+    }
+    
+    public Cursor forward(int n)
+    {
+      int nextOffset = offset;
+      for (; n > 0; n--) {
+        nextOffset = next(nextOffset);
+      }
+      return new Cursor(string, nextOffset);
+    }
+    
+    public int offset()
+    {
+      return offset;
+    }
+    
+    @Override // Datum
+    public Type type()
+    {
+      return TypeRegistry.STRING_CURSOR_TYPE;
+    }
+    
+    @Override // IOrd
+    public int compareTo(Cursor rhs)
+    {
+      if (this.offset < rhs.offset)
+        return -1;
+      else if (this.offset > rhs.offset)
+        return +1;
+      else
+        return 0;
+    }
+    
+    @Override // IEq
+    public boolean isEqual(Cursor rhs)
+    {
+      return this.offset == rhs.offset;
+    }
+    
+    private Cursor(String string, int offset)
+    {
+      this.string = string;
+      this.offset = offset;
+    }
+    
+    private final String string;
+    private final int offset;
+  }
+  
   public Text(String value)
   {
     this.value = value;
+    this.length = value.codePointCount(0, value.length());
   }
-    
+  
   @Override // Datum
   public Type type()
   {
@@ -33,7 +112,8 @@ public final class Text implements Datum, IEq, IOrd
   
   public int length()
   {
-    return value.length();
+    //return value.length();
+    return length;
   }
   
   public boolean isEmpty()
@@ -59,6 +139,22 @@ public final class Text implements Datum, IEq, IOrd
     return value.equals(rhs.value);
   }
   
+  public Cursor cursor()
+  {
+    return new Cursor(value, 0);
+  }
+  
+  public Cursor endCursor()
+  {
+    return new Cursor(value, value.length());
+  }
+  
+  public IInt get(Cursor position)
+  {
+    int codePoint = value.codePointAt(position.offset());
+    return Int.valueOf(codePoint);
+  }
+  
   public Bytes encode(Charset encoding)
   {
     //return new Bytes(encoding.encode(CharBuffer.wrap(value)));
@@ -70,12 +166,11 @@ public final class Text implements Datum, IEq, IOrd
   {
     var result = new StringBuilder();
     for (; !args.isEmpty(); args = args.cdr()) {
-      if (args.car() instanceof Text text) {
-        result.append(text.value);
-        if (! args.cdr().isEmpty())
-          result.append(delim.value);
-      }
-      else throw new TypeMismatch();
+      if (!(args.car() instanceof Text text))
+        throw new TypeMismatch();
+      result.append(text.value);
+      if (!args.cdr().isEmpty())
+        result.append(delim.value);
     }
     return new Text(result.toString());
   }
@@ -84,17 +179,17 @@ public final class Text implements Datum, IEq, IOrd
   {
     var result = new StringBuilder();
     for (var arg : args) {
-      if (arg instanceof Text text)
-        result.append(text.value);
-      else throw new TypeMismatch();
+      if (!(arg instanceof Text text))
+        throw new TypeMismatch();
+      result.append(text.value);
     }
     return new Text(result.toString());
   }
   
-  public Text substring(int start, int end)
+  public Text substring(Cursor start, Cursor end)
   {
     try {
-      return new Text(value.substring(start, end));
+      return new Text(value.substring(start.offset(), end.offset()));
     }
     catch (StringIndexOutOfBoundsException ex) {
       throw new IndexOutOfBounds();
@@ -115,9 +210,13 @@ public final class Text implements Datum, IEq, IOrd
     return result.build();
   }
   
-  public int find(Text string, int start)
+  public Cursor find(Text string, Cursor start)
   {
-    return this.value.indexOf(string.value, start);
+    int i = this.value.indexOf(string.value, start.offset());
+    if (i < 0)
+      return endCursor();
+    else
+      return new Cursor(value, i);
   }
   
   public Text replace(Text substring, Text replacement)
@@ -125,5 +224,25 @@ public final class Text implements Datum, IEq, IOrd
     return new Text(this.value.replace(substring.value, replacement.value));
   }
   
+  public Text insert(Text substring, Cursor position)
+  {
+    var left = value.substring(0, position.offset());
+    var right = value.substring(position.offset());
+    var middle = substring.value;
+    var totalLength = left.length() + middle.length() + right.length();
+    var inserted = new StringBuilder(totalLength).append(left).append(middle).append(right).toString();
+    return new Text(inserted);
+  }
+  
+  public Text delete(Cursor start, Cursor end)
+  {
+    var left = value.substring(0, start.offset());
+    var right = value.substring(end.offset());
+    var totalLength = left.length() + right.length();
+    var removed = new StringBuilder(totalLength).append(left).append(right).toString();
+    return new Text(removed);
+  }
+  
   private final String value;
+  private final int length;
 }

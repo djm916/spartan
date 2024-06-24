@@ -22,6 +22,7 @@ public final class TypeRegistry
   public static final Type VECTOR_TYPE = register(Symbol.of("vector"));
   public static final Type BYTES_TYPE = register(Symbol.of("bytes"));
   public static final Type STRING_TYPE = register(Symbol.of("string"));
+  public static final Type STRING_CURSOR_TYPE = register(Symbol.of("string-cursor"));
   public static final Type PORT_TYPE = register(Symbol.of("port"));
   public static final Type PACKAGE_TYPE = register(Symbol.of("package"));
   public static final Type RECORD_DESC_TYPE = register(Symbol.of("record-descriptor"));

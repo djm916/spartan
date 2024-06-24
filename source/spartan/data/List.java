@@ -7,6 +7,7 @@ import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.function.Supplier;
 import spartan.errors.Error;
@@ -85,11 +86,24 @@ permits Null
       return this;
     }
     
+    public Builder addAll(Builder other)
+    {
+      if (head == EMPTY)
+        return other;
+      else {
+        tail = tail.rest = other.head;
+      }
+      return this;
+    }
+    
     public List build()
     {
       return head;
     }
   }
+  
+  public static final Collector<Datum, Builder, List> COLLECTOR =
+    Collector.of(Builder::new, Builder::add, Builder::addAll, Builder::build);
   
   public static List cons(Datum first, List rest)
   {

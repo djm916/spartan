@@ -153,26 +153,24 @@ public final class CorePackage extends spartan.data.Package
     
     /* String & String Cursor procedures */
     
-    //bind(Symbol.of("string-ref"), StringLib.REF);
-    //bind(Symbol.of("string-set!"), StringLib.SET);
-    //bind(Symbol.of("string-length/bytes"), StringLib.LENGTH_BYTES);
-    //bind(Symbol.of("string-length/codepoints"), StringLib.LENGTH_CODEPOINTS);
-    //bind(Symbol.of("string-length/graphemes"), StringLib.LENGTH_GRAPHEMES);
-    
+    bind(Symbol.of("string-ref"), StringLib.REF);
+    bind(Symbol.of("string-length"), StringLib.LENGTH);
     bind(Symbol.of("string-empty?"), StringLib.IS_EMPTY);
+    bind(Symbol.of("string-substring"), StringLib.SUBSTR);
     bind(Symbol.of("string-concat"), StringLib.CONCAT);
     bind(Symbol.of("string-join"), StringLib.JOIN);
-    bind(Symbol.of("string-substr"), StringLib.SUBSTR);
+    bind(Symbol.of("string-split"), StringLib.SPLIT);    
     bind(Symbol.of("string-reverse"), StringLib.REVERSE);
     bind(Symbol.of("string-find"), StringLib.FIND);
     bind(Symbol.of("string-replace"), StringLib.REPLACE);
-    bind(Symbol.of("string-split"), StringLib.SPLIT);
+    bind(Symbol.of("string-insert"), StringLib.INSERT);
+    bind(Symbol.of("string-delete"), StringLib.DELETE);
     bind(Symbol.of("string-hash"), StringLib.HASH);
-    //bind(Symbol.of("string-codepoints"), StringLib.CODEPOINTS);
-    //bind(Symbol.of("string-graphemes"), StringLib.GRAPHEMES);
-    //bind(Symbol.of("string-cursor-start"), StringLib.CURSOR_START);
-    //bind(Symbol.of("string-cursor-end"), StringLib.CURSOR_END);
-    
+    bind(Symbol.of("string-cursor-begin"), StringLib.CURSOR_BEGIN);
+    bind(Symbol.of("string-cursor-end"), StringLib.CURSOR_END);
+    bind(Symbol.of("string-cursor-next"), StringLib.CURSOR_NEXT);
+    bind(Symbol.of("string-cursor-prev"), StringLib.CURSOR_PREV);
+        
     /* I/O and Port procedures */
     
     bind(Symbol.of("standard-input-port"), InputPort.STDIN);

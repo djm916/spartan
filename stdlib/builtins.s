@@ -139,6 +139,15 @@
     `(letrec ((,symbol (fun ,vars ,@body)))
        (,symbol ,@inits))))
 
+(defmacro let-values (bindings & body)
+  (rec loop ((bindings bindings))
+    (if (null? bindings)
+      `(do ,@body)
+      (let* [(binding (car bindings))
+             (formals (car binding))
+             (exp (cadr binding))]
+        `(apply (fun ,formals ,(loop (cdr bindings))) ,exp)))))
+
 (load "stdlib/vectors.s")
 (load "stdlib/defrecord.s")
 (load "stdlib/promises.s")

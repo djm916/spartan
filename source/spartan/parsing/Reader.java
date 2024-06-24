@@ -501,8 +501,9 @@ public class Reader implements AutoCloseable
     while (!isStringEnd(peekChar())) {
       getChar();
       if (lastChar == '\\') {
-        getChar();
-        text.append(interpolateEscapeChar((char)lastChar));
+        //getChar();
+        readEscapeSequence(text);
+        //text.append(interpolateEscapeChar((char)lastChar));
       }
       else {
         text.append((char) lastChar);
@@ -516,17 +517,53 @@ public class Reader implements AutoCloseable
 
     return new Text(text.toString());
   }
-
-  private char interpolateEscapeChar(char ch)
+  
+  private void readEscapeSequence(StringBuilder text)
   {
-    return switch (lastChar) {      
-      case 'n' -> '\n';
-      case 'r' -> '\r';
-      case 't' -> '\t';
-      case '"' -> '"';
-      case '\\' -> '\\';
-      default -> ch;
-    };
+    getChar();
+    if (lastChar == 'n')
+      text.append('\n');
+    else if (lastChar == '"')
+      text.append('"');
+    else if (lastChar == '\\')
+      text.append('\\');
+    else if (lastChar == 'u')
+      readUnicodeScalar(text);
+    else
+      text.append((char)lastChar);
+  }
+  
+  private void readUnicodeScalar(StringBuilder text)
+  {
+    if (peekChar() != '{')
+      throw syntaxError("invalid Unicode escape sequence");
+    getChar();
+    
+    var digits = new StringBuilder(8);
+    while (isHexDigit(peekChar()) && digits.length() <= 8) {
+      getChar();
+      digits.append((char)lastChar);
+    }
+    
+    if (peekChar() != '}')
+      throw syntaxError("invalid Unicode escape sequence");
+    getChar();
+    
+    int codePoint = 0;
+    try {
+      codePoint = Integer.parseUnsignedInt(digits, 0, digits.length(), 16);
+      //System.out.println("read codepoint = " + Integer.toHexString(codePoint));
+    }
+    catch (NumberFormatException ex) {
+      throw syntaxError("Unicode scalar value out of range");
+    }
+    
+    try {
+      text.appendCodePoint(codePoint);
+    }
+    catch (IllegalArgumentException ex) {
+      throw syntaxError("Unicode scalar value out of range");
+    }
   }
   
   private List readList(char delim)

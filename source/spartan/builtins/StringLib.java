@@ -45,13 +45,13 @@ public final class StringLib
   
   public static final Primitive SUBSTR = new Primitive(Signature.variadic(2, 1)) {
     public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof Text str))
+      if (!(vm.popArg() instanceof Text string))
         throw new TypeMismatch();
-      if (!(vm.popArg() instanceof IInt start))
+      if (!(vm.popArg() instanceof Text.Cursor start))
         throw new TypeMismatch();
-      if (!((vm.args.isEmpty() ? str.length() : vm.popArg()) instanceof IInt end))
+      if (!((vm.args.isEmpty() ? string.endCursor() : vm.popArg()) instanceof Text.Cursor end))
         throw new TypeMismatch();
-      vm.result = str.substring(start.intValue(), end.intValue());
+      vm.result = string.substring(start, end);
       vm.popFrame();
     }
   };
@@ -64,9 +64,9 @@ public final class StringLib
         throw new TypeMismatch();
       if (!(vm.popArg() instanceof Text substring))
         throw new TypeMismatch();
-      if (!((vm.args.isEmpty() ? Int.valueOf(0) : vm.popArg()) instanceof IInt start))
+      if (!((vm.args.isEmpty() ? string.cursor() : vm.popArg()) instanceof Text.Cursor position))
         throw new TypeMismatch();
-      vm.result = Int.valueOf(string.find(substring, start.intValue()));
+      vm.result = string.find(substring, position);
       vm.popFrame();
     }
   };
@@ -82,6 +82,36 @@ public final class StringLib
       if (!(vm.popArg() instanceof Text replacement))
         throw new TypeMismatch();
       vm.result = string.replace(substring, replacement);
+      vm.popFrame();
+    }
+  };
+  
+  // (string-insert string substring position)
+  
+  public static final Primitive INSERT = new Primitive(Signature.fixed(3)) {
+    public void apply(VirtualMachine vm) {
+      if (!(vm.popArg() instanceof Text string))
+        throw new TypeMismatch();
+      if (!(vm.popArg() instanceof Text substring))
+        throw new TypeMismatch();
+      if (!(vm.popArg() instanceof Text.Cursor position))
+        throw new TypeMismatch();
+      vm.result = string.insert(substring, position);
+      vm.popFrame();
+    }
+  };
+  
+  // (string-delete string start end)
+  
+  public static final Primitive DELETE = new Primitive(Signature.fixed(3)) {
+    public void apply(VirtualMachine vm) {
+      if (!(vm.popArg() instanceof Text string))
+        throw new TypeMismatch();
+      if (!(vm.popArg() instanceof Text.Cursor start))
+        throw new TypeMismatch();
+      if (!(vm.popArg() instanceof Text.Cursor end))
+        throw new TypeMismatch();
+      vm.result = string.delete(start, end);
       vm.popFrame();
     }
   };
@@ -108,18 +138,18 @@ public final class StringLib
     }
   };
   
-  /**
-  
-  // (string-ref str idx)
+  // (string-ref string position)
   
   public static final Primitive REF = new Primitive(Signature.fixed(2)) {
     public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof Text str && vm.popArg() instanceof IInt index))
+      if (!(vm.popArg() instanceof Text string && vm.popArg() instanceof Text.Cursor position))
         throw new TypeMismatch();
-      vm.result = Text.get(index.intValue());
+      vm.result = string.get(position);
       vm.popFrame();
     }
   };
+  
+  /**
   
   // (string-set! str idx val)
   
@@ -158,23 +188,48 @@ public final class StringLib
     }
   };
   
-  /*
-  public static final Primitive CURSOR_START = new Primitive(Signature.fixed(1)) {
+  // (string-cursor-begin string)
+  
+  public static final Primitive CURSOR_BEGIN = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof Text str))
+      if (!(vm.popArg() instanceof Text string))
         throw new TypeMismatch();
-      vm.result = TextCursor.forStart(str);
+      vm.result = string.cursor();
       vm.popFrame();
     }
   };
   
+  // (string-cursor-end string)
+  
   public static final Primitive CURSOR_END = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof Text str))
+      if (!(vm.popArg() instanceof Text string))
         throw new TypeMismatch();
-      vm.result = TextCursor.forEnd(str);
+      vm.result = string.endCursor();
       vm.popFrame();
     }
   };
-  */
+  
+  // (string-cursor-next position)
+  
+  public static final Primitive CURSOR_NEXT = new Primitive(Signature.fixed(1)) {
+    public void apply(VirtualMachine vm) {
+      if (!(vm.popArg() instanceof Text.Cursor cursor))
+        throw new TypeMismatch();
+      vm.result = cursor.next();
+      vm.popFrame();
+    }
+  };
+  
+  // (string-cursor-prev position)
+  
+  public static final Primitive CURSOR_PREV = new Primitive(Signature.fixed(1)) {
+    public void apply(VirtualMachine vm) {
+      if (!(vm.popArg() instanceof Text.Cursor cursor))
+        throw new TypeMismatch();
+      vm.result = cursor.prev();
+      vm.popFrame();
+    }
+  };
+  
 }

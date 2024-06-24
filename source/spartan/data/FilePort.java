@@ -18,8 +18,6 @@ import static java.nio.file.StandardOpenOption.*;
 
 public final class FilePort extends Port
 {
-  //public FilePort open(String fileName, List 
-  //private final 
   private static final Map<Symbol, OpenOption> openOptionMap = new IdentityHashMap<>();
   
   static {
@@ -30,12 +28,6 @@ public final class FilePort extends Port
     openOptionMap.put(Symbol.of("truncate"), TRUNCATE_EXISTING);
   }
   
-  private Optional<OpenOption> getOption(Symbol option)
-  {
-    return Optional.ofNullable(openOptionMap.get(option));
-  }
-  
-  /*
   private OpenOption[] parseOpenOptions(List options)
   {
     var result = new HashSet<OpenOption>();
@@ -49,15 +41,7 @@ public final class FilePort extends Port
     }
     return result.toArray(OpenOption[]::new);
   }
-  */
-  
-  private OpenOption[] parseOpenOptions(List options)
-  {
-    return options.streamOfType(Symbol.class, TypeMismatch::new)
-                  .map(option -> getOption(option).orElseThrow(InvalidArgument::new))
-                  .toArray(OpenOption[]::new);
-  }
-  
+    
   public FilePort(String fileName, List options)
   {
     var openOptions = parseOpenOptions(options);
