@@ -153,6 +153,7 @@ public final class CorePackage extends spartan.data.Package
     
     /* String & String Cursor procedures */
     
+    bind(Symbol.of("string"), StringLib.FROM_LIST);
     bind(Symbol.of("string-ref"), StringLib.REF);
     bind(Symbol.of("string-length"), StringLib.LENGTH);
     bind(Symbol.of("string-empty?"), StringLib.IS_EMPTY);

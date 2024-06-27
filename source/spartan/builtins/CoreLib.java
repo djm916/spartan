@@ -447,10 +447,10 @@ public final class CoreLib
   
   public static final Primitive MAKE_RECORD_TYPE = new Primitive(Signature.fixed(2)) {
     private void validateFields(List fields) {
-      for (; !fields.isEmpty(); fields = fields.cdr()) {
-        if (!(fields.car() instanceof Symbol f))
+      for (var elem : fields) {
+        if (!(elem instanceof Symbol field))
           throw new TypeMismatch();
-        if (!f.isSimple())
+        if (!field.isSimple())
           throw new InvalidArgument();
       }
     }

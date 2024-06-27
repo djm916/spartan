@@ -85,6 +85,20 @@ public final class Text implements Datum, IEq, IOrd
     private final String string;
     private final int offset;
   }
+
+  public static Text fromCodePoints(List codePoints)
+  {
+    var intArray = codePoints.streamOf(IInt.class, TypeMismatch::new)
+                   .mapToInt(c -> c.intValue())
+                   .toArray();
+    
+    return fromCodePoints(intArray);
+  }
+  
+  public static Text fromCodePoints(int[] codePoints)
+  {
+    return new Text(new String(codePoints, 0, codePoints.length));
+  }
   
   public Text(String value)
   {

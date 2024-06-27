@@ -6,6 +6,15 @@ import spartan.errors.TypeMismatch;
 
 public final class StringLib
 {
+  // (string c ...)
+  
+  public static final Primitive FROM_LIST = new Primitive(Signature.variadic(0)) {
+    public void apply(VirtualMachine vm) {
+      vm.result = Text.fromCodePoints(vm.popRestArgs());
+      vm.popFrame();
+    }
+  };
+  
   // (string-concat s ...)
   
   public static final Primitive CONCAT = new Primitive(Signature.variadic(0)) {
