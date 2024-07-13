@@ -58,6 +58,6 @@ permits InputPort, OutputPort, FilePort
   
   private static IOError unsupportedOperation()
   {
-    return new IOError("unsupported I/O operation");
+    return new IOError(IOError.ErrorCode.UNSUPPORTED);
   }
 }

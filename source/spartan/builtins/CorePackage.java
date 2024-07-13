@@ -55,6 +55,7 @@ public final class CorePackage extends spartan.data.Package
     bind(Symbol.of("macroexpand-1"), CoreLib.MACROEXPAND1);
     bind(Symbol.of("print-traceback"), CoreLib.PRINT_TRACEBACK);
     bind(Symbol.of("*package*"), this);
+    //bind(Symbol.of("apply-primitive/handler"), CoreLib.APPLY_PRIMITIVE_WITH_HANDLER);
     
     //bind(Symbol.of("print-package"), CoreLib.PRINT_PACKAGE);
     

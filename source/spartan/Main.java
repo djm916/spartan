@@ -12,7 +12,7 @@ import spartan.data.List;
 import spartan.data.Text;
 import spartan.data.Symbol;
 import spartan.errors.Error;
-import spartan.errors.LoadError;
+import spartan.errors.IOError;
 
 @Command(name = "spartan",
          description = "Invoke the Spartan interpreter.",
@@ -51,7 +51,7 @@ public class Main implements Callable<Integer>
       try {
         Loader.loadDLL(Config.HOME_DIR.resolve(Path.of("libspartan.dll")));
       }
-      catch (LoadError err) {
+      catch (IOError err) {
         System.err.println(err.getMessage());
       }
     }
@@ -63,7 +63,7 @@ public class Main implements Callable<Integer>
     try {
       spartan.Runtime.boot();
     }
-    catch (LoadError err) {
+    catch (IOError err) {
       System.err.println(err.getMessage());
     }
     
@@ -75,7 +75,7 @@ public class Main implements Callable<Integer>
       try {
         Loader.load(scriptPath);
       }
-      catch (LoadError err) {
+      catch (IOError err) {
         System.err.println(err.getMessage());
       }
     }

@@ -20,8 +20,8 @@ public final class OutputPort extends Port
     try {
       return new OutputPort(new BufferedOutputStream(new FileOutputStream(fileName)));
     }
-    catch (FileNotFoundException | SecurityException ex) {
-      throw new IOError(ex.getMessage());
+    catch (IOException ex) {
+      throw new IOError(ex);
     }
   }
   
@@ -39,7 +39,7 @@ public final class OutputPort extends Port
       return channel.write(buffer);
     }
     catch (IOException ex) {
-      throw new IOError(ex.getMessage());
+      throw new IOError(ex);
     }
   }
   
@@ -50,7 +50,7 @@ public final class OutputPort extends Port
       channel.close();
     }
     catch (IOException ex) {
-      throw new IOError(ex.getMessage());
+      throw new IOError(ex);
     }
   }
   

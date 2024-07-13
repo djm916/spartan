@@ -154,3 +154,4 @@
 (load "stdlib/streams.s")
 (load "stdlib/import.s")
 (load "stdlib/except.s")
+(load "stdlib/ports.s")

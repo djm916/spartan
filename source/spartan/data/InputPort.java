@@ -20,8 +20,8 @@ public final class InputPort extends Port
     try {
       return new InputPort(new BufferedInputStream(new FileInputStream(fileName)));
     }
-    catch (FileNotFoundException | SecurityException ex) {
-      throw new IOError(ex.getMessage());
+    catch (IOException ex) {
+      throw new IOError(ex);
     }
   }
 
@@ -39,7 +39,7 @@ public final class InputPort extends Port
       return channel.read(buffer);
     }
     catch (IOException ex) {
-      throw new IOError(ex.getMessage());
+      throw new IOError(ex);
     } 
   }
   
@@ -50,7 +50,7 @@ public final class InputPort extends Port
       channel.close();
     }
     catch (IOException ex) {
-      throw new IOError(ex.getMessage());
+      throw new IOError(ex);
     }
   }
   

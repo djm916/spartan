@@ -4,7 +4,7 @@ import spartan.parsing.Reader;
 import spartan.compiling.Compiler;
 import spartan.runtime.VirtualMachine;
 import spartan.errors.Error;
-import spartan.errors.LoadError;
+import spartan.errors.IOError;
 import java.io.FileNotFoundException;
 import java.io.EOFException;
 import java.nio.file.Files;
@@ -41,7 +41,7 @@ public final class Loader
       load(Path.of(file));
     }
     catch (InvalidPathException ex) {
-      throw new LoadError(file); // Path is invalid
+      throw new IOError(ex);
     }
   }
   
@@ -88,7 +88,7 @@ public final class Loader
       }      
     }
     catch (FileNotFoundException ex) {
-      throw new LoadError(path.toString()); // No file was found
+      throw new IOError(ex);
     }
   }
   
@@ -102,7 +102,7 @@ public final class Loader
     catch (UnsatisfiedLinkError | InvalidPathException ex) {
       if (Config.LOG_DEBUG)
         log.severe(String.format("unable to load \"%s\": %s", path.toString(), ex.toString()));
-      throw new LoadError(path.toString());
+      throw new IOError(ex);
     }
   }
   
@@ -121,7 +121,7 @@ public final class Loader
         return tryPath.normalize().toAbsolutePath();
     }
     
-    throw new LoadError(path.toString()); // No file was found
+    throw new IOError(IOError.ErrorCode.FILE_NOT_FOUND);
   }
   
   private static final Logger log = Logger.getLogger(Loader.class.getName());

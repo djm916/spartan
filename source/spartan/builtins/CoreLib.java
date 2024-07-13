@@ -229,6 +229,28 @@ public final class CoreLib
     }
   };
   
+  // (apply-primitive/handler handler f args...)
+  
+  public static final Primitive APPLY_PRIMITIVE_WITH_HANDLER = new Primitive(Signature.variadic(2)) {
+    public void apply(VirtualMachine vm) {
+      if (!(vm.popArg() instanceof IFun handler))
+        throw new TypeMismatch();
+      if (!(vm.popArg() instanceof Primitive f))
+        throw new TypeMismatch();
+      try {
+        int numArgs = vm.args.length();
+        if (!f.signature().matches(numArgs))
+          throw new WrongNumberArgs();
+        f.apply(vm);
+      }
+      catch (Error err) {
+        vm.result = handler;
+        vm.args = List.of(new Text(err.getMessage()));
+        vm.apply(1);
+      }
+    }
+  };
+  
   // (format-decimal num [precision])
   
   public static final Primitive FORMAT_DECIMAL = new Primitive(Signature.variadic(1, 1)) {
