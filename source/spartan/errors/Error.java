@@ -17,6 +17,13 @@ public class Error extends RuntimeException
     this.source = source;
   }
   
+  public Error(String message, SourceInfo source, List<Position> backTrace)
+  {
+    super(message);
+    this.source = source;
+    this.backTrace = backTrace;
+  }
+  
   public SourceInfo getSource()
   {
     return source;

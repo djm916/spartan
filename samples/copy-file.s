@@ -1,5 +1,5 @@
 
-(def file (port-open-file "./samples/test.txt" '(read)))
+(def file (port-open-file "./samples/none.txt" '(read)))
 (def buffer (make-bytes 1024))
 
 (let ((eof false))

@@ -185,6 +185,15 @@ public final class CoreLib
     }
   };
 
+  public static final Primitive IS_IDENTICAL = new Primitive(Signature.fixed(2)) {
+    public void apply(VirtualMachine vm) {
+      var x = vm.popArg();
+      var y = vm.popArg();
+      vm.result = Bool.valueOf(x == y);
+      vm.popFrame();
+    }
+  };
+  
   // (string->bytes string)
   
   public static final Primitive STRING_TO_BYTES = new Primitive(Signature.fixed(1)) {
@@ -221,7 +230,7 @@ public final class CoreLib
     }
   };
     
-  public static final Primitive ERROR = new Primitive(Signature.fixed(1)) {
+  public static final Primitive ABORT = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Text errMsg))
         throw new TypeMismatch();
@@ -276,6 +285,10 @@ public final class CoreLib
       vm.popFrame();
     }
   };
+  
+  //
+  // Type predicates
+  //
   
   public static final Primitive IS_VOID = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {

@@ -1,7 +1,7 @@
 
 (in-package spartan.core)
 
-(def *winds* ())
+(def *winders* ())
 
 ; Together, dynamic-wind and call/cc manage a list of winders. A winder is a pair of in and out thunks established by a call to dynamic-wind.
 ; Whenever dynamic-wind is invoked, the in thunk is invoked, a new winder containing the in and out thunks is placed on the winders list,
@@ -14,72 +14,78 @@
 
 (defun dynamic-wind (pre thunk post)
   (pre)
-  (set! *winds* (cons (list pre post) *winds*))
+  (set! *winders* (cons (list pre post) *winders*))
   (let ((result (thunk)))
-    (set! *winds* (cdr *winds*))
+    (set! *winders* (cdr *winders*))
     (post)
     result))
 
 (set! call/cc
   (let ((oldcc call/cc))
     (fun (proc)
-      (let ((winds *winds*))
+      (let ((save *winders*))
         (oldcc (fun (k)
                  (proc (fun (result)
-                         (%do-winds *winds* winds)
+                         (%do-winds *winders* save)
                          (k result)))))))))
 
 (defun %do-winds (from to)
-  (set! *winds* from)
-  (if (not (eq? from to))
+  (print-line "do winds")
+  (set! *winders* from)
+  (if (not (identical? from to))
       (cond ((null? from)
                (%do-winds from (cdr to))
                ((car (car to))))
             ((null? to)
-               ((cdr (car from)))
+               ((cadr (car from)))
                (%do-winds (cdr from) to))
             (else
-               ((cdr (car from)))
+               ((cadr (car from)))
                (%do-winds (cdr from) (cdr to))
                ((car (car to))))))
-  (set! *winds* to))
+  (set! *winders* to))
 
 (defrecord exception (name message))
 
-(defun *default-handler* (ex)
+(defun *default-exception-handler* (ex)
   (let ((message (string-concat "unhandled exception "
                                 (symbol->string (exception-name ex))
                                 ": "
                                 (exception-message ex))))
-    (error message)))
-  ;(print-line "unhandled exception " ex " was raised.")
-  ;(print-traceback))
+    (abort message)))
 
-;(def *top-level-continuation* nil)
+;(def *top-level-continuation* void)
 ;(call/cc (fun (k) (set! *top-level-continuation* k)))
 
-;(def *handlers* (list (list *default-handler* *top-level-continuation*)))
-
-(def *handlers* (list (list *default-handler* void)))
+;(def *handlers* (list (list *default-exception-handler* *top-level-continuation*)))
+;(def *handlers* (list (list *default-exception-handler* void)))
+(def *handlers* ())
 
 (defun push-handler (h k)
   (set! *handlers* (cons (list h k) *handlers*)))
 
 (defun pop-handler ()
-  (let ((top (car *handlers*)))
-    (set! *handlers* (cdr *handlers*))
-    top))
+  (if (null? *handlers*)
+    (do
+      (print-line "handler stack empty")
+      ())
+    (do
+      (let ((top (car *handlers*)))
+        (set! *handlers* (cdr *handlers*))
+        top))))
 
 (defun try (thunk handler)
   (call/cc
     (fun (k)
       (dynamic-wind
-        (fun () (push-handler handler k))
+        (fun () (print-line "in") (push-handler handler k))
         thunk
-        (fun () (pop-handler))))))
+        (fun () (print-line "out") (pop-handler))))))
 
-(defun raise (exp)
-  (let* ((top (pop-handler))
-         (h (car top))
-         (k (cadr top)))
-    (k (h exp))))
+(defun raise (exn)
+  (if (null? *handlers*)
+    (*default-exception-handler* exn)
+    (let* ((top (pop-handler))
+           (h (car top))
+           (k (cadr top)))
+      (k (h exn)))))
