@@ -1,7 +1,9 @@
 
 (in-package spartan.core)
 
-(def *winders* ())
+; ============
+; Dynamic Wind
+; ============
 
 ; Together, dynamic-wind and call/cc manage a list of winders. A winder is a pair of in and out thunks established by a call to dynamic-wind.
 ; Whenever dynamic-wind is invoked, the in thunk is invoked, a new winder containing the in and out thunks is placed on the winders list,
@@ -11,6 +13,8 @@
 ; on the current winders list that is not also on the saved winders list is invoked, followed by the in thunk of each winder on the saved
 ; winders list that is not also on the current winders list. The winders list is updated incrementally, again to ensure that a winder is on the
 ; current winders list only if control has passed through its in thunk and not entered its out thunk.
+
+(def *winders* ())
 
 (defun dynamic-wind (pre thunk post)
   (pre)
@@ -30,7 +34,6 @@
                          (k result)))))))))
 
 (defun %do-winds (from to)
-  (print-line "do winds")
   (set! *winders* from)
   (if (not (identical? from to))
       (cond ((null? from)
@@ -45,6 +48,11 @@
                ((car (car to))))))
   (set! *winders* to))
 
+; ==========
+; Exceptions
+; ==========
+;
+
 (defrecord exception (name message))
 
 (defun *default-exception-handler* (ex)
@@ -54,38 +62,53 @@
                                 (exception-message ex))))
     (abort message)))
 
-;(def *top-level-continuation* void)
-;(call/cc (fun (k) (set! *top-level-continuation* k)))
-
-;(def *handlers* (list (list *default-exception-handler* *top-level-continuation*)))
-;(def *handlers* (list (list *default-exception-handler* void)))
 (def *handlers* ())
 
-(defun push-handler (h k)
+(defun %push-handler (h k)
   (set! *handlers* (cons (list h k) *handlers*)))
 
-(defun pop-handler ()
-  (if (null? *handlers*)
-    (do
-      (print-line "handler stack empty")
-      ())
-    (do
-      (let ((top (car *handlers*)))
-        (set! *handlers* (cdr *handlers*))
-        top))))
+(defun %pop-handler ()
+  (let ((top (car *handlers*)))
+    (set! *handlers* (cdr *handlers*))
+    top))
 
 (defun try (thunk handler)
-  (call/cc
-    (fun (k)
-      (dynamic-wind
-        (fun () (print-line "in") (push-handler handler k))
-        thunk
-        (fun () (print-line "out") (pop-handler))))))
+  (let ((save *handlers*))
+    (call/cc
+      (fun (k)
+        (dynamic-wind
+          (fun () (%push-handler handler k))
+          thunk
+          (fun () (set! *handlers* save)))))))
 
 (defun raise (exn)
   (if (null? *handlers*)
     (*default-exception-handler* exn)
-    (let* ((top (pop-handler))
+    (let* ((top (%pop-handler))
            (h (car top))
            (k (cadr top)))
       (k (h exn)))))
+
+(defun with-exception-handler (handler thunk)
+  (let ((save *handlers*))
+    (call/cc
+      (fun (k)
+        (dynamic-wind
+          (fun () (%push-handler handler k))
+          thunk
+          (fun () (set! *handlers* save)))))))
+
+; <guard-exp> => (guard <guard-clause>* <exp>*)
+; <guard-clause> => (<symbol> <exp>*)
+
+(defmacro guard (clauses & body)
+  (defun generate-handler-body (var clauses)
+    (if (null? clauses) ()
+      (let ((clause (car clauses)))
+        (cons `((= ',(car clause) (exception-name ,var)) ,@(cdr clause))
+              (generate-handler-body var (cdr clauses))))))
+  (let ((var (gensym)))
+    `(with-exception-handler
+       (fun (,var)
+         (cond ,@(generate-handler-body var clauses)))
+       (fun () ,@body))))

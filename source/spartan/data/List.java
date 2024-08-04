@@ -19,6 +19,12 @@ final class Null extends List
   public static final Null VALUE = new Null();
   
   @Override // Datum
+  public String repr()
+  {
+    return "()";
+  }
+  
+  @Override // Datum
   public boolean boolValue()
   {
     return false;

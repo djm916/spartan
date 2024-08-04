@@ -153,5 +153,5 @@
 (load "stdlib/promises.s")
 (load "stdlib/streams.s")
 (load "stdlib/import.s")
-(load "stdlib/except.s")
+(load "stdlib/control.s")
 (load "stdlib/ports.s")

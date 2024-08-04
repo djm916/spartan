@@ -11,6 +11,12 @@ public final class Void implements Datum, IEq
   }
   
   @Override // Datum
+  public String repr()
+  {
+    return "void";
+  }
+  
+  @Override // Datum
   public boolean boolValue()
   {
     return false;

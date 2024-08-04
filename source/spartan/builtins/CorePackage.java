@@ -55,14 +55,6 @@ public final class CorePackage extends spartan.data.Package
     bind(Symbol.of("macroexpand-1"), CoreLib.MACROEXPAND1);    
     bind(Symbol.of("*package*"), this);
     bind(Symbol.of("identical?"), CoreLib.IS_IDENTICAL);
-    //bind(Symbol.of("apply-primitive/handler"), CoreLib.APPLY_PRIMITIVE_WITH_HANDLER);    
-    //bind(Symbol.of("print-package"), CoreLib.PRINT_PACKAGE);
-    //bind(Symbol.of("*default-exception-handler*"), CoreLib.DEFAULT_EXCEPTION_HANDLER);
-    bind(Symbol.of("print-backtrace"), CoreLib.PRINT_TRACEBACK);
-    
-    /* Conditions */
-    
-    //bind(Symbol.of("make-condition"), CoreLib.MAKE_CONDITION);
     
     /* Type predicates */
     
