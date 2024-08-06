@@ -72,15 +72,6 @@
     (set! *handlers* (cdr *handlers*))
     top))
 
-(defun try (thunk handler)
-  (let ((save *handlers*))
-    (call/cc
-      (fun (k)
-        (dynamic-wind
-          (fun () (%push-handler handler k))
-          thunk
-          (fun () (set! *handlers* save)))))))
-
 (defun raise (exn)
   (if (null? *handlers*)
     (*default-exception-handler* exn)
@@ -88,6 +79,15 @@
            (h (car top))
            (k (cadr top)))
       (k (h exn)))))
+
+;(defun try (thunk handler)
+;  (let ((save *handlers*))
+;    (call/cc
+;      (fun (k)
+;        (dynamic-wind
+;          (fun () (%push-handler handler k))
+;          thunk
+;          (fun () (set! *handlers* save)))))))
 
 (defun with-exception-handler (handler thunk)
   (let ((save *handlers*))

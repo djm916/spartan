@@ -53,7 +53,6 @@ public final class CorePackage extends spartan.data.Package
     bind(Symbol.of("identity-hash"), CoreLib.IDENTITY_HASH);
     bind(Symbol.of("abort"), CoreLib.ABORT);
     bind(Symbol.of("macroexpand-1"), CoreLib.MACROEXPAND1);    
-    bind(Symbol.of("*package*"), this);
     bind(Symbol.of("identical?"), CoreLib.IS_IDENTICAL);
     
     /* Type predicates */
@@ -172,8 +171,9 @@ public final class CorePackage extends spartan.data.Package
         
     /* I/O and Port procedures */
     
-    bind(Symbol.of("standard-input-port"), InputPort.STDIN);
-    bind(Symbol.of("standard-output-port"), OutputPort.STDOUT);
+    bind(Symbol.of("*standard-input-port*"), InputPort.STDIN);
+    bind(Symbol.of("*standard-output-port*"), OutputPort.STDOUT);
+    bind(Symbol.of("*standard-error-port*"), OutputPort.STDERR);
     bind(Symbol.of("port-open-file"), PortLib.OPEN);
     bind(Symbol.of("port-close"), PortLib.CLOSE);
     bind(Symbol.of("port-read"), PortLib.READ);
@@ -209,13 +209,12 @@ public final class CorePackage extends spartan.data.Package
     
     /* Package-related procedures */
     
+    bind(Symbol.of("*package*"), this);
     bind(Symbol.of("make-package"), PackageLib.MAKE);
     bind(Symbol.of("find-package"), PackageLib.FIND);
     bind(Symbol.of("get-package"), PackageLib.GET);
-    bind(Symbol.of("package-exists?"), PackageLib.EXISTS);
     bind(Symbol.of("package-symbols"), PackageLib.SYMBOLS);
-    bind(Symbol.of("package-add-alias"), PackageLib.ADD_ALIAS);
-    //bind(Symbol.of("package-bound?"), PackageLib.BOUND);
+    bind(Symbol.of("package-alias"), PackageLib.ALIAS);
     bind(Symbol.of("package-bind"), PackageLib.BIND);
     bind(Symbol.of("package-resolve"), PackageLib.RESOLVE);
     

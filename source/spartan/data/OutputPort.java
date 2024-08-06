@@ -13,7 +13,8 @@ import java.nio.channels.WritableByteChannel;
 
 public final class OutputPort extends Port
 {
-  public static final OutputPort STDOUT = new OutputPort(System.out);
+  public static final OutputPort STDOUT = new OutputPort(System.out);  
+  public static final OutputPort STDERR = new OutputPort(System.err);
   
   public static OutputPort fromFile(String fileName)
   {

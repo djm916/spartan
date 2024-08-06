@@ -1,6 +1,8 @@
 
 (load "stdlib/priority-queue.s")
 
+(in-package test)
+
 (import spartan.priority-queue :as pq)
 
 (def N 20)

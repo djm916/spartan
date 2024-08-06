@@ -1,4 +1,4 @@
-(def file (port-open-file "./samples/test.txt" "rw"))
+(def file (port-open-file "./samples/test.txt" '(read)))
 (def file-size (port-size file))
 (def buffer (make-bytes file-size))
 

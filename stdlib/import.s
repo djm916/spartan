@@ -2,13 +2,13 @@
 
 ; 
 
-(defun %import (source-package import-specifiers)
+(defun %do-import (source-package import-specifiers)
   (for ((specifiers import-specifiers (cdr specifiers)))
     ((null? specifiers) void)
     (let* ((spec (car specifiers))
            (symbol (if (list? spec) (car spec) spec))
            (alias (if (list? spec) (cadr spec) symbol)))
-      (package-bind *package* alias (package-resolve source-package symbol)))))
+      (package-bind alias (package-resolve symbol source-package)))))
       
 ;  (rec loop ((elems import-specifiers))
 ;    (if (empty? elems) ()
@@ -33,7 +33,7 @@
       (do
         (set! args (cdr args))
         (if (null? args)
-          (error "malformed expression"))
+          (abort "malformed expression"))
         (set! local-alias (car args))
         (set! args (cdr args))))
     
@@ -45,8 +45,8 @@
           (do
             (set! args (cdr args))
             (set! args (cdr args))
-            (if (empty? args)
-              (error "malformed expression"))
+            (if (null? args)
+              (abort "malformed expression"))
             (set! alias (car args))))
         (set! imported-symbols (cons (list symbol alias) imported-symbols))
         (set! args (cdr args))))
@@ -55,6 +55,5 @@
             (import-specifiers ,(if (null? imported-symbols)
                                   `(package-symbols source-package)
                                   `',imported-symbols)))
-       ,@(if (void? local-alias) () `((package-add-alias ',package-name ',local-alias)))
-       (%import source-package import-specifiers))))
-       
+       ,@(if (void? local-alias) () `((package-alias ',package-name ',local-alias)))
+       (%do-import source-package import-specifiers))))

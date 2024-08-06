@@ -68,44 +68,31 @@ public final class PackageLib
       vm.popFrame();
     }
   };
-  
-  // (package-exists? package-name)
-  
-  public static final Primitive EXISTS = new Primitive(Signature.fixed(1)) {
-    public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof Symbol pkgName))
-        throw new TypeMismatch();
-      vm.result = Bool.valueOf(spartan.Runtime.getPackage(pkgName).isPresent());
-      vm.popFrame();
-    }
-  };
-    
-  // (package-bind package symbol value)
+      
   // (package-bind symbol value [package])
   
-  public static final Primitive BIND = new Primitive(Signature.fixed(3)) {
+  public static final Primitive BIND = new Primitive(Signature.variadic(2, 1)) {
     public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof Package pkg))
-        throw new TypeMismatch();
       if (!(vm.popArg() instanceof Symbol symbol))
+        throw new TypeMismatch();
+      var value = vm.popArg();
+      if (!((vm.args.isEmpty() ? spartan.Runtime.currentPackage() : vm.popArg()) instanceof Package pkg))
         throw new TypeMismatch();
       if (!symbol.isSimple())
         throw new InvalidArgument();
-      var value = vm.popArg();
       pkg.bind(symbol, value, () -> new MultipleDefinition(symbol));
       vm.result = Void.VALUE;
       vm.popFrame();
     }
   };
   
-  // (package-resolve package symbol)
   // (package-resolve symbol [package])
   
-  public static final Primitive RESOLVE = new Primitive(Signature.fixed(2)) {
+  public static final Primitive RESOLVE = new Primitive(Signature.variadic(1, 1)) {
     public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof Package pkg))
-        throw new TypeMismatch();
       if (!(vm.popArg() instanceof Symbol symbol))
+        throw new TypeMismatch();
+      if (!((vm.args.isEmpty() ? spartan.Runtime.currentPackage() : vm.popArg()) instanceof Package pkg))
         throw new TypeMismatch();
       if (!symbol.isSimple())
         throw new InvalidArgument();
@@ -116,19 +103,18 @@ public final class PackageLib
   
   // (package-symbols [package])
   
-  public static final Primitive SYMBOLS = new Primitive(Signature.fixed(1)) {
+  public static final Primitive SYMBOLS = new Primitive(Signature.variadic(0, 1)) {
     public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof Package pkg))
+      if (!((vm.args.isEmpty() ? spartan.Runtime.currentPackage() : vm.popArg()) instanceof Package pkg))
         throw new TypeMismatch();
       vm.result = List.of(pkg.symbols());
       vm.popFrame();
     }
   };
   
-  // (package-alias target-package source-package alias)
   // (package-alias package-name alias [package])
   
-  public static final Primitive ADD_ALIAS = new Primitive(Signature.variadic(2, 1)) {    
+  public static final Primitive ALIAS = new Primitive(Signature.variadic(2, 1)) {    
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Symbol pkgName))
         throw new TypeMismatch();

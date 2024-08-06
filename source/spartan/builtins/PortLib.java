@@ -30,13 +30,13 @@ public final class PortLib
     openOptionMap.put(Symbol.of("truncate"), StandardOpenOption.TRUNCATE_EXISTING);
   }
   
-  private static OpenOption[] lowerOpenOptions(List options)
+  private static OpenOption[] makeOptionArray(List options)
   {
     var result = new HashSet<OpenOption>();
-    for (var elem : options) {
-      if (!(elem instanceof Symbol kw))
+    for (var e : options) {
+      if (!(e instanceof Symbol s))
         throw new TypeMismatch();
-      var opt = openOptionMap.get(kw);
+      var opt = openOptionMap.get(s);
       if (opt == null)      
         throw new InvalidArgument();
       result.add(opt);
@@ -63,9 +63,8 @@ public final class PortLib
         throw new TypeMismatch();
       if (!(vm.popArg() instanceof List options))
         throw new TypeMismatch();
-      var optionArray = lowerOpenOptions(options);
       try {
-        vm.result = ok(new FilePort(path.str(), optionArray));
+        vm.result = ok(new FilePort(path.str(), makeOptionArray(options)));
       }
       catch (IOError err) {
         //System.out.println("caught IOError with error code " + err.errorNo());

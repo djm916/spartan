@@ -32,23 +32,17 @@
                   [else
                      (list 'spartan.core:cons (%quasiquote (car exp) level) (%quasiquote (cdr exp) level))]))]))
 
-
 ; quasiquote macro
 ; NOTE: turned off; using builtin quasiquote special form!
 (defmacro quasiquote (exp)
   (%quasiquote exp 0))
 
-;(defmacro in-package (package-name)
-;  `(let ((package (try-find-package ',package-name)))
-;     (if (nil? package)
-;       (set! package (make-package ',package-name)))
-;     (set! spartan.core:*package* package)))
-
 (defmacro in-package (package-name)
   `(set! spartan.core:*package*
-         (if (package-exists? ',package-name)
-             (find-package ',package-name)
-             (make-package ',package-name))))
+     (let ((pkg (find-package ',package-name)))
+       (if (void? pkg)
+         (make-package ',package-name)
+         pkg))))
 
 (defmacro inc! (var)
   `(set! ,var (+ 1 ,var)))

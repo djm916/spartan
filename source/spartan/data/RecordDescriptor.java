@@ -11,12 +11,13 @@ import spartan.runtime.VirtualMachine;
 
 public class RecordDescriptor implements Datum
 {
-  public RecordDescriptor(Symbol name, Symbol... fields)
+  public RecordDescriptor(Symbol name, Set<Symbol> fields)
   {
     this.instanceType = TypeRegistry.register(name);
-    this.fieldSlotMap = new IdentityHashMap<>(fields.length);
-    for (int i = 0; i < fields.length; ++i)
-      fieldSlotMap.put(fields[i], i);
+    this.fieldSlotMap = new IdentityHashMap<>(fields.size());
+    for (var field : fields) {
+      fieldSlotMap.put(field, fieldSlotMap.size());
+    }
   }
   
   @Override // Datum

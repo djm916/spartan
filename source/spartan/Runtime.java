@@ -20,6 +20,7 @@ public final class Runtime
   public static Package currentPackage()
   {
     return (Package) CorePackage.INSTANCE.lookup(Symbol.of("*package*")).get();
+    //return currentPackage;
   }
   
   /**
@@ -28,6 +29,7 @@ public final class Runtime
   public static void currentPackage(Package pkg)
   {
     CorePackage.INSTANCE.bind(Symbol.of("*package*"), pkg);
+    //currentPackage = pkg;
   }
   
   /**
@@ -111,6 +113,7 @@ public final class Runtime
   
   private Runtime() { }
   
+  //private static Package currentPackage = CorePackage.INSTANCE;
   private static final Map<Symbol, Package> packages = new IdentityHashMap<>();
   private static final Logger log = Logger.getLogger(Runtime.class.getName());
 }

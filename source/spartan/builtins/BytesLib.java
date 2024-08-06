@@ -17,13 +17,15 @@ public final class BytesLib
     }
   };
     
-  // (make-bytes n)
+  // (make-bytes len [fill])
   
-  public static final Primitive MAKE = new Primitive(Signature.fixed(1)) {
+  public static final Primitive MAKE = new Primitive(Signature.variadic(1, 1)) {
     public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof IInt n))
+      if (!(vm.popArg() instanceof IInt len))
         throw new TypeMismatch();
-      vm.result = new Bytes(n.intValue());
+      if (!((vm.args.isEmpty() ? Int.valueOf(0) : vm.popArg()) instanceof IInt fill))
+        throw new TypeMismatch();
+      vm.result = new Bytes(len.intValue(), fill.byteValue());
       vm.popFrame();
     }
   };

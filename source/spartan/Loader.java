@@ -58,10 +58,10 @@ public final class Loader
   {
     var path = resolvePath(file);
     
-    if (loadedFiles.contains(path))
+    if (loadCache.contains(path))
       return;
     
-    loadedFiles.add(path);
+    loadCache.add(path);
     
     if (Config.LOG_DEBUG)
       log.info(() -> "loading \"" + path + "\"");
@@ -78,7 +78,7 @@ public final class Loader
         }
       }
       catch (EOFException ex) {
-        // nothing to do
+        // end of file; end loop
       }
       catch (Error err) {
         System.err.println(err);
@@ -125,5 +125,5 @@ public final class Loader
   }
   
   private static final Logger log = Logger.getLogger(Loader.class.getName());
-  private static final Set<Path> loadedFiles = new HashSet<>();
+  private static final Set<Path> loadCache = new HashSet<>();
 }

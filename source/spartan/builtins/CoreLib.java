@@ -8,6 +8,8 @@ import spartan.errors.InvalidArgument;
 import spartan.errors.NoSuchPackage;
 import spartan.errors.WrongNumberArgs;
 import spartan.errors.UnboundSymbol;
+import spartan.errors.IOError;
+import java.io.IOException;
 import spartan.runtime.VirtualMachine;
 import spartan.Config;
 import spartan.parsing.Reader;
@@ -32,16 +34,6 @@ public final class CoreLib
     if (x instanceof IOrd lhs && y instanceof IOrd rhs)
       return lhs.compareTo(rhs);
     throw new TypeMismatch();
-  }
-  
-  public static Datum macroExpand1(Datum form)
-  {
-    if (!(form instanceof List list && !list.isEmpty() && list.car() instanceof Symbol symbol))
-      return Void.VALUE;
-    var args = list.cdr();
-    return spartan.Runtime.lookupMacro(symbol)
-           .map(macro -> macro.expand(new VirtualMachine(), args, new SourceInfo(form, null)))
-           .orElse(Void.VALUE);
   }
   
   public static final Primitive NOT = new Primitive(Signature.fixed(1)) {
@@ -92,7 +84,9 @@ public final class CoreLib
       vm.popFrame();
     }
   };
-    
+  
+  //   (apply f args)
+  
   public static final Primitive APPLY = new Primitive(Signature.fixed(2)) {
     public void apply(VirtualMachine vm) {
       vm.result = vm.popArg();
@@ -102,6 +96,8 @@ public final class CoreLib
       vm.apply(vm.args.length());
     }
   };
+  
+  // (call/cc f)
   
   public static final Primitive CALL_CC = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
@@ -113,6 +109,8 @@ public final class CoreLib
     }
   };
   
+  // (print obj...)
+  
   public static final Primitive PRINT = new Primitive(Signature.variadic(0)) {
     public void apply(VirtualMachine vm) {
       while (!vm.args.isEmpty())
@@ -121,6 +119,8 @@ public final class CoreLib
       vm.popFrame();
     }
   };
+  
+  // (print-line obj...)
   
   public static final Primitive PRINT_LINE = new Primitive(Signature.variadic(0)) {
     public void apply(VirtualMachine vm) {
@@ -132,6 +132,8 @@ public final class CoreLib
     }
   };
   
+  // (type obj)
+  
   public static final Primitive TYPE = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       vm.result = Symbol.of(vm.popArg().type().name());
@@ -139,12 +141,14 @@ public final class CoreLib
     }
   };
   
+  // (load path)
+  
   public static final Primitive LOAD = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof Text file))
+      if (!(vm.popArg() instanceof Text path))
         throw new TypeMismatch();
       try {
-        spartan.Loader.load(file.str());
+        spartan.Loader.load(path.str());
       }
       finally {
         vm.result = Void.VALUE;
@@ -235,28 +239,6 @@ public final class CoreLib
       if (!(vm.popArg() instanceof Text errMsg))
         throw new TypeMismatch();
       throw new Error(errMsg.str());
-    }
-  };
-  
-  // (apply-primitive/handler handler f args...)
-  
-  public static final Primitive APPLY_PRIMITIVE_WITH_HANDLER = new Primitive(Signature.variadic(2)) {
-    public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof IFun handler))
-        throw new TypeMismatch();
-      if (!(vm.popArg() instanceof Primitive f))
-        throw new TypeMismatch();
-      try {
-        int numArgs = vm.args.length();
-        if (!f.signature().matches(numArgs))
-          throw new WrongNumberArgs();
-        f.apply(vm);
-      }
-      catch (Error err) {
-        vm.result = handler;
-        vm.args = List.of(new Text(err.getMessage()));
-        vm.apply(1);
-      }
     }
   };
   
@@ -446,6 +428,16 @@ public final class CoreLib
   // Macro expansion
   //
   
+  public static Datum macroExpand1(Datum form)
+  {
+    if (!(form instanceof List list && !list.isEmpty() && list.car() instanceof Symbol symbol))
+      return Void.VALUE;
+    var args = list.cdr();
+    return spartan.Runtime.lookupMacro(symbol)
+           .map(macro -> macro.expand(new VirtualMachine(), args, new SourceInfo(form, null)))
+           .orElse(Void.VALUE);
+  }
+  
   public static final Primitive MACROEXPAND1 = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       var form = vm.popArg();
@@ -453,61 +445,42 @@ public final class CoreLib
       vm.popFrame();
     }
   };
+    
+  //
+  // Records
+  //
   
-  public static final Primitive PRINT_PACKAGE = new Primitive(Signature.fixed(1)) {
-    public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof Symbol pkgName))
-        throw new TypeMismatch();
-      var pkg = spartan.Runtime.getPackage(pkgName).orElseThrow(() -> new NoSuchPackage(pkgName));
-      System.out.println(pkg.toString());
-      vm.result = Void.VALUE;
-      vm.popFrame();
-    }
-  };
   
-  public static final Primitive PRINT_TRACEBACK = new Primitive(Signature.fixed(0)) {
-    public void apply(VirtualMachine vm) {
-      var backTrace = vm.generateBackTrace();
-      if (backTrace != null && !backTrace.isEmpty()) {
-        System.out.println("\nbacktrace:");
-        for (spartan.parsing.Position position : backTrace)
-          System.out.print(String.format("\n\t%s", position));
-      }
-      vm.result = Void.VALUE;
-      vm.popFrame();
-    }
-  };
-  
-  // (make-record-type record-name fields)
+  // (make-record-type name fields)
   
   public static final Primitive MAKE_RECORD_TYPE = new Primitive(Signature.fixed(2)) {
-    private void validateFields(List fields) {
-      for (var elem : fields) {
-        if (!(elem instanceof Symbol field))
-          throw new TypeMismatch();
-        if (!field.isSimple())
-          throw new InvalidArgument();
-      }
-    }
-    private Symbol fullName(Symbol baseName) {
-      return new QualifiedSymbol(spartan.Runtime.currentPackage().name().name(), baseName.name()).intern();
-    }
-    private Symbol[] fieldArray(List fields) {
-      return fields.stream().map(f -> (Symbol)f).toArray(Symbol[]::new);
-    }
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Symbol name))
         throw new TypeMismatch();
-      if (!(vm.popArg() instanceof List fields))
-        throw new TypeMismatch();
       if (!name.isSimple())
         throw new InvalidArgument();
-      validateFields(fields);
-      var rtd = new RecordDescriptor(fullName(name), fieldArray(fields));
-      vm.result = rtd;
+      if (!(vm.popArg() instanceof List fields))
+        throw new TypeMismatch();
+      vm.result = makeRTD(name, fields);
       vm.popFrame();
     }
   };
+  
+  private static RecordDescriptor makeRTD(Symbol name, List fields)
+  {
+    var fullName = new QualifiedSymbol(spartan.Runtime.currentPackage().name().name(), name.name()).intern();
+    var fieldSet = new java.util.HashSet<Symbol>();
+    for (var e : fields) {
+      if (!(e instanceof Symbol f))
+        throw new TypeMismatch();
+      if (!f.isSimple())
+        throw new InvalidArgument();
+      if (fieldSet.contains(f))
+        throw new InvalidArgument();
+      fieldSet.add(f);
+    }
+    return new RecordDescriptor(fullName, fieldSet);
+  }
   
   // (record-constructor rtd)
   

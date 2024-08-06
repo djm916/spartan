@@ -25,7 +25,7 @@ class MutablePosition
  * It provides a stream-like interface via {@link #read}.
  * Each time {@link #read} is called, the next {@code Datum} will be consumed from the input
  * and returned, along with source code position data.
- * When the input source is fully consumed, {@link #read} will return {@code null}.
+ * When the input source is fully consumed, {@link #read} will throw {@code EOFException}.
  */
 public class Reader implements AutoCloseable
 {
@@ -65,8 +65,9 @@ public class Reader implements AutoCloseable
   /**
    * Reads the next {@code SourceDatum} from the input stream.
    *
-   * @return the next {@code SourceDatum}, or {@code null} if the input source is exhausted
-   * @throws SyntaxError if the input is syntactially invalid
+   * @return the next {@code SourceDatum}
+   * @throws EOFException if input stream is exhausted (end of file)
+   * @throws SyntaxError if the input text is syntactially invalid
    */
   public SourceDatum read() throws EOFException
   {

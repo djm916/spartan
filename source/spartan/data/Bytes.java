@@ -10,6 +10,7 @@ import java.nio.ByteBuffer;
 import java.nio.BufferUnderflowException;
 import java.nio.BufferOverflowException;
 import java.nio.charset.Charset;
+import java.util.Arrays;
 
 public final class Bytes implements Datum
 {
@@ -35,7 +36,13 @@ public final class Bytes implements Datum
   
   public Bytes(int capacity)
   {
+    this(capacity, (byte)0);
+  }
+  
+  public Bytes(int capacity, byte init)
+  {
     this.buffer = ByteBuffer.allocate(capacity);
+    Arrays.fill(this.buffer.array(), init);
   }
   
   public Bytes(byte[] bytes)
