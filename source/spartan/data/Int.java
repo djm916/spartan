@@ -4,14 +4,13 @@ import spartan.errors.DivisionByZero;
 import spartan.errors.IntegerOverflow;
 
 /**
- * Implementation of IInt as 64-bit signed integer (Java long type)
+ * Implementation of IInt as 64-bit signed integer (a Java long).
  *
  * Using a long for the representation has a few advantages. First, they can simultaneously represent bytes, array indices,
  * hash codes, file sizes and positions, avoiding an explosion of custom wrappers for each size. The trade-off, of course,
  * is that they probably waste a lot of space most of the time. Converting long to and from double produces sensible results,
  * with minimal loss of precision. This makes it easy to convert Int to Real and vice-versa, which is useful for implementing
  * math operations. 
- *  - 
  */
 public final class Int implements Datum, INum, IInt, IRatio, IReal, IComplex, IEq, IOrd
 {

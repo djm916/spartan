@@ -6,6 +6,9 @@ import spartan.errors.TypeMismatch;
 import spartan.errors.InvalidArgument;
 import spartan.runtime.VirtualMachine;
 
+/**
+ * Contains implementations of {@code bytes}-related builtin procedures.
+ */
 public final class BytesLib
 {
   // (bytes ...)

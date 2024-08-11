@@ -10,39 +10,47 @@ import java.util.List;
 import java.util.random.RandomGenerator;
 import java.util.logging.Logger;
 
-/** Contains global system configuration parameters. */
+/** Global system configuration parameters. */
 public final class Config
 {
   private static final Logger log = Logger.getLogger(Config.class.getName());
   
-  /** Enables or disables debug logging. Configured with the "spartan.debug" Java system property. Should
-      be "true" or "false". Defaults to "false". */
+  /** Enables or disables debug logging. Set via the Java system property "spartan.debug-logging".
+      Valid values are "true" and "false". Defaults to "false". */
   public static final boolean LOG_DEBUG = Boolean.valueOf(System.getProperty("spartan.debug-logging", "false"));
   
+  /** Enables or disables tail call optimization. Valid values are "true" and "false". Defaults to "true". */
   public static final boolean TAIL_CALLS = Boolean.valueOf(System.getProperty("spartan.optimize-tail-calls", "true"));
   
-  /** The default character encoding for converting to and from binary data.
-      This encoding is assumed when reading source code files. */
+  /** The default character encoding for converting text to and from binary. Default is UTF-8.
+      This encoding is used when reading source code files. */
   public static final Charset DEFAULT_ENCODING = StandardCharsets.UTF_8;
   
-  /** The default decimal display precision */
+  /** The default decimal display precision. Default is 3. */
   public static final int DEFAULT_DECIMAL_PRECISION = 3;
-    
+  
+  /** Home directory of the Spartan implementation. Set via the environment variable "SPARTAN_HOME".
+   * If SPARTAN_HOME is not set, defaults to the current working directory.
+   */
   public static final Path HOME_DIR = initHomeDir();
   
-  /** The list of directories to search when loading a file. Populated from the environment variable
-      SPARTANPATH. SPARTANPATH must contain a list of directories, separated by a (system-specific) delimiter.
-      If SPARTANPATH is not set, defaults to the current working directory. */
-  public static final List<Path> LOAD_SEARCH_DIRS = initLoadSearchDirs();
+  /** The list of directories to search when loading a file. Set via the environment variable "SPARTANPATH".
+   * If set, SPARTANPATH must contain a list of directories separated by a (system-specific) delimiter.
+   * If SPARTANPATH is not set, defaults to the current working directory.
+   */
+  public static final List<Path> SEARCH_DIRS = initLoadSearchDirs();
   
+  /** The system random number generator. */
   public static final RandomGenerator DEFAULT_RNG = RandomGenerator.getDefault();
   
+  /** Enumeration of different operating system types. */
   public static enum OSType {
     WINDOWS, UNIX, MACOS, UNKNOWN
   };
   
+  /** The current operating system type */
   public static final OSType OS_TYPE = getOSType();
-    
+  
   private Config() {}
   
   private static String getEnv(String key, String def)

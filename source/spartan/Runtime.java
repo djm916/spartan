@@ -12,6 +12,7 @@ import java.util.Optional;
 import java.util.logging.Logger;
 import java.nio.file.Path;
 
+/** Global program execution state */
 public final class Runtime
 {
   /**
@@ -70,6 +71,7 @@ public final class Runtime
     packages.put(pkg.name(), pkg);
   }
   
+  /** Resolve the given symbol in the global environment */
   public static Optional<Macro> lookupMacro(Symbol s)
   {
     return lookup(s)
@@ -89,6 +91,7 @@ public final class Runtime
      */
   }
   
+  /** Resolve the given symbol in the global environment */
   public static Optional<Datum> lookup(Symbol s)
   {
     if (s instanceof QualifiedSymbol qs)

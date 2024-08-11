@@ -15,25 +15,25 @@ import java.util.Set;
 import java.util.HashSet;
 
 /**
- * Loads source files.
+ * Methods for loading source code files and native libraries.
  *
- * Loading a file includes locating, reading, and evaluating source code files.
+ * "Loading" includes locating, parsing, and evaluating source code files.
+ * Files are located via a recursive search of the directories specified by the
+ * environment variable SPARTAN_PATH.
  * Files are evaluated using a new virtual machine, distinct from the calling
  * virtual machine.
- * Definitions in the loaded file will be stored in the given global environment.
- * Normally, the global environment should be shared between virtual machine
- * instances.
+ * Definitions in the loaded file are stored in the global environment,
+ * shared by all virtual machine instances.
  */
 public final class Loader
 {
   /**
-   * Loads the given file.
+   * Loads a file, checking for an invalid path.
    *
-   * This method should be used when the file is not known to be a valid path.
+   * This method should be used when the path is NOT known to be a valid.
    *
-   * @param file the file to load
-   * @param globals the global environment
-   * @throws LoadError if the file cannot be located or does not constitute a valid path
+   * @param file the path of the file to load
+   * @throws IOError if the file cannot be loaded for any reason
    */
   public static void load(String file)
   {
@@ -46,13 +46,12 @@ public final class Loader
   }
   
   /**
-   * Loads the given file.
+   * Loads a file.
    *
    * This method should be used when the file is known to be a valid path.
    *
-   * @param file the file to load
-   * @param globals the global environment
-   * @throws LoadError if the file cannot be located
+   * @param file the path of the file to load
+   * @throws IOError if the file cannot be loaded for any reason
    */
   public static void load(Path file)
   {
@@ -92,6 +91,11 @@ public final class Loader
     }
   }
   
+  /** Load a .DLL native library on a Windows system.
+   *
+   * @param path path to the .DLL file to load
+   * @throws IOError if the .DLL could not be loaded for any reason
+   */
   public static void loadDLL(Path path)
   {
     try {
@@ -113,7 +117,7 @@ public final class Loader
       return path.normalize();
     
     // Search paths in environment variable SPARTAN_PATH
-    for (var searchDir : Config.LOAD_SEARCH_DIRS) {
+    for (var searchDir : Config.SEARCH_DIRS) {
       var tryPath = searchDir.resolve(path);
       if (Config.LOG_DEBUG)
         log.info(() -> String.format("trying %s", tryPath));

@@ -6,7 +6,7 @@ import spartan.compiling.Compiler;
 import spartan.runtime.VirtualMachine;
 import spartan.errors.Error;
 
-/** This class implements the interactive REPL (Read, Eval, Print Loop) */
+/** Interactive REPL (Read, Eval, Print Loop) */
 public final class Repl
 {
   public static void start()

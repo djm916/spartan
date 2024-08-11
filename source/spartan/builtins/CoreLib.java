@@ -15,6 +15,9 @@ import spartan.Config;
 import spartan.parsing.Reader;
 import spartan.errors.SourceInfo;
 
+/**
+ * Contains implementations of Spartan Scheme's core builtin procedures.
+ */
 public final class CoreLib
 {
   public static Bool not(Datum x)
@@ -198,7 +201,7 @@ public final class CoreLib
     }
   };
   
-  // (string->bytes string)
+  // (string->bytes string [encoding])
   
   public static final Primitive STRING_TO_BYTES = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
@@ -384,13 +387,13 @@ public final class CoreLib
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Text baseName))
         throw new TypeMismatch();
-      if (!((vm.args.isEmpty() ? spartan.Runtime.currentPackage().name().name() : vm.popArg()) instanceof Text pkgName))
+      if (!((vm.args.isEmpty() ? new Text(spartan.Runtime.currentPackage().name().name()) : vm.popArg()) instanceof Text pkgName))
         throw new TypeMismatch();
       vm.result = new QualifiedSymbol(pkgName.str(), baseName.str());
       vm.popFrame();
-    }
+    }    
   };
-  
+    
   // (symbol-package symbol)
   
   public static final Primitive SYMBOL_PACKAGE = new Primitive(Signature.fixed(1)) {
@@ -461,14 +464,17 @@ public final class CoreLib
         throw new InvalidArgument();
       if (!(vm.popArg() instanceof List fields))
         throw new TypeMismatch();
-      vm.result = makeRTD(name, fields);
+      validateFields(fields);
+      var fullName = new QualifiedSymbol(spartan.Runtime.currentPackage().name().name(), name.name()).intern();
+      var fieldArray = fields.streamOf(Symbol.class).toArray(Symbol[]::new);
+      vm.result = new RecordDescriptor(fullName, fieldArray);
       vm.popFrame();
     }
   };
   
-  private static RecordDescriptor makeRTD(Symbol name, List fields)
+  // Ensure all record fields are distinct, simple symbols
+  private static void validateFields(List fields)
   {
-    var fullName = new QualifiedSymbol(spartan.Runtime.currentPackage().name().name(), name.name()).intern();
     var fieldSet = new java.util.HashSet<Symbol>();
     for (var e : fields) {
       if (!(e instanceof Symbol f))
@@ -479,7 +485,6 @@ public final class CoreLib
         throw new InvalidArgument();
       fieldSet.add(f);
     }
-    return new RecordDescriptor(fullName, fieldSet);
   }
   
   // (record-constructor rtd)

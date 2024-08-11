@@ -10,8 +10,6 @@ import java.util.function.Supplier;
 /**
  * A simple cache (key/value mapping) that stores weak references to its values.
  *
- * @param K the type of key
- * @param V the type of value
  */
 public class WeakCache<K, V>
 {

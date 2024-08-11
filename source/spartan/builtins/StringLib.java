@@ -158,7 +158,7 @@ public final class StringLib
     }
   };
   
-  /**
+  /*
   
   // (string-set! str idx val)
   

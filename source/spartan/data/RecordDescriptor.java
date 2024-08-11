@@ -9,15 +9,15 @@ import spartan.errors.TypeMismatch;
 import spartan.errors.NoSuchElement;
 import spartan.runtime.VirtualMachine;
 
+/** A record type descriptor. */
 public class RecordDescriptor implements Datum
 {
-  public RecordDescriptor(Symbol name, Set<Symbol> fields)
+  public RecordDescriptor(Symbol name, Symbol[] fields)
   {
     this.instanceType = TypeRegistry.register(name);
-    this.fieldSlotMap = new IdentityHashMap<>(fields.size());
-    for (var field : fields) {
-      fieldSlotMap.put(field, fieldSlotMap.size());
-    }
+    this.fieldSlotMap = new IdentityHashMap<>(fields.length);
+    for (int i = 0; i < fields.length; ++i)
+      fieldSlotMap.put(fields[i], i);
   }
   
   @Override // Datum

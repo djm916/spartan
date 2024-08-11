@@ -1,9 +1,13 @@
 package spartan.data;
 
+/**
+ * Implementation of IComplex as a pair of 64-bit floating point numbers (Java doubles).
+ */
 public final class Complex implements Datum, INum, IComplex, ITrans, IEq
 {
+  /** Value of the mathematical constant I. */
   public static final Complex I = new Complex(0.0, 1.0);
-    
+  
   public Complex(double x, double y)
   {
     this.real = x;

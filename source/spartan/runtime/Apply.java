@@ -4,13 +4,13 @@ import spartan.errors.SourceInfo;
 import spartan.errors.Error;
 
 /**
- * Implements application of a {@link spartan.data.Callable}.
+ * Implements application of a {@link spartan.data.IFun}.
  */
 public final class Apply extends Inst
 {
   /**
    * @param numArgs the number of arguments being applied
-   * @param position the source position where this application occurs
+   * @param source the source position of the call
    */
   public Apply(int numArgs, SourceInfo source)
   {

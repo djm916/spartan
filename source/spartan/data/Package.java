@@ -67,7 +67,6 @@ public class Package implements Datum
    * Import all symbols from another package into this package
    *
    * @param pkg The package to import from
-   * @param symbol The symbol to import
    * @throws UnboundSymbol if symbol is not present in package
    * @throws MultipleDefinition if symbol is already present in this package
    */
@@ -107,7 +106,7 @@ public class Package implements Datum
    * Otherwise, throws a MultipleDefinition exception.
    *
    * @param name The symbol to bind
-   * @param val The symbol's value
+   * @param value The symbol's value
    * @throws MultipleDefinition If symbol is already present in this package
    */
   public void bind(Symbol name, Datum value, Supplier<MultipleDefinition> onError)
@@ -129,7 +128,7 @@ public class Package implements Datum
    * Otherwise, throws a UnboundSymbol exception.
    *
    * @param name The symbol to bind
-   * @param val The symbol's value
+   * @param value The symbol's value
    * @throws UnboundSymbol If symbol is not present in this package
    */
   public void store(Symbol name, Datum value, Supplier<UnboundSymbol> onError)

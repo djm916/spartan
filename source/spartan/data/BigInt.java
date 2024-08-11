@@ -4,6 +4,9 @@ import java.math.BigInteger;
 import spartan.errors.DivisionByZero;
 import spartan.errors.IntegerOverflow;
 
+/**
+ * Implementation of IInt as an arbitrary-precision signed integer.
+ */
 public final class BigInt implements Datum, INum, IInt, IRatio, IReal, IComplex, IEq, IOrd
 {
   public static final BigInt ZERO = new BigInt(0);

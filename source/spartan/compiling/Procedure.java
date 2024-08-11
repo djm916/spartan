@@ -4,7 +4,9 @@ import spartan.runtime.Inst;
 import spartan.data.Signature;
 
 /**
-  Represents the basic data of a user-defined procedure (closure or macro),
-  including the bytecode of the procedure body, and the procedure signature.
+  A user-defined procedure (closure or macro).
+  
+  @param body the instructions that make up the procedure's body
+  @param sig the procedure's signature
 */
 public record Procedure(Inst body, Signature sig) {}

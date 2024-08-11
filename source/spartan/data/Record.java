@@ -11,7 +11,7 @@ public final class Record implements Datum
   /**
    * Constructor
    *
-   * @param type The record's type
+   * @param rtd A record type descriptor
    * @param values The initial values for the record's fields
    */
   public Record(RecordDescriptor rtd, Datum... values)

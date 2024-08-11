@@ -5,6 +5,9 @@ import spartan.data.Void; // shadows java.lang.Void
 import java.util.Optional;
 import java.util.logging.Logger;
 
+/**
+ * The spartan.core package.
+ */
 public final class CorePackage extends spartan.data.Package
 {
   private static final Logger log = Logger.getLogger(CorePackage.class.getName());

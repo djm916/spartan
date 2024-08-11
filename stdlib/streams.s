@@ -1,15 +1,9 @@
-; Streams Library
+; Streams library
 
-; A stream is a lazyily-evaluated, possibly infinite, sequence with a list-like interface.
+; A "stream" is a lazyily-evaluated, possibly infinite, sequence.
 
-; A stream is essentially a procedure (called a "promise"), which generates a sequence of values, calculated on demand.
-; Each time the promise is invoked, it returns a pair: the next value in the stream, and another promise to compute the remaining values.
-
-; This implementation of streams relys on the "delay" macro and the
-; "force" procedure. The user defines a "generator" procedure,
-; which is called each time the stream is forced. It should
-; return nil to indicate an end of stream condition. Otherwise, it
-; should return the next value in the stream.
+; In this implementation, a stream is a promise that, when forced, returns a
+; pair: the stream's first element, and the rest of the stream (another promise).
 
 ; A stream may be either finite or infinite. Be warned that some
 ; stream operations cannot be computed on infinite streams. 
@@ -67,10 +61,17 @@
   (if (stream-empty? s) i
     (stream-reduce f (f i (stream-car s)) (stream-cdr s))))
 
+(defun stream-enumerate (i s)
+  (if (stream-empty? s) ()
+    (stream-cons (list i (stream-car s)) (stream-enumerate (+ i 1) (stream-cdr s)))))
+
 (defun stream->list (s)
   (if (stream-empty? s) ()
     (cons (stream-car s) (stream->list (stream-cdr s)))))
 
-(defun stream-enumerate (i s)
-  (if (stream-empty? s) ()
-    (stream-cons (list i (stream-car s)) (stream-enumerate (+ i 1) (stream-cdr s)))))
+(defun generator->stream (g)
+  (delay
+    (let ((result (g)))
+      (if (void? result)
+        ()
+        (list result (generator->stream g))))))

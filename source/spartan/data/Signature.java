@@ -1,37 +1,44 @@
 package spartan.data;
 
 /**
-  Represents a procedure's signature.
-*/
-public record Signature(int minArgs, int maxArgs)
+ * A procedure signature (number of formal parameters)
+ *
+ * @param min minimum number of arguments accepted
+ * @param max maximum number of arguments accepted
+ */
+public record Signature(int min, int max)
 {
   /**
-   * Return a Signature for a procedure that accepts exactly n arguments
+   * Returns a signature for a procedure that accepts exactly n arguments.
    */
-  public static Signature fixed(int required)
+  public static Signature fixed(int n)
   {
-    return new Signature(required, required);
+    return new Signature(n, n);
   }
   
   /**
-   * Return a Signature for a procedure that accepts at least n arguments
+   * Returns a signature for a procedure that accepts at least n arguments,
+   * and an arbitrary number of additional arguments.
    */
-  public static Signature variadic(int required)
+  public static Signature variadic(int n)
   {
-    return new Signature(required, Integer.MAX_VALUE);
+    return new Signature(n, Integer.MAX_VALUE);
   }
   
   /**
-   * Return a Signature for a procedure that accepts at least n arguments,
-   * and at most n+m arguments
+   * Returns a signature for a procedure that accepts at least n arguments,
+   * and up to m additional optional arguments.
    */
-  public static Signature variadic(int required, int optional)
+  public static Signature variadic(int n, int m)
   {
-    return new Signature(required, required + optional);
+    return new Signature(n, n + m);
   }
   
-  public boolean matches(int numArgs)
+  /**
+   * Check if this signature accepts n arguments.
+   */
+  public boolean matches(int n)
   {
-    return minArgs <= numArgs && numArgs <= maxArgs;
+    return min <= n && n <= max;
   }
 }

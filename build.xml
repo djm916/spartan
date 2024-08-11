@@ -40,6 +40,8 @@
     <javadoc sourcepath="source" destdir="javadoc">
       <excludepackage name="spartan.tests"/>
       <excludepackage name="picocli"/>
+      <arg value="--source=17"/>
+      <arg value="--enable-preview"/>
     </javadoc>
   </target>
   

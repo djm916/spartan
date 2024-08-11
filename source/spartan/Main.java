@@ -14,6 +14,7 @@ import spartan.data.Symbol;
 import spartan.errors.Error;
 import spartan.errors.IOError;
 
+/** Entry point for the command line interface to the interpreter */
 @Command(name = "spartan",
          description = "Invoke the Spartan interpreter.",
          mixinStandardHelpOptions = true,

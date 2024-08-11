@@ -291,6 +291,11 @@ permits Null
     return StreamSupport.stream(spliterator(), false);
   }
   
+  public <T extends Datum> Stream<T> streamOf(Class<T> clazz)
+  {
+    return stream().map(clazz::cast);
+  }
+  
   public <T extends Datum> Stream<T> streamOf(Class<T> clazz, Supplier<Error> onError)
   {
     return stream().map(e -> { try { return clazz.cast(e); } catch (ClassCastException ex) { throw onError.get(); } });

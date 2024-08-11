@@ -19,13 +19,14 @@ class MutablePosition
 }
 
 /**
- * Converts source code text into {@code Datum}s.
- * 
+ * Converts Scheme source code into {@code Datum}s.
+ *
+ * A reader provides an on-demand, stream-like interface for parsing Scheme source code.
  * The input source can be a file, the terminal, or a string.
- * It provides a stream-like interface via {@link #read}.
- * Each time {@link #read} is called, the next {@code Datum} will be consumed from the input
- * and returned, along with source code position data.
- * When the input source is fully consumed, {@link #read} will throw {@code EOFException}.
+ * Each call to {@link #read} consumes a complete Scheme datum from the input source,
+ * and returns it along with the corresponding source position data.
+ * When the input source is fully consumed, {@link #read} throws {@code EOFException}.
+ * If {@code read} encounters a malformed Scheme datum, a {@link SyntaxError} is thrown.
  */
 public class Reader implements AutoCloseable
 {
@@ -77,7 +78,10 @@ public class Reader implements AutoCloseable
       throw new EOFException();
     return new SourceDatum(readDatum(), positionMap);
   }
-    
+  
+  /**
+   * Closes this reader and its underlying input source.
+   */
   public void close()
   {
     try {
