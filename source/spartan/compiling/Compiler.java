@@ -954,7 +954,7 @@ public class Compiler
   private Inst compileFor(List exp, Scope scope, boolean tail, Inst next)
   {
     if (!(exp.length() >= 3 && exp.cadr() instanceof List bindings && checkForBindingsForm(bindings)
-      && exp.caddr() instanceof List caddr && (caddr.length() == 1 || caddr.length() == 2)))
+          && exp.caddr() instanceof List caddr && (caddr.length() == 1 || caddr.length() == 2)))
       throw malformedExp(exp);
     
     int numBindings = bindings.length();

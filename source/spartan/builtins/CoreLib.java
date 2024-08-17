@@ -545,4 +545,13 @@ public final class CoreLib
       vm.popFrame();
     }
   };
+  
+  // (current-time-ms)
+  
+  public static final Primitive CURRENT_TIME_MS = new Primitive(Signature.fixed(0)) {
+    public void apply(VirtualMachine vm) {
+      vm.result = Int.valueOf(System.currentTimeMillis());
+      vm.popFrame();
+    }
+  };
 }

@@ -13,7 +13,7 @@ body {
 
 div.codeblock {
   font-family: monospace;
-  margin-left: 5%;
+  white-space: pre;
 }
 
 .code {

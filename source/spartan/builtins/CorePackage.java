@@ -52,11 +52,12 @@ public final class CorePackage extends spartan.data.Package
     bind(Symbol.of("print-line"), CoreLib.PRINT_LINE);
     bind(Symbol.of("type"), CoreLib.TYPE);    
     bind(Symbol.of("load"), CoreLib.LOAD);    
-    bind(Symbol.of("gensym"), CoreLib.GENSYM);
-    bind(Symbol.of("identity-hash"), CoreLib.IDENTITY_HASH);
+    bind(Symbol.of("gensym"), CoreLib.GENSYM);    
     bind(Symbol.of("abort"), CoreLib.ABORT);
-    bind(Symbol.of("macroexpand-1"), CoreLib.MACROEXPAND1);    
+    bind(Symbol.of("macroexpand-1"), CoreLib.MACROEXPAND1);
+    bind(Symbol.of("identity-hash"), CoreLib.IDENTITY_HASH);
     bind(Symbol.of("identical?"), CoreLib.IS_IDENTICAL);
+    bind(Symbol.of("current-time-ms"), CoreLib.CURRENT_TIME_MS);
     
     /* Type predicates */
     

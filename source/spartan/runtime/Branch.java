@@ -16,7 +16,7 @@ public final class Branch extends Inst
     else
       vm.control = ifFalse;
   }
-
+    
   private final Inst ifTrue;
   private final Inst ifFalse;
 }
