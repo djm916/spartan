@@ -16,6 +16,12 @@ public final class MakeClosure extends Inst
     vm.result = new Closure(proc, vm.locals);
     vm.control = next;
   }
-
+  
+  public void emit(StringBuilder sb)
+  {
+    sb.append("(make-closure)\n");
+    //next.emit(sb);
+  }
+  
   private final Procedure proc;
 }

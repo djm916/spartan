@@ -1,20 +1,19 @@
 package spartan.runtime;
 
-public final class PopFrame extends Inst
+public final class Halt extends Inst
 {
-  public PopFrame()
+  public Halt()
   {
     super(null);
   }
   
   public final void eval(VirtualMachine vm)
   {
-    vm.popFrame();
+    vm.control = null;
   }
   
   public void emit(StringBuilder sb)
   {
-    sb.append("(pop-frame)");
-    //next.emit(sb);
-  }
+    sb.append("(halt)\n");
+  }  
 }

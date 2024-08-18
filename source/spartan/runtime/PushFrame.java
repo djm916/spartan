@@ -17,6 +17,12 @@ public final class PushFrame extends Inst
     vm.control = next;
   }
 
-  private final Inst returnTo;
-  private final Position position;
+  public void emit(StringBuilder sb)
+  {
+    //sb.append("(push-frame)\n");
+    //next.emit(sb);
+  }
+  
+  public final Inst returnTo;
+  public final Position position;
 }

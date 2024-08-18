@@ -15,6 +15,12 @@ public final class StoreLocal extends Inst
     vm.control = next;
   }
 
+  public void emit(StringBuilder sb)
+  {
+    sb.append("(store-local " + depth + ":" + offset + ")\n");
+    //next.emit(sb);
+  }
+  
   private final int depth;
   private final int offset;
 }

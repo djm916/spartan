@@ -12,4 +12,10 @@ public final class PopRestArgs extends Inst
     vm.result = vm.popRestArgs();
     vm.control = next;
   }
+  
+  public void emit(StringBuilder sb)
+  {
+    sb.append("(pop-arg*)");
+    //next.emit(sb);
+  }
 }

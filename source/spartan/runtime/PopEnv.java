@@ -12,4 +12,10 @@ public final class PopEnv extends Inst
     vm.locals = vm.locals.parent();
     vm.control = next;
   }
+  
+  public void emit(StringBuilder sb)
+  {
+    sb.append("(pop-env)");
+    //next.emit(sb);
+  }
 }

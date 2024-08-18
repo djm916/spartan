@@ -15,6 +15,12 @@ public final class LoadConst extends Inst
     vm.result = x;
     vm.control = next;
   }
+  
+  public void emit(StringBuilder sb)
+  {
+    sb.append("(load-const " + x.repr() + ")\n");
+    //next.emit(sb);
+  }
 
   private final Datum x;
 }

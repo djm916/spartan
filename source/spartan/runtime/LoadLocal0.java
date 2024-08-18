@@ -14,5 +14,11 @@ public final class LoadLocal0 extends Inst
     vm.control = next;
   }
 
+  public void emit(StringBuilder sb)
+  {
+    sb.append("(load-local 0" + offset + ")\n");
+    //next.emit(sb);
+  }
+  
   private final int offset;
 }

@@ -7,6 +7,12 @@ public final class Jump extends Inst
     super(null);
   }
   
+  public Jump(Inst target)
+  {
+    super(null);
+    this.target = target;
+  }
+  
   public final void setTarget(Inst target)
   {
     this.target = target;
@@ -17,5 +23,10 @@ public final class Jump extends Inst
     vm.control = target;
   }
   
-  private Inst target;
+  public void emit(StringBuilder sb)
+  {
+    //sb.append("(jump ?)\n");
+  }
+  
+  public Inst target;
 }

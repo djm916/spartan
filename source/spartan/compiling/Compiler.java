@@ -44,7 +44,10 @@ public class Compiler
   public Inst compile(SourceDatum exp)
   {
     positionMap = exp.positionMap();
-    return compile(exp.datum(), Scope.EMPTY, false, null);
+    var code = compile(exp.datum(), Scope.EMPTY, false, new Halt());
+    if (Config.LOG_DEBUG)
+      log.info(() -> "Compilation result:\n" + Inst.codeListing(code));
+    return code;
   }
 
   /** Convenience method for creating instances of SyntaxError for malformed expressions. */
@@ -204,10 +207,10 @@ public class Compiler
      Compilation:
 
            <<pred>>
-           branch sub alt
-     sub:  <<sub>>
+           branch L1 L2
+     L1:   <<sub>>
            jump next
-     alt:  <<alt>>
+     L2:   <<alt>>
      next: ...
      
      Syntax (1-branch form): (if pred sub)
@@ -224,9 +227,9 @@ public class Compiler
     var pred = exp.cadr();
     var sub = exp.caddr();
     var alt = length == 4 ? exp.cadddr() : Void.VALUE;
-
+    
     return compile(pred, scope, false,
-           new Branch(compile(sub, scope, tail, next),
+           new Branch(compile(sub, scope, tail, new Jump(next)),
                       compile(alt, scope, tail, next)));
   }
 

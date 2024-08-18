@@ -14,5 +14,11 @@ public final class PushEnv extends Inst
     vm.control = next;
   }
 
+  public void emit(StringBuilder sb)
+  {
+    sb.append("(push-env " + numSlots + ")\n");
+    //next.emit(sb);
+  }
+  
   private final int numSlots;
 }

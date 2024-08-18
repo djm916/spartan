@@ -12,4 +12,10 @@ public final class PushArg extends Inst
     vm.pushArg(vm.result);
     vm.control = next;
   }
+  
+  public void emit(StringBuilder sb)
+  {
+    sb.append("(push-arg)\n");
+    //next.emit(sb);
+  }
 }

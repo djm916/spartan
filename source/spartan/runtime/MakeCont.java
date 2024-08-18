@@ -14,4 +14,10 @@ public final class MakeCont extends Inst
     vm.result = new Continuation(vm.frame);
     vm.control = next;
   }
+  
+  public void emit(StringBuilder sb)
+  {
+    sb.append("(make-cont)\n");
+    //next.emit(sb);
+  }
 }

@@ -23,6 +23,12 @@ public final class BindGlobal extends Inst
     vm.control = next;
   }
 
+  public void emit(StringBuilder sb)
+  {
+    sb.append("(bind-global " + packageName.repr() + ":" + baseName.repr() + ")\n");
+    //next.emit(sb);
+  }
+  
   private final Symbol packageName;
   private final Symbol baseName;
   private final SourceInfo source;
