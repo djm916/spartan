@@ -14,7 +14,7 @@
 (print-line "2*(2^2) = " ((compose square double) 2))
 (print-line "2*(2^2) = " (->> 2 (square) (double)))
 
-(print-line "sum of squares 1..100 = "
+(print-line "squares 1..100 = "
   (->> (range 1 100)
        (list-map square)
        (list-fold-left + 0)))

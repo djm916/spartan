@@ -207,10 +207,10 @@ public class Compiler
      Compilation:
 
            <<pred>>
-           branch L1 L2
-     L1:   <<sub>>
+           branchf else
+           <<sub>>
            jump next
-     L2:   <<alt>>
+     else: <<alt>>
      next: ...
      
      Syntax (1-branch form): (if pred sub)
@@ -229,8 +229,8 @@ public class Compiler
     var alt = length == 4 ? exp.cadddr() : Void.VALUE;
     
     return compile(pred, scope, false,
-           new Branch(compile(sub, scope, tail, new Jump(next)),
-                      compile(alt, scope, tail, next)));
+           new BranchFalse(compile(sub, scope, tail, new Jump(next)),
+                           compile(alt, scope, tail, next)));
   }
 
   /* Compiles the "cond" special form.
@@ -242,13 +242,13 @@ public class Compiler
      Compilation:
 
      pred1:  <<pred1>>
-             branch body1 pred2
-     body1:  <<body1>>
+             branchf pred2
+             <<body1>>
              jump next
              ...
      predN:  <<predN>>
-             branch bodyN none
-     bodyN:  <<bodyN>>
+             branchf none
+             <<bodyN>>
              jump next
      none:   load-const nil
      next:   ...
@@ -261,13 +261,13 @@ public class Compiler
      Compilation:
 
      pred1:    <<pred1>>
-               branch body1 pred2
-     body1:    <<body1>>
+               branchf pred2
+               <<body1>>
                jump next
                ...
      predN:    <<predN>>
-               branch bodyN default
-     bodyN:    <<bodyN>>
+               branchf default
+               <<bodyN>>
                jump next
      default:  <<default>>
      next:     ...
@@ -293,8 +293,8 @@ public class Compiler
       return compileSequence(body, scope, tail, next);
 
     return compile(test, scope, false,
-           new Branch(compileSequence(body, scope, tail, new Jump(next)),
-                      compileCondClauses(clauses.cdr(), scope, tail, next)));
+           new BranchFalse(compileSequence(body, scope, tail, new Jump(next)),
+                           compileCondClauses(clauses.cdr(), scope, tail, next)));
   }
 
   /* Compiles the "let" special form
@@ -754,7 +754,10 @@ public class Compiler
     if (!(exp.length() >= 3 && exp.cadr() instanceof List params && checkParamListForm(params)))
       throw malformedExp(exp);
     var body = exp.cddr();
-    return new MakeClosure(makeProcedure(params, body, scope), next);
+    var proc = makeProcedure(params, body, scope);    
+    if (Config.LOG_DEBUG)
+      log.info(() -> "Compiled procedure body\n" + CodeListing.generate(proc.body()));
+    return new MakeClosure(proc, next);
   }
 
   /* Transforms a sequence of inner definitions at the beginning
@@ -807,13 +810,16 @@ public class Compiler
 
      Compilation:
 
-     test1:  <<exp1>>
-             branch next test2
-     test2:  <<exp2>>
-             branch next test3
-     test3:  ...
-             branch next testN
-     testN:  <<expN>>
+             <<exp1>>
+             branchf L1
+             jump next
+     L1:     <<exp2>>           
+             branchf LN
+             jump next
+     ...
+     LN:     <<expN>>
+             branchf next
+             jump next
      next:   ...
   */
 
@@ -831,8 +837,8 @@ public class Compiler
       return next;
 
     return compile(exp.car(), scope, (tail && exp.cdr().isEmpty()),
-           new Branch(next,
-                      compileDisjunction(exp.cdr(), scope, tail, next)));
+           new BranchFalse(new Jump(next),
+                           compileDisjunction(exp.cdr(), scope, tail, next)));
   }
 
   /* Compiles the "and" special form, a logical conjunction.
@@ -841,11 +847,17 @@ public class Compiler
 
      Compilation:
 
-     test1:    <<exp1>>
-               branch test2 done
+             <<exp1>>
+             brancht L1
+             jump next
+     L1:     <<exp2>>           
+             brancht LN
+             jump next
      ...
-     testN:    <<expN>>
-     done:     ...
+     LN:     <<expN>>
+             brancht next
+             jump next
+     next:   ...
   */
 
   private Inst compileAnd(List exp, Scope scope, boolean tail, Inst next)
@@ -862,8 +874,8 @@ public class Compiler
       return next;
 
     return compile(exp.car(), scope, (tail && exp.cdr().isEmpty()),
-           new Branch(compileConjuction(exp.cdr(), scope, tail, next),
-                      next));
+           new BranchTrue(new Jump(next),
+                          compileConjuction(exp.cdr(), scope, tail, next)));
   }
 
   /* Compiles the "do" special form.
@@ -886,8 +898,8 @@ public class Compiler
      Compilation:
 
      loop: <<pred>>
-           branch body next
-     body: <<body>>
+           branchf next
+           <<body>>
            jump loop
      next: load-const nil
            ...
@@ -902,8 +914,8 @@ public class Compiler
     var body = exp.cddr();
     var jump = new Jump();
     var loop = compile(pred, scope, false,
-               new Branch(compileSequence(body, scope, false, jump),
-                          new LoadConst(Void.VALUE, next)));
+               new BranchFalse(compileSequence(body, scope, false, jump),
+                               new LoadConst(Void.VALUE, next)));
     jump.setTarget(loop);
     return loop;
   }
@@ -933,7 +945,7 @@ public class Compiler
            ; iteration test and body
 
      loop: <<test>>
-           branch done body
+           brancht done
 
            ; evaluate loop body for side-effect
 
@@ -953,7 +965,7 @@ public class Compiler
            store-local 0 N-1
            
            jump loop
-            
+           
      done: <<result>>
            pop-env
   */
@@ -979,12 +991,13 @@ public class Compiler
     
     var jump = new Jump();
     var loop = compile(test, extendedScope, false,
-               new Branch(compile(result, extendedScope, false,
-                          new PopEnv(next)),
+               new BranchTrue(
                           compileSequence(body, extendedScope, false,
                           compilePushArgs(steps, extendedScope,
                           compileBindLocals(0, numBindings,                          
-                          jump)))));
+                          jump))),
+                          compile(result, extendedScope, false,
+                          new PopEnv(next))));
     jump.setTarget(loop);                          
     return compilePushArgs(inits, scope,
            new PushEnv(numBindings,

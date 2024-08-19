@@ -1,5 +1,3 @@
-x
-
 (def s "abcdef")
 
 (print-line (string-length s))

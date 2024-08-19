@@ -10,8 +10,8 @@ public class CodeListing
     var sb = new StringBuilder();
     var labels = new IdentityHashMap<Inst, String>();
     
-    pass1(labels, code);
-    pass2(sb, labels, code);
+    generateLabels(labels, code);
+    generateListing(sb, labels, code);
     
     return sb.toString();
   }
@@ -23,21 +23,26 @@ public class CodeListing
     return "L" + (labelCounter++);
   }
   
-  private static void pass1(Map<Inst, String> labels, Inst code)
+  private static void generateLabels(Map<Inst, String> labels, Inst code)
   {
     top: while (code != null) {
-      if (code instanceof Branch br) {
-        labels.put(br.ifTrue, genLabel());
-        labels.put(br.ifFalse, genLabel());
-        pass1(labels, br.ifTrue);
-        code = br.ifFalse;
+      if (code instanceof BranchTrue br) {        
+        labels.put(br.alt, genLabel());
+        generateLabels(labels, br.next);
+        code = br.alt;
+        continue top;
+      }
+      if (code instanceof BranchFalse br) {        
+        labels.put(br.alt, genLabel());
+        generateLabels(labels, br.next);
+        code = br.alt;
         continue top;
       }
       else if (code instanceof Jump jmp) {
         labels.put(jmp.target, genLabel());
       }
       else if (code instanceof PushFrame fr) {
-        pass1(labels, fr.next);
+        generateLabels(labels, fr.next);
         code = fr.returnTo;
         continue top;
       }
@@ -45,13 +50,15 @@ public class CodeListing
     }
   }
   
-  private static void pass2(StringBuilder sb, Map<Inst, String> labels, Inst code)
+  private static void generateListing(StringBuilder sb, Map<Inst, String> labels, Inst code)
   {    
     top: while (code != null) {
       
       // emit (optional) label
       if (labels.containsKey(code))
         sb.append(labels.get(code) + ":");
+      
+      sb.append("\t");
       
       switch (code) {
         case Apply inst: {
@@ -62,10 +69,16 @@ public class CodeListing
           sb.append("(bind-global " + inst.packageName.repr() + ":" + inst.baseName.repr() + ")\n");
           break;
         }
-        case Branch inst: {
-          sb.append(String.format("(branch %s %s)\n", labels.get(inst.ifTrue), labels.get(inst.ifFalse)));
-          pass2(sb, labels, inst.ifTrue);
-          code = inst.ifFalse;
+        case BranchTrue inst: {
+          sb.append(String.format("(branch-true %s)\n", labels.get(inst.alt)));
+          generateListing(sb, labels, inst.next);
+          code = inst.alt;
+          continue top;
+        }
+        case BranchFalse inst: {
+          sb.append(String.format("(branch-false %s)\n", labels.get(inst.alt)));
+          generateListing(sb, labels, inst.next);
+          code = inst.alt;
           continue top;
         }
         case Halt inst: {
@@ -105,6 +118,10 @@ public class CodeListing
           sb.append("(pop-arg)\n");
           break;
         }
+        case PopRestArgs inst: {
+          sb.append("(pop-arg*)\n");
+          break;
+        }
         case PopEnv inst: {
           sb.append("(pop-env)\n");
           break;
@@ -118,12 +135,12 @@ public class CodeListing
           break;
         }
         case PushEnv inst: {
-          sb.append("(push-env)\n");
+          sb.append(String.format("(push-env %d)\n", inst.numSlots));
           break;
         }
         case PushFrame inst: {
           sb.append("(push-frame)\n");
-          pass2(sb, labels, inst.next);
+          generateListing(sb, labels, inst.next);
           code = inst.returnTo;
           continue top;
         }
@@ -141,7 +158,7 @@ public class CodeListing
           break;
         }
         default: {
-          throw new IllegalArgumentException("unknown instruction type");
+          throw new IllegalArgumentException("unknown instruction type: " + code.getClass());
         }
       }
       
