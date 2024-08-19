@@ -22,11 +22,6 @@ public final class Jump extends Inst
   {
     vm.control = target;
   }
-  
-  public void emit(StringBuilder sb)
-  {
-    //sb.append("(jump ?)\n");
-  }
-  
-  public Inst target;
+    
+  Inst target;
 }

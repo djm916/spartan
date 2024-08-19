@@ -22,5 +22,5 @@ public final class LoadConst extends Inst
     //next.emit(sb);
   }
 
-  private final Datum x;
+  final Datum x;
 }

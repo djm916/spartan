@@ -13,12 +13,6 @@ public final class StoreLocal0 extends Inst
     vm.locals.store0(vm.result, offset);
     vm.control = next;
   }
-
-  public void emit(StringBuilder sb)
-  {
-    sb.append("(store-local 0 " + offset + ")\n");
-    //next.emit(sb);
-  }
   
-  private final int offset;
+  final int offset;
 }

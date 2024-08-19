@@ -17,13 +17,8 @@ public final class Branch extends Inst
       vm.control = ifFalse;
   }
   
-  public void emit(StringBuilder sb)
-  {
-    //sb.append("(branch ? ?)\n");
-    //ifTrue.emit(sb);
-    //ifFalse.emit(sb);
-  }
+  public void emit(StringBuilder sb) {}
   
-  public final Inst ifTrue;
-  public final Inst ifFalse;
+  final Inst ifTrue;
+  final Inst ifFalse;
 }

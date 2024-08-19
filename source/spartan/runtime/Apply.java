@@ -30,12 +30,7 @@ public final class Apply extends Inst
       throw err;
     }
   }
-  
-  public void emit(StringBuilder sb)
-  {
-    sb.append("(apply " + numArgs + ")\n");
-  }
-  
-  private final int numArgs;
-  private final SourceInfo source;
+    
+  final int numArgs;
+  final SourceInfo source;
 }

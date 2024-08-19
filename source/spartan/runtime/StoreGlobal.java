@@ -22,14 +22,8 @@ public final class StoreGlobal extends Inst
                    .store(baseName, vm.result, () -> new UnboundSymbol(packageName, baseName, source));
     vm.control = next;
   }
-
-  public void emit(StringBuilder sb)
-  {
-    sb.append("(store-global " + packageName.repr() + ":" + baseName.repr() + ")\n");
-    //next.emit(sb);
-  }
   
-  private final Symbol packageName;
-  private final Symbol baseName;
-  private final SourceInfo source;
+  final Symbol packageName;
+  final Symbol baseName;
+  final SourceInfo source;
 }

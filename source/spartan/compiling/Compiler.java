@@ -46,7 +46,7 @@ public class Compiler
     positionMap = exp.positionMap();
     var code = compile(exp.datum(), Scope.EMPTY, false, new Halt());
     if (Config.LOG_DEBUG)
-      log.info(() -> "Compilation result:\n" + Inst.codeListing(code));
+      log.info(() -> "Compilation result:\n" + CodeListing.generate(code));
     return code;
   }
 
@@ -293,7 +293,7 @@ public class Compiler
       return compileSequence(body, scope, tail, next);
 
     return compile(test, scope, false,
-           new Branch(compileSequence(body, scope, tail, next),
+           new Branch(compileSequence(body, scope, tail, new Jump(next)),
                       compileCondClauses(clauses.cdr(), scope, tail, next)));
   }
 
@@ -807,11 +807,14 @@ public class Compiler
 
      Compilation:
 
-     test1:    <<exp1>>
-               branch done test2
-     ...
-     testN:    <<expN>>
-     done:     ...
+     test1:  <<exp1>>
+             branch next test2
+     test2:  <<exp2>>
+             branch next test3
+     test3:  ...
+             branch next testN
+     testN:  <<expN>>
+     next:   ...
   */
 
   private Inst compileOr(List exp, Scope scope, boolean tail, Inst next)
