@@ -227,7 +227,7 @@ public class Compiler
     var pred = exp.cadr();
     var sub = exp.caddr();
     var alt = length == 4 ? exp.cadddr() : Void.VALUE;
-    
+        
     return compile(pred, scope, false,
            new BranchFalse(compile(sub, scope, tail, new Jump(next)),
                            compile(alt, scope, tail, next)));
@@ -656,12 +656,14 @@ public class Compiler
     if (tail && Config.TAIL_CALLS) // Tail call optimization: omit call frame, return directly to the caller
       return compilePushArgs(args, scope,
              compile(proc, scope, false,
-             new Apply(numArgs, source)));
+             new Apply(numArgs, source,
+             next)));
     else
       return new PushFrame(next, position,
              compilePushArgs(args, scope,
              compile(proc, scope, false,
-             new Apply(numArgs, source))));
+             new Apply(numArgs, source,
+             next))));
   }
 
   /* Compile the "call/cc" form, or "call-with-current-continuation"

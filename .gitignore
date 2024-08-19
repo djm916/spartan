@@ -2,6 +2,7 @@ build/*
 doc/*
 test-results/*
 native/*.h
+javadoc/*
 Spartan.jar
 libspartan.dll
 desktop.ini

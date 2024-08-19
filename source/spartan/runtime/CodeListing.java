@@ -41,11 +41,6 @@ public class CodeListing
       else if (code instanceof Jump jmp) {
         labels.put(jmp.target, genLabel());
       }
-      else if (code instanceof PushFrame fr) {
-        generateLabels(labels, fr.next);
-        code = fr.returnTo;
-        continue top;
-      }
       code = code.next;
     }
   }
@@ -140,9 +135,7 @@ public class CodeListing
         }
         case PushFrame inst: {
           sb.append("(push-frame)\n");
-          generateListing(sb, labels, inst.next);
-          code = inst.returnTo;
-          continue top;
+          break;
         }
         case StoreGlobal inst: {
           var symb = inst.packageName.repr() + ":" + inst.baseName.repr();

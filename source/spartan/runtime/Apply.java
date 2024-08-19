@@ -12,9 +12,9 @@ public final class Apply extends Inst
    * @param numArgs the number of arguments being applied
    * @param source the source position of the call
    */
-  public Apply(int numArgs, SourceInfo source)
+  public Apply(int numArgs, SourceInfo source, Inst next)
   {
-    super(null);
+    super(next);
     this.numArgs = numArgs;
     this.source = source;
   }
