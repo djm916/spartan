@@ -30,7 +30,7 @@ public final class Apply extends Inst
       throw err;
     }
   }
-    
+  
   final int numArgs;
   final SourceInfo source;
 }

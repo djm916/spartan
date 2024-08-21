@@ -46,7 +46,7 @@ public class Compiler
     positionMap = exp.positionMap();
     var code = compile(exp.datum(), Scope.EMPTY, false, new Halt());
     if (Config.LOG_DEBUG)
-      log.info(() -> "Compilation result:\n" + CodeListing.generate(code));
+      log.info(() -> String.format("Listing for expression at %s\n%s", positionMap.get(exp.datum()), CodeListing.generate(code)));
     return code;
   }
 
@@ -758,7 +758,7 @@ public class Compiler
     var body = exp.cddr();
     var proc = makeProcedure(params, body, scope);    
     if (Config.LOG_DEBUG)
-      log.info(() -> "Compiled procedure body\n" + CodeListing.generate(proc.body()));
+      log.info(() -> String.format("Listing for procedure defined at %s\n%s", positionMap.get(exp), CodeListing.generate(proc.body())));
     return new MakeClosure(proc, next);
   }
 

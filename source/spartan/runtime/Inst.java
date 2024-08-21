@@ -33,5 +33,5 @@ public abstract class Inst
    * @param vm the {@code VirtualMachine} instance
    * @throws Error if an error occurs
    */
-  public abstract void eval(VirtualMachine vm);  
+  public abstract void eval(VirtualMachine vm);
 }

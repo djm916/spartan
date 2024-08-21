@@ -8,155 +8,98 @@ public class CodeListing
   public static String generate(Inst code)
   {
     var sb = new StringBuilder();
-    var labels = new IdentityHashMap<Inst, String>();
+    var ctx = new Context();
     
-    generateLabels(labels, code);
-    generateListing(sb, labels, code);
+    generateLabels(code, ctx);
+    emitListing(code, ctx, sb);
     
     return sb.toString();
   }
   
-  private static Integer labelCounter = 0;
-  
-  private static String genLabel()
-  {
-    return "L" + (labelCounter++);
+  private static class Context {
+    int labelCounter = 0;
+    Map<Inst, String> labels = new IdentityHashMap<>();
+    
+    String genLabel()
+    {
+      return "L" + (labelCounter++);
+    };
   }
   
-  private static void generateLabels(Map<Inst, String> labels, Inst code)
+  private static void generateLabels(Inst code, Context ctx)
   {
-    top: while (code != null) {
+    // TODO: make the br.next of the (jt) be the "true" branch and the branch.alt be the "false" branch 
+    
+    while (code != null) {
       if (code instanceof BranchTrue br) {        
-        labels.put(br.alt, genLabel());
-        generateLabels(labels, br.next);
+        ctx.labels.put(br.alt, ctx.genLabel());
+        generateLabels(br.next, ctx);
         code = br.alt;
-        continue top;
       }
-      if (code instanceof BranchFalse br) {        
-        labels.put(br.alt, genLabel());
-        generateLabels(labels, br.next);
+      else if (code instanceof BranchFalse br) {        
+        ctx.labels.put(br.alt, ctx.genLabel());
+        generateLabels(br.next, ctx);
         code = br.alt;
-        continue top;
       }
       else if (code instanceof Jump jmp) {
-        labels.put(jmp.target, genLabel());
+        ctx.labels.put(jmp.target, ctx.genLabel());
+        code = code.next;
       }
-      code = code.next;
+      else {
+        code = code.next;
+      }
     }
   }
   
-  private static void generateListing(StringBuilder sb, Map<Inst, String> labels, Inst code)
-  {    
-    top: while (code != null) {
-      
+  private static void emitListing(Inst code, Context ctx, StringBuilder sb)
+  {
+    while (code != null) {
       // emit (optional) label
-      if (labels.containsKey(code))
-        sb.append(labels.get(code) + ":");
-      
+      if (ctx.labels.containsKey(code))
+        sb.append(ctx.labels.get(code) + ":");      
       sb.append("\t");
-      
-      switch (code) {
-        case Apply inst: {
-          sb.append("(apply " + inst.numArgs + ")\n");
-          break;
-        }
-        case BindGlobal inst: {
-          sb.append("(bind-global " + inst.packageName.repr() + ":" + inst.baseName.repr() + ")\n");
-          break;
-        }
-        case BranchTrue inst: {
-          sb.append(String.format("(branch-true %s)\n", labels.get(inst.alt)));
-          generateListing(sb, labels, inst.next);
-          code = inst.alt;
-          continue top;
-        }
-        case BranchFalse inst: {
-          sb.append(String.format("(branch-false %s)\n", labels.get(inst.alt)));
-          generateListing(sb, labels, inst.next);
-          code = inst.alt;
-          continue top;
-        }
-        case Halt inst: {
-          sb.append("(halt)\n");
-          break;
-        }
-        case Jump inst: {
-          sb.append(String.format("(jump %s)\n", labels.get(inst.target)));
-          break;
-        }
-        case LoadConst inst: {
-          sb.append("(load-const " + inst.x.repr() + ")\n");
-          break;
-        }
-        case LoadGlobal inst: {
-          var symb = inst.packageName.repr() + ":" + inst.baseName.repr();
-          sb.append("(load-global " + symb + ")\n");
-          break;
-        }
-        case LoadLocal inst: {
-          sb.append("(load-local " + inst.depth + " " + inst.offset + ")\n");
-          break;
-        }
-        case LoadLocal0 inst: {
-          sb.append("(load-local 0 " + inst.offset + ")\n");
-          break;
-        }
-        case MakeClosure inst: {
-          sb.append("(make-closure)\n");
-          break;
-        }
-        case MakeCont inst: {
-          sb.append("(make-cont)\n");
-          break;
-        }
-        case PopArg inst: {
-          sb.append("(pop-arg)\n");
-          break;
-        }
-        case PopRestArgs inst: {
-          sb.append("(pop-arg*)\n");
-          break;
-        }
-        case PopEnv inst: {
-          sb.append("(pop-env)\n");
-          break;
-        }
-        case PopFrame inst: {
-          sb.append("(pop-frame)\n");
-          break;
-        }        
-        case PushArg inst: {
-          sb.append("(push-arg)\n");
-          break;
-        }
-        case PushEnv inst: {
-          sb.append(String.format("(push-env %d)\n", inst.numSlots));
-          break;
-        }
-        case PushFrame inst: {
-          sb.append("(push-frame)\n");
-          break;
-        }
-        case StoreGlobal inst: {
-          var symb = inst.packageName.repr() + ":" + inst.baseName.repr();
-          sb.append("(store-global " + symb + ")\n");
-          break;
-        }
-        case StoreLocal inst: {
-          sb.append("(store-local " + inst.depth + " " + inst.offset + ")\n");
-          break;
-        }
-        case StoreLocal0 inst: {
-          sb.append("(store-local 0 "+ inst.offset + ")\n");
-          break;
-        }
-        default: {
-          throw new IllegalArgumentException("unknown instruction type: " + code.getClass());
-        }
+      sb.append(emit(code, ctx));
+      sb.append("\n");
+      if (code instanceof BranchTrue br) {        
+        emitListing(br.next, ctx, sb);
+        code = br.alt;
       }
-      
-      //sb.append("\n");      
-      code = code.next;
+      else if (code instanceof BranchFalse br) {        
+        emitListing(br.next, ctx, sb);
+        code = br.alt;
+      }
+      else {
+        code = code.next;
+      }      
     }
+  }
+  
+  private static String emit(Inst code, Context ctx)
+  {
+    return switch (code) {
+      case Apply      inst -> String.format("(apply " + inst.numArgs + ")");
+      case BindGlobal inst -> String.format("(bind-global %s:%s)", inst.packageName.str(), inst.baseName.str());
+      case BranchTrue inst -> String.format("(branch-true %s)", ctx.labels.get(inst.alt));
+      case BranchFalse inst -> String.format("(branch-false %s)", ctx.labels.get(inst.alt));
+      case Halt        inst -> "(halt)";
+      case Jump        inst -> String.format("(jump %s)", ctx.labels.get(inst.target));
+      case LoadConst inst -> String.format("(load-const %s)", inst.x.repr());
+      case LoadGlobal inst -> String.format("(load-global %s:%s)", inst.packageName.str(), inst.baseName.str());
+      case LoadLocal inst -> String.format("(load-local %d %d)", inst.depth, inst.offset);
+      case LoadLocal0 inst -> String.format("(load-local 0 %d)", inst.offset);
+      case MakeClosure inst -> "(make-closure)";
+      case MakeCont inst -> "(make-cont)";
+      case PopArg inst -> "(pop-arg)";
+      case PopRestArgs inst -> "(pop-arg*)";
+      case PopEnv inst -> "(pop-env)";
+      case PopFrame inst -> "(pop-frame)";
+      case PushArg inst -> "(push-arg)";
+      case PushEnv inst -> String.format("(push-env %d)", inst.numSlots);
+      case PushFrame inst -> "(push-frame)";
+      case StoreGlobal inst -> String.format("(store-global %s:%s)", inst.packageName.str(), inst.baseName.str());
+      case StoreLocal inst -> String.format("(store-local %d %d)", inst.depth, inst.offset);
+      case StoreLocal0 inst -> String.format("(store-local 0 %d)", inst.offset);
+      default -> throw new IllegalArgumentException("unknown instruction type: " + code.getClass());
+    };
   }
 }

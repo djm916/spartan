@@ -15,8 +15,6 @@ public final class BranchFalse extends Inst
     else
       vm.control = next;
   }
-  
-  public void emit(StringBuilder sb) {}
-  
+      
   final Inst alt;
 }
