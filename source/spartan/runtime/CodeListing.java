@@ -1,7 +1,9 @@
 package spartan.runtime;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.IdentityHashMap;
+import java.util.HashSet;
 
 public class CodeListing
 {
@@ -11,6 +13,16 @@ public class CodeListing
     var ctx = new Context();
     
     generateLabels(code, ctx);
+    
+    sb.append("\n; procedures section\n\n");
+    
+    for (var body : ctx.procEntries) {
+      emitListing(body, ctx, sb);
+      sb.append("---------------\n");
+    }
+    
+    sb.append("\n; main section\n\n");
+    
     emitListing(code, ctx, sb);
     
     return sb.toString();
@@ -19,6 +31,7 @@ public class CodeListing
   private static class Context {
     int labelCounter = 0;
     Map<Inst, String> labels = new IdentityHashMap<>();
+    Set<Inst> procEntries = new HashSet<>();
     
     String genLabel()
     {
@@ -26,10 +39,11 @@ public class CodeListing
     };
   }
   
+  /**
+   * Generate labels
+   */
   private static void generateLabels(Inst code, Context ctx)
   {
-    // TODO: make the br.next of the (jt) be the "true" branch and the branch.alt be the "false" branch 
-    
     while (code != null) {
       if (code instanceof BranchTrue br) {        
         ctx.labels.put(br.alt, ctx.genLabel());
@@ -45,6 +59,13 @@ public class CodeListing
         ctx.labels.put(jmp.target, ctx.genLabel());
         code = code.next;
       }
+      else if (code instanceof MakeClosure clo) {
+        var body = clo.proc.body();
+        ctx.labels.put(body, ctx.genLabel());
+        ctx.procEntries.add(body);
+        generateLabels(body, ctx);
+        code = code.next;
+      }
       else {
         code = code.next;
       }
@@ -52,7 +73,7 @@ public class CodeListing
   }
   
   private static void emitListing(Inst code, Context ctx, StringBuilder sb)
-  {
+  {    
     while (code != null) {
       // emit (optional) label
       if (ctx.labels.containsKey(code))
@@ -87,7 +108,7 @@ public class CodeListing
       case LoadGlobal inst -> String.format("(load-global %s:%s)", inst.packageName.str(), inst.baseName.str());
       case LoadLocal inst -> String.format("(load-local %d %d)", inst.depth, inst.offset);
       case LoadLocal0 inst -> String.format("(load-local 0 %d)", inst.offset);
-      case MakeClosure inst -> "(make-closure)";
+      case MakeClosure inst -> String.format("(make-closure %s)", ctx.labels.get(inst.proc.body()));
       case MakeCont inst -> "(make-cont)";
       case PopArg inst -> "(pop-arg)";
       case PopRestArgs inst -> "(pop-arg*)";

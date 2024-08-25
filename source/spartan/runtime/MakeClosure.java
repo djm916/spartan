@@ -17,5 +17,5 @@ public final class MakeClosure extends Inst
     vm.control = next;
   }
   
-  private final Procedure proc;
+  final Procedure proc;
 }

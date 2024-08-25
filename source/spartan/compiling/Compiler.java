@@ -757,8 +757,8 @@ public class Compiler
       throw malformedExp(exp);
     var body = exp.cddr();
     var proc = makeProcedure(params, body, scope);    
-    if (Config.LOG_DEBUG)
-      log.info(() -> String.format("Listing for procedure defined at %s\n%s", positionMap.get(exp), CodeListing.generate(proc.body())));
+    //if (Config.LOG_DEBUG)
+      //log.info(() -> String.format("Listing for procedure defined at %s\n%s", positionMap.get(exp), CodeListing.generate(proc.body())));
     return new MakeClosure(proc, next);
   }
 

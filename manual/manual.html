@@ -298,9 +298,11 @@ defined inductively as follows:</p>
 
 <a id="chapter_5"><h2>Virtual Machine</h2></a>
 
-<p>The virtual machine's design in based the CESK machine: an abstract machine model
-for evaluating lambda calculus expressions, extended with a store for mutable variables.
-The CESK machine has 4 components:
+<p>The Spartan virtual machine design is based on a CESK machine, modified to support a Scheme-like programming language.
+The CESK machine is based on the CEK machine, an abstract machine model for evaluating the lambda calculus.
+The lambda calculus, including lambda expressions, applications, and variables, is sufficient to support functional programming.
+The CESK machine extends the CEK machine with a store, to support mutable variables. The CESK machine has 4 components:</p>
+
 <ul>
   <li>C: control, the current expression being evaluated</li>
   <li>E: environment, a mapping from variables to locations in the store S</li>
@@ -309,25 +311,31 @@ The CESK machine has 4 components:
 </ul>
 </p>
 
-<p>The control component 
-</p>
+<p>In modern hardware parlance, the C component is analogous to the instruction pointer (IP), E is analogous to the stack,
+S is analogous to the heap, and K is analogous to the call stack. In a tradional language like C, the call stack is used for both
+activation frame records, and to store the values of parameters and local variables. In the CESK machine, these purposes are split</p>
 
-<p>The virtual machine's design is based on a CESK machine. It's state consists of 5 registers:</p>
+<p>The Spartan virtual machine's state consists of 5 components:</p>
 
 <ul>
-  <li>RES: result, a temporary register to store return values</li>
+  <li>RES: result, stores result of evaluated expressions</li>
   <li>CTL: control, the current instruction being executed</li>
-  <li>ARG: arguments, pointer to evaluated procedure arguments list</li>
-  <li>ENV: environment, pointer to the head of environment chain</li>
-  <li>KON: continuation, pointer to the head of continuation chain</li>
+  <li>ARG: arguments, evaluated procedure arguments list</li>
+  <li>ENV: environment, head of the environment chain</li>
+  <li>KON: continuation, head of the continuation chain</li>
 </ul>
+
+<p>In the CESK machine, the C component serves a dual purpose: it is either an expression to evaluate or a data value which is the result of evaluating an expression (the only values in the lambda calculus are functions).
+In the Spartan VM, these purposes are split into to registers. The RES stores evaluation results, and the CTL register points to an instruction.
 
 <p>Closures<p>
 The function values created by lambda expressions are so-called lexical closures because they
-retain values for the free variables in the body of the lambda. In the virtual machine, function values are represented by
-a closure C = (body, env) : a pair containing 1) a pointer to the function's entry point, 2) a pointer to the function's defining environment.
-When a function is called, the environment stored in the closure, extended with a frame for the parameter values,
-is made current while evaluating the function's body. When the function returns, the previous environment is restored.
+retain values for the free variables in the body of the lambda. That is, lambda bodies are always evaluated with respect to their defining environment,
+plus any parameters.
+In the virtual machine, function values are represented by
+a closure object: a pair containing 1) a pointer to the function's entry point, 2) a pointer to the function's defining environment.
+When a function is called, the environment stored in the closure is extended with a frame for the parameters and made current before
+evaluating the function body. When the function returns, the previous environment is restored.
 
 <p>Environments and environment frames</p>
 Conceptually, every expression is evaluated in the context of an environment, which stores the value of each variable in the expression.
@@ -342,15 +350,6 @@ In the virtual machine, the continuation is represented as a stack of continuati
 Each continuation frame on the stack represents a suspended function awaiting a result.
 When a function is called, a new frame is pushed on the stack which records the virtual machine state required to resume execution after the call.
 When the call returns, the continuation stack is popped, and the virtual machine's state is restored to the state saved just prior to the call.
-
-
-State = (C, E, S, K, R, A)
-
-C                  
-
-(load-const x)
-(apply n)          R = Prim(p)         (p(A), 
-                   R = Clo(b, e)       (b, e, S, K, R, A)
 
 <h3>Instruction Set Architecture</h3>
 
