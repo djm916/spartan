@@ -4,7 +4,7 @@
 ; This file is pre-loaded when the interpreter starts and
 ; itself loads several other files.
 
-(set! spartan.core:*package* (find-package 'spartan.core))
+(set! spartan.core:*package* (the-package 'spartan.core))
 
 (defun %quasiquote (exp level)
   (defun unquote? (form)

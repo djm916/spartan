@@ -216,7 +216,7 @@ public final class CorePackage extends spartan.data.Package
     bind(Symbol.of("*package*"), this);
     bind(Symbol.of("make-package"), PackageLib.MAKE);
     bind(Symbol.of("find-package"), PackageLib.FIND);
-    bind(Symbol.of("get-package"), PackageLib.GET);
+    bind(Symbol.of("the-package"), PackageLib.GET);
     bind(Symbol.of("package-symbols"), PackageLib.SYMBOLS);
     bind(Symbol.of("package-alias"), PackageLib.ALIAS);
     bind(Symbol.of("package-bind"), PackageLib.BIND);

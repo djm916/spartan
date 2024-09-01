@@ -58,7 +58,7 @@ public final class PackageLib
     }
   };
   
-  // (get-package package-name)
+  // (the-package package-name)
   
   public static final Primitive GET = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {

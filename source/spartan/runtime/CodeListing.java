@@ -40,7 +40,9 @@ public class CodeListing
   }
   
   /**
-   * Generate labels
+   * Compilation pass 1
+   *
+   *   - Generate and assign labels for all jumps and procedure entry points
    */
   private static void generateLabels(Inst code, Context ctx)
   {
@@ -72,6 +74,11 @@ public class CodeListing
     }
   }
   
+  /**
+   * Compilation pass 2
+   *
+   *   - Emit flattened code
+   */
   private static void emitListing(Inst code, Context ctx, StringBuilder sb)
   {    
     while (code != null) {
