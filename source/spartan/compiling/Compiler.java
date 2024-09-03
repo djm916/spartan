@@ -45,7 +45,7 @@ public class Compiler
   {
     positionMap = exp.positionMap();
     var code = compile(exp.datum(), Scope.EMPTY, false, new Halt());
-    if (Config.LOG_DEBUG)
+    if (Config.LOG_DEBUG && Config.EMIT_BYTECODE)
       log.info(() -> String.format("Listing for expression at %s\n%s", positionMap.get(exp.datum()), CodeListing.generate(code)));
     return code;
   }
@@ -176,7 +176,7 @@ public class Compiler
     
     var xform = transformDefun(exp);
     
-    if (Config.LOG_DEBUG)
+    if (Config.LOG_DEBUG && Config.SHOW_MACRO_EXPANSION)
       log.info(() -> String.format("defun transform: %s => %s", exp.repr(), xform.repr()));
     
     try {
@@ -207,15 +207,15 @@ public class Compiler
      Compilation:
 
            <<pred>>
-           branchf else
+           jf L
            <<sub>>
-           jump next
-     else: <<alt>>
+           j next
+     L:    <<alt>>
      next: ...
      
      Syntax (1-branch form): (if pred sub)
      
-     Translation: (if pred sub nil)
+     Translation: (if pred sub void)
   */
   private Inst compileIf(List exp, Scope scope, boolean tail, Inst next)
   {
@@ -241,13 +241,13 @@ public class Compiler
      
      Compilation:
 
-     pred1:  <<pred1>>
-             branchf pred2
-             <<body1>>
-             jump next
-             ...
-     predN:  <<predN>>
-             branchf none
+     P1:  <<pred1>>
+          jf P2
+          <<body1>>
+          j next
+          ...
+     PN:  <<predN>>
+          jf none
              <<bodyN>>
              jump next
      none:   load-const nil
@@ -286,13 +286,13 @@ public class Compiler
       return new LoadConst(Void.VALUE, next);
 
     var clause = (List) clauses.car();
-    var test = clause.car();
+    var pred = clause.car();
     var body = clause.cdr();
 
-    if (Symbol.ELSE.equals(test))
+    if (Symbol.ELSE.equals(pred))
       return compileSequence(body, scope, tail, next);
 
-    return compile(test, scope, false,
+    return compile(pred, scope, false,
            new BranchFalse(compileSequence(body, scope, tail, new Jump(next)),
                            compileCondClauses(clauses.cdr(), scope, tail, next)));
   }
@@ -502,7 +502,7 @@ public class Compiler
     
     var xform = transformRec(s, bindings, exp.cdddr());
     
-    if (Config.LOG_DEBUG)
+    if (Config.LOG_DEBUG && Config.SHOW_MACRO_EXPANSION)
       log.info(() -> String.format("rec transform: %s => %s", exp.repr(), xform.repr()));
     
     try {
@@ -737,7 +737,7 @@ public class Compiler
   {
     if (isInnerDef(body.car())) {
       var xform = transformInnerDefs(body);
-      if (Config.LOG_DEBUG)
+      if (Config.LOG_DEBUG && Config.SHOW_MACRO_EXPANSION)
         log.info(() -> String.format("inner defs transform: %s => %s", body.repr(), xform.repr()));
       return compile(xform, scope, true, next);
     }
@@ -899,12 +899,12 @@ public class Compiler
 
      Compilation:
 
-     loop: <<pred>>
-           branchf next
-           <<body>>
-           jump loop
-     next: load-const nil
-           ...
+     L0: <<pred>>
+         jf L1
+         <<body>>
+         j L0
+     L1: ldc nil
+     next: ...
   */
 
   private Inst compileWhile(List exp, Scope scope, boolean tail, Inst next)
@@ -1042,7 +1042,7 @@ public class Compiler
 
     var xform = transformQuasiquote(exp.cadr(), 0);
     
-    if (Config.LOG_DEBUG)
+    if (Config.LOG_DEBUG && Config.SHOW_MACRO_EXPANSION)
       log.info(() -> String.format("quasiquote transform: %s => %s", exp.repr(), xform.repr()));
     
     try {
@@ -1296,7 +1296,7 @@ public class Compiler
     var args = quoteList(exp.cdr());
     var xform = macro.expand(vm, args, source);
     
-    if (Config.LOG_DEBUG)
+    if (Config.LOG_DEBUG && Config.SHOW_MACRO_EXPANSION)
       log.info(() -> String.format("macro transform: %s => %s", exp.repr(), xform.repr()));
     
     // augment source position map for the resulting generated code

@@ -1,27 +1,26 @@
 package spartan.runtime;
 
-public final class Jump extends Inst
+public final class Jump implements Inst
 {
   public Jump()
   {
-    super(null);
+    this(null);
   }
   
   public Jump(Inst target)
   {
-    super(null);
     this.target = target;
   }
   
-  public final void setTarget(Inst target)
+  public Inst target()
+  {
+    return target;
+  }
+  
+  public void setTarget(Inst target)
   {
     this.target = target;
   }
   
-  public final void eval(VirtualMachine vm)
-  {
-    vm.control = target;
-  }
-    
-  Inst target;
+  private Inst target;
 }

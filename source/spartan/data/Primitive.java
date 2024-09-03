@@ -1,11 +1,10 @@
 package spartan.data;
 
-public abstract class Primitive implements Datum, IFun
+import spartan.runtime.VirtualMachine;
+
+public non-sealed abstract class Primitive implements Datum, IFun
 {
-  public Primitive(Signature sig)
-  {
-    this.sig = sig;
-  }
+  public abstract void apply(VirtualMachine vm);
   
   @Override // Datum
   public Type type()
@@ -14,10 +13,15 @@ public abstract class Primitive implements Datum, IFun
   }
   
   @Override // IFun
-  public Signature signature()
+  public boolean accepts(int numArgs)
   {
-    return sig;
+    return sig.matches(numArgs);
   }
-    
-  private final Signature sig;
+  
+  protected Primitive(Signature sig)
+  {
+    this.sig = sig;
+  }
+
+  protected final Signature sig;
 }

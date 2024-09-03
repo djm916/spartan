@@ -1,9 +1,8 @@
 package spartan.data;
 
-import spartan.runtime.Env;
-import spartan.runtime.Inst;
+import spartan.runtime.Kon;
 
-public record Closure(Inst body, Signature sig, Env env) implements Datum, IFun
+public record Kontinue(Kon kon) implements Datum, IFun
 {
   @Override // Datum
   public Type type()
@@ -14,6 +13,6 @@ public record Closure(Inst body, Signature sig, Env env) implements Datum, IFun
   @Override // IFun
   public boolean accepts(int numArgs)
   {
-    return sig.matches(numArgs);
+    return numArgs == 1;
   }
 }

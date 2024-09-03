@@ -22,6 +22,12 @@ public final class Config
   /** Enables or disables tail call optimization. Valid values are "true" and "false". Defaults to "true". */
   public static final boolean TAIL_CALLS = Boolean.valueOf(System.getProperty("spartan.optimize-tail-calls", "true"));
   
+  /** Enables or disables emitting bytecode listings. Valid values are "true" and "false". Defaults to "true". */
+  public static final boolean EMIT_BYTECODE = Boolean.valueOf(System.getProperty("spartan.emit-bytecode", "true"));
+  
+  /** Enables or disables logging of macro expansion results. Valid values are "true" and "false". Defaults to "true". */
+  public static final boolean SHOW_MACRO_EXPANSION = Boolean.valueOf(System.getProperty("spartan.show-macro-expansion", "true"));
+  
   /** The default character encoding for converting text to and from binary. Default is UTF-8.
       This encoding is used when reading source code files. */
   public static final Charset DEFAULT_ENCODING = StandardCharsets.UTF_8;

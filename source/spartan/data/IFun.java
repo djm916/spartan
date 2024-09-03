@@ -5,8 +5,8 @@ import spartan.runtime.VirtualMachine;
 /**
  * Interface for "callable" types (procedures, continuations, etc.)
  */
-public interface IFun extends Datum
+public sealed interface IFun extends Datum
+permits Primitive, Closure, Kontinue
 {
-  void apply(VirtualMachine vm);
-  Signature signature();
+  boolean accepts(int numArgs);
 }

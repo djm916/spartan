@@ -107,7 +107,7 @@ public final class CoreLib
       //if (! (vm.popArg() instanceof Closure proc))
         //throw new TypeMismatch();
       vm.result = vm.popArg();
-      vm.args = List.of(new Continuation(vm.frame));
+      vm.args = List.of(new Kontinue(vm.kon));
       vm.apply(1);
     }
   };
