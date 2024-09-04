@@ -18,13 +18,14 @@ import java.nio.file.Path;
 /** Global program execution state */
 public final class Runtime
 {
+  private static final Symbol PACKAGE_VAR = Symbol.of("*package*");
+  
   /**
    * Returns the current package
    */
   public static Package currentPackage()
   {
-    return (Package) CorePackage.INSTANCE.lookup(Symbol.of("*package*"));
-    //return currentPackage;
+    return (Package) CorePackage.INSTANCE.lookup(PACKAGE_VAR);
   }
   
   /**
@@ -32,8 +33,7 @@ public final class Runtime
    */
   public static void currentPackage(Package pkg)
   {
-    CorePackage.INSTANCE.store(Symbol.of("*package*"), pkg);
-    //currentPackage = pkg;
+    CorePackage.INSTANCE.store(PACKAGE_VAR, pkg);
   }
   
   /**
@@ -113,7 +113,6 @@ public final class Runtime
   
   private Runtime() { }
   
-  //private static Package currentPackage = CorePackage.INSTANCE;
   private static final Map<Symbol, Package> packages = new IdentityHashMap<>();
   private static final Logger log = Logger.getLogger(Runtime.class.getName());
 }
