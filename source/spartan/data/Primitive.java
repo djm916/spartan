@@ -22,6 +22,11 @@ public non-sealed abstract class Primitive implements Datum, IFun
   {
     this.sig = sig;
   }
+  
+  public Signature sig()
+  {
+    return sig;
+  }
 
-  protected final Signature sig;
+  private final Signature sig;
 }

@@ -7,6 +7,7 @@ import spartan.data.IFun;
 import spartan.data.Primitive;
 import spartan.data.Closure;
 import spartan.data.Kontinue;
+import spartan.compiling.Procedure;
 import spartan.errors.Error;
 import spartan.errors.WrongNumberArgs;
 import spartan.errors.TypeMismatch;
@@ -81,127 +82,127 @@ public final class VirtualMachine
     try {
       while (control != null) {
         switch (control) {
-          case Apply inst: {
+          case Apply(var numArgs, var source, var next): {
             try {
-              apply(inst.numArgs());
+              apply(numArgs);
             }
             catch (Error err) {
-              err.setSource(inst.source());
+              err.setSource(source);
               throw err;
             }
             break;
           }
-          case BindGlobal inst: {
+          case BindGlobal(var packageName, var baseName, var source, var next): {
             try {
-              bindGlobal(inst.packageName(), inst.baseName(), result);
-              control = inst.next();
+              bindGlobal(packageName, baseName, result);
+              control = next;
             }
             catch (Error err) {
-              err.setSource(inst.source());
+              err.setSource(source);
               throw err;
             }
             break;
           }
-          case BranchFalse inst: {
-            control = !result.boolValue() ? inst.right() : inst.left();
+          case BranchFalse(var left, var right): {
+            control = !result.boolValue() ? right : left;
             break;
           }
-          case BranchTrue inst: {
-            control = result.boolValue() ? inst.right() : inst.left();
+          case BranchTrue(var left, var right): {
+            control = result.boolValue() ? right : left;
             break;
           }
-          case Halt inst: {
+          case Halt(): {
             control = null;
             break;
           }
-          case Jump inst: {
-            control = inst.target();
+          case Jump j: {
+            control = j.target();
             break;
           }
-          case LoadConst inst: {
-            result = inst.value();
-            control = inst.next();
+          case LoadConst(var value, var next): {
+            result = value;
+            control = next;
             break;
           }
-          case LoadGlobal inst: {
+          case LoadGlobal(var packageName, var baseName, var source, var next): {
             try {
-              result = loadGlobal(inst.packageName(), inst.baseName());
-              control = inst.next();
+              result = loadGlobal(packageName, baseName);
+              control = next;
             }
             catch (Error err) {
-              err.setSource(inst.source());
+              err.setSource(source);
               throw err;
             }
             break;
           }
-          case LoadLocal inst: {
-            result = loadLocal(env, inst.depth(), inst.offset());
-            control = inst.next();
+          case LoadLocal(var depth, var offset, var next): {
+            result = loadLocal(env, depth, offset);
+            control = next;
             break;
           }
-          case LoadLocal0 inst: {
-            result = env.get(inst.offset());
-            control = inst.next();
+          case LoadLocal0(var offset, var next): {
+            result = env.get(offset);
+            control = next;
             break;
           }
-          case MakeClosure inst: {
-            result = new Closure(inst.proc().body(), inst.proc().sig(), env);
-            control = inst.next();
+          case MakeClosure(Procedure(var body, var sig), var next): {
+            result = new Closure(body, sig, env);
+            control = next;
             break;
           }
-          case PopArg inst: {
+          case PopArg(var next): {
             result = popArg();
-            control = inst.next();
+            control = next;
             break;
           }
-          case PopEnv inst: {
+          case PopEnv(var next): {
             env = env.parent();
-            control = inst.next();
+            control = next;
             break;
           }
-          case PopFrame inst: {
+          case PopFrame(): {
             popFrame();
             break;
           }
-          case PopRestArgs inst: {
+          case PopRestArgs(var next): {
             result = popRestArgs();
-            control = inst.next();
+            control = next;
             break;
           }
-          case PushArg inst: {
+          case PushArg(var next): {
             pushArg(result);
-            control = inst.next();
+            control = next;
             break;
           }
-          case PushEnv inst: {
-            env = new Env(inst.numSlots(), env);
-            control = inst.next();
+          case PushEnv(var numSlots, var next): {
+            env = new Env(numSlots, env);
+            control = next;
             break;
           }
-          case PushFrame inst: {
-             pushFrame(inst.returnTo(), inst.position());
-             control = inst.next();
+          case PushFrame(var returnTo, Position position, var next): {
+             pushFrame(returnTo, position);
+             control = next;
              break;
           }
-          case StoreGlobal inst: {
+          case StoreGlobal(var packageName, var baseName, var source, var next): {
             try {
-              storeGlobal(inst.packageName(), inst.baseName(), result);
-              control = inst.next();
+              storeGlobal(packageName, baseName, result);
+              control = next;
             }
             catch (Error err) {
-              err.setSource(inst.source());
+              err.setSource(source);
               throw err;
             }
             break;
           }
-          case StoreLocal inst: {
-            storeLocal(env, inst.depth(), inst.offset(), result);
-            control = inst.next();
+          case StoreLocal(var depth, var offset, var next): {
+            storeLocal(env, depth, offset, result);
+            control = next;
             break;
           }
-          case StoreLocal0 inst: {
-            env.set(inst.offset(), result);
-            control = inst.next();
+          case StoreLocal0(var offset, var next): {
+            env.set(offset, result);
+            control = next;
             break;
           }
         }
@@ -259,27 +260,30 @@ public final class VirtualMachine
   
   public void apply(int numArgs)
   {
-    if (!(result instanceof IFun f))
-      throw new TypeMismatch();
-    
-    if (!f.accepts(numArgs))
-      throw new WrongNumberArgs();
-    
-    switch (f) {
+    switch (result) {
       case Primitive p: {
+        if (!(p.sig().matches(numArgs)))
+          throw new WrongNumberArgs();
         p.apply(this);
         return;
       }
-      case Closure c: {
-        env = c.env();
-        control = c.body();
+      case Closure(var body, var sig, var theEnv): {
+        if (!sig.matches(numArgs))
+          throw new WrongNumberArgs();
+        env = theEnv;
+        control = body;
         return;
       }
-      case Kontinue k: {
-        kon = k.kon();
+      case Kontinue(var theKon): {
+        if (1 != numArgs)
+          throw new WrongNumberArgs();
+        kon = theKon;
         result = popArg();
         popFrame();
         return;
+      }
+      default: {
+        throw new TypeMismatch();
       }
     }
   }

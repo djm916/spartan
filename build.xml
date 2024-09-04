@@ -18,7 +18,7 @@
            classpath="${classpath}"
            nativeheaderdir="native">
       <!-- <compilerarg value="-Xlint"/> -->
-      <compilerarg value="--source=17"/>
+      <compilerarg value="--source=22"/>
       <compilerarg value="--enable-preview"/>
     </javac>
     <jar destfile="Spartan.jar"
@@ -40,7 +40,7 @@
     <javadoc sourcepath="source" destdir="javadoc">
       <excludepackage name="spartan.tests"/>
       <excludepackage name="picocli"/>
-      <arg value="--source=17"/>
+      <arg value="--source=22"/>
       <arg value="--enable-preview"/>
     </javadoc>
   </target>
