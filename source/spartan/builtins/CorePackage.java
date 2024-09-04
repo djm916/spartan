@@ -27,7 +27,7 @@ public final class CorePackage extends spartan.data.Package
   
   private CorePackage()
   {
-    super(Symbol.of(NAME), spartan.data.Package.NONE);
+    super(Symbol.of(NAME), null);
   }
   
   {

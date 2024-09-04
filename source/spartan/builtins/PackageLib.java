@@ -40,8 +40,8 @@ public final class PackageLib
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Symbol pkgName))
         throw new TypeMismatch();      
-      spartan.Runtime.currentPackage(spartan.Runtime.getPackage(pkgName).orElseThrow(() -> new NoSuchPackage(pkgName)));
-      vm.result = Void.VALUE;      
+      spartan.Runtime.currentPackage(spartan.Runtime.getPackage(pkgName));
+      vm.result = Void.VALUE;
       vm.popFrame();
     }
   };
@@ -52,8 +52,12 @@ public final class PackageLib
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Symbol pkgName))
         throw new TypeMismatch();
-      var maybePkg = spartan.Runtime.getPackage(pkgName);
-      vm.result = maybePkg.isPresent() ? maybePkg.get() : Void.VALUE;
+      try {
+        vm.result = spartan.Runtime.getPackage(pkgName);
+      }
+      catch (NoSuchPackage err) {
+        vm.result = Void.VALUE;
+      }
       vm.popFrame();
     }
   };
@@ -64,7 +68,7 @@ public final class PackageLib
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Symbol pkgName))
         throw new TypeMismatch();
-      vm.result = spartan.Runtime.getPackage(pkgName).orElseThrow(() -> new NoSuchPackage(pkgName));
+      vm.result = spartan.Runtime.getPackage(pkgName);
       vm.popFrame();
     }
   };
@@ -80,7 +84,7 @@ public final class PackageLib
         throw new TypeMismatch();
       if (!symbol.isSimple())
         throw new InvalidArgument();
-      pkg.bind(symbol, value, () -> new MultipleDefinition(symbol));
+      pkg.bind(symbol, value);
       vm.result = Void.VALUE;
       vm.popFrame();
     }
@@ -96,7 +100,7 @@ public final class PackageLib
         throw new TypeMismatch();
       if (!symbol.isSimple())
         throw new InvalidArgument();
-      vm.result = pkg.lookup(symbol).orElseThrow(() -> new UnboundSymbol(pkg.name(), symbol));
+      vm.result = pkg.lookup(symbol);
       vm.popFrame();
     }
   };
@@ -126,7 +130,7 @@ public final class PackageLib
         throw new InvalidArgument();
       if (!alias.isSimple())
         throw new InvalidArgument();
-      var sourcePackage = spartan.Runtime.getPackage(pkgName).orElseThrow(() -> new NoSuchPackage(pkgName));
+      var sourcePackage = spartan.Runtime.getPackage(pkgName);
       targetPackage.addPackageAlias(alias, sourcePackage);
       vm.result = Void.VALUE;
       vm.popFrame();

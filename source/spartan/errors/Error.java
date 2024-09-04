@@ -53,8 +53,8 @@ public class Error extends RuntimeException
   public String toString()
   {
     var message = new StringBuilder();
-    var pos = (source.position() == null ? "unknown source" : source.position());
-    var exp = (source.exp() == null ? "none" : source.exp().repr());
+    var pos = (source == null || source.position() == null) ? "unknown source" : source.position();
+    var exp = (source == null || source.exp() == null) ? "none" : source.exp().repr();
     
     message.append(String.format("error: %s: %s in expression: %s", pos, getMessage(), exp));
     

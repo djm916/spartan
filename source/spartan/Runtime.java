@@ -6,6 +6,9 @@ import spartan.data.QualifiedSymbol;
 import spartan.data.Datum;
 import spartan.data.Package;
 import spartan.data.Macro;
+import spartan.errors.MultipleDefinition;
+import spartan.errors.UnboundSymbol;
+import spartan.errors.NoSuchPackage;
 import java.util.Map;
 import java.util.IdentityHashMap;
 import java.util.Optional;
@@ -20,7 +23,7 @@ public final class Runtime
    */
   public static Package currentPackage()
   {
-    return (Package) CorePackage.INSTANCE.lookup(Symbol.of("*package*")).get();
+    return (Package) CorePackage.INSTANCE.lookup(Symbol.of("*package*"));
     //return currentPackage;
   }
   
@@ -29,7 +32,7 @@ public final class Runtime
    */
   public static void currentPackage(Package pkg)
   {
-    CorePackage.INSTANCE.bind(Symbol.of("*package*"), pkg);
+    CorePackage.INSTANCE.store(Symbol.of("*package*"), pkg);
     //currentPackage = pkg;
   }
   
@@ -47,11 +50,15 @@ public final class Runtime
    * First searches for a local package alias of the given name, then for a
    * global package with the given name.
    */
-  public static Optional<Package> getPackage(Symbol pkgName)
+  public static Package getPackage(Symbol pkgName)
   {
-    //return Optional.ofNullable(packages.get(pkgName));
-    return currentPackage().getPackageAlias(pkgName)
-           .or(() -> Optional.ofNullable(packages.get(pkgName)));
+    var pkg = currentPackage().getPackageAlias(pkgName);
+    if (pkg != null)
+      return pkg;
+    pkg = packages.get(pkgName);
+    if (pkg == null)
+      throw new NoSuchPackage(pkgName);
+    return pkg;
   }
   
   /**
@@ -72,33 +79,23 @@ public final class Runtime
   }
   
   /** Resolve the given symbol in the global environment */
-  public static Optional<Macro> lookupMacro(Symbol s)
-  {
-    return lookup(s)
-           .filter(datum -> datum instanceof Macro)
-           .map(macro -> (Macro)macro);
-    /*
-    if (s instanceof QualifiedSymbol qs)
-      return getPackage(Symbol.of(qs.packageName()))
-             .flatMap(pkg -> pkg.lookup(Symbol.of(qs.baseName())));
-             .filter(datum -> datum instanceof Macro)
-             .map(macro -> (Macro)macro);
-    else
-      return currentPackage()
-             .lookup(s.intern())
-             .filter(datum -> datum instanceof Macro)
-             .map(macro -> (Macro)macro);
-     */
-  }
-  
-  /** Resolve the given symbol in the global environment */
-  public static Optional<Datum> lookup(Symbol s)
+  public static Datum lookup(Symbol s)
   {
     if (s instanceof QualifiedSymbol qs)
-      return getPackage(Symbol.of(qs.packageName()))
-             .flatMap(pkg -> pkg.lookup(Symbol.of(qs.baseName())));
+      return getPackage(Symbol.of(qs.packageName())).lookup(Symbol.of(qs.baseName()));
     else
       return currentPackage().lookup(s.intern());
+  }
+  
+  public static Optional<Macro> lookupMacro(Symbol s)
+  {
+    try {
+      var value = lookup(s);
+      return (value instanceof Macro macro) ? Optional.of(macro) : Optional.empty();
+    }
+    catch (UnboundSymbol | NoSuchPackage err) {
+      return Optional.empty();
+    }
   }
   
   public static void boot()

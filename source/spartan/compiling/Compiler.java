@@ -1275,7 +1275,13 @@ public class Compiler
       throw malformedExp(exp);
     var body = exp.cdddr();
     var macro = new Macro(makeProcedure(params, body, Scope.EMPTY));
-    spartan.Runtime.currentPackage().bind(symbol.intern(), macro, () -> new MultipleDefinition(symbol, new SourceInfo(exp, positionMap.get(symbol))));
+    try {
+      spartan.Runtime.currentPackage().bind(symbol.intern(), macro);
+    }
+    catch (MultipleDefinition err) {
+      err.setSource(new SourceInfo(exp, positionMap.get(symbol)));
+      throw err;
+    }
     return new LoadConst(Void.VALUE, next);
   }
   
@@ -1337,8 +1343,7 @@ public class Compiler
     if (exp.car() instanceof Symbol s) {
       return Optional.ofNullable(specialForms.get(s))
              .map(form -> form.compile(exp, scope, tail, next))
-             .or(() -> spartan.Runtime.lookupMacro(s)
-                       .map(macro -> compileExpandMacro(macro, exp, scope, tail, next)))
+             .or(() -> spartan.Runtime.lookupMacro(s).map(macro -> compileExpandMacro(macro, exp, scope, tail, next)))
              .orElseGet(() -> compileApply(exp, scope, tail, next));
     }
     return compileApply(exp, scope, tail, next);

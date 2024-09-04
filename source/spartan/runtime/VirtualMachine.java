@@ -47,24 +47,17 @@ public final class VirtualMachine
   
   private static void bindGlobal(Symbol packageName, Symbol baseName, Datum value)
   {
-    spartan.Runtime.getPackage(packageName)
-                   .orElseThrow(() -> new NoSuchPackage(packageName))
-                   .bind(baseName, value, () -> new MultipleDefinition(baseName));
+    spartan.Runtime.getPackage(packageName).bind(baseName, value);
   }
   
   private static Datum loadGlobal(Symbol packageName, Symbol baseName)
   {
-    return spartan.Runtime.getPackage(packageName)
-                          .orElseThrow(() -> new NoSuchPackage(packageName))
-                          .lookup(baseName)
-                          .orElseThrow(() -> new UnboundSymbol(packageName, baseName));
+    return spartan.Runtime.getPackage(packageName).lookup(baseName);
   }
   
   private static void storeGlobal(Symbol packageName, Symbol baseName, Datum value)
   {
-    spartan.Runtime.getPackage(packageName)
-                   .orElseThrow(() -> new NoSuchPackage(packageName))
-                   .store(baseName, value, () -> new UnboundSymbol(packageName, baseName));
+    spartan.Runtime.getPackage(packageName).store(baseName, value);
   }
   
   private static Datum loadLocal(Env env, int depth, int offset)

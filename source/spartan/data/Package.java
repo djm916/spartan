@@ -13,13 +13,6 @@ import java.util.Set;
 
 public class Package implements Datum
 {
-  public static final Package NONE = new Package(null, null) {
-    public Optional<Datum> lookup(Symbol name)
-    {
-      return Optional.empty();
-    }
-  };
-  
   @Override // Datum
   public Type type()
   {
@@ -60,7 +53,7 @@ public class Package implements Datum
    */
   public void doImport(Package pkg, Symbol symbol, Symbol alias)
   {
-    bind(alias, pkg.lookup(symbol).orElseThrow(() -> new UnboundSymbol(pkg.name(), symbol)), () -> new MultipleDefinition(alias));
+    bind(alias, pkg.lookup(symbol));
   }
   
   /**
@@ -94,9 +87,9 @@ public class Package implements Datum
    * @param pkgName A package alias
    * @return The (optional) package aliased by pkgName
    */
-  public Optional<Package> getPackageAlias(Symbol pkgName)
+  public Package getPackageAlias(Symbol pkgName)
   {
-    return Optional.ofNullable(aliases.get(pkgName));
+    return aliases.get(pkgName);
   }
   
   /**
@@ -109,15 +102,10 @@ public class Package implements Datum
    * @param value The symbol's value
    * @throws MultipleDefinition If symbol is already present in this package
    */
-  public void bind(Symbol name, Datum value, Supplier<MultipleDefinition> onError)
+  public void bind(Symbol name, Datum value)
   {
     if (bindings.containsKey(name))
-      throw onError.get();
-    bindings.put(name, value);
-  }
-  
-  public void bind(Symbol name, Datum value)
-  {    
+      throw new MultipleDefinition(name);
     bindings.put(name, value);
   }
   
@@ -131,10 +119,10 @@ public class Package implements Datum
    * @param value The symbol's value
    * @throws UnboundSymbol If symbol is not present in this package
    */
-  public void store(Symbol name, Datum value, Supplier<UnboundSymbol> onError)
+  public void store(Symbol name, Datum value)
   {
     if (!bindings.containsKey(name))
-      throw onError.get();
+      throw new UnboundSymbol(this.name, name);
     bindings.put(name, value);
   }
   
@@ -144,9 +132,16 @@ public class Package implements Datum
    * @param name The symbol to look up
    * @return The (optional) value of the symbol
    */
-  public Optional<Datum> lookup(Symbol name)
+  public Datum lookup(Symbol name)
   {
-    return Optional.ofNullable(bindings.get(name)).or(() -> parent.lookup(name));
+    var value = bindings.get(name);
+    if (value != null)
+      return value;
+    if (parent != null)
+      value = parent.lookup(name);
+    if (value == null)
+      throw new UnboundSymbol(this.name, name);
+    return value;
   }
   
   public Set<Symbol> symbols()
