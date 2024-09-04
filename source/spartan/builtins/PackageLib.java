@@ -34,13 +34,13 @@ public final class PackageLib
     }
   };
   
-  // (set-current-package! package-name)
+  // (set-current-package! package)
   
   public static final Primitive SET_CURRENT_PACKAGE = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof Symbol pkgName))
-        throw new TypeMismatch();      
-      spartan.Runtime.currentPackage(spartan.Runtime.getPackage(pkgName));
+      if (!(vm.popArg() instanceof Package pkg))
+        throw new TypeMismatch();
+      spartan.Runtime.currentPackage(pkg);
       vm.result = Void.VALUE;
       vm.popFrame();
     }

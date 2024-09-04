@@ -4,7 +4,7 @@
 ; This file is pre-loaded when the interpreter starts and
 ; itself loads several other files.
 
-(set! spartan.core:*package* (the-package 'spartan.core))
+;(set! spartan.core:*package* (the-package 'spartan.core))
 
 (defun %quasiquote (exp level)
   (defun unquote? (form)
@@ -38,11 +38,9 @@
   (%quasiquote exp 0))
 
 (defmacro in-package (package-name)
-  `(set! spartan.core:*package*
+  `(spartan.core:set-current-package!
      (let ((pkg (find-package ',package-name)))
-       (if (void? pkg)
-         (make-package ',package-name)
-         pkg))))
+       (if pkg pkg (make-package ',package-name)))))
 
 (defmacro inc! (var)
   `(set! ,var (+ 1 ,var)))

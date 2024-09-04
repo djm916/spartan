@@ -3,26 +3,29 @@ package spartan.data;
 import spartan.errors.InvalidArgument;
 import spartan.errors.UnboundSymbol;
 import spartan.errors.MultipleDefinition;
-//import spartan.util.Either;
 import java.util.Map;
 import java.util.IdentityHashMap;
 import java.util.Optional;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import java.util.Set;
 
 public class Package implements Datum
 {
+  public Package(Symbol name, Package parent)
+  {
+    this.name = name;
+    this.parent = parent;
+  }
+  
   @Override // Datum
   public Type type()
   {
     return TypeRegistry.PACKAGE_TYPE;
   }
   
-  public Package(Symbol name, Package parent)
+  @Override // Datum
+  public String repr()
   {
-    this.name = name;
-    this.parent = parent;
+    return String.format("#<%s %s>", type().name(), name.repr());
   }
   
   public Symbol name()
@@ -89,7 +92,8 @@ public class Package implements Datum
    */
   public Package getPackageAlias(Symbol pkgName)
   {
-    return aliases.get(pkgName);
+    // size check is an optimization to avoid a call to IdentityHashMap.get in common case of a package having no local aliases
+    return aliases.size() == 0 ? null : aliases.get(pkgName);
   }
   
   /**
@@ -130,7 +134,8 @@ public class Package implements Datum
    * Lookup the value of a symbol
    * 
    * @param name The symbol to look up
-   * @return The (optional) value of the symbol
+   * @return The value of the symbol
+   * @throws UnboundSymbol If symbol is not visible in this package
    */
   public Datum lookup(Symbol name)
   {
@@ -144,6 +149,9 @@ public class Package implements Datum
     return value;
   }
   
+  /**
+   * Return the set of all symbols present in this package
+   */
   public Set<Symbol> symbols()
   {
     return bindings.keySet();
