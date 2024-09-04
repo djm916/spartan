@@ -3,6 +3,7 @@ doc/*
 test-results/*
 native/*.h
 javadoc/*
+jfr_records/*
 Spartan.jar
 libspartan.dll
 desktop.ini

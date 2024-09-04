@@ -218,27 +218,29 @@ public final class VirtualMachine
     assert args == List.EMPTY;
     assert env == null;
     assert kon == null;
-
+        
     return result;
   }
   
   public void pushArg(Datum x)
   {
-    args = List.cons(x, args);
+    args = ConsPool.get(x, args);
   }
   
   public Datum popArg()
   {
-    Datum x = args.car();
+    var result = args.car();
+    var old = args;
     args = args.cdr();
-    return x;
+    ConsPool.put(old);
+    return result;
   }
   
   public List popRestArgs()
   {
-    List x = args;
+    var old = args;
     args = List.EMPTY;
-    return x;
+    return old;
   }
   
   public void pushFrame(Inst returnTo, Position position)
