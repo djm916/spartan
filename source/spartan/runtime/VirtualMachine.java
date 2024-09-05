@@ -260,30 +260,27 @@ public final class VirtualMachine
   
   public void apply(int numArgs)
   {
-    switch (result) {
+    if (!(result instanceof IFun f))
+      throw new TypeMismatch();
+    
+    if (!f.accepts(numArgs))
+      throw new WrongNumberArgs();
+    
+    switch (f) {
       case Primitive p: {
-        if (!(p.sig().matches(numArgs)))
-          throw new WrongNumberArgs();
         p.apply(this);
         return;
       }
-      case Closure(var body, var sig, var theEnv): {
-        if (!sig.matches(numArgs))
-          throw new WrongNumberArgs();
-        env = theEnv;
-        control = body;
+      case Closure(var b, _, var e): {
+        env = e;
+        control = b;
         return;
       }
-      case Kontinue(var theKon): {
-        if (1 != numArgs)
-          throw new WrongNumberArgs();
-        kon = theKon;
+      case Kontinue(var k): {
+        kon = k;
         result = popArg();
         popFrame();
         return;
-      }
-      default: {
-        throw new TypeMismatch();
       }
     }
   }
