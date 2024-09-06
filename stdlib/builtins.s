@@ -131,6 +131,11 @@
     `(letrec ((,symbol (fun ,vars ,@body)))
        (,symbol ,@inits))))
 
+; (let-values (((var...) init)) body...)
+; ==>
+; (apply (fun (var...) (do body...)) init)
+;
+
 (defmacro let-values (bindings & body)
   (rec loop ((bindings bindings))
     (if (null? bindings)
@@ -147,3 +152,4 @@
 (load "stdlib/import.s")
 (load "stdlib/control.s")
 (load "stdlib/ports.s")
+(load "stdlib/match.s")

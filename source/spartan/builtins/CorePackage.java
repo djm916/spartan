@@ -139,6 +139,7 @@ public final class CorePackage extends spartan.data.Package
     bind(Symbol.of("set-cdr!"), ListLib.SET_CDR);    
     bind(Symbol.of("list-length"), ListLib.LENGTH);
     bind(Symbol.of("list-reverse"), ListLib.REVERSE);
+    bind(Symbol.of("list-concat"), ListLib.CONCAT);
     
     /* Vector procedures */
     

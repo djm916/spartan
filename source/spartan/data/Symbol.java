@@ -6,7 +6,6 @@ public sealed class Symbol implements Datum, IEq
 permits QualifiedSymbol
 {
   private static WeakCache<String, Symbol> cache = new WeakCache<>();
-  //private static SymbolCache cache = new SymbolCache();
   private static int nextUniqueId;
   private final String name;    // full (qualified or unqualified) print name of the symbol  
   
@@ -21,7 +20,6 @@ permits QualifiedSymbol
   public static final Symbol IF = new Symbol("if");
   public static final Symbol COND = new Symbol("cond");
   public static final Symbol ELSE = new Symbol("else");
-  public static final Symbol BEGIN = new Symbol("begin");
   public static final Symbol QUOTE = new Symbol("quote");
   public static final Symbol QUASIQUOTE = new Symbol("quasiquote");
   public static final Symbol UNQUOTE = new Symbol("unquote");  
@@ -36,9 +34,6 @@ permits QualifiedSymbol
   public static final Symbol AND = new Symbol("and");
   public static final Symbol OR = new Symbol("or");
   public static final Symbol AMPERSAND = new Symbol("&");
-  public static final Symbol CALL_CC = new Symbol("call/cc");
-  public static final Symbol REC = new Symbol("rec");
-  public static final Symbol RETURN = new Symbol("return");
   public static final Symbol CAR = new Symbol("car");
   public static final Symbol CDR = new Symbol("cdr");
   public static final Symbol Q_CAR = new QualifiedSymbol("spartan.core", "car");

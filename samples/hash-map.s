@@ -26,6 +26,8 @@
 (for ((e elems (cdr e)))
   ((null? e) void)
   (let ((pair (car e)))
+    (if (not (hashmap:contains? h (car pair)))
+      (abort "hashmap does not contain expected key!"))
     (print-line (car pair) " => " (hashmap:find h (car pair)))))
 
 (print-line "entries = " (hashmap:entries h))

@@ -271,13 +271,13 @@ public final class VirtualMachine
         p.apply(this);
         return;
       }
-      case Closure(var b, _, var e): {
-        env = e;
-        control = b;
+      case Closure(var body, _, var savedEnv): {
+        env = savedEnv;
+        control = body;
         return;
       }
-      case Kontinue(var k): {
-        kon = k;
+      case Kontinue(var savedKon): {
+        kon = savedKon;
         result = popArg();
         popFrame();
         return;

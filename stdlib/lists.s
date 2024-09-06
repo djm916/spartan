@@ -7,22 +7,6 @@
 
 (in-package spartan.core)
 
-(defun list-empty? (x)
-  (and (list? x) (not (null? x))))
-
-(defun list-ref (xs i)
-  (car (list-drop i xs)))
-
-(defun list-set! (xs i e)
-  (set-car! (list-drop i xs)))
-
-(defun list-concat (xs ys)
-  (if (null? xs) ys
-    (cons (car xs) (list-concat (cdr xs) ys))))
-
-(defun list-append (xs e)
-  (list-concat xs (list e)))
-
 (defun list-map (f xs)
   (if (null? xs) ()
     (cons (f (car xs))
@@ -32,10 +16,6 @@
   (if (null? xs) () 
     (cons (f (car xs) i)
           (list-map/index f (+ 1 i) (cdr xs)))))
-
-(defun list-flat-map (f xs)
-  (apply list-concat
-         (list-map (fun (xs) (list-map f xs)) xs)))
 
 (defun list-for-each (f xs)
   (if (not (null? xs))

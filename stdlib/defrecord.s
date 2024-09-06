@@ -65,4 +65,4 @@
      ;(defmacro ,(generate-matcher-name name) (arg vars & body)
       ; `(apply (fun ,',vars ,',@body) (unpack-point ,',arg)))))
      (defmacro ,(generate-matcher-name name) (arg vars & body)
-       `(apply (fun ,vars ,@body) (unpack-point ,arg)))))
+       `(apply (fun ,vars ,@body) (',,(generate-destructor-name name) ,arg)))))

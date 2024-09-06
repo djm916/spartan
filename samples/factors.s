@@ -24,6 +24,9 @@
       (set! primes (stream-cdr primes))))
   factors)
 
+(if (null? *command-line-args*)
+  (abort "required command line argument"))
+
 (def N (string->int (car *command-line-args*)))
 
 (print-line (prime-factors N))
