@@ -13,13 +13,24 @@
         ((or (number? pat) (string? pat) (boolean? pat))
          (if (= pat exp) (succeed ()) (fail)))
         ((symbol? pat)
-         (succeed (list exp)))
+         (if (= pat '_) (succeed ()) (succeed (list exp))))
         ((list? pat)
          (cond
            ((null? pat)
             (if (null? exp) (succeed ()) (fail)))
            ((and (symbol? (car pat)) (= (car pat) 'quote))
-            (if (= (cadr pat) exp) (succeed ()) fail))
+            (if (= (cadr pat) exp) (succeed ()) (fail)))
+           ((and (symbol? (car pat)) (= (car pat) 'record))
+            (let ((record-type-name (cadr pat))
+                  (field-patterns (cddr pat)))
+              (if (not (= (type exp) record-type-name))
+                (fail)
+                (let ((field-values ((record-destructor (record-descriptor exp)) exp)))
+                  (loop (car field-values) (car field-patterns)
+                        (fun (car-args)
+                          (loop (cdr field-values) (cdr field-patterns)
+                            (fun (cdr-args)
+                              (succeed (list-concat car-args cdr-args))))))))))
            ((and (list? exp) (not (null? exp)))
             (loop (car exp) (car pat)
                   (fun (car-args)
@@ -35,17 +46,27 @@
 ;   ...
 ;   (pattern body))
 ;
+; <pattern> =>   _
+;              | <symbol>
+;              | <number>
+;              | <string>
+;              | <boolean>
+;              | (quote <datum>)
+;              | (<pattern> ...)
+;              | 
 (defmacro match (exp & rule-pairs)
 
   (defun get-vars-in (pat)
     (cond
-      ((symbol? pat) (list pat))
+      ((symbol? pat) (if (= pat '_) () (list pat)))
       ((list? pat)
        (cond
          ((null? pat) ())
          ((and (symbol? (car pat)) (= (car pat) 'quote)) ())
+         ((and (symbol? (car pat)) (= (car pat) 'record))
+          (list-concat (get-vars-in (caddr pat)) (get-vars-in (cdddr pat))))
          (else
-           (list-concat (get-vars-in (car pat)) (get-vars-in (cdr pat))))))
+          (list-concat (get-vars-in (car pat)) (get-vars-in (cdr pat))))))
       (else
         (abort "unrecognized pattern syntax"))))
   

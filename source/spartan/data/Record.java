@@ -5,8 +5,10 @@ import java.util.stream.Collectors;
 /**
  * An instance of a record type.
  *
+ * @param rtd The record type descriptor for this record
+ * @param fields The values of the fields of this record
  */
-public final class Record implements Datum
+public record Record(RecordDescriptor rtd, Datum[] fields) implements Datum
 {
   /**
    * Constructor
@@ -14,12 +16,6 @@ public final class Record implements Datum
    * @param rtd A record type descriptor
    * @param values The initial values for the record's fields
    */
-  public Record(RecordDescriptor rtd, Datum... values)
-  {
-    this.rtd = rtd;
-    this.slots = values;
-  }
-  
   @Override // Datum
   public Type type()
   {
@@ -29,29 +25,21 @@ public final class Record implements Datum
   /**
    * Gets the value of the field assigned to the given slot
    *
-   * @param slot the field slot index
+   * @param index the field index
    */
-  public Datum get(int slot)
+  public Datum get(int index)
   {
-    return slots[slot];
+    return fields[index];
   }
   
   /**
    * Sets the value of the field assigned to the given slot
    *
-   * @param slot the field slot index
+   * @param index the field index
    * @param value the new field value
    */
-  public void set(int slot, Datum value)
+  public void set(int index, Datum value)
   {
-    slots[slot] = value;
+    fields[index] = value;
   }
-  
-  public Datum[] fieldValues()
-  {
-    return slots;
-  }
-  
-  private final RecordDescriptor rtd;
-  private final Datum[] slots;
 }

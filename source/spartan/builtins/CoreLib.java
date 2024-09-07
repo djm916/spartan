@@ -2,6 +2,7 @@ package spartan.builtins;
 
 import spartan.data.*;
 import spartan.data.Void; // shadows java.lang.Void
+import spartan.data.Record; // shadows java.lang.Record
 import spartan.errors.Error;
 import spartan.errors.TypeMismatch;
 import spartan.errors.InvalidArgument;
@@ -542,6 +543,26 @@ public final class CoreLib
       if (!(vm.popArg() instanceof RecordDescriptor rtd))
         throw new TypeMismatch();
       vm.result = rtd.destructor();
+      vm.popFrame();
+    }
+  };
+  
+  // (record? obj)
+  
+  public static final Primitive IS_RECORD = new Primitive(Signature.fixed(1)) {
+    public void apply(VirtualMachine vm) {
+      vm.result = Bool.valueOf(vm.popArg() instanceof Record);
+      vm.popFrame();
+    }
+  };
+  
+  // (record-descriptor obj)
+  
+  public static final Primitive GET_DESCRIPTOR = new Primitive(Signature.fixed(1)) {
+    public void apply(VirtualMachine vm) {
+      if (!(vm.popArg() instanceof Record(var rtd, _)))
+        throw new TypeMismatch();
+      vm.result = rtd;
       vm.popFrame();
     }
   };

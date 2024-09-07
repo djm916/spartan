@@ -9,7 +9,18 @@ import spartan.errors.TypeMismatch;
 import spartan.errors.NoSuchElement;
 import spartan.runtime.VirtualMachine;
 
-/** A record type descriptor. */
+/** A record type descriptor.
+ *
+ * A record type descriptor (RTD) stores metadata about a class of records, and
+ * provides a procedural interface for manipulating records.
+ *
+ * Currently, the following metadata is available:
+ * <ul>
+ *   <li>The record type name</li>
+ *   <li>The record field names</li>
+ *   <li>Constructor, predicate, field accessors, field mutators, and destructor procedures</li>
+ * </ul>
+ */
 public class RecordDescriptor implements Datum
 {
   public RecordDescriptor(Symbol name, Symbol[] fields)
@@ -44,7 +55,7 @@ public class RecordDescriptor implements Datum
     return fieldSlotMap.size();
   }
   
-  public Set<Symbol> fieldNames()
+  public Set<Symbol> fields()
   {
     return fieldSlotMap.keySet();
   }
@@ -107,7 +118,7 @@ public class RecordDescriptor implements Datum
       public void apply(VirtualMachine vm) {
         if (!(vm.popArg() instanceof Record record && record.type().id() == rtd.instanceType.id()))
           throw new TypeMismatch();
-        vm.result = List.of(record.fieldValues());
+        vm.result = List.of(record.fields());
         vm.popFrame();
       }
     };

@@ -54,31 +54,37 @@
 (defun list-remove! (f xs)
   (list-filter! (fun (x) (not (f x))) xs))
 
-; Reduce a list to a single value
-
-; Inputs:
-;   f     a binary function
-;   xs:   a list of elements x1 x2 ... xN
-;   i:    an inital value
-    
-; For example, a 3 element list reduces as:
+; Reduce a list to a single value by applying a binary function to successive
+; elements of the list (from the left).
 ;
-;   (f (f (f i x1) x2) x3)
+; Parameters:
+;   f    a binary function
+;   i    an inital value
+;   xs   a list of elements, (x1 x2 ... xN)
+;
+; (fold-left f i xs) ==> (f ... (f (f i x1) x2) ... xN)
+;
+; For example,
+; 
+; (fold-left + 0 '(1 2 3)) ==> (+ (+ (+ 0 1) 2) 3) ==> 6
 
 (defun list-fold-left (f i xs)
   (if (null? xs) i
     (list-fold-left f (f i (car xs)) (cdr xs))))
 
-; Reduce a list to a single value
-
-; Inputs:
-;   f     a binary function
-;   xs:   a list of elements x1 x2 ... xN
-;   i:    an inital value
-    
-; For example, a 3 element list reduces as:
+; Reduce a list to a single value by applying a binary function to successive
+; elements of the list (from the right).
 ;
-;   (f x1 (f x2 (f x3 i)))
+; Parameters:
+;   f    a binary function
+;   i    an inital value
+;   xs   a list of elements, (x1 x2 ... xN)
+;
+; (fold-right f i xs) ==> (f x1 (f x2 ... (f xN i)))
+;
+; For example,
+;
+; (fold-right cons () '(1 2 3)) ==> (cons 1 (cons 2 (cons 3 ()))) ==> (1 2 3)
 
 (defun list-fold-right (f i xs)
   (if (null? xs) i

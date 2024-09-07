@@ -74,6 +74,7 @@ public final class CorePackage extends spartan.data.Package
     bind(Symbol.of("callable?"), CoreLib.IS_CALLABLE);
     bind(Symbol.of("port?"), CoreLib.IS_PORT);
     bind(Symbol.of("bytes?"), CoreLib.IS_BYTES);
+    bind(Symbol.of("record?"), CoreLib.IS_RECORD);
     
     /* Math constants & procedures */
 
@@ -203,6 +204,7 @@ public final class CorePackage extends spartan.data.Package
     bind(Symbol.of("record-accessor"), CoreLib.RECORD_ACCESSOR);
     bind(Symbol.of("record-mutator"), CoreLib.RECORD_MUTATOR);    
     bind(Symbol.of("record-destructor"), CoreLib.RECORD_DESTRUCTOR);
+    bind(Symbol.of("record-descriptor"), CoreLib.GET_DESCRIPTOR);
     
     /* Symbol related procedures */
     

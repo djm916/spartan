@@ -62,7 +62,5 @@
      ; Define destructor
      (def ,(generate-destructor-name name) (spartan.core:record-destructor rtd))
      ; Define matcher
-     ;(defmacro ,(generate-matcher-name name) (arg vars & body)
-      ; `(apply (fun ,',vars ,',@body) (unpack-point ,',arg)))))
      (defmacro ,(generate-matcher-name name) (arg vars & body)
        `(apply (fun ,vars ,@body) (',,(generate-destructor-name name) ,arg)))))
