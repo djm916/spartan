@@ -113,11 +113,17 @@ public final class PortLib
     }
   };
   
-  // (port-read port buffer start count)
+  // (port-read port buffer [start [count]])
   
-  public static final Primitive READ = new Primitive(Signature.fixed(4)) {
+  public static final Primitive READ = new Primitive(Signature.variadic(2, 2)) {
     public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof Port port && vm.popArg() instanceof Bytes bytes && vm.popArg() instanceof IInt start && vm.popArg() instanceof IInt count))
+      if (!(vm.popArg() instanceof Port port))
+        throw new TypeMismatch();
+      if (!(vm.popArg() instanceof Bytes bytes))
+        throw new TypeMismatch();
+      if (!((vm.args.isEmpty() ? Int.valueOf(0) : vm.popArg()) instanceof IInt start))
+        throw new TypeMismatch();
+      if (!((vm.args.isEmpty() ? Int.valueOf(bytes.length()) : vm.popArg()) instanceof IInt count))
         throw new TypeMismatch();
       try {
         vm.result = ok(Int.valueOf(port.read(bytes.buffer(), start.intValue(), count.intValue())));
@@ -131,11 +137,17 @@ public final class PortLib
     }
   };
   
-  // (port-write port buffer start count)
+  // (port-write port buffer [start [count]])
   
-  public static final Primitive WRITE = new Primitive(Signature.fixed(4)) {
+  public static final Primitive WRITE = new Primitive(Signature.variadic(2, 2)) {
     public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof Port port && vm.popArg() instanceof Bytes bytes && vm.popArg() instanceof IInt start && vm.popArg() instanceof IInt count))
+      if (!(vm.popArg() instanceof Port port))
+        throw new TypeMismatch();
+      if (!(vm.popArg() instanceof Bytes bytes))
+        throw new TypeMismatch();
+      if (!((vm.args.isEmpty() ? Int.valueOf(0) : vm.popArg()) instanceof IInt start))
+        throw new TypeMismatch();
+      if (!((vm.args.isEmpty() ? Int.valueOf(bytes.length()) : vm.popArg()) instanceof IInt count))
         throw new TypeMismatch();
       try {
         vm.result = ok(Int.valueOf(port.write(bytes.buffer(), start.intValue(), count.intValue())));

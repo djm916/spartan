@@ -15,16 +15,7 @@ public final class CorePackage extends spartan.data.Package
   public static final String NAME = "spartan.core";
   
   public static final CorePackage INSTANCE = new CorePackage();
-  
-  /*
-  public static CorePackage getInstance()
-  {
-    if (instance == null)
-      instance = new CorePackage();
-    return instance;
-  }
-  */
-  
+    
   private CorePackage()
   {
     super(Symbol.of(NAME), null);
@@ -195,6 +186,7 @@ public final class CorePackage extends spartan.data.Package
     bind(Symbol.of("bytes-ref"), BytesLib.REF);
     bind(Symbol.of("bytes-set!"), BytesLib.SET);
     bind(Symbol.of("bytes-length"), BytesLib.LENGTH);
+    //bind(Symbol.of("bytes-write-int32"), BytesLib.WRITE_INT32);
     
     /* Record related procedures */
     
