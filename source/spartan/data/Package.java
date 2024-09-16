@@ -19,7 +19,7 @@ public class Package implements Datum
   @Override // Datum
   public Type type()
   {
-    return TypeRegistry.PACKAGE_TYPE;
+    return Type.PACKAGE;
   }
   
   @Override // Datum

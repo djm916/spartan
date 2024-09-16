@@ -149,7 +149,7 @@ permits Null
   @Override
   public Type type()
   {
-    return TypeRegistry.LIST_TYPE;
+    return Type.LIST;
   }
   
   @Override

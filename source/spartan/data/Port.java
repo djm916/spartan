@@ -11,7 +11,7 @@ permits InputPort, OutputPort, FilePort
   @Override
   public Type type()
   {
-    return TypeRegistry.PORT_TYPE;
+    return Type.PORT;
   }
   
   public void close()

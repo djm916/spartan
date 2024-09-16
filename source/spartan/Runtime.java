@@ -76,7 +76,13 @@ public final class Runtime
     packages.put(pkg.name(), pkg);
   }
   
-  /** Resolve the given symbol in the global environment */
+  /** Resolve the given symbol in the global environment
+   *
+   * @param s the symbol to look up
+   * @return the value bound to the symbol
+   * @throws NoSuchPackage if the symbol is qualified and the package does not exist
+   * @throws UnboundSymbol if the symbol could not be resolved
+   */
   public static Datum lookup(Symbol s)
   {
     if (s instanceof QualifiedSymbol qs)
@@ -96,6 +102,14 @@ public final class Runtime
     }
   }
   
+  /** Bootstrap the initial system state and global environment.
+   *
+   *  <ul>
+   *    <li>Add the "spartan.core" package</li>
+   *    <li>Load the "builtins.s" file</li>
+   *    <li>Set the current package to the "user" package</li>
+   *  </ul>
+   */
   public static void boot()
   {
     if (Config.LOG_DEBUG)

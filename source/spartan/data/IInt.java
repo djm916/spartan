@@ -46,7 +46,7 @@ permits Int, BigInt
   @Override // Datum
   default Type type()
   {
-    return TypeRegistry.INTEGER_TYPE;
+    return Type.INTEGER;
   }
   
   String formatInt(int base);

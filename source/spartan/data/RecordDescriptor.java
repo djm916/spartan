@@ -1,10 +1,5 @@
 package spartan.data;
 
-import java.util.Map;
-import java.util.IdentityHashMap;
-import java.util.Optional;
-import java.util.Set;
-import spartan.errors.MultipleDefinition;
 import spartan.errors.TypeMismatch;
 import spartan.errors.NoSuchElement;
 import spartan.runtime.VirtualMachine;
@@ -21,43 +16,20 @@ import spartan.runtime.VirtualMachine;
  *   <li>Constructor, predicate, field accessors, field mutators, and destructor procedures</li>
  * </ul>
  */
-public class RecordDescriptor implements Datum
+public record RecordDescriptor(Type instanceType, Symbol name, Symbol[] fields) implements Datum
 {
-  public RecordDescriptor(Symbol name, Symbol[] fields)
-  {
-    this.instanceType = TypeRegistry.register(name);
-    this.fieldSlotMap = new IdentityHashMap<>(fields.length);
-    for (int i = 0; i < fields.length; ++i)
-      fieldSlotMap.put(fields[i], i);
-  }
-  
   @Override // Datum
   public Type type()
   {
-    return TypeRegistry.RECORD_DESC_TYPE;
+    return Type.RECORD_DESC;
   }
-  
-  public Type instanceType()
-  {
-    return instanceType;
-  }
-  
+    
   public int slot(Symbol field)
   {
-    var offset = fieldSlotMap.get(field);
-    if (offset == null)
-      throw new NoSuchElement();
-    return offset;
-  }
-  
-  public int numFields()
-  {
-    return fieldSlotMap.size();
-  }
-  
-  public Set<Symbol> fields()
-  {
-    return fieldSlotMap.keySet();
+    for (int i = 0; i < fields.length; ++i)
+      if (fields[i] == field)
+        return i;
+    throw new NoSuchElement();
   }
   
   public IFun accessor(Symbol field)
@@ -66,7 +38,7 @@ public class RecordDescriptor implements Datum
     final int slot = slot(field);
     return new Primitive(Signature.fixed(1)) {
       public void apply(VirtualMachine vm) {
-        if (!(vm.popArg() instanceof Record record && record.type().id() == rtd.instanceType.id()))
+        if (!(vm.popArg() instanceof Record record && record.type().id() == rtd.instanceType().id()))
           throw new TypeMismatch();
         vm.result = record.get(slot);
         vm.popFrame();
@@ -80,7 +52,7 @@ public class RecordDescriptor implements Datum
     final int slot = slot(field);
     return new Primitive(Signature.fixed(2)) {
       public void apply(VirtualMachine vm) {
-        if (!(vm.popArg() instanceof Record record && record.type().id() == rtd.instanceType.id()))
+        if (!(vm.popArg() instanceof Record record && record.type().id() == rtd.instanceType().id()))
           throw new TypeMismatch();
         record.set(slot, vm.popArg());
         vm.result = Void.VALUE;
@@ -92,7 +64,7 @@ public class RecordDescriptor implements Datum
   public IFun constructor()
   {
     final var rtd = this;
-    return new Primitive(Signature.fixed(rtd.numFields())) {
+    return new Primitive(Signature.fixed(rtd.fields().length)) {
       public void apply(VirtualMachine vm) {
         vm.result = new Record(rtd, vm.popRestArgs().toArray());
         vm.popFrame();
@@ -105,7 +77,7 @@ public class RecordDescriptor implements Datum
     final var rtd = this;
     return new Primitive(Signature.fixed(1)) {
       public void apply(VirtualMachine vm) {
-        vm.result = Bool.valueOf(vm.popArg() instanceof Record record && record.type().id() == rtd.instanceType.id());
+        vm.result = Bool.valueOf(vm.popArg() instanceof Record record && record.type().id() == rtd.instanceType().id());
         vm.popFrame();
       }
     };
@@ -123,7 +95,4 @@ public class RecordDescriptor implements Datum
       }
     };
   }
-  
-  private final Type instanceType;
-  private final Map<Symbol, Integer> fieldSlotMap;
 }

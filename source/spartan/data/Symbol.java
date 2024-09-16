@@ -60,7 +60,7 @@ permits QualifiedSymbol
   @Override // Datum
   public Type type()
   {
-    return TypeRegistry.SYMBOL_TYPE;
+    return Type.SYMBOL;
   }
   
   @Override // Datum

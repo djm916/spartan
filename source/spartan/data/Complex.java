@@ -27,7 +27,7 @@ public final class Complex implements Datum, INum, IComplex, ITrans, IEq
   @Override
   public Type type()
   {
-    return TypeRegistry.COMPLEX_TYPE;
+    return Type.COMPLEX;
   }
   
   @Override

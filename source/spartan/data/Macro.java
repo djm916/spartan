@@ -6,18 +6,17 @@ import spartan.runtime.Inst;
 import spartan.errors.SourceInfo;
 import spartan.errors.WrongNumberArgs;
 
-public final class Macro implements Datum
+public record Macro(Inst body, Signature sig) implements Datum
 {
   public Macro(Procedure proc)
   {
-    this.sig = proc.sig();
-    this.body = proc.body();
+    this(proc.body(), proc.sig());
   }
   
   @Override // Datum
   public Type type()
   {
-    return TypeRegistry.MACRO_TYPE;
+    return Type.MACRO;
   }
   
   public Datum expand(VirtualMachine vm, List args, SourceInfo source)
@@ -30,7 +29,4 @@ public final class Macro implements Datum
     vm.eval(body);
     return vm.result;
   }
-  
-  private final Signature sig;
-  private final Inst body;
 }

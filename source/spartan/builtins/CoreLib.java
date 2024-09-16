@@ -468,7 +468,8 @@ public final class CoreLib
       validateFields(fields);
       var fullName = new QualifiedSymbol(spartan.Runtime.currentPackage().name().name(), name.name()).intern();
       var fieldArray = fields.streamOf(Symbol.class).toArray(Symbol[]::new);
-      vm.result = new RecordDescriptor(fullName, fieldArray);
+      var type = TypeRegistry.register(fullName);
+      vm.result = new RecordDescriptor(type, fullName, fieldArray);
       vm.popFrame();
     }
   };

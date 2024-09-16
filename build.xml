@@ -53,7 +53,7 @@
       <formatter type="brief"/>
       <classpath path="${classpath};build"/>
       <batchtest todir="test-results">
-        <fileset dir="build" includes="spartan/tests/"/>
+        <fileset dir="build" includes="spartan/tests/" excludes="spartan/tests/TestBase.class"/>
       </batchtest>
     </junit>
   </target>

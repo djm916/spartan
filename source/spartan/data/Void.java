@@ -7,7 +7,7 @@ public final class Void implements Datum, IEq
   @Override // Datum
   public Type type()
   {
-    return TypeRegistry.VOID_TYPE;
+    return Type.VOID;
   }
   
   @Override // Datum

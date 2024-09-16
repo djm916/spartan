@@ -6,12 +6,6 @@ public non-sealed abstract class Primitive implements Datum, IFun
 {
   public abstract void apply(VirtualMachine vm);
   
-  @Override // Datum
-  public Type type()
-  {
-    return TypeRegistry.PROCEDURE_TYPE;
-  }
-  
   @Override // IFun
   public boolean accepts(int numArgs)
   {

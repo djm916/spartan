@@ -24,7 +24,7 @@ public final class Real implements Datum, INum, IReal, IComplex, ITrans, IEq, IO
   @Override
   public Type type()
   {
-    return TypeRegistry.REAL_TYPE;
+    return Type.REAL;
   }
   
   public String repr()

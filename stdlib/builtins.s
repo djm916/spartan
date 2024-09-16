@@ -80,14 +80,8 @@
 
 (defmacro ->> (arg form & forms)
   (for ((forms forms (cdr forms))
-        (result (list-append form arg) (list-append (car forms) result)))
+        (result (list-append arg form) (list-append result (car forms))))
     ((null? forms) result)))
-
-;  (rec loop [(result (list-append form arg))
-;             (forms forms)]
-;    (if (null? forms)
-;      result
-;      (loop (list-append (car forms) result) (cdr forms)))))
 
 ; (curry () ...) => (fun () ...)
 ; (curry (x) ...) => (fun (x) ...)

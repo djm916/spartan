@@ -53,7 +53,7 @@ public final class Vector implements Datum, Iterable<Datum>
   @Override // Datum
   public Type type()
   {
-    return TypeRegistry.VECTOR_TYPE;
+    return Type.VECTOR;
   }
     
   public int length()

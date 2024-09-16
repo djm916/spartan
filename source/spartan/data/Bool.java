@@ -13,7 +13,7 @@ public final class Bool implements Datum, IEq
   @Override // Datum
   public Type type()
   {
-    return TypeRegistry.BOOLEAN_TYPE;
+    return Type.BOOLEAN;
   }
 
   @Override

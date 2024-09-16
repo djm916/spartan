@@ -8,5 +8,11 @@ import spartan.runtime.VirtualMachine;
 public sealed interface IFun extends Datum
 permits Primitive, Closure, Kontinue
 {
+  @Override // Datum
+  default Type type()
+  {
+    return Type.PROCEDURE;
+  }
+  
   boolean accepts(int numArgs);
 }

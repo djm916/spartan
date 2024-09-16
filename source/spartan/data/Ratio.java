@@ -41,7 +41,7 @@ public final class Ratio implements Datum, INum, IRatio, IReal, IComplex, IEq, I
   @Override
   public Type type()
   {
-    return TypeRegistry.RATIONAL_TYPE;
+    return Type.RATIONAL;
   }
   
   @Override

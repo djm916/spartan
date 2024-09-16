@@ -132,6 +132,7 @@ public final class CorePackage extends spartan.data.Package
     bind(Symbol.of("list-length"), ListLib.LENGTH);
     bind(Symbol.of("list-reverse"), ListLib.REVERSE);
     bind(Symbol.of("list-concat"), ListLib.CONCAT);
+    bind(Symbol.of("list-append"), ListLib.APPEND);
     
     /* Vector procedures */
     

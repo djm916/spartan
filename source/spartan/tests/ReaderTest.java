@@ -10,7 +10,8 @@ import java.io.EOFException;
 import spartan.data.Int;
 
 public class ReaderTest
-{   
+{
+  /** Reader throws EOFException on encountering end of input. */
   @Test(expected = EOFException.class)
   public void endOfInputThrowsEOF() throws EOFException
   {
@@ -18,7 +19,7 @@ public class ReaderTest
       r.read();
     }
   }
-
+  
   @Test(expected = NullPointerException.class)
   public void nullInputThrowsNPE() throws EOFException
   {

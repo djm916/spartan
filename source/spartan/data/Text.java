@@ -56,7 +56,7 @@ public final class Text implements Datum, IEq, IOrd
     @Override // Datum
     public Type type()
     {
-      return TypeRegistry.STRING_CURSOR_TYPE;
+      return Type.STRING_CURSOR;
     }
     
     @Override // IOrd
@@ -109,7 +109,7 @@ public final class Text implements Datum, IEq, IOrd
   @Override // Datum
   public Type type()
   {
-    return TypeRegistry.STRING_TYPE;
+    return Type.STRING;
   }
   
   @Override // Datum

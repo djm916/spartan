@@ -31,7 +31,7 @@ public final class Bytes implements Datum
   @Override
   public Type type()
   {
-    return TypeRegistry.BYTES_TYPE;
+    return Type.BYTES;
   }
   
   public Bytes(int capacity)

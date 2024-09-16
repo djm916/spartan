@@ -85,9 +85,10 @@ public final class ListLib
   
   public static final Primitive APPEND = new Primitive(Signature.fixed(2)) {
     public void apply(VirtualMachine vm) {
+      var elem = vm.popArg();
       if (!(vm.popArg() instanceof List list))
         throw new TypeMismatch();
-      vm.result = list.append(vm.popArg()); 
+      vm.result = list.append(elem); 
       vm.popFrame();  
     }
   };
