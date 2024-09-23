@@ -28,6 +28,8 @@ public final class Config
   /** Enables or disables logging of macro expansion results. Valid values are "true" and "false". Defaults to "true". */
   public static final boolean SHOW_MACRO_EXPANSION = Boolean.valueOf(System.getProperty("spartan.show-macro-expansion", "true"));
   
+  public static boolean ALLOW_REDEFINITION = false;
+  
   /** The default character encoding for converting text to and from binary. Default is UTF-8.
       This encoding is used when reading source code files. */
   public static final Charset DEFAULT_ENCODING = StandardCharsets.UTF_8;

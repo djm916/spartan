@@ -81,6 +81,7 @@ public class Main implements Callable<Integer>
       }
     }
     else {
+      Config.ALLOW_REDEFINITION = true;
       Repl.start();
     }
 

@@ -108,7 +108,7 @@ public class Package implements Datum
    */
   public void bind(Symbol name, Datum value)
   {
-    if (bindings.containsKey(name))
+    if (!spartan.Config.ALLOW_REDEFINITION && bindings.containsKey(name))
       throw new MultipleDefinition(name);
     bindings.put(name, value);
   }
