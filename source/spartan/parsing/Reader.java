@@ -233,7 +233,13 @@ public class Reader implements AutoCloseable
     var position = getTokenPosition();
     return new SyntaxError(message, new SourceInfo(null, position));
   }
-
+  
+  private <E extends Datum> E withPosition(E exp, Position pos)
+  {
+    positionMap.put(exp, pos);
+    return exp;
+  }
+  
   private SyntaxError malformedNumeric()
   {
     return syntaxError("malformed numeric literal");
@@ -450,9 +456,7 @@ public class Reader implements AutoCloseable
     if (peekChar() == ':')      
       return readQualifiedSymbol(text.toString(), text, position);
     
-    var symbol = new Symbol(text.toString());
-    positionMap.put(symbol, position);
-    return symbol;
+    return withPosition(new Symbol(text.toString()), position);
   }
   
   /** Read the base-name part of a package-qualified symbol
@@ -476,9 +480,7 @@ public class Reader implements AutoCloseable
     }
     var name = text.toString();
     var baseName = name.substring(splitIndex);
-    var symbol = new QualifiedSymbol(text.toString(), pkgName, baseName);
-    positionMap.put(symbol, position);
-    return symbol;
+    return withPosition(new QualifiedSymbol(text.toString(), pkgName, baseName), position);
   }
   
   private Symbol readKeyword()
@@ -583,34 +585,36 @@ public class Reader implements AutoCloseable
     if (lastChar != delim)
       throw unexpectedEOF();
     
-    var list = builder.build();
-    positionMap.put(list, position);
-    return list;
+    return withPosition(builder.build(), position);
   }
     
   private List readQuote()
   {
+    var pos = getTokenPosition();
     skipSpace();
-    return List.of(Symbol.QUOTE, readDatum());
+    return withPosition(List.of(Symbol.QUOTE, readDatum()), pos);
   }
   
   private List readUnquote()
   {
+    var pos = getTokenPosition();
     skipSpace();
-    return List.of(Symbol.UNQUOTE, readDatum());
+    return withPosition(List.of(Symbol.UNQUOTE, readDatum()), pos);
   }
 
   private List readUnquoteSplicing()
   {
+    var pos = getTokenPosition();
     getChar();
     skipSpace();
-    return List.of(Symbol.UNQUOTE_SPLICING, readDatum());
+    return withPosition(List.of(Symbol.UNQUOTE_SPLICING, readDatum()), pos);
   }
 
   private List readQuasiQuote()
   {
+    var pos = getTokenPosition();
     skipSpace();
-    return List.of(Symbol.QUASIQUOTE, readDatum());
+    return withPosition(List.of(Symbol.QUASIQUOTE, readDatum()), pos);
   }
   
   /**

@@ -32,8 +32,7 @@
                   [else
                      (list 'spartan.core:cons (%quasiquote (car exp) level) (%quasiquote (cdr exp) level))]))]))
 
-; quasiquote macro
-; NOTE: turned off; using builtin quasiquote special form!
+; quasiquote implemented as a macro; just calls the procedure %quasiquote on its (unevaluated) argument
 (defmacro quasiquote (exp)
   (%quasiquote exp 0))
 

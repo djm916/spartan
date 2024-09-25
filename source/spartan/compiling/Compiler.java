@@ -16,6 +16,7 @@ import java.util.logging.Logger;
 import java.util.Optional;
 import java.util.Map;
 import static java.util.Map.entry;
+import static spartan.Runtime.lookupMacro;
 
 interface ISpecialForm
 {
@@ -46,14 +47,22 @@ public class Compiler
     positionMap = exp.positionMap();
     var code = compile(exp.datum(), Scope.EMPTY, false, new Halt());
     if (Config.LOG_DEBUG && Config.EMIT_BYTECODE)
-      log.info(() -> String.format("Listing for expression at %s\n%s", positionMap.get(exp.datum()), CodeListing.generate(code)));
+      log.info(() -> String.format("Listing for expression at %s\n%s", positionOf(exp.datum()), CodeListing.generate(code)));
     return code;
   }
 
   /** Convenience method for creating instances of SyntaxError for malformed expressions. */
   private SyntaxError malformedExp(Datum exp)
   {
-    return new SyntaxError("malformed expression", new SourceInfo(exp, positionMap.get(exp)));
+    return new SyntaxError("malformed expression", new SourceInfo(exp, positionOf(exp)));
+  }
+  
+  private Position positionOf(Datum exp)
+  {
+    var pos = positionMap.get(exp);
+    if (pos == null)
+      log.warning(() -> String.format("The position is null for the expression %s", exp.repr()));
+    return pos;
   }
   
   /**
@@ -107,9 +116,9 @@ public class Compiler
   private Inst compileGlobalVarRef(Symbol s, Inst next)
   {
     if (s instanceof QualifiedSymbol qs)
-      return new LoadGlobal(Symbol.of(qs.packageName()), Symbol.of(qs.baseName()), new SourceInfo(qs, positionMap.get(qs)), next);
+      return new LoadGlobal(Symbol.of(qs.packageName()), Symbol.of(qs.baseName()), new SourceInfo(qs, positionOf(qs)), next);
     else
-      return new LoadGlobal(spartan.Runtime.currentPackage().name(), s.intern(), new SourceInfo(s, positionMap.get(s)), next);
+      return new LoadGlobal(spartan.Runtime.currentPackage().name(), s.intern(), new SourceInfo(s, positionOf(s)), next);
   }
   
   
@@ -147,10 +156,10 @@ public class Compiler
   private Inst compileSetGlobalVar(Symbol s, Inst next)
   {
     if (s instanceof QualifiedSymbol qs)
-      return new StoreGlobal(Symbol.of(qs.packageName()), Symbol.of(qs.baseName()), new SourceInfo(qs, positionMap.get(qs)),
+      return new StoreGlobal(Symbol.of(qs.packageName()), Symbol.of(qs.baseName()), new SourceInfo(qs, positionOf(qs)),
              new LoadConst(Void.VALUE, next));
     else
-      return new StoreGlobal(spartan.Runtime.currentPackage().name(), s.intern(), new SourceInfo(s, positionMap.get(s)),
+      return new StoreGlobal(spartan.Runtime.currentPackage().name(), s.intern(), new SourceInfo(s, positionOf(s)),
              new LoadConst(Void.VALUE, next));
   }
   
@@ -160,7 +169,7 @@ public class Compiler
       throw malformedExp(exp);
     var init = exp.caddr();  
     return compile(init, scope, false,
-           new BindGlobal(spartan.Runtime.currentPackage().name(), s.intern(), new SourceInfo(exp, positionMap.get(s)),
+           new BindGlobal(spartan.Runtime.currentPackage().name(), s.intern(), new SourceInfo(exp, positionOf(s)),
            new LoadConst(Void.VALUE, next)));
   }
   
@@ -183,7 +192,7 @@ public class Compiler
       return compile(xform, scope, false, next);
     }
     catch (Error err) {
-      err.setSource(new SourceInfo(xform, positionMap.get(exp)));
+      err.setSource(new SourceInfo(xform, positionOf(exp)));
       throw err;
     }
   }
@@ -509,7 +518,7 @@ public class Compiler
       return compile(xform, scope, tail, next);
     }
     catch (Error err) {
-      err.setSource(new SourceInfo(xform, positionMap.get(exp)));
+      err.setSource(new SourceInfo(xform, positionOf(exp)));
       throw err;
     }
   }
@@ -650,7 +659,7 @@ public class Compiler
     var proc = exp.car();
     var args = exp.cdr();
     int numArgs = args.length();
-    var position = positionMap.get(exp);
+    var position = positionOf(exp);
     var source = new SourceInfo(exp, position);
     
     if (tail && Config.TAIL_CALLS) // Tail call optimization: omit call frame, return directly to the caller
@@ -685,7 +694,7 @@ public class Compiler
       throw malformedExp(exp);
     
     var proc = exp.cadr();
-    var position = positionMap.get(exp);
+    var position = positionOf(exp);
     
     // Optimization: omit frame for call in tail position
     
@@ -758,7 +767,7 @@ public class Compiler
     var body = exp.cddr();
     var proc = makeProcedure(params, body, scope);    
     //if (Config.LOG_DEBUG)
-      //log.info(() -> String.format("Listing for procedure defined at %s\n%s", positionMap.get(exp), CodeListing.generate(proc.body())));
+      //log.info(() -> String.format("Listing for procedure defined at %s\n%s", positionOf(exp), CodeListing.generate(proc.body())));
     return new MakeClosure(proc, next);
   }
 
@@ -1049,7 +1058,7 @@ public class Compiler
       return compile(xform, scope, false, next);
     }
     catch (Error err) {
-      err.setSource(new SourceInfo(exp, positionMap.get(exp)));
+      err.setSource(new SourceInfo(exp, positionOf(exp)));
       throw err;
     }
   }
@@ -1279,7 +1288,7 @@ public class Compiler
       spartan.Runtime.currentPackage().bind(symbol.intern(), macro);
     }
     catch (MultipleDefinition err) {
-      err.setSource(new SourceInfo(exp, positionMap.get(symbol)));
+      err.setSource(new SourceInfo(exp, positionOf(symbol)));
       throw err;
     }
     return new LoadConst(Void.VALUE, next);
@@ -1294,20 +1303,18 @@ public class Compiler
      Applies the macro procedure to the list of (unevaluated) arguments,
      and compiles the returned code.
   */
-  private Inst compileExpandMacro(Macro macro, List exp, Scope scope, boolean tail, Inst next)
+  private Datum expand(Macro macro, List exp)
   {
-    var position = positionMap.get(exp);
-    var source = new SourceInfo(exp, position);
-    var macroName = (Symbol)exp.car();    
+    var position = positionOf(exp);
     var args = quoteList(exp.cdr());
-    var xform = macro.expand(vm, args, source);
+    var xform = macro.expand(vm, args, new SourceInfo(exp, position));
     
     if (Config.LOG_DEBUG && Config.SHOW_MACRO_EXPANSION)
       log.info(() -> String.format("macro transform: %s => %s", exp.repr(), xform.repr()));
     
     // augment source position map for the resulting generated code
     augmentSourceMap(xform, position);
-    return compile(xform, scope, tail, next);    
+    return xform;
   }
   
   private void augmentSourceMap(Datum exp, Position position)
@@ -1343,7 +1350,7 @@ public class Compiler
     if (exp.car() instanceof Symbol s) {
       return Optional.ofNullable(specialForms.get(s))
              .map(form -> form.compile(exp, scope, tail, next))
-             .or(() -> spartan.Runtime.lookupMacro(s).map(macro -> compileExpandMacro(macro, exp, scope, tail, next)))
+             .or(() -> lookupMacro(s).map(macro -> compile(expand(macro, exp), scope, tail, next)))
              .orElseGet(() -> compileApply(exp, scope, tail, next));
     }
     return compileApply(exp, scope, tail, next);
