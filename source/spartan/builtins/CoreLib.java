@@ -537,17 +537,6 @@ public final class CoreLib
     }
   };
   
-  // (record-destructor rtd)
-  
-  public static final Primitive RECORD_DESTRUCTOR = new Primitive(Signature.fixed(1)) {
-    public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof RecordDescriptor rtd))
-        throw new TypeMismatch();
-      vm.result = rtd.destructor();
-      vm.popFrame();
-    }
-  };
-  
   // (record? obj)
   
   public static final Primitive IS_RECORD = new Primitive(Signature.fixed(1)) {

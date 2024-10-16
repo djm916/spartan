@@ -31,17 +31,17 @@
 
 (defun newton (f x0)
   (def df (derivative f)) ; df ~= f', an approximation of the derivative function of f
-  (def done false)        ; Set to true when the method converges, ending the iteration
+  (def done #false)       ; Set to true when the method converges, ending the iteration
                           ; (i.e., the difference between successive approximations
                           ;  is less than some small tolerance value)
-  (def x1 void)           ; If the method converges, x1 is a better estimate than x0,
+  (def x1 #void)          ; If the method converges, x1 is a better estimate than x0,
                           ; and also stores the final result
   ; Iterate Newton's method
   (while (not done)
     (set! x1 (- x0 (/ (f x0) (df x0))))
     ;(print-line x1)
     (if (<= (abs (- x1 x0)) 0.00001) ; Compute the difference between successive approximations
-      (set! done true)               ; If the method converges, then x1 is the result and we are done
+      (set! done #true)              ; If the method converges, then x1 is the result and we are done
       (set! x0 x1)))                 ; Otherwise, continue the iteration using the new estimate
   x1)
 

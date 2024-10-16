@@ -50,7 +50,7 @@
 (defmacro defrecord (name fields)
   `(let ((rtd (spartan.core:make-record-type ',name ',fields))) ; Create record type descriptor
      ; Bind record type name to the record type descriptor
-     ;(def ,name rtd)
+     (def ,name rtd)
      ; Define constructor
      (def ,(generate-constructor-name name) (spartan.core:record-constructor rtd))
      ; Define type predicate
@@ -58,9 +58,4 @@
      ; Define accessors
      ,@(spartan.core:list-map (fun (field) `(def ,(generate-accessor-name name field) (spartan.core:record-accessor rtd ',field))) fields)
      ; Define mutators
-     ,@(spartan.core:list-map (fun (field) `(def ,(generate-mutator-name name field) (spartan.core:record-mutator rtd ',field))) fields)
-     ; Define destructor
-     (def ,(generate-destructor-name name) (spartan.core:record-destructor rtd))
-     ; Define matcher
-     (defmacro ,(generate-matcher-name name) (arg vars & body)
-       `(apply (fun ,vars ,@body) (',,(generate-destructor-name name) ,arg)))))
+     ,@(spartan.core:list-map (fun (field) `(def ,(generate-mutator-name name field) (spartan.core:record-mutator rtd ',field))) fields)))

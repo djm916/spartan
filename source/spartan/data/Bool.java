@@ -19,7 +19,7 @@ public final class Bool implements Datum, IEq
   @Override
   public String repr()
   {
-    return value ? "true" : "false";
+    return value ? "#true" : "#false";
   }
   
   @Override

@@ -40,6 +40,12 @@ permits QualifiedSymbol
   public static final Symbol Q_CDR = new QualifiedSymbol("spartan.core", "cdr");
   public static final Symbol Q_CONS = new QualifiedSymbol("spartan.core", "cons");
   public static final Symbol Q_CONCAT = new QualifiedSymbol("spartan.core", "list-concat");
+  public static final Symbol MATCH = new Symbol("match");
+  public static final Symbol UNDERSCORE = new Symbol("_");
+  public static final Symbol LIST = new Symbol("list");
+  public static final Symbol LIST_STAR = new Symbol("list*");
+  public static final Symbol VECTOR = new Symbol("vector");
+  public static final Symbol RECORD = new Symbol("record");
   
   /**
    * Returns an interned symbol with the given name.

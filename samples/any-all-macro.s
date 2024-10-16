@@ -17,34 +17,34 @@
 
 (defmacro any? (& xs)
   (if (null? xs)
-    false
-    `(if ,(car xs) true (any? ,@(cdr xs)))))
+    #false
+    `(if ,(car xs) #true (any? ,@(cdr xs)))))
 
 ; "all?" implements a short-circuiting "and" operation mapped over a list.
 ;
-; (all?) => true
+; (all?) => #true
 ;
-; (all? xs...) => (if (not (car xs)) false (all? (cdr xs)))
+; (all? xs...) => (if (not (car xs)) #false (all? (cdr xs)))
 ;
 
 (defmacro all? (& xs)
   (if (null? xs)
-    true
-    `(if (not ,(car xs)) false (all? ,@(cdr xs)))))
+    #true
+    `(if (not ,(car xs)) #false (all? ,@(cdr xs)))))
 
 (print-line "(any?) = " (any?))
-(print-line "(any? false) = " (any? false))
-(print-line "(any? true) = " (any? true))
-(print-line "(any? false true) = " (any? false true))
-(print-line "(any? true false) = " (any? true false))
-(print-line "(any? false false) = " (any? false false))
-(print-line "(any? true true) = " (any? true true))
+(print-line "(any? #false) = " (any? #false))
+(print-line "(any? #true) = " (any? #true))
+(print-line "(any? #false #true) = " (any? #false #true))
+(print-line "(any? #true #false) = " (any? #true #false))
+(print-line "(any? #false #false) = " (any? #false #false))
+(print-line "(any? #true #true) = " (any? #true #true))
 
 (print-line "(all?) = " (all?))
-(print-line "(all? false) = " (all? false))
-(print-line "(all? true) = " (all? true))
-(print-line "(all? false true) = " (all? false true))
-(print-line "(all? true false) = " (all? true false))
-(print-line "(all? true true) = " (all? true true))
-(print-line "(all? false false) = " (all? false false))
+(print-line "(all? #false) = " (all? #false))
+(print-line "(all? #true) = " (all? #true))
+(print-line "(all? #false #true) = " (all? #false #true))
+(print-line "(all? #true #false) = " (all? #true #false))
+(print-line "(all? #true #true) = " (all? #true #true))
+(print-line "(all? #false #false) = " (all? #false #false))
 

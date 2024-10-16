@@ -1,6 +1,7 @@
 package spartan.data;
 
 import java.util.function.Predicate;
+import java.util.function.BiPredicate;
 import java.util.function.UnaryOperator;
 import java.util.Iterator;
 import java.util.Spliterator;
@@ -134,7 +135,7 @@ permits Null
    *
    * This is a not a member function in order to avoid a "Shlemiel The Painter" O(N^2) algorithm.
    */
-  public static List concat(List lists)
+  public static <E extends Datum> List concat(Iterable<E> lists)
   {
     var builder = new List.Builder();
     for (var car : lists) {
@@ -143,6 +144,16 @@ permits Null
       for (var elem : list)
         builder.add(elem);
     }
+    return builder.build();
+  }
+  
+  public static List concat2(List left, List right)
+  {
+    var builder = new List.Builder();
+    for (var elem : left)
+      builder.add(elem);
+    for (var elem : right)
+      builder.add(elem);
     return builder.build();
   }
   
@@ -258,6 +269,16 @@ permits Null
   public List map(UnaryOperator<Datum> f)
   {
     return map(this, f);
+  }
+  
+  public boolean equals(Object other)
+  {
+    return other instanceof List rhs && isEqual(this, rhs, (a, b) -> a.equals(b));
+  }
+  
+  public boolean isEqual(List rhs)
+  {
+    return isEqual(this, rhs, (a, b) -> (a instanceof IEq x) && (b instanceof IEq y) && x.isEqual(y));
   }
   
   @Override // Iterable
@@ -390,6 +411,14 @@ permits Null
     for (; !list.isEmpty(); list = list.cdr())
       result.add(f.apply(list.first));
     return result.build();
+  }
+  
+  private static boolean isEqual(List lhs, List rhs, BiPredicate<Datum, Datum> equals)
+  {
+    for (; !lhs.isEmpty() && !rhs.isEmpty(); lhs = lhs.cdr(), rhs = rhs.cdr())
+      if (!equals.test(lhs.car(), rhs.car()))
+        return false;
+    return lhs.isEmpty() && rhs.isEmpty();
   }
   
   protected List(Datum first, List rest)

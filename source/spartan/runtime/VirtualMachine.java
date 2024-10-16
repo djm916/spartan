@@ -150,6 +150,10 @@ public final class VirtualMachine
             control = next;
             break;
           }
+          case Match(var pattern, var left, var right): {
+            control = pattern.match(result, env) ? left : right;
+            break;
+          }
           case PopArg(var next): {
             result = popArg();
             control = next;
@@ -183,6 +187,9 @@ public final class VirtualMachine
              pushFrame(returnTo, position);
              control = next;
              break;
+          }
+          case Raise(var err, _): {
+            throw err;
           }
           case StoreGlobal(var packageName, var baseName, var source, var next): {
             try {

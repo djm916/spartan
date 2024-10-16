@@ -33,9 +33,6 @@ public final class CorePackage extends spartan.data.Package
     bind(Symbol.of(">"), CoreLib.GT);
     bind(Symbol.of("<="), CoreLib.LE);
     bind(Symbol.of(">="), CoreLib.GE);
-    bind(Symbol.of("void"), Void.VALUE);
-    bind(Symbol.of("true"), Bool.TRUE);
-    bind(Symbol.of("false"), Bool.FALSE);    
     bind(Symbol.of("not"), CoreLib.NOT);    
     bind(Symbol.of("apply"), CoreLib.APPLY);
     bind(Symbol.of("call/cc"), CoreLib.CALL_CC);
@@ -196,7 +193,6 @@ public final class CorePackage extends spartan.data.Package
     bind(Symbol.of("record-predicate"), CoreLib.RECORD_PREDICATE);
     bind(Symbol.of("record-accessor"), CoreLib.RECORD_ACCESSOR);
     bind(Symbol.of("record-mutator"), CoreLib.RECORD_MUTATOR);    
-    bind(Symbol.of("record-destructor"), CoreLib.RECORD_DESTRUCTOR);
     bind(Symbol.of("record-descriptor"), CoreLib.GET_DESCRIPTOR);
     
     /* Symbol related procedures */

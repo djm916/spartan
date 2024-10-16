@@ -5,6 +5,6 @@ package spartan.runtime;
  */
 public sealed interface Inst
 permits Apply, BindGlobal, BranchFalse, BranchTrue, Halt, Jump, LoadConst, LoadGlobal,
-        LoadLocal, LoadLocal0, MakeClosure, PopArg, PopEnv, PopFrame, PopRestArgs,
-        PushArg, PushEnv, PushFrame, StoreGlobal, StoreLocal, StoreLocal0
+        LoadLocal, LoadLocal0, MakeClosure, Match, PopArg, PopEnv, PopFrame, PopRestArgs,
+        PushArg, PushEnv, PushFrame, Raise, StoreGlobal, StoreLocal, StoreLocal0
 {}

@@ -27,5 +27,10 @@ public final class TypeRegistry
     return registry.get(typeName);
   }
   
+  public static Type forName(Symbol typeName)
+  {
+    return registry.get(typeName);
+  }
+  
   private TypeRegistry() {}
 }

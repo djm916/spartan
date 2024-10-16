@@ -88,11 +88,11 @@
 
 (defmacro curry (args & body)
   (defun loop (args)
-    (cond ((empty? args)
+    (cond ((null? args)
            `(fun () ,@body))
-          ((empty? (cdr args))
+          ((null? (cdr args))
            `(fun (,(car args)) ,@body))
-          (true
+          (#true
            `(fun (,(car args)) ,(loop (cdr args))))))
   (loop args))
     
@@ -145,4 +145,4 @@
 (load "stdlib/import.s")
 (load "stdlib/control.s")
 (load "stdlib/ports.s")
-(load "stdlib/match.s")
+;(load "stdlib/match.s")

@@ -101,6 +101,12 @@ public class CodeListing
           code = inst.next();
           break;
         }
+        case Match(_, var left, var right): {
+          ctx.labels.put(right, ctx.genLabel());
+          generateLabels(left, ctx);
+          code = right;
+          break;
+        }
         case PopArg inst: {
           code = inst.next();
           break;
@@ -126,6 +132,10 @@ public class CodeListing
           break;
         }
         case PushFrame inst: {
+          code = inst.next();
+          break;
+        }
+        case Raise inst: {
           code = inst.next();
           break;
         }
@@ -206,6 +216,11 @@ public class CodeListing
           code = inst.next();
           break;
         }
+        case Match(_, var left, var right): {
+          emitListing(left, ctx, sb);
+          code = right;
+          break;
+        }
         case PopArg inst: {
           code = inst.next();
           break;
@@ -231,6 +246,10 @@ public class CodeListing
           break;
         }
         case PushFrame inst: {
+          code = inst.next();
+          break;
+        }
+        case Raise inst: {
           code = inst.next();
           break;
         }
@@ -264,6 +283,7 @@ public class CodeListing
       case LoadLocal inst -> String.format("(load-local %d %d)", inst.depth(), inst.offset());
       case LoadLocal0 inst -> String.format("(load-local 0 %d)", inst.offset());
       case MakeClosure inst -> String.format("(make-closure %s)", ctx.labels.get(inst.proc().body()));
+      case Match(var pattern, _, var right) -> String.format("(match %s %s)", pattern.toString(), ctx.labels.get(right));
       case PopArg inst -> "(pop-arg)";
       case PopRestArgs inst -> "(pop-arg*)";
       case PopEnv inst -> "(pop-env)";
@@ -271,6 +291,7 @@ public class CodeListing
       case PushArg inst -> "(push-arg)";
       case PushEnv inst -> String.format("(push-env %d)", inst.numSlots());
       case PushFrame inst -> "(push-frame)";
+      case Raise inst -> "(raise)";
       case StoreGlobal inst -> String.format("(store-global %s:%s)", inst.packageName().str(), inst.baseName().str());
       case StoreLocal inst -> String.format("(store-local %d %d)", inst.depth(), inst.offset());
       case StoreLocal0 inst -> String.format("(store-local 0 %d)", inst.offset());

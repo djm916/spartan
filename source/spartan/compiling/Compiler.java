@@ -10,6 +10,8 @@ import spartan.errors.SourceInfo;
 import spartan.errors.Error;
 import spartan.errors.SyntaxError;
 import spartan.errors.MultipleDefinition;
+import spartan.errors.MatchFailure;
+import spartan.errors.InvalidPattern;
 import spartan.runtime.VirtualMachine;
 import spartan.Config;
 import java.util.logging.Logger;
@@ -1294,7 +1296,7 @@ public class Compiler
     return new LoadConst(Void.VALUE, next);
   }
   
-  /* Compile a macro call
+  /* Expand a macro
   
      Syntax: (f args...)
      
@@ -1329,7 +1331,225 @@ public class Compiler
       positionMap.put(exp, position);
     }
   }
+  
+  /**
+       <pattern> =>   _
+                    | <symbol>
+                    | <number>
+                    | <string>
+                    | <boolean>
+                    | (quote <datum>)
+                    | (list <pattern> ...)
+                    | (list* <pattern> ...)
+                    | (vector <pattern> ...)
+                    | (record <symbol> <pattern> ...)
+                    | (and <pattern> ...)
+                    | (or <pattern> ...)
+                    
+                    
+     Syntax: (match exp
+               (pattern1 body1)
+               ...
+               (patternN bodyN))
+   
+     Compilation:
+
+          <<exp>>
+          push-env N          // extend environment for variables in pattern1
+          match pattern1 L1   // continue if pattern matches value in RES; otherwise try next pattern
+          <<body1>>           // evaluate body
+          pop-env
+          j LN
+     L1:  push-env N
+          match pattern2 L2
+          <<body2>>
+          pop-env
+          j LN
+          ...
+          raise               // all patterns failed to match; raise error
+     LN:  next
+  */
+  private Inst compileMatch(List exp, Scope scope, boolean tail, Inst next)
+  {
+    if (exp.length() < 3 || !checkMatchClauses(exp.cddr()))
+      throw malformedExp(exp);
+
+    return compile(exp.cadr(), scope, false,
+           compileMatchClauses(exp, exp.cddr(), scope, tail, next));
+  }
+  
+  private Inst compileMatchClauses(List matchExp, List clauses, Scope scope, boolean tail, Inst next)
+  {
+    if (clauses.isEmpty())
+      return new Raise(new MatchFailure(new SourceInfo(matchExp, positionOf(matchExp))), next);
+
+    var clause = (List) clauses.car();
+    var patt = clause.car();
+    var body = clause.cdr();
+    var vars = patternVars(patt);
+    var extendedScope = scope.extend(vars);
     
+    //System.out.println("pattern = " + patt.repr());
+    //System.out.println("pattern vars = " + vars.repr());    
+    
+    return new PushEnv(vars.length(),
+           new Match(compilePattern(patt, vars),
+                     compileSequence(body, extendedScope, tail, new PopEnv(new Jump(next))),
+                     compileMatchClauses(matchExp, clauses.cdr(), scope, tail, next)));
+  }
+  
+  private boolean checkMatchClauses(List clauses)
+  {
+    for (; !clauses.isEmpty(); clauses = clauses.cdr())
+      if (!(clauses.car() instanceof List clause && clause.length() >= 2 && checkPattern(clause.car())))
+        return false;
+    return true;
+  }
+  
+  private boolean checkPattern(Datum pattern)
+  {
+    return true;
+  }
+  
+  private List patternVars(Datum pattern)
+  {
+    if (pattern instanceof Symbol symb && !symb.isKeyword() && !Symbol.UNDERSCORE.equals(symb))
+      return List.of(symb);
+    if (pattern instanceof List list && !list.isEmpty() && list.car() instanceof Symbol car) {
+      if (car.equals(Symbol.LIST))
+        return patternVarsInner(list.cdr());
+      if (car.equals(Symbol.LIST_STAR))
+        return patternVarsInner(list.cdr());
+      if (car.equals(Symbol.VECTOR))
+        return patternVarsInner(list.cdr());
+      if (car.equals(Symbol.RECORD))
+        return patternVarsInner(list.cddr());
+      if (car.equals(Symbol.AND))
+        return patternVarsInner(list.cdr());
+      if (car.equals(Symbol.OR))
+        return patternVarsInner(list.cdr());
+    }
+    return List.EMPTY;
+  }
+  
+  private List patternVarsInner(List patterns)
+  {
+    if (patterns.isEmpty())
+      return List.EMPTY;
+    else
+      return List.concat2(patternVars(patterns.car()), patternVarsInner(patterns.cdr()));
+  }
+  
+  private IPattern compilePattern(Datum pattern, List vars)
+  {
+    if (pattern instanceof Symbol symb && Symbol.UNDERSCORE.equals(symb))
+      return new MatchAny();
+    if (pattern instanceof Symbol symb && symb.isKeyword())
+      return new MatchEqual(symb);
+    if (pattern instanceof Symbol symb)
+      return new MatchVar(vars.index(symb::equals));
+    if (pattern instanceof Bool || pattern instanceof IInt || pattern instanceof Text)
+      return new MatchEqual((IEq)pattern);
+    if (pattern instanceof List list && !list.isEmpty() && list.car() instanceof Symbol car) {
+      if (car.equals(Symbol.QUOTE) && checkQuotePattern(list))
+        return compileQuotePattern(list);
+      if (car.equals(Symbol.LIST))
+        return compileListPattern(list.cdr(), vars);
+      if (car.equals(Symbol.LIST_STAR))
+        return compileListStarPattern(list.cdr(), vars);
+      if (car.equals(Symbol.VECTOR))
+        return compileVectorPattern(list.cdr(), vars);
+      if (car.equals(Symbol.RECORD) && checkRecordPattern(list))
+        return compileRecordPattern(list, vars);
+      if (car.equals(Symbol.AND))
+        return compileAndPattern(list.cdr(), vars);
+      if (car.equals(Symbol.OR) && checkOrPattern(list.cdr()))
+        return compileOrPattern(list.cdr(), vars);
+    }
+    throw malformedExp(pattern);
+  }
+  
+  private boolean checkQuotePattern(List pattern)
+  {
+    return pattern.length() == 2 && pattern.cadr() instanceof IEq;
+  }
+  
+  // (quote <datum>)
+  private IPattern compileQuotePattern(List pattern)
+  {
+    var datum = (IEq)pattern.cadr();
+    return new MatchEqual(datum instanceof Symbol s ? s.intern() : datum);
+  }
+  
+  private IPattern compileListPattern(List patterns, List vars)
+  {
+    if (patterns.isEmpty())
+      return new MatchNull();
+    else
+      return new MatchCons(compilePattern(patterns.car(), vars),
+                           compileListPattern(patterns.cdr(), vars));
+  }
+  
+  private IPattern compileListStarPattern(List patterns, List vars)
+  {
+    if (!patterns.cdr().isEmpty() && patterns.cddr().isEmpty())
+      return new MatchCons(compilePattern(patterns.car(), vars),
+                           compilePattern(patterns.cadr(), vars));
+    else
+      return new MatchCons(compilePattern(patterns.car(), vars),
+                           compileListStarPattern(patterns.cdr(), vars));
+  }
+  
+  private IPattern compileVectorPattern(List patterns, List vars)
+  {
+    return new MatchVector(patterns.stream().map(pat -> compilePattern(pat, vars)).toArray(IPattern[]::new));
+  }
+  
+  private IPattern compileRecordPattern(List pattern, List vars)
+  {
+    var typeName = (Symbol) pattern.cadr();
+    var fieldPatterns = pattern.cddr();
+    var rtd = spartan.Runtime.lookupRTD(typeName).get();
+    return new MatchRecord(rtd, fieldPatterns.stream().map(pat -> compilePattern(pat, vars)).toArray(IPattern[]::new));
+  }
+  
+  private IPattern compileAndPattern(List patterns, List vars)
+  {
+    if (patterns.isEmpty())
+      return new MatchAny();
+    else
+      return new MatchAnd(compilePattern(patterns.car(), vars),
+                          compileAndPattern(patterns.cdr(), vars));
+  }
+  
+  private IPattern compileOrPattern(List patterns, List vars)
+  {
+    if (patterns.isEmpty())
+      return new MatchFail();
+    else
+      return new MatchOr(compilePattern(patterns.car(), vars),
+                         compileOrPattern(patterns.cdr(), vars));
+  }
+  
+  private boolean checkOrPattern(List patterns)
+  {
+    var vars = patternVars(patterns.car());
+    for (patterns = patterns.cdr(); !patterns.isEmpty(); patterns = patterns.cdr())
+      if (!vars.equals(patternVars(patterns.car())))
+        return false;
+    return true;
+  }
+  
+  // (record <type-name> <pattern>...)
+  private boolean checkRecordPattern(List pattern)
+  {
+    return pattern.length() >= 2
+        && pattern.cadr() instanceof Symbol typeName
+        && spartan.Runtime.lookupRTD(typeName)
+           .map(rtd -> rtd.fields().length == pattern.cddr().length())
+           .orElse(false);
+  }
+  
   /* Compile a combination (i.e., special forms, procedure application, and macro expansion.
      
      Evaluation rules:
@@ -1386,7 +1606,8 @@ public class Compiler
     Map.entry(Symbol.QUOTE, this::compileQuote),
     //Map.entry(Symbol.QUASIQUOTE, this::compileQuasiquote),
     Map.entry(Symbol.OR, this::compileOr),
-    Map.entry(Symbol.AND, this::compileAnd)
+    Map.entry(Symbol.AND, this::compileAnd),
+    Map.entry(Symbol.MATCH, this::compileMatch)
   );
   
   private PositionMap positionMap;

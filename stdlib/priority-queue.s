@@ -37,7 +37,7 @@
       top)))
 
 (defun __reheap-down (v c)
-  (let [(root 0) (left 1) (right 2) (last (vector-length v)) (done false)]
+  (let [(root 0) (left 1) (right 2) (last (vector-length v)) (done #false)]
     (while (and (not done) (< left last))
       (let [(child (cond [(not (< right last)) left]
                          [(c (vector-ref v left) (vector-ref v right)) left]
@@ -48,4 +48,4 @@
             (set! root child)
             (set! left (+ 1 (* 2 root)))
             (set! right (+ 2 (* 2 root))))
-          (set! done true))))))
+          (set! done #true))))))

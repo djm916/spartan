@@ -13,7 +13,7 @@ import spartan.runtime.VirtualMachine;
  * <ul>
  *   <li>The record type name</li>
  *   <li>The record field names</li>
- *   <li>Constructor, predicate, field accessors, field mutators, and destructor procedures</li>
+ *   <li>Constructor, predicate, field accessor, field mutator procedures</li>
  * </ul>
  */
 public record RecordDescriptor(Type instanceType, Symbol name, Symbol[] fields) implements Datum
@@ -81,18 +81,5 @@ public record RecordDescriptor(Type instanceType, Symbol name, Symbol[] fields) 
         vm.popFrame();
       }
     };
-  }
-  
-  public IFun destructor()
-  {
-    final var rtd = this;
-    return new Primitive(Signature.fixed(1)) {
-      public void apply(VirtualMachine vm) {
-        if (!(vm.popArg() instanceof Record record && record.type().id() == rtd.instanceType.id()))
-          throw new TypeMismatch();
-        vm.result = List.of(record.fields());
-        vm.popFrame();
-      }
-    };
-  }
+  }  
 }

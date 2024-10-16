@@ -3,6 +3,7 @@ package spartan.parsing;
 import java.io.*;
 import java.nio.file.Path;
 import spartan.data.*;
+import spartan.data.Void; 
 import spartan.errors.SyntaxError;
 import spartan.errors.SourceInfo;
 import spartan.Config;
@@ -117,7 +118,7 @@ public class Reader implements AutoCloseable
 
   private static boolean isSpecial(int ch)
   {
-    return ch == '~' || ch == '!' || ch == '@' || ch == '#' || ch == '$' || ch == '%'
+    return ch == '~' || ch == '!' || ch == '@' || ch == '$' || ch == '%'
         || ch == '^' || ch == '&' || ch == '*' || ch == '-' || ch == '_' || ch == '+'
         || ch == '=' || ch == '|' || ch == '\\' || ch == '<' || ch == '>' || ch == '?'
         || ch == '.' || ch ==  '/';
@@ -450,13 +451,11 @@ public class Reader implements AutoCloseable
       getChar();
       text.append((char)lastChar);
     }
-        
-    // Read qualified symbol
-        
-    if (peekChar() == ':')      
-      return readQualifiedSymbol(text.toString(), text, position);
     
-    return withPosition(new Symbol(text.toString()), position);
+    if (peekChar() == ':') 
+      return readQualifiedSymbol(text.toString(), text, position);
+    else
+      return withPosition(new Symbol(text.toString()), position);
   }
   
   /** Read the base-name part of a package-qualified symbol
@@ -496,6 +495,30 @@ public class Reader implements AutoCloseable
     }
     
     return Symbol.of(text.toString());
+  }
+  
+  private Datum readLiteral()
+  {
+    var position = getTokenPosition();
+    var buffer = new StringBuilder();
+    
+    buffer.append((char)lastChar);
+
+    while (isSymbolFollow(peekChar())) {
+      getChar();
+      buffer.append((char)lastChar);
+    }
+    
+    var str = buffer.toString();
+    
+    if (str.equals("#true"))
+      return Bool.TRUE;
+    else if (str.equals("#false"))
+      return Bool.FALSE;
+    else if (str.equals("#void"))
+      return Void.VALUE;
+    else
+      throw syntaxError("invalid literal " + str);
   }
   
   private Text readText()
@@ -641,6 +664,8 @@ public class Reader implements AutoCloseable
       return readKeyword();
     if (isSymbolStart(lastChar))
       return readSymbol();
+    if (lastChar == '#')
+      return readLiteral();
     if (lastChar == '\"')
       return readText();
     if (lastChar == '\'')

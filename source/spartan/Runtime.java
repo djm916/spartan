@@ -6,6 +6,7 @@ import spartan.data.QualifiedSymbol;
 import spartan.data.Datum;
 import spartan.data.Package;
 import spartan.data.Macro;
+import spartan.data.RecordDescriptor;
 import spartan.errors.MultipleDefinition;
 import spartan.errors.UnboundSymbol;
 import spartan.errors.NoSuchPackage;
@@ -76,6 +77,13 @@ public final class Runtime
     packages.put(pkg.name(), pkg);
   }
   
+  public static Datum lookup(Symbol s)
+  {
+    return (s instanceof QualifiedSymbol qs)
+           ? getPackage(Symbol.of(qs.packageName())).lookup(Symbol.of(qs.baseName()))
+           : currentPackage().lookup(s.intern());
+  }
+  
   /** Resolve the given symbol in the global environment
    *
    * @param s the symbol to look up
@@ -83,23 +91,24 @@ public final class Runtime
    * @throws NoSuchPackage if the symbol is qualified and the package does not exist
    * @throws UnboundSymbol if the symbol could not be resolved
    */
-  public static Datum lookup(Symbol s)
-  {
-    if (s instanceof QualifiedSymbol qs)
-      return getPackage(Symbol.of(qs.packageName())).lookup(Symbol.of(qs.baseName()));
-    else
-      return currentPackage().lookup(s.intern());
-  }
-  
-  public static Optional<Macro> lookupMacro(Symbol s)
+  public static Optional<Datum> tryLookup(Symbol s)
   {
     try {
-      var value = lookup(s);
-      return (value instanceof Macro macro) ? Optional.of(macro) : Optional.empty();
+      return Optional.of(lookup(s));
     }
     catch (UnboundSymbol | NoSuchPackage err) {
       return Optional.empty();
     }
+  }
+  
+  public static Optional<Macro> lookupMacro(Symbol s)
+  {
+    return tryLookup(s).filter(Macro.class::isInstance).map(Macro.class::cast);
+  }
+  
+  public static Optional<RecordDescriptor> lookupRTD(Symbol s)
+  {
+    return tryLookup(s).filter(RecordDescriptor.class::isInstance).map(RecordDescriptor.class::cast);
   }
   
   /** Bootstrap the initial system state and global environment.
