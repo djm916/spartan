@@ -7,9 +7,9 @@ public non-sealed abstract class Primitive implements Datum, IFun
   public abstract void apply(VirtualMachine vm);
   
   @Override // IFun
-  public boolean accepts(int numArgs)
+  public Signature sig()
   {
-    return sig.matches(numArgs);
+    return sig;
   }
   
   protected Primitive(Signature sig)

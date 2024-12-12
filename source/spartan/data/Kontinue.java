@@ -2,11 +2,10 @@ package spartan.data;
 
 import spartan.runtime.Kon;
 
-public record Kontinue(Kon kon) implements Datum, IFun
-{  
-  @Override // IFun
-  public boolean accepts(int numArgs)
+public record Kontinue(Kon kon, Signature sig) implements Datum, IFun
+{
+  public Kontinue(Kon kon)
   {
-    return numArgs == 1;
+    this(kon, Signature.fixed(1));
   }
 }

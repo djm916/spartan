@@ -2,6 +2,9 @@ package spartan.data;
 
 import spartan.runtime.Env;
 import spartan.runtime.Inst;
+import spartan.runtime.VirtualMachine;
+import spartan.errors.SourceInfo;
+import spartan.errors.WrongNumberArgs;
 
 /**
    A closure is an anonymous procedure object.
@@ -11,10 +14,16 @@ import spartan.runtime.Inst;
    @param env the environment current when the procedure was created
 */
 public record Closure(Inst body, Signature sig, Env env) implements Datum, IFun
-{  
-  @Override // IFun
-  public boolean accepts(int numArgs)
+{
+  public Datum apply(VirtualMachine vm, List args, SourceInfo source)
   {
-    return sig.matches(numArgs);
+    int numArgs = args.length();
+    if (!sig.matches(numArgs))
+      throw new WrongNumberArgs(source);
+    vm.pushFrame(null, source.position());
+    vm.args = args;
+    vm.env = env;
+    vm.eval(body);
+    return vm.result;
   }
 }

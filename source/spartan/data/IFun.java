@@ -14,5 +14,5 @@ permits Primitive, Closure, Kontinue
     return Type.PROCEDURE;
   }
   
-  boolean accepts(int numArgs);
+  Signature sig();
 }

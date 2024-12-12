@@ -270,7 +270,7 @@ public final class VirtualMachine
     if (!(result instanceof IFun f))
       throw new TypeMismatch();
     
-    if (!f.accepts(numArgs))
+    if (!f.sig().matches(numArgs))
       throw new WrongNumberArgs();
     
     switch (f) {
@@ -283,7 +283,7 @@ public final class VirtualMachine
         control = body;
         return;
       }
-      case Kontinue(var savedKon): {
+      case Kontinue(var savedKon, _): {
         kon = savedKon;
         result = popArg();
         popFrame();
@@ -291,7 +291,7 @@ public final class VirtualMachine
       }
     }
   }
-  
+    
   public void reset()
   {
     control = null;
