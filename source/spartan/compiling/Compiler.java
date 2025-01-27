@@ -1349,19 +1349,17 @@ public class Compiler
      Compilation:
 
           <<exp>>
-          push-env N          // extend environment for variables in pattern1
-          match pattern1 L1   // continue if pattern matches value in RES; otherwise try next pattern
+          push-env N_max      // extend environment
+     P1:  match pattern1 P2   // continue if pattern matches value in RES; otherwise try next pattern
           <<body1>>           // evaluate body
-          pop-env
-          j LN
-     L1:  push-env N
-          match pattern2 L2
+          jump NXT
+     P2:  match pattern2 P3
           <<body2>>
-          pop-env
-          j LN
+          jump NXT
           ...
           raise               // all patterns failed to match; raise error
-     LN:  next
+     NXT: pop-env
+          next
   */
   private Inst compileMatch(List exp, Scope scope, boolean tail, Inst next)
   {
@@ -1369,7 +1367,23 @@ public class Compiler
       throw malformedExp(exp);
 
     return compile(exp.second(), scope, false,
-           compileMatchClauses(exp, exp.drop2(), scope, tail, next));
+           new PushEnv(matchEnvSize(exp.drop2()),
+           compileMatchClauses(exp, exp.drop2(), scope, tail,
+           new PopEnv(next))));
+  }
+  
+  private int matchEnvSize(List clauses)
+  {
+    int maxVars = 0;
+    for (; !clauses.isEmpty(); clauses = clauses.rest()) {
+      var clause = (List) clauses.first();
+      var patt = clause.first();
+      var vars = patternVars(patt);
+      var len = vars.length();
+      if (len > maxVars)
+        maxVars = len;
+    }
+    return maxVars;
   }
   
   private Inst compileMatchClauses(List matchExp, List clauses, Scope scope, boolean tail, Inst next)
@@ -1386,10 +1400,9 @@ public class Compiler
     //System.out.println("pattern = " + patt.repr());
     //System.out.println("pattern vars = " + vars.repr());    
     
-    return new PushEnv(vars.length(),
-           new Match(compilePattern(patt, vars),
-                     compileSequence(body, extendedScope, tail, new PopEnv(new Jump(next))),
-                     compileMatchClauses(matchExp, clauses.rest(), scope, tail, next)));
+    return new Match(compilePattern(patt, vars),
+                     compileSequence(body, extendedScope, tail, new Jump(next)),
+                     compileMatchClauses(matchExp, clauses.rest(), scope, tail, next));
   }
   
   private boolean checkMatchClauses(List clauses)
