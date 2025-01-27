@@ -40,7 +40,7 @@
           [else (loop (+ 1 i) (rest xs))])))
 
 (defun contains? (x xs)
-  (>= (find-index (fun (y) (= x y)) xs) 0))
+  (not (nil? (find (fun (y) (= x y)) xs))))
 
 (defun remove (f xs)
   (filter (fun (x) (not (f x))) xs))
