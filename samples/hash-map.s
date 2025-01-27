@@ -16,19 +16,19 @@
 
 (print-line "Inserting " elems " ...")
 
-(for ((e elems (cdr e)))
-  ((null? e) void)
-  (let ((pair (car e)))
-    (hashmap:insert! h (car pair) (cadr pair))))
+(for ((e elems (rest e)))
+  ((empty? e) #nil)
+  (let ((pair (first e)))
+    (hashmap:insert! h (first pair) (second pair))))
 
 (print-line "Key lookup:")
 
-(for ((e elems (cdr e)))
-  ((null? e) void)
-  (let ((pair (car e)))
-    (if (not (hashmap:contains? h (car pair)))
+(for ((e elems (rest e)))
+  ((empty? e) #nil)
+  (let ((pair (first e)))
+    (if (not (hashmap:contains? h (first pair)))
       (abort "hashmap does not contain expected key!"))
-    (print-line (car pair) " => " (hashmap:find h (car pair)))))
+    (print-line (first pair) " => " (hashmap:find h (first pair)))))
 
 (print-line "entries = " (hashmap:entries h))
 (print-line "keys = " (hashmap:keys h))
@@ -37,10 +37,10 @@
 
 (print-line "Removing all keys...")
 
-(for ((e elems (cdr e)))
-  ((null? e) void)
-  (let ((pair (car e)))
-    (hashmap:remove! h (car pair))))
+(for ((e elems (rest e)))
+  ((empty? e) #nil)
+  (let ((pair (first e)))
+    (hashmap:remove! h (first pair))))
 
 (print-line "entries = " (hashmap:entries h))
 (print-line "keys = " (hashmap:keys h))

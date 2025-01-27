@@ -56,6 +56,6 @@
      ; Define type predicate
      (def ,(generate-predicate-name name) (spartan.core:record-predicate rtd))
      ; Define accessors
-     ,@(spartan.core:list-map (fun (field) `(def ,(generate-accessor-name name field) (spartan.core:record-accessor rtd ',field))) fields)
+     ,@(spartan.core:map (fun (field) `(def ,(generate-accessor-name name field) (spartan.core:record-accessor rtd ',field))) fields)
      ; Define mutators
-     ,@(spartan.core:list-map (fun (field) `(def ,(generate-mutator-name name field) (spartan.core:record-mutator rtd ',field))) fields)))
+     ,@(spartan.core:map (fun (field) `(def ,(generate-mutator-name name field) (spartan.core:record-mutator rtd ',field))) fields)))

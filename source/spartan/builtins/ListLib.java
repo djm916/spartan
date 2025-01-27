@@ -3,7 +3,7 @@ package spartan.builtins;
 import spartan.data.Primitive;
 import spartan.data.Signature;
 import spartan.data.List;
-import spartan.data.Void;
+import spartan.data.Nil;
 import spartan.data.Int;
 import spartan.data.IInt;
 import spartan.data.Bool;
@@ -19,66 +19,48 @@ public final class ListLib
     }
   };
     
-  public static final Primitive CAR = new Primitive(Signature.fixed(1)) {
+  public static final Primitive FIRST = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof List list))
         throw new TypeMismatch();
-      vm.result = list.car();
+      vm.result = list.first();
       vm.popFrame();
     }
   };
   
-  public static final Primitive CADR = new Primitive(Signature.fixed(1)) {
+  public static final Primitive SECOND = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof List list))
         throw new TypeMismatch();
-      vm.result = list.cadr();
+      vm.result = list.second();
       vm.popFrame();      
     }
   };
   
-  public static final Primitive CADDR = new Primitive(Signature.fixed(1)) {
+  public static final Primitive THIRD = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof List list))
         throw new TypeMismatch();
-      vm.result = list.caddr();
+      vm.result = list.third();
       vm.popFrame();  
     }
   };
   
-  public static final Primitive CDR = new Primitive(Signature.fixed(1)) {
+  public static final Primitive REST = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof List list))
         throw new TypeMismatch();
-      vm.result = list.cdr();
+      vm.result = list.rest();
       vm.popFrame();  
     }
   };
-  
-  public static final Primitive CDDR = new Primitive(Signature.fixed(1)) {
+    
+  public static final Primitive ADJOIN = new Primitive(Signature.fixed(2)) {
     public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof List list))
+      var first = vm.popArg();
+      if (!(vm.popArg() instanceof List rest))
         throw new TypeMismatch();
-      vm.result = list.cddr();
-      vm.popFrame();     
-    }
-  };
-  
-  public static final Primitive CDDDR = new Primitive(Signature.fixed(1)) {
-    public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof List list))
-        throw new TypeMismatch();
-      vm.result = list.cdddr();
-      vm.popFrame();  
-    }
-  };
-  
-  public static final Primitive CONS = new Primitive(Signature.fixed(2)) {
-    public void apply(VirtualMachine vm) {
-      var car = vm.popArg();
-      if (!(vm.popArg() instanceof List cdr))
-        throw new TypeMismatch();
-      vm.result = List.cons(car, cdr);
+      vm.result = List.adjoin(first, rest);
       vm.popFrame();
     }
   };
@@ -109,41 +91,40 @@ public final class ListLib
     }
   };  
   
-  public static final Primitive SET_CAR = new Primitive(Signature.fixed(2)) {
+  public static final Primitive SET_FIRST = new Primitive(Signature.fixed(2)) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof List list))
         throw new TypeMismatch();
-      list.setCar(vm.popArg());
-      vm.result = Void.VALUE;
+      list.setFirst(vm.popArg());
+      vm.result = Nil.VALUE;
       vm.popFrame();
     }
   };
   
-  public static final Primitive SET_CDR = new Primitive(Signature.fixed(2)) {
+  public static final Primitive SET_REST = new Primitive(Signature.fixed(2)) {
     public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof List list && vm.popArg() instanceof List cdr))
+      if (!(vm.popArg() instanceof List list && vm.popArg() instanceof List rest))
         throw new TypeMismatch();
-      list.setCdr(cdr);
-      vm.result = Void.VALUE;
-      vm.popFrame();
-    }
-  };
-    
-  public static final Primitive NTH_CDR = new Primitive(Signature.fixed(2)) {
-    public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof List list && vm.popArg() instanceof IInt index))
-        throw new TypeMismatch();
-      vm.result = list.tail(index.intValue());
+      list.setRest(rest);
+      vm.result = Nil.VALUE;
       vm.popFrame();
     }
   };
   
-  public static final Primitive SET_NTH_CDR = new Primitive(Signature.fixed(3)) {
+  public static final Primitive TAKE = new Primitive(Signature.fixed(2)) {
     public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof List list && vm.popArg() instanceof IInt index && vm.popArg() instanceof List tail))
+      if (!(vm.popArg() instanceof IInt n && vm.popArg() instanceof List list))
         throw new TypeMismatch();
-      list.setTail(index.intValue(), tail);
-      vm.result = Void.VALUE;
+      vm.result = list.take(n.intValue());
+      vm.popFrame();
+    }
+  };
+  
+  public static final Primitive DROP = new Primitive(Signature.fixed(2)) {
+    public void apply(VirtualMachine vm) {
+      if (!(vm.popArg() instanceof IInt n && vm.popArg() instanceof List list))
+        throw new TypeMismatch();
+      vm.result = list.drop(n.intValue());
       vm.popFrame();
     }
   };
@@ -157,7 +138,7 @@ public final class ListLib
     }
   };
   
-  public static final Primitive IS_NULL = new Primitive(Signature.fixed(1)) {
+  public static final Primitive IS_EMPTY = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       vm.result = Bool.valueOf(vm.popArg() == List.EMPTY);
       vm.popFrame();

@@ -8,8 +8,8 @@ public record Type(int id, String name)
   // Define built-in types
   //
   
-  /** The builtin "void" type */
-  public static final Type VOID = TypeRegistry.register(Symbol.of("void"));
+  /** The builtin "nil" type */
+  public static final Type NIL = TypeRegistry.register(Symbol.of("nil"));
   /** The builtin "boolean" type */
   public static final Type BOOLEAN = TypeRegistry.register(Symbol.of("boolean"));
   /** The builtin "symbol" type */

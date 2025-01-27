@@ -30,7 +30,7 @@
 (defun generate-row (row-above)
   (def len-above (vector-length row-above))
   (def len (+ 1 len-above))
-  (def row (make-vector len void))
+  (def row (make-vector len #nil))
   (def i 1)
   (vector-set! row 0 1)
   (while (< i len-above)

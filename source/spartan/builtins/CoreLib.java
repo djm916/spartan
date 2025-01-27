@@ -1,7 +1,6 @@
 package spartan.builtins;
 
 import spartan.data.*;
-import spartan.data.Void; // shadows java.lang.Void
 import spartan.data.Record; // shadows java.lang.Record
 import spartan.errors.Error;
 import spartan.errors.TypeMismatch;
@@ -119,7 +118,7 @@ public final class CoreLib
     public void apply(VirtualMachine vm) {
       while (!vm.args.isEmpty())
         System.out.print(vm.popArg().str());
-      vm.result = Void.VALUE;
+      vm.result = Nil.VALUE;
       vm.popFrame();
     }
   };
@@ -131,7 +130,7 @@ public final class CoreLib
       while (!vm.args.isEmpty())
         System.out.print(vm.popArg().str());
       System.out.println();
-      vm.result = Void.VALUE;
+      vm.result = Nil.VALUE;
       vm.popFrame();
     }
   };
@@ -155,7 +154,7 @@ public final class CoreLib
         spartan.Loader.load(path.str());
       }
       finally {
-        vm.result = Void.VALUE;
+        vm.result = Nil.VALUE;
         vm.popFrame();
       }
     }
@@ -276,9 +275,9 @@ public final class CoreLib
   // Type predicates
   //
   
-  public static final Primitive IS_VOID = new Primitive(Signature.fixed(1)) {
+  public static final Primitive IS_NIL = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
-      vm.result = Bool.valueOf(vm.popArg() instanceof Void);
+      vm.result = Bool.valueOf(vm.popArg() instanceof Nil);
       vm.popFrame();
     }
   };
@@ -401,7 +400,7 @@ public final class CoreLib
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Symbol s))
         throw new TypeMismatch();
-      vm.result = s instanceof QualifiedSymbol qs ? new Text(qs.packageName()) : Void.VALUE;
+      vm.result = s instanceof QualifiedSymbol qs ? new Text(qs.packageName()) : Nil.VALUE;
       vm.popFrame();
     }
   };
@@ -434,12 +433,12 @@ public final class CoreLib
   
   public static Datum macroExpand1(Datum form)
   {
-    if (!(form instanceof List list && !list.isEmpty() && list.car() instanceof Symbol symbol))
-      return Void.VALUE;
-    var args = list.cdr();
+    if (!(form instanceof List list && !list.isEmpty() && list.first() instanceof Symbol symbol))
+      return Nil.VALUE;
+    var args = list.rest();
     return spartan.Runtime.lookupMacro(symbol)
            .map(macro -> macro.expand(new VirtualMachine(), args, new SourceInfo(form, null)))
-           .orElse(Void.VALUE);
+           .orElse(Nil.VALUE);
   }
   
   public static final Primitive MACROEXPAND1 = new Primitive(Signature.fixed(1)) {

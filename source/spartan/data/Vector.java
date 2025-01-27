@@ -17,11 +17,11 @@ public final class Vector implements Datum, Iterable<Datum>
   public static Vector fromList(List elems)
   {
     var result = new Vector(elems.length());
-    for (; !elems.isEmpty(); elems = elems.cdr())
-      result.append(elems.car());
+    for (; !elems.isEmpty(); elems = elems.rest())
+      result.append(elems.first());
     return result;
   }
-    
+  
   public Vector(int initialCapacity)
   {
     try {

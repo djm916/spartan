@@ -3,36 +3,36 @@ package spartan.runtime;
 import spartan.data.Datum;
 import spartan.data.List;
 
-public final class ConsPool
+public final class ListCache
 {
   public static int reusedCount = 0;
   public static int cacheSize = 0;
   public static int maxCacheSize = 0;
   
-  public static List get(Datum car, List cdr)
+  public static List get(Datum first, List rest)
   {
     if (freeList.isEmpty())
-      return List.cons(car, cdr);
+      return List.adjoin(first, rest);
     
     ++reusedCount;
     --cacheSize;
 
-    var cons = freeList;
-    freeList = freeList.cdr();
-    cons.setCar(car);
-    cons.setCdr(cdr);
-    return cons;
+    var list = freeList;
+    freeList = freeList.rest();
+    list.setFirst(first);
+    list.setRest(rest);
+    return list;
   }
   
-  public static void put(List cons)
+  public static void put(List list)
   {
     ++cacheSize;
     if (cacheSize > maxCacheSize)
       maxCacheSize = cacheSize;
     
-    cons.setCar(null);
-    cons.setCdr(freeList);
-    freeList = cons;
+    list.setFirst(null);
+    list.setRest(freeList);
+    freeList = list;
   }
   
   private static List freeList = List.EMPTY;

@@ -1,7 +1,6 @@
 package spartan.builtins;
 
 import spartan.data.*;
-import spartan.data.Void; // shadows java.lang.Void
 import spartan.errors.TypeMismatch;
 import spartan.errors.InvalidArgument;
 import spartan.runtime.VirtualMachine;
@@ -57,7 +56,7 @@ public final class BytesLib
       if (!(vm.popArg() instanceof IInt x))
         throw new TypeMismatch();
       b.set(i.intValue(), x.byteValue());
-      vm.result = Void.VALUE;
+      vm.result = Nil.VALUE;
       vm.popFrame();
     }
   };

@@ -1,7 +1,6 @@
 package spartan.builtins;
 
 import spartan.data.*;
-import spartan.data.Void; // shadows java.lang.Void
 import java.util.Optional;
 import java.util.logging.Logger;
 
@@ -49,7 +48,7 @@ public final class CorePackage extends spartan.data.Package
     
     /* Type predicates */
     
-    bind(Symbol.of("void?"), CoreLib.IS_VOID);
+    bind(Symbol.of("nil?"), CoreLib.IS_NIL);
     bind(Symbol.of("boolean?"), CoreLib.IS_BOOL);
     bind(Symbol.of("integer?"), CoreLib.IS_INT);
     bind(Symbol.of("real?"), CoreLib.IS_REAL);
@@ -114,22 +113,25 @@ public final class CorePackage extends spartan.data.Package
     bind(Symbol.of("format-decimal"), CoreLib.FORMAT_DECIMAL);
     
     /* List procedures */
-    
-    bind(Symbol.of("null?"), ListLib.IS_NULL);
+        
+    bind(Symbol.of("adjoin"), ListLib.ADJOIN);
+    bind(Symbol.of("first"), ListLib.FIRST);
+    bind(Symbol.of("second"), ListLib.SECOND);
+    bind(Symbol.of("third"), ListLib.THIRD);
+    //bind(Symbol.of("fourth"), ListLib.FOURTH);
+    bind(Symbol.of("rest"), ListLib.REST);
+    bind(Symbol.of("empty?"), ListLib.IS_EMPTY);
+    bind(Symbol.of("set-first!"), ListLib.SET_FIRST);
+    bind(Symbol.of("set-rest!"), ListLib.SET_REST);
     bind(Symbol.of("list"), ListLib.MAKE_LIST);
-    bind(Symbol.of("cons"), ListLib.CONS);
-    bind(Symbol.of("car"), ListLib.CAR);
-    bind(Symbol.of("cdr"), ListLib.CDR);
-    bind(Symbol.of("cddr"), ListLib.CDDR);
-    bind(Symbol.of("cdddr"), ListLib.CDDDR);
-    bind(Symbol.of("cadr"), ListLib.CADR);
-    bind(Symbol.of("caddr"), ListLib.CADDR);
-    bind(Symbol.of("set-car!"), ListLib.SET_CAR);
-    bind(Symbol.of("set-cdr!"), ListLib.SET_CDR);    
-    bind(Symbol.of("list-length"), ListLib.LENGTH);
-    bind(Symbol.of("list-reverse"), ListLib.REVERSE);
-    bind(Symbol.of("list-concat"), ListLib.CONCAT);
-    bind(Symbol.of("list-append"), ListLib.APPEND);
+    bind(Symbol.of("length"), ListLib.LENGTH);
+    bind(Symbol.of("reverse"), ListLib.REVERSE);
+    bind(Symbol.of("concat"), ListLib.CONCAT);
+    bind(Symbol.of("append"), ListLib.APPEND);
+    //bind(Symbol.of("take"), ListLib.TAKE);
+    //bind(Symbol.of("drop"), ListLib.DROP);
+    //bind(Symbol.of("nth"), ListLib.NTH);
+    //bind(Symbol.of("nth-rest"), ListLib.NTH_REST);
     
     /* Vector procedures */
     

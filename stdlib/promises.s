@@ -4,7 +4,7 @@
 (defrecord promise (thunk value has-value))
 
 (defmacro delay (exp)
-  `(make-promise (fun () ,exp) #void #false))
+  `(make-promise (fun () ,exp) #nil #false))
 
 (defun force (p)
   (if (not (promise? p))
@@ -13,6 +13,6 @@
     (do
       (promise-value-set! p ((promise-thunk p)))
       (promise-has-value-set! p #true)
-      (promise-thunk-set! p #void)))
+      (promise-thunk-set! p #nil)))
   (promise-value p))
   

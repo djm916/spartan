@@ -55,7 +55,7 @@ public record RecordDescriptor(Type instanceType, Symbol name, Symbol[] fields) 
         if (!(vm.popArg() instanceof Record record && record.type().id() == rtd.instanceType().id()))
           throw new TypeMismatch();
         record.set(slot, vm.popArg());
-        vm.result = Void.VALUE;
+        vm.result = Nil.VALUE;
         vm.popFrame();
       }
     };

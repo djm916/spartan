@@ -2,7 +2,6 @@ package spartan.compiling;
 
 import spartan.runtime.*;
 import spartan.data.*;
-import spartan.data.Void; // shadows java.lang.Void
 import spartan.parsing.SourceDatum;
 import spartan.parsing.PositionMap;
 import spartan.parsing.Position;
@@ -62,8 +61,8 @@ public class Compiler
   private Position positionOf(Datum exp)
   {
     var pos = positionMap.get(exp);
-    if (pos == null)
-      log.warning(() -> String.format("The position is null for the expression %s", exp.repr()));
+    //if (pos == null)
+      //log.warning(() -> String.format("The position is null for the expression %s", exp.repr()));
     return pos;
   }
   
@@ -76,7 +75,7 @@ public class Compiler
   private static boolean isSelfEval(Datum exp)
   {
     return exp == List.EMPTY
-        || exp == Void.VALUE
+        || exp == Nil.VALUE
         || exp instanceof INum
         || exp instanceof Bool
         || exp instanceof Text
@@ -135,10 +134,10 @@ public class Compiler
   */
   private Inst compileSet(List exp, Scope scope, boolean tail, Inst next)
   {
-    if (!(exp.length() == 3 && exp.cadr() instanceof Symbol s))
+    if (!(exp.length() == 3 && exp.second() instanceof Symbol s))
       throw malformedExp(exp);
     
-    var init = exp.caddr();
+    var init = exp.third();
     return compile(init, scope, false,
            scope.lookup(s)
                 .map(i -> compileSetLocalVar(i, next))
@@ -149,30 +148,30 @@ public class Compiler
   {
     if (i.depth() == 0)
       return new StoreLocal0(i.offset(),
-             new LoadConst(Void.VALUE, next));
+             new LoadConst(Nil.VALUE, next));
     else
       return new StoreLocal(i.depth(), i.offset(),
-             new LoadConst(Void.VALUE, next));
+             new LoadConst(Nil.VALUE, next));
   }
   
   private Inst compileSetGlobalVar(Symbol s, Inst next)
   {
     if (s instanceof QualifiedSymbol qs)
       return new StoreGlobal(Symbol.of(qs.packageName()), Symbol.of(qs.baseName()), new SourceInfo(qs, positionOf(qs)),
-             new LoadConst(Void.VALUE, next));
+             new LoadConst(Nil.VALUE, next));
     else
       return new StoreGlobal(spartan.Runtime.currentPackage().name(), s.intern(), new SourceInfo(s, positionOf(s)),
-             new LoadConst(Void.VALUE, next));
+             new LoadConst(Nil.VALUE, next));
   }
   
   private Inst compileDef(List exp, Scope scope, boolean tail, Inst next)
   {
-    if (!(exp.length() == 3 && exp.cadr() instanceof Symbol s && s.isSimple()))
+    if (!(exp.length() == 3 && exp.second() instanceof Symbol s && s.isSimple()))
       throw malformedExp(exp);
-    var init = exp.caddr();  
+    var init = exp.third();  
     return compile(init, scope, false,
            new BindGlobal(spartan.Runtime.currentPackage().name(), s.intern(), new SourceInfo(exp, positionOf(s)),
-           new LoadConst(Void.VALUE, next)));
+           new LoadConst(Nil.VALUE, next)));
   }
   
   /* Compile "defun" special form
@@ -205,10 +204,10 @@ public class Compiler
   */
   private List transformDefun(List exp)
   {
-    var symb = exp.cadr();
-    var params = exp.caddr();
-    var body = exp.cdddr();
-    return List.of(Symbol.DEF, symb, List.cons(Symbol.FUN, List.cons(params, body)));
+    var symb = exp.second();
+    var params = exp.third();
+    var body = exp.drop3();
+    return List.of(Symbol.DEF, symb, List.adjoin(Symbol.FUN, List.adjoin(params, body)));
   }
 
   /* Compile the "if" special form.
@@ -235,9 +234,9 @@ public class Compiler
     if (length < 3 || length > 4)
       throw malformedExp(exp);
 
-    var pred = exp.cadr();
-    var sub = exp.caddr();
-    var alt = length == 4 ? exp.cadddr() : Void.VALUE;
+    var pred = exp.second();
+    var sub = exp.third();
+    var alt = length == 4 ? exp.fourth() : Nil.VALUE;
         
     return compile(pred, scope, false,
            new BranchFalse(compile(sub, scope, tail, new Jump(next)),
@@ -285,27 +284,27 @@ public class Compiler
   */
   private Inst compileCond(List exp, Scope scope, boolean tail, Inst next)
   {
-    if (exp.length() < 2 || !checkClauseListForm(exp.cdr()))
+    if (exp.length() < 2 || !checkClauseListForm(exp.rest()))
       throw malformedExp(exp);
 
-    return compileCondClauses(exp.cdr(), scope, tail, next);
+    return compileCondClauses(exp.rest(), scope, tail, next);
   }
 
   private Inst compileCondClauses(List clauses, Scope scope, boolean tail, Inst next)
   {
     if (clauses.isEmpty())
-      return new LoadConst(Void.VALUE, next);
+      return new LoadConst(Nil.VALUE, next);
 
-    var clause = (List) clauses.car();
-    var pred = clause.car();
-    var body = clause.cdr();
+    var clause = (List) clauses.first();
+    var pred = clause.first();
+    var body = clause.rest();
 
     if (Symbol.ELSE.equals(pred))
       return compileSequence(body, scope, tail, next);
 
     return compile(pred, scope, false,
            new BranchFalse(compileSequence(body, scope, tail, new Jump(next)),
-                           compileCondClauses(clauses.cdr(), scope, tail, next)));
+                           compileCondClauses(clauses.rest(), scope, tail, next)));
   }
 
   /* Compiles the "let" special form
@@ -337,10 +336,10 @@ public class Compiler
 
   private Inst compileLet(List exp, Scope scope, boolean tail, Inst next)
   {
-    if (!(exp.length() >= 3 && exp.cadr() instanceof List bindings && checkBindingListForm(bindings)))
+    if (!(exp.length() >= 3 && exp.second() instanceof List bindings && checkBindingListForm(bindings)))
       throw malformedExp(exp);
 
-    var body = exp.cddr();
+    var body = exp.drop2();
     int numBindings = bindings.length();
     var vars = extractFirst(bindings);
     var inits = extractSecond(bindings);
@@ -374,10 +373,10 @@ public class Compiler
   */
   private Inst compileLetStar(List exp, Scope scope, boolean tail, Inst next)
   {
-    if (!(exp.length() >= 3 && exp.cadr() instanceof List bindings && checkBindingListForm(bindings)))
+    if (!(exp.length() >= 3 && exp.second() instanceof List bindings && checkBindingListForm(bindings)))
       throw malformedExp(exp);
 
-    var body = exp.cddr();
+    var body = exp.drop2();
     int numBindings = bindings.length();
     var vars = extractFirst(bindings);
     var extendedScope = scope.extend(vars);
@@ -395,13 +394,13 @@ public class Compiler
     if (bindings.isEmpty())
       return next;
 
-    var binding = (List) bindings.car();
-    var symb = (Symbol) binding.car();
-    var init = binding.cadr();
+    var binding = (List) bindings.first();
+    var symb = (Symbol) binding.first();
+    var init = binding.second();
 
     return compile(init, scope, false,
                    new StoreLocal0(offset,
-                   compileSequentialBindings(bindings.cdr(), offset + 1, scope.bind(symb),
+                   compileSequentialBindings(bindings.rest(), offset + 1, scope.bind(symb),
                    next)));
   }
   
@@ -430,17 +429,17 @@ public class Compiler
   */
   private Inst compileLetRec(List exp, Scope scope, boolean tail, Inst next)
   {
-    if (!(exp.length() >= 3 && exp.cadr() instanceof List bindings && checkBindingListForm(bindings)))
+    if (!(exp.length() >= 3 && exp.second() instanceof List bindings && checkBindingListForm(bindings)))
       throw malformedExp(exp);
 
-    var body = exp.cddr();
+    var body = exp.drop2();
     int numBindings = bindings.length();
     var vars = extractFirst(bindings);
     var inits = extractSecond(bindings);
     var extendedScope = scope.extend(vars);
 
     return new PushEnv(numBindings,
-           new LoadConst(Void.VALUE,
+           new LoadConst(Nil.VALUE,
            compileInitRecEnv(0, numBindings,
            compileRecursiveBindings(inits, 0, extendedScope,
            compileSequence(body, extendedScope, tail,
@@ -454,9 +453,9 @@ public class Compiler
     if (inits.isEmpty())
       return next;
 
-    return compile(inits.car(), scope, false,
+    return compile(inits.first(), scope, false,
            new StoreLocal0(offset,
-           compileRecursiveBindings(inits.cdr(), offset + 1, scope, next)));
+           compileRecursiveBindings(inits.rest(), offset + 1, scope, next)));
   }
   
   /* Generate the initialization sequence of a letrec expression. */
@@ -508,10 +507,10 @@ public class Compiler
   */
   private Inst compileRec(List exp, Scope scope, boolean tail, Inst next)
   {
-    if (!(exp.length() >= 4 && exp.cadr() instanceof Symbol s && s.isSimple() && exp.caddr() instanceof List bindings && checkBindingListForm(bindings)))
+    if (!(exp.length() >= 4 && exp.second() instanceof Symbol s && s.isSimple() && exp.third() instanceof List bindings && checkBindingListForm(bindings)))
       throw malformedExp(exp);
     
-    var xform = transformRec(s, bindings, exp.cdddr());
+    var xform = transformRec(s, bindings, exp.drop3());
     
     if (Config.LOG_DEBUG && Config.SHOW_MACRO_EXPANSION)
       log.info(() -> String.format("rec transform: %s => %s", exp.repr(), xform.repr()));
@@ -529,15 +528,15 @@ public class Compiler
   {
     var vars = extractFirst(bindings);
     var inits = extractSecond(bindings);
-    return List.of(Symbol.LETREC, List.cons(List.of(f, List.cons(Symbol.FUN, List.cons(vars, body))), List.EMPTY), List.cons(f, inits));
+    return List.of(Symbol.LETREC, List.adjoin(List.of(f, List.adjoin(Symbol.FUN, List.adjoin(vars, body))), List.EMPTY), List.adjoin(f, inits));
   }
   
   /* Check that a binding list for a "let" expression is well-formed */
   
   private boolean checkBindingListForm(List bindings)
   {
-    for (; !bindings.isEmpty(); bindings = bindings.cdr())
-      if (!(bindings.car() instanceof List list && list.length() == 2 && list.car() instanceof Symbol s && s.isSimple()))
+    for (; !bindings.isEmpty(); bindings = bindings.rest())
+      if (!(bindings.first() instanceof List list && list.length() == 2 && list.first() instanceof Symbol s && s.isSimple()))
         return false;
     return true;
   }
@@ -546,8 +545,8 @@ public class Compiler
   
   private boolean checkForBindingsForm(List bindings)
   {
-    for (; !bindings.isEmpty(); bindings = bindings.cdr())
-      if (!(bindings.car() instanceof List list && list.length() == 3 && list.car() instanceof Symbol s && s.isSimple()))
+    for (; !bindings.isEmpty(); bindings = bindings.rest())
+      if (!(bindings.first() instanceof List list && list.length() == 3 && list.first() instanceof Symbol s && s.isSimple()))
         return false;
     return true;
   }
@@ -558,8 +557,8 @@ public class Compiler
    */
   private boolean checkParamListForm(List params)
   {
-    for (; !params.isEmpty(); params = params.cdr())
-      if (!(params.car() instanceof Symbol param && param.isSimple()) || (param.equals(Symbol.AMPERSAND) && (params.cdr().isEmpty() || !params.cddr().isEmpty())))
+    for (; !params.isEmpty(); params = params.rest())
+      if (!(params.first() instanceof Symbol param && param.isSimple()) || (param.equals(Symbol.AMPERSAND) && (params.rest().isEmpty() || !params.drop2().isEmpty())))
         return false;
     return true;
   }
@@ -572,15 +571,15 @@ public class Compiler
    */
   private boolean checkTypedParamListForm(List params)
   {
-    for (; !params.isEmpty(); params = params.cdr())
-      if (!(params.car() instanceof List param && checkTypedParamForm(param)) || (Symbol.AMPERSAND.equals(param) && (params.cdr().isEmpty() || !params.cddr().isEmpty())))
+    for (; !params.isEmpty(); params = params.rest())
+      if (!(params.first() instanceof List param && checkTypedParamForm(param)) || (Symbol.AMPERSAND.equals(param) && (params.rest().isEmpty() || !params.drop2().isEmpty())))
         return false;
     return true;
   }
   
   private boolean checkTypedParamForm(List param)
   {
-    return param.length() == 2 && param.car() instanceof Symbol name && name.isSimple() && param.cadr() instanceof Symbol type && type.isSimple();
+    return param.length() == 2 && param.first() instanceof Symbol name && name.isSimple() && param.second() instanceof Symbol type && type.isSimple();
   }
   
   /* Check that a clause list is well-formed
@@ -591,8 +590,8 @@ public class Compiler
    */
   private boolean checkClauseListForm(List clauses)
   {
-    for (; !clauses.isEmpty(); clauses = clauses.cdr())
-      if (!(clauses.car() instanceof List clause) || clause.length() < 2 || (Symbol.ELSE.equals(clause.car()) && !clauses.cdr().isEmpty()))
+    for (; !clauses.isEmpty(); clauses = clauses.rest())
+      if (!(clauses.first() instanceof List clause) || clause.length() < 2 || (Symbol.ELSE.equals(clause.first()) && !clauses.rest().isEmpty()))
         return false;
     return true;
   }
@@ -600,19 +599,19 @@ public class Compiler
   // Extract the first sub-element from each element in a list of lists
   private List extractFirst(List bindings)
   {
-    return bindings.map(list -> ((List)list).car());
+    return bindings.map(list -> ((List)list).first());
   }
 
   // Extract the second sub-element from each element in a list of lists
   private List extractSecond(List bindings)
   {
-    return bindings.map(list -> ((List)list).cadr());
+    return bindings.map(list -> ((List)list).second());
   }
   
   // Extract the third sub-element from each element in a list of lists
   private List extractThird(List bindings)
   {
-    return bindings.map(list -> ((List)list).caddr());
+    return bindings.map(list -> ((List)list).third());
   }
   
   /* Generate the argument-evaluation sequence of a procedure application */
@@ -622,8 +621,8 @@ public class Compiler
     if (args.isEmpty())
       return next;
 
-    return compilePushArgs(args.cdr(), scope,
-           compile(args.car(), scope, false,
+    return compilePushArgs(args.rest(), scope,
+           compile(args.first(), scope, false,
            new PushArg(next)));
   }
   
@@ -658,8 +657,8 @@ public class Compiler
 
   private Inst compileApply(List exp, Scope scope, boolean tail, Inst next)
   {
-    var proc = exp.car();
-    var args = exp.cdr();
+    var proc = exp.first();
+    var args = exp.rest();
     int numArgs = args.length();
     var position = positionOf(exp);
     var source = new SourceInfo(exp, position);
@@ -734,8 +733,8 @@ public class Compiler
     if (exp.isEmpty())
       return next;
 
-    return compile(exp.car(), scope, (tail && exp.cdr().isEmpty()),
-           compileSequence(exp.cdr(), scope, tail, next));
+    return compile(exp.first(), scope, (tail && exp.rest().isEmpty()),
+           compileSequence(exp.rest(), scope, tail, next));
   }
 
   /* Compiles a procedure body. A procedure body consists of a sequence
@@ -746,7 +745,7 @@ public class Compiler
   */
   private Inst compileBody(List body, Scope scope, Inst next)
   {
-    if (isInnerDef(body.car())) {
+    if (isInnerDef(body.first())) {
       var xform = transformInnerDefs(body);
       if (Config.LOG_DEBUG && Config.SHOW_MACRO_EXPANSION)
         log.info(() -> String.format("inner defs transform: %s => %s", body.repr(), xform.repr()));
@@ -764,9 +763,9 @@ public class Compiler
    */
   private Inst compileFun(List exp, Scope scope, boolean tail, Inst next)
   {
-    if (!(exp.length() >= 3 && exp.cadr() instanceof List params && checkParamListForm(params)))
+    if (!(exp.length() >= 3 && exp.second() instanceof List params && checkParamListForm(params)))
       throw malformedExp(exp);
-    var body = exp.cddr();
+    var body = exp.drop2();
     var proc = makeProcedure(params, body, scope);    
     //if (Config.LOG_DEBUG)
       //log.info(() -> String.format("Listing for procedure defined at %s\n%s", positionOf(exp), CodeListing.generate(proc.body())));
@@ -798,15 +797,15 @@ public class Compiler
   {
     List.Builder bindings = new List.Builder();
 
-    while (!body.isEmpty() && isInnerDef(body.car())) {
-      var exp = (List) body.car();
-      if (Symbol.DEFUN.equals(exp.car()))
+    while (!body.isEmpty() && isInnerDef(body.first())) {
+      var exp = (List) body.first();
+      if (Symbol.DEFUN.equals(exp.first()))
         exp = transformDefun(exp);
-      bindings.add(exp.cdr());
-      body = body.cdr();
+      bindings.add(exp.rest());
+      body = body.rest();
     }
 
-    return List.cons(Symbol.LETREC, List.cons(bindings.build(), body));
+    return List.adjoin(Symbol.LETREC, List.adjoin(bindings.build(), body));
   }
 
   /* Determine if an expression is an inner-define form, i.e. a list beginning
@@ -814,7 +813,7 @@ public class Compiler
   */
   private boolean isInnerDef(Datum exp)
   {
-    return exp instanceof List form && !form.isEmpty() && (Symbol.DEF.equals(form.car()) || Symbol.DEFUN.equals(form.car()));
+    return exp instanceof List form && !form.isEmpty() && (Symbol.DEF.equals(form.first()) || Symbol.DEFUN.equals(form.first()));
   }
 
   /* Compiles the "or" special form, a logical disjunction.
@@ -841,7 +840,7 @@ public class Compiler
     if (exp.length() < 2)
       throw malformedExp(exp);
 
-    return compileDisjunction(exp.cdr(), scope, tail, next);
+    return compileDisjunction(exp.rest(), scope, tail, next);
   }
 
   private Inst compileDisjunction(List exp, Scope scope, boolean tail, Inst next)
@@ -849,9 +848,9 @@ public class Compiler
     if (exp.isEmpty())
       return next;
 
-    return compile(exp.car(), scope, (tail && exp.cdr().isEmpty()),
+    return compile(exp.first(), scope, (tail && exp.rest().isEmpty()),
            new BranchFalse(new Jump(next),
-                           compileDisjunction(exp.cdr(), scope, tail, next)));
+                           compileDisjunction(exp.rest(), scope, tail, next)));
   }
 
   /* Compiles the "and" special form, a logical conjunction.
@@ -878,7 +877,7 @@ public class Compiler
     if (exp.length() < 2)
       throw malformedExp(exp);
 
-    return compileConjuction(exp.cdr(), scope, tail, next);
+    return compileConjuction(exp.rest(), scope, tail, next);
   }
 
   private Inst compileConjuction(List exp, Scope scope, boolean tail, Inst next)
@@ -886,9 +885,9 @@ public class Compiler
     if (exp.isEmpty())
       return next;
 
-    return compile(exp.car(), scope, (tail && exp.cdr().isEmpty()),
+    return compile(exp.first(), scope, (tail && exp.rest().isEmpty()),
            new BranchTrue(new Jump(next),
-                          compileConjuction(exp.cdr(), scope, tail, next)));
+                          compileConjuction(exp.rest(), scope, tail, next)));
   }
 
   /* Compiles the "do" special form.
@@ -901,7 +900,7 @@ public class Compiler
     if (exp.length() < 2)
       throw malformedExp(exp);
 
-    return compileSequence(exp.cdr(), scope, tail, next);
+    return compileSequence(exp.rest(), scope, tail, next);
   }
 
   /* Compiles the "while" special form.
@@ -923,12 +922,12 @@ public class Compiler
     if (exp.length() < 3)
       throw malformedExp(exp);
 
-    var pred = exp.cadr();
-    var body = exp.cddr();
+    var pred = exp.second();
+    var body = exp.drop2();
     var jump = new Jump();
     var loop = compile(pred, scope, false,
                new BranchFalse(compileSequence(body, scope, false, jump),
-                               new LoadConst(Void.VALUE, next)));
+                               new LoadConst(Nil.VALUE, next)));
     jump.setTarget(loop);
     return loop;
   }
@@ -984,8 +983,8 @@ public class Compiler
   */
   private Inst compileFor(List exp, Scope scope, boolean tail, Inst next)
   {
-    if (!(exp.length() >= 3 && exp.cadr() instanceof List bindings && checkForBindingsForm(bindings)
-          && exp.caddr() instanceof List caddr && (caddr.length() == 1 || caddr.length() == 2)))
+    if (!(exp.length() >= 3 && exp.second() instanceof List bindings && checkForBindingsForm(bindings)
+          && exp.third() instanceof List third && (third.length() == 1 || third.length() == 2)))
       throw malformedExp(exp);
     
     int numBindings = bindings.length();
@@ -993,14 +992,9 @@ public class Compiler
     var inits = extractSecond(bindings);
     var steps = extractThird(bindings);
     var extendedScope = scope.extend(vars);
-    var test = caddr.car();
-    var result = caddr.length() == 2 ? caddr.cadr() : Void.VALUE;
-    var body = exp.cdddr();
-    
-    //System.out.println("for vars = " + vars.repr());
-    //System.out.println("for inits = " + inits.repr());
-    //System.out.println("for steps = " + steps.repr());
-    //System.out.println("for caddr = " + caddr.repr());
+    var test = third.first();
+    var result = third.length() == 2 ? third.second() : Nil.VALUE;
+    var body = exp.drop3();
     
     var jump = new Jump();
     var loop = compile(test, extendedScope, false,
@@ -1025,12 +1019,12 @@ public class Compiler
     if (exp.length() != 2)
       throw malformedExp(exp);
     
-    if (exp.cadr() instanceof Symbol s)
+    if (exp.second() instanceof Symbol s)
       return new LoadConst(s.intern(), next);
-    else if (exp.cadr() instanceof List list)
+    else if (exp.second() instanceof List list)
       return new LoadConst(quoteList(list), next);
     else
-      return new LoadConst(exp.cadr(), next);
+      return new LoadConst(exp.second(), next);
   }
 
   private List quoteList(List list)
@@ -1051,7 +1045,7 @@ public class Compiler
     if (exp.length() != 2)
       throw malformedExp(exp);
 
-    var xform = transformQuasiquote(exp.cadr(), 0);
+    var xform = transformQuasiquote(exp.second(), 0);
     
     if (Config.LOG_DEBUG && Config.SHOW_MACRO_EXPANSION)
       log.info(() -> String.format("quasiquote transform: %s => %s", exp.repr(), xform.repr()));
@@ -1108,12 +1102,12 @@ public class Compiler
    * level N. Then QQ is defined as follows:
    *
    * QQ(x, N) => (quote x), for non-list value x
-   * QQ(((unquote x) xs...), 0) => (cons x QQ(xs..., 0))
-   * QQ(((unquote x) xs...), N) => (cons QQ((unquote x), N-1) QQ(xs..., N)), N > 0
+   * QQ(((unquote x) xs...), 0) => (adjoin x QQ(xs..., 0))
+   * QQ(((unquote x) xs...), N) => (adjoin QQ((unquote x), N-1) QQ(xs..., N)), N > 0
    * QQ(((unquote-splicing x) xs...), 0) => (concat x QQ(xs..., 0))
    * QQ(((unquote-splicing x) xs...), N) => (concat QQ((unquote-splicing x), N-1) QQ(xs..., N)), N > 0
-   * QQ(((quasiquote x) xs...), N) => (cons QQ((quasiquote x), N+1) QQ(xs..., N))
-   * QQ((x xs...), N) => (cons QQ(x, N) QQ(xs..., N))
+   * QQ(((quasiquote x) xs...), N) => (adjoin QQ((quasiquote x), N+1) QQ(xs..., N))
+   * QQ((x xs...), N) => (adjoin QQ(x, N) QQ(xs..., N))
    */
   
   private List transformQuasiquote(Datum exp, int level)
@@ -1128,70 +1122,70 @@ public class Compiler
     
     // Handle unquote, unquote-splicing, and nested quasiquote forms
     
-    if (list.car() instanceof List form && !form.isEmpty())
+    if (list.first() instanceof List form && !form.isEmpty())
     {
-      if (form.car() instanceof Symbol s && s.equals(Symbol.UNQUOTE)) {
+      if (form.first() instanceof Symbol s && s.equals(Symbol.UNQUOTE)) {
         if (form.length() != 2)
           throw malformedExp(form);
         
-        // (quasiquote<0> ((unquote x) xs...)) => (cons x (quasiquote<0> xs...))
+        // (quasiquote<0> ((unquote x) xs...)) => (adjoin x (quasiquote<0> xs...))
         
         if (level == 0) {
-          return List.cons(Symbol.Q_CONS,
-                 List.cons(form.cadr(),
-                 List.cons(transformQuasiquote(list.cdr(), 0),
+          return List.adjoin(Symbol.Q_ADJOIN,
+                 List.adjoin(form.second(),
+                 List.adjoin(transformQuasiquote(list.rest(), 0),
                  List.EMPTY)));
         }
         
-        // (quasiquote<N> ((unquote x) xs...)) => (cons (quasiquote<N-1> (unquote x)) (quasiquote<N> xs...))
+        // (quasiquote<N> ((unquote x) xs...)) => (adjoin (quasiquote<N-1> (unquote x)) (quasiquote<N> xs...))
         
-        return List.cons(Symbol.Q_CONS,
-               List.cons(transformQuasiquote(form, level - 1),
-               List.cons(transformQuasiquote(list.cdr(), level),
+        return List.adjoin(Symbol.Q_ADJOIN,
+               List.adjoin(transformQuasiquote(form, level - 1),
+               List.adjoin(transformQuasiquote(list.rest(), level),
                List.EMPTY)));
       }
 
-      if (form.car() instanceof Symbol s && s.equals(Symbol.UNQUOTE_SPLICING)) {
+      if (form.first() instanceof Symbol s && s.equals(Symbol.UNQUOTE_SPLICING)) {
         if (form.length() != 2)
           throw malformedExp(exp);
         
         // (quasiquote<0> ((unquote-splicing x) xs...)) => (concat x (quasiquote<0> xs...))
         
         if (level == 0) {
-          return List.cons(Symbol.Q_CONCAT,
-                 List.cons(form.cadr(),
-                 List.cons(transformQuasiquote(list.cdr(), level),
+          return List.adjoin(Symbol.Q_CONCAT,
+                 List.adjoin(form.second(),
+                 List.adjoin(transformQuasiquote(list.rest(), level),
                  List.EMPTY)));
         }
         
         // (quasiquote<N> ((unquote-splicing x) xs...)) => (concat (quasiquote<N-1> (unquote-splicing x)) (quasiquote<N> xs...))
         
-        return List.cons(Symbol.Q_CONS,
-               List.cons(transformQuasiquote(form, level - 1),
-               List.cons(transformQuasiquote(list.cdr(), level),
+        return List.adjoin(Symbol.Q_ADJOIN,
+               List.adjoin(transformQuasiquote(form, level - 1),
+               List.adjoin(transformQuasiquote(list.rest(), level),
                List.EMPTY)));
       }
       
-      // (quasiquote<N> ((quasiquote x) xs...)) => (cons (quasiquote<N+1> (quasiquote x)) (quasiquote<N> xs...))
+      // (quasiquote<N> ((quasiquote x) xs...)) => (adjoin (quasiquote<N+1> (quasiquote x)) (quasiquote<N> xs...))
 
-      if (form.car() instanceof Symbol s && s.equals(Symbol.QUASIQUOTE)) {
+      if (form.first() instanceof Symbol s && s.equals(Symbol.QUASIQUOTE)) {
         if (form.length() != 2)
           throw malformedExp(exp);
 
-        return List.cons(Symbol.Q_CONS,
-               List.cons(transformQuasiquote(form, level + 1),
-               List.cons(transformQuasiquote(list.cdr(), level),
+        return List.adjoin(Symbol.Q_ADJOIN,
+               List.adjoin(transformQuasiquote(form, level + 1),
+               List.adjoin(transformQuasiquote(list.rest(), level),
                List.EMPTY)));
       }
     }
     
     // General case: recursively transform the car and cdr of the list
     
-    // (quasiquote<N> (x xs...)) => (cons (quasiquote<N> x) (quasiquote<N> xs...))
+    // (quasiquote<N> (x xs...)) => (adjoin (quasiquote<N> x) (quasiquote<N> xs...))
 
-    return List.cons(Symbol.Q_CONS,
-           List.cons(transformQuasiquote(list.car(), level),
-           List.cons(transformQuasiquote(list.cdr(), level),
+    return List.adjoin(Symbol.Q_ADJOIN,
+           List.adjoin(transformQuasiquote(list.first(), level),
+           List.adjoin(transformQuasiquote(list.rest(), level),
            List.EMPTY)));
   }
   
@@ -1282,9 +1276,9 @@ public class Compiler
 
   private Inst compileDefmacro(List exp, Scope scope, boolean tail, Inst next)
   {
-    if (!(exp.length() >= 4 && exp.cadr() instanceof Symbol symbol && symbol.isSimple() && exp.caddr() instanceof List params && checkParamListForm(params)))
+    if (!(exp.length() >= 4 && exp.second() instanceof Symbol symbol && symbol.isSimple() && exp.third() instanceof List params && checkParamListForm(params)))
       throw malformedExp(exp);
-    var body = exp.cdddr();
+    var body = exp.drop3();
     var macro = new Macro(makeProcedure(params, body, Scope.EMPTY));
     try {
       spartan.Runtime.currentPackage().bind(symbol.intern(), macro);
@@ -1293,7 +1287,7 @@ public class Compiler
       err.setSource(new SourceInfo(exp, positionOf(symbol)));
       throw err;
     }
-    return new LoadConst(Void.VALUE, next);
+    return new LoadConst(Nil.VALUE, next);
   }
   
   /* Expand a macro
@@ -1308,7 +1302,7 @@ public class Compiler
   private Datum expand(Macro macro, List exp)
   {
     var position = positionOf(exp);
-    var args = quoteList(exp.cdr());
+    var args = quoteList(exp.rest());
     var xform = macro.expand(vm, args, new SourceInfo(exp, position));
     
     if (Config.LOG_DEBUG && Config.SHOW_MACRO_EXPANSION)
@@ -1371,11 +1365,11 @@ public class Compiler
   */
   private Inst compileMatch(List exp, Scope scope, boolean tail, Inst next)
   {
-    if (exp.length() < 3 || !checkMatchClauses(exp.cddr()))
+    if (exp.length() < 3 || !checkMatchClauses(exp.drop2()))
       throw malformedExp(exp);
 
-    return compile(exp.cadr(), scope, false,
-           compileMatchClauses(exp, exp.cddr(), scope, tail, next));
+    return compile(exp.second(), scope, false,
+           compileMatchClauses(exp, exp.drop2(), scope, tail, next));
   }
   
   private Inst compileMatchClauses(List matchExp, List clauses, Scope scope, boolean tail, Inst next)
@@ -1383,9 +1377,9 @@ public class Compiler
     if (clauses.isEmpty())
       return new Raise(new MatchFailure(new SourceInfo(matchExp, positionOf(matchExp))), next);
 
-    var clause = (List) clauses.car();
-    var patt = clause.car();
-    var body = clause.cdr();
+    var clause = (List) clauses.first();
+    var patt = clause.first();
+    var body = clause.rest();
     var vars = patternVars(patt);
     var extendedScope = scope.extend(vars);
     
@@ -1395,13 +1389,13 @@ public class Compiler
     return new PushEnv(vars.length(),
            new Match(compilePattern(patt, vars),
                      compileSequence(body, extendedScope, tail, new PopEnv(new Jump(next))),
-                     compileMatchClauses(matchExp, clauses.cdr(), scope, tail, next)));
+                     compileMatchClauses(matchExp, clauses.rest(), scope, tail, next)));
   }
   
   private boolean checkMatchClauses(List clauses)
   {
-    for (; !clauses.isEmpty(); clauses = clauses.cdr())
-      if (!(clauses.car() instanceof List clause && clause.length() >= 2 && checkPattern(clause.car())))
+    for (; !clauses.isEmpty(); clauses = clauses.rest())
+      if (!(clauses.first() instanceof List clause && clause.length() >= 2 && checkPattern(clause.first())))
         return false;
     return true;
   }
@@ -1415,19 +1409,19 @@ public class Compiler
   {
     if (pattern instanceof Symbol symb && !symb.isKeyword() && !Symbol.UNDERSCORE.equals(symb))
       return List.of(symb);
-    if (pattern instanceof List list && !list.isEmpty() && list.car() instanceof Symbol car) {
-      if (car.equals(Symbol.LIST))
-        return patternVarsInner(list.cdr());
-      if (car.equals(Symbol.LIST_STAR))
-        return patternVarsInner(list.cdr());
-      if (car.equals(Symbol.VECTOR))
-        return patternVarsInner(list.cdr());
-      if (car.equals(Symbol.RECORD))
-        return patternVarsInner(list.cddr());
-      if (car.equals(Symbol.AND))
-        return patternVarsInner(list.cdr());
-      if (car.equals(Symbol.OR))
-        return patternVarsInner(list.cdr());
+    if (pattern instanceof List list && !list.isEmpty() && list.first() instanceof Symbol first) {
+      if (first.equals(Symbol.LIST))
+        return patternVarsInner(list.rest());
+      if (first.equals(Symbol.LIST_STAR))
+        return patternVarsInner(list.rest());
+      if (first.equals(Symbol.VECTOR))
+        return patternVarsInner(list.rest());
+      if (first.equals(Symbol.RECORD))
+        return patternVarsInner(list.drop2());
+      if (first.equals(Symbol.AND))
+        return patternVarsInner(list.rest());
+      if (first.equals(Symbol.OR))
+        return patternVarsInner(list.rest());
     }
     return List.EMPTY;
   }
@@ -1437,7 +1431,7 @@ public class Compiler
     if (patterns.isEmpty())
       return List.EMPTY;
     else
-      return List.concat2(patternVars(patterns.car()), patternVarsInner(patterns.cdr()));
+      return List.concat2(patternVars(patterns.first()), patternVarsInner(patterns.rest()));
   }
   
   private IPattern compilePattern(Datum pattern, List vars)
@@ -1450,54 +1444,54 @@ public class Compiler
       return new MatchVar(vars.index(symb::equals));
     if (pattern instanceof Bool || pattern instanceof IInt || pattern instanceof Text)
       return new MatchEqual((IEq)pattern);
-    if (pattern instanceof List list && !list.isEmpty() && list.car() instanceof Symbol car) {
-      if (car.equals(Symbol.QUOTE) && checkQuotePattern(list))
+    if (pattern instanceof List list && !list.isEmpty() && list.first() instanceof Symbol first) {
+      if (first.equals(Symbol.QUOTE) && checkQuotePattern(list))
         return compileQuotePattern(list);
-      if (car.equals(Symbol.LIST))
-        return compileListPattern(list.cdr(), vars);
-      if (car.equals(Symbol.LIST_STAR))
-        return compileListStarPattern(list.cdr(), vars);
-      if (car.equals(Symbol.VECTOR))
-        return compileVectorPattern(list.cdr(), vars);
-      if (car.equals(Symbol.RECORD) && checkRecordPattern(list))
+      if (first.equals(Symbol.LIST))
+        return compileListPattern(list.rest(), vars);
+      if (first.equals(Symbol.LIST_STAR))
+        return compileListStarPattern(list.rest(), vars);
+      if (first.equals(Symbol.VECTOR))
+        return compileVectorPattern(list.rest(), vars);
+      if (first.equals(Symbol.RECORD) && checkRecordPattern(list))
         return compileRecordPattern(list, vars);
-      if (car.equals(Symbol.AND))
-        return compileAndPattern(list.cdr(), vars);
-      if (car.equals(Symbol.OR) && checkOrPattern(list.cdr()))
-        return compileOrPattern(list.cdr(), vars);
+      if (first.equals(Symbol.AND))
+        return compileAndPattern(list.rest(), vars);
+      if (first.equals(Symbol.OR) && checkOrPattern(list.rest()))
+        return compileOrPattern(list.rest(), vars);
     }
     throw malformedExp(pattern);
   }
   
   private boolean checkQuotePattern(List pattern)
   {
-    return pattern.length() == 2 && pattern.cadr() instanceof IEq;
+    return pattern.length() == 2 && pattern.second() instanceof IEq;
   }
   
   // (quote <datum>)
   private IPattern compileQuotePattern(List pattern)
   {
-    var datum = (IEq)pattern.cadr();
+    var datum = (IEq)pattern.second();
     return new MatchEqual(datum instanceof Symbol s ? s.intern() : datum);
   }
   
   private IPattern compileListPattern(List patterns, List vars)
   {
     if (patterns.isEmpty())
-      return new MatchNull();
+      return new MatchEmpty();
     else
-      return new MatchCons(compilePattern(patterns.car(), vars),
-                           compileListPattern(patterns.cdr(), vars));
+      return new MatchList(compilePattern(patterns.first(), vars),
+                           compileListPattern(patterns.rest(), vars));
   }
   
   private IPattern compileListStarPattern(List patterns, List vars)
   {
-    if (!patterns.cdr().isEmpty() && patterns.cddr().isEmpty())
-      return new MatchCons(compilePattern(patterns.car(), vars),
-                           compilePattern(patterns.cadr(), vars));
+    if (!patterns.rest().isEmpty() && patterns.drop2().isEmpty())
+      return new MatchList(compilePattern(patterns.first(), vars),
+                           compilePattern(patterns.second(), vars));
     else
-      return new MatchCons(compilePattern(patterns.car(), vars),
-                           compileListStarPattern(patterns.cdr(), vars));
+      return new MatchList(compilePattern(patterns.first(), vars),
+                           compileListStarPattern(patterns.rest(), vars));
   }
   
   private IPattern compileVectorPattern(List patterns, List vars)
@@ -1507,8 +1501,8 @@ public class Compiler
   
   private IPattern compileRecordPattern(List pattern, List vars)
   {
-    var typeName = (Symbol) pattern.cadr();
-    var fieldPatterns = pattern.cddr();
+    var typeName = (Symbol) pattern.second();
+    var fieldPatterns = pattern.drop2();
     var rtd = spartan.Runtime.lookupRTD(typeName).get();
     return new MatchRecord(rtd, fieldPatterns.stream().map(pat -> compilePattern(pat, vars)).toArray(IPattern[]::new));
   }
@@ -1518,8 +1512,8 @@ public class Compiler
     if (patterns.isEmpty())
       return new MatchAny();
     else
-      return new MatchAnd(compilePattern(patterns.car(), vars),
-                          compileAndPattern(patterns.cdr(), vars));
+      return new MatchAnd(compilePattern(patterns.first(), vars),
+                          compileAndPattern(patterns.rest(), vars));
   }
   
   private IPattern compileOrPattern(List patterns, List vars)
@@ -1527,15 +1521,15 @@ public class Compiler
     if (patterns.isEmpty())
       return new MatchFail();
     else
-      return new MatchOr(compilePattern(patterns.car(), vars),
-                         compileOrPattern(patterns.cdr(), vars));
+      return new MatchOr(compilePattern(patterns.first(), vars),
+                         compileOrPattern(patterns.rest(), vars));
   }
   
   private boolean checkOrPattern(List patterns)
   {
-    var vars = patternVars(patterns.car());
-    for (patterns = patterns.cdr(); !patterns.isEmpty(); patterns = patterns.cdr())
-      if (!vars.equals(patternVars(patterns.car())))
+    var vars = patternVars(patterns.first());
+    for (patterns = patterns.rest(); !patterns.isEmpty(); patterns = patterns.rest())
+      if (!vars.equals(patternVars(patterns.first())))
         return false;
     return true;
   }
@@ -1544,9 +1538,9 @@ public class Compiler
   private boolean checkRecordPattern(List pattern)
   {
     return pattern.length() >= 2
-        && pattern.cadr() instanceof Symbol typeName
+        && pattern.second() instanceof Symbol typeName
         && spartan.Runtime.lookupRTD(typeName)
-           .map(rtd -> rtd.fields().length == pattern.cddr().length())
+           .map(rtd -> rtd.fields().length == pattern.drop2().length())
            .orElse(false);
   }
   
@@ -1567,7 +1561,7 @@ public class Compiler
   
   private Inst compileCombo(List exp, Scope scope, boolean tail, Inst next)
   {
-    if (exp.car() instanceof Symbol s) {
+    if (exp.first() instanceof Symbol s) {
       return Optional.ofNullable(specialForms.get(s))
              .map(form -> form.compile(exp, scope, tail, next))
              .or(() -> lookupMacro(s).map(macro -> compile(expand(macro, exp), scope, tail, next)))
@@ -1604,7 +1598,7 @@ public class Compiler
     Map.entry(Symbol.SET, this::compileSet),
     Map.entry(Symbol.WHILE, this::compileWhile),
     Map.entry(Symbol.QUOTE, this::compileQuote),
-    //Map.entry(Symbol.QUASIQUOTE, this::compileQuasiquote),
+    Map.entry(Symbol.QUASIQUOTE, this::compileQuasiquote),
     Map.entry(Symbol.OR, this::compileOr),
     Map.entry(Symbol.AND, this::compileAnd),
     Map.entry(Symbol.MATCH, this::compileMatch)

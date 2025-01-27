@@ -25,15 +25,15 @@
 
 ; Return the first element of a stream
 
-(defun stream-car (s) (car (force s)))
+(defun stream-car (s) (first (force s)))
 
 ; Return the rest of a stream
 
-(defun stream-cdr (s) (cadr (force s)))
+(defun stream-cdr (s) (second (force s)))
 
 ; Determine if a stream is empty
 
-(defun stream-empty? (s) (null? (force s)))
+(defun stream-empty? (s) (empty? (force s)))
 
 ; The empty stream
 
@@ -44,7 +44,7 @@
     (stream-cons (f (stream-car s)) (stream-map f (stream-cdr s)))))
 
 (defun stream-for-each (f s)
-  (if (stream-empty? s) void
+  (if (stream-empty? s) #nil
     (do (f (stream-car s))
         (stream-for-each f (stream-cdr s)))))
 
@@ -67,11 +67,11 @@
 
 (defun stream->list (s)
   (if (stream-empty? s) ()
-    (cons (stream-car s) (stream->list (stream-cdr s)))))
+    (adjoin (stream-car s) (stream->list (stream-cdr s)))))
 
 (defun generator->stream (g)
   (delay
     (let ((result (g)))
-      (if (void? result)
+      (if (nil? result)
         ()
         (list result (generator->stream g))))))

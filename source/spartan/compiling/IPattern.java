@@ -11,7 +11,7 @@ import spartan.data.TypeRegistry;
 import spartan.data.IEq;
 
 public sealed interface IPattern
-permits MatchAny, MatchVar, MatchCons, MatchNull, MatchEqual, MatchVector, MatchRecord, MatchOr, MatchAnd, MatchFail
+permits MatchAny, MatchVar, MatchEqual, MatchList, MatchEmpty, MatchVector, MatchRecord, MatchOr, MatchAnd, MatchFail
 {
   boolean match(Datum arg, Env env);
 }
@@ -33,7 +33,7 @@ record MatchVar(int offset) implements IPattern
   }
 }
 
-record MatchNull() implements IPattern
+record MatchEmpty() implements IPattern
 {
   public boolean match(Datum arg, Env env)
   {
@@ -41,12 +41,12 @@ record MatchNull() implements IPattern
   }
 }
 
-record MatchCons(IPattern car, IPattern cdr) implements IPattern
+record MatchList(IPattern first, IPattern rest) implements IPattern
 {
   public boolean match(Datum arg, Env env)
   {
     return (arg instanceof List list) && !list.isEmpty() &&
-           car.match(list.car(), env) && cdr.match(list.cdr(), env);
+           first.match(list.first(), env) && rest.match(list.rest(), env);
   }
 }
 

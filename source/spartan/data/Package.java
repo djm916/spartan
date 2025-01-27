@@ -56,6 +56,8 @@ public class Package implements Datum
    */
   public void doImport(Package pkg, Symbol symbol, Symbol alias)
   {
+    if (!spartan.Config.ALLOW_REDEFINITION && isAccessible(symbol))
+      throw new MultipleDefinition(symbol);
     bind(alias, pkg.lookup(symbol));
   }
   
@@ -155,6 +157,11 @@ public class Package implements Datum
   public Set<Symbol> symbols()
   {
     return bindings.keySet();
+  }
+  
+  private boolean isAccessible(Symbol name)
+  {
+    return bindings.containsKey(name) || (parent != null && parent.bindings.containsKey(name));
   }
   
   protected final Symbol name;

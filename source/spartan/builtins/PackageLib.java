@@ -2,7 +2,6 @@ package spartan.builtins;
 
 import spartan.data.*;
 import spartan.data.Package; // shadows java.lang.Package
-import spartan.data.Void; // shadows java.lang.Void
 import spartan.errors.TypeMismatch;
 import spartan.errors.InvalidArgument;
 import spartan.errors.NoSuchPackage;
@@ -41,7 +40,7 @@ public final class PackageLib
       if (!(vm.popArg() instanceof Package pkg))
         throw new TypeMismatch();
       spartan.Runtime.currentPackage(pkg);
-      vm.result = Void.VALUE;
+      vm.result = Nil.VALUE;
       vm.popFrame();
     }
   };
@@ -56,7 +55,7 @@ public final class PackageLib
         vm.result = spartan.Runtime.getPackage(pkgName);
       }
       catch (NoSuchPackage err) {
-        vm.result = Void.VALUE;
+        vm.result = Nil.VALUE;
       }
       vm.popFrame();
     }
@@ -85,7 +84,7 @@ public final class PackageLib
       if (!symbol.isSimple())
         throw new InvalidArgument();
       pkg.bind(symbol, value);
-      vm.result = Void.VALUE;
+      vm.result = Nil.VALUE;
       vm.popFrame();
     }
   };
@@ -132,7 +131,7 @@ public final class PackageLib
         throw new InvalidArgument();
       var sourcePackage = spartan.Runtime.getPackage(pkgName);
       targetPackage.addPackageAlias(alias, sourcePackage);
-      vm.result = Void.VALUE;
+      vm.result = Nil.VALUE;
       vm.popFrame();
     }
   };

@@ -179,11 +179,11 @@ public final class Text implements Datum, IEq, IOrd
   public static Text join(Text delim, List args)
   {
     var result = new StringBuilder();
-    for (; !args.isEmpty(); args = args.cdr()) {
-      if (!(args.car() instanceof Text text))
+    for (; !args.isEmpty(); args = args.rest()) {
+      if (!(args.first() instanceof Text text))
         throw new TypeMismatch();
       result.append(text.value);
-      if (!args.cdr().isEmpty())
+      if (!args.rest().isEmpty())
         result.append(delim.value);
     }
     return new Text(result.toString());

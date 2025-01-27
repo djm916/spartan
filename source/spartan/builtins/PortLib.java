@@ -1,7 +1,6 @@
 package spartan.builtins;
 
 import spartan.data.*;
-import spartan.data.Void; // shadows java.lang.Void
 import spartan.errors.TypeMismatch;
 import spartan.errors.InvalidArgument;
 import spartan.errors.IOError;
@@ -46,13 +45,13 @@ public final class PortLib
   
   private static List ok(Datum result)
   {
-    return List.of(result, Void.VALUE);
+    return List.of(result, Nil.VALUE);
   }
   
   private static List fail(IOError err)
   {
-    //return List.of(Void.VALUE, Int.valueOf(err.errorNo()));
-    return List.of(Void.VALUE, new Text(err.getMessage()));
+    //return List.of(Nil.VALUE, Int.valueOf(err.errorNo()));
+    return List.of(Nil.VALUE, new Text(err.getMessage()));
   }
   
   // (port-open-file path options)
@@ -84,7 +83,7 @@ public final class PortLib
         throw new TypeMismatch();
       try {
         port.close();
-        vm.result = ok(Void.VALUE);
+        vm.result = ok(Nil.VALUE);
       }
       catch (IOError err) {
         vm.result = fail(err);
@@ -187,7 +186,7 @@ public final class PortLib
         throw new TypeMismatch();
       try {
         port.seek(position.longValue());
-        vm.result = ok(Void.VALUE);
+        vm.result = ok(Nil.VALUE);
       }
       catch (IOError err) {
         vm.result = fail(err);

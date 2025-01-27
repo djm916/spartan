@@ -3,7 +3,6 @@ package spartan.parsing;
 import java.io.*;
 import java.nio.file.Path;
 import spartan.data.*;
-import spartan.data.Void; 
 import spartan.errors.SyntaxError;
 import spartan.errors.SourceInfo;
 import spartan.Config;
@@ -515,8 +514,8 @@ public class Reader implements AutoCloseable
       return Bool.TRUE;
     else if (str.equals("#false"))
       return Bool.FALSE;
-    else if (str.equals("#void"))
-      return Void.VALUE;
+    else if (str.equals("#nil"))
+      return Nil.VALUE;
     else
       throw syntaxError("invalid literal " + str);
   }

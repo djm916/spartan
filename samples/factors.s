@@ -19,14 +19,14 @@
   (while (> n 1)
     (let ((p (stream-car primes)))
       (while (= 0 (remainder n p))
-        (set! factors (cons p factors))
+        (set! factors (adjoin p factors))
         (set! n (quotient n p)))
       (set! primes (stream-cdr primes))))
   factors)
 
-(if (null? *command-line-args*)
+(if (empty? *command-line-args*)
   (abort "required command line argument"))
 
-(def N (string->int (car *command-line-args*)))
+(def N (string->int (first *command-line-args*)))
 
 (print-line (prime-factors N))

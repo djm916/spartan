@@ -232,15 +232,15 @@ public final class VirtualMachine
   
   public void pushArg(Datum x)
   {
-    args = ConsPool.get(x, args);
+    args = ListCache.get(x, args);
   }
   
   public Datum popArg()
   {
-    var result = args.car();
+    var result = args.first();
     var old = args;
-    args = args.cdr();
-    ConsPool.put(old);
+    args = args.rest();
+    ListCache.put(old);
     return result;
   }
   

@@ -6,7 +6,7 @@
 
 (defun range (lo hi)
   (if (> lo hi) ()
-    (cons lo (range (+ 1 lo) hi))))
+    (adjoin lo (range (+ 1 lo) hi))))
   
 (print-line "(2*2)^2 = " ((compose double square) 2))
 (print-line "(2*2)^2 = " (->> 2 (double) (square)))
@@ -16,7 +16,6 @@
 
 (print-line "squares 1..100 = "
   (->> (range 1 100)
-       (list-map square)
-       (list-fold-left + 0)))
+       (map square)))
 
-(print-line "sum of squares 1..100 = " (list-fold-left + 0 (list-map square (range 1 100))))
+(print-line "sum of squares 1..100 = " (fold-left + 0 (map square (range 1 100))))

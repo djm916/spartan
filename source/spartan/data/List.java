@@ -15,9 +15,9 @@ import spartan.errors.Error;
 import spartan.errors.TypeMismatch;
 import spartan.errors.NoSuchElement;
 
-final class Null extends List
+final class EmptyList extends List
 {
-  public static final Null VALUE = new Null();
+  public static final EmptyList VALUE = new EmptyList();
   
   @Override // Datum
   public String repr()
@@ -38,39 +38,27 @@ final class Null extends List
   }
   
   @Override // List
-  public Datum car()
+  public Datum first()
   {
     throw new NoSuchElement();
   }
   
   @Override // List
-  public void setCar(Datum x)
+  public List rest()
   {
     throw new NoSuchElement();
   }
   
-  @Override // List
-  public List cdr()
-  {
-    throw new NoSuchElement();
-  }
-  
-  @Override // List
-  public void setCdr(List x)
-  {
-    throw new NoSuchElement();
-  }
-  
-  private Null()
+  private EmptyList()
   {
     super(null, null);
   }
 }
 
 public sealed class List implements Datum, Iterable<Datum>
-permits Null
+permits EmptyList
 {
-  public static final List EMPTY = Null.VALUE;
+  public static final List EMPTY = EmptyList.VALUE;
   
   public static class Builder
   {
@@ -112,7 +100,7 @@ permits Null
   public static final Collector<Datum, Builder, List> COLLECTOR =
     Collector.of(Builder::new, Builder::add, Builder::addAll, Builder::build);
   
-  public static List cons(Datum first, List rest)
+  public static List adjoin(Datum first, List rest)
   {
     return new List(first, rest);
   }
@@ -171,49 +159,59 @@ permits Null
       .collect(Collectors.joining(" ", "(", ")"));
   }
   
-  public Datum car()
+  public Datum first()
   {
     return first;
   }
   
-  public void setCar(Datum x)
+  public void setFirst(Datum first)
   {
-    first = x;
+    this.first = first;
   }
   
-  public List cdr()
+  public List rest()
   {
     return rest;
   }
   
-  public void setCdr(List x)
+  public void setRest(List rest)
   {
-    rest = x;
+    this.rest = rest;
   }
   
-  public Datum cadr()
+  public Datum second()
   {
-    return cdr().car();
+    return rest().first();
   }
   
-  public Datum caddr()
+  public Datum third()
   {    
-    return cdr().cdr().car();
+    return rest().rest().first();
   }
   
-  public Datum cadddr()
+  public Datum fourth()
   {
-    return cdr().cdr().cdr().car();
+    return rest().rest().rest().first();
   }
   
-  public List cddr()
+  public List drop2()
   {
-    return cdr().cdr();
+    return rest().rest();
   }
   
-  public List cdddr()
+  public List drop3()
   {
-    return cdr().cdr().cdr();
+    return rest().rest().rest();
+  }
+  
+  public Datum drop(int n)
+  {
+    return drop(this, n);
+  }
+  
+  public Datum take(int n)
+  {
+    return drop(this, n);
   }
   
   public Datum get(int index)
@@ -221,21 +219,6 @@ permits Null
     return get(this, index);
   }
   
-  public void set(int index, Datum value)
-  {
-    set(this, index, value);
-  }
-  
-  public Datum tail(int index)
-  {
-    return tail(this, index);
-  }
-  
-  public void setTail(int index, List value)
-  {
-    setTail(this, index, value);
-  }
-    
   public int length()
   {
     return length(this);
@@ -294,8 +277,8 @@ permits Null
       
       @Override
       public Datum next() {
-        var val = cur.car();
-        cur = cur.cdr();
+        var val = cur.first();
+        cur = cur.rest();
         return val;
       }
     };
@@ -330,70 +313,64 @@ permits Null
   private static Datum[] toArray(List list)
   {
     var result = new Datum[list.length()];
-    for (int i = 0; !list.isEmpty(); ++i, list = list.cdr())
-      result[i] = list.car();
+    for (int i = 0; !list.isEmpty(); ++i, list = list.rest())
+      result[i] = list.first();
     return result;
   }
   
   private static int length(List list)
   {
     int length = 0;
-    for (; !list.isEmpty(); list = list.cdr())
+    for (; !list.isEmpty(); list = list.rest())
       ++length;
     return length;
   }
   
   private static Datum get(List list, int index)
   {
-    for (; !list.isEmpty() && index > 0; list = list.cdr(), --index)
+    for (; !list.isEmpty() && index > 0; list = list.rest(), --index)
       ;
-    return list.car();
+    return list.first();
   }
   
-  private static void set(List list, int index, Datum value)
+  private static Datum take(List list, int n)
   {
-    for (; !list.isEmpty() && index > 0; list = list.cdr(), --index)
-      ;
-    list.setCar(value);
+    var result = new Builder();
+    for (; !list.isEmpty() && n > 0; list = list.rest(), --n)
+      result.add(list.first());
+    return result.build();
   }
   
-  private static Datum tail(List list, int index)
+  private static Datum drop(List list, int n)
   {
-    for (; !list.isEmpty() && index > 0; list = list.cdr(), --index)
+    for (; !list.isEmpty() && n > 0; list = list.rest(), --n)
       ;
     return list;
-  }
-  
-  private static void setTail(List list, int index, List value)
-  {
-    for (; !list.isEmpty() && index > 0; list = list.cdr(), --index)
-      ;
-    list.setCdr(value);
   }
   
   private static List append(List list, Datum x)
   {
     var result = new Builder();
-    for (; !list.isEmpty(); list = list.cdr())
-      result.add(list.car());
+    for (; !list.isEmpty(); list = list.rest())
+      result.add(list.first());
     result.add(x);
     return result.build();
   }
   
   private static List reverse(List list)
   {
-    var result = List.EMPTY;
-    for (; !list.isEmpty(); list = list.cdr())
-      result = cons(list.car(), result);
+    var result = EMPTY;
+    for (; !list.isEmpty(); list = list.rest())
+      result = adjoin(list.first(), result);
     return result;
   }
   
   private static List remove(List list, Predicate<Datum> pred)
   {
     var result = new Builder();
-    for (; !list.isEmpty(); list = list.cdr())
-      if (!pred.test(list.car()))
-        result.add(list.car());
+    for (; !list.isEmpty(); list = list.rest())
+      if (!pred.test(list.first()))
+        result.add(list.first());
     return result.build();
   }
   
@@ -408,15 +385,15 @@ permits Null
   private static List map(List list, UnaryOperator<Datum> f)
   {
     var result = new List.Builder();
-    for (; !list.isEmpty(); list = list.cdr())
+    for (; !list.isEmpty(); list = list.rest())
       result.add(f.apply(list.first));
     return result.build();
   }
   
   private static boolean isEqual(List lhs, List rhs, BiPredicate<Datum, Datum> equals)
   {
-    for (; !lhs.isEmpty() && !rhs.isEmpty(); lhs = lhs.cdr(), rhs = rhs.cdr())
-      if (!equals.test(lhs.car(), rhs.car()))
+    for (; !lhs.isEmpty() && !rhs.isEmpty(); lhs = lhs.rest(), rhs = rhs.rest())
+      if (!equals.test(lhs.first(), rhs.first()))
         return false;
     return lhs.isEmpty() && rhs.isEmpty();
   }

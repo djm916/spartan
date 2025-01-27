@@ -8,33 +8,33 @@
 
 (defun %quasiquote (exp level)
   (defun unquote? (form)
-    (and (list? form) (not (null? form)) (symbol? (car form)) (= (car form) 'unquote)))
+    (and (list? form) (not (empty? form)) (symbol? (first form)) (= (first form) 'unquote)))
   (defun unquote-splicing? (form)
-    (and (list? form) (not (null? form)) (symbol? (car form)) (= (car form) 'unquote-splicing)))
+    (and (list? form) (not (empty? form)) (symbol? (first form)) (= (first form) 'unquote-splicing)))
   (defun quasiquote? (form)
-    (and (list? form) (not (null? form)) (symbol? (car form)) (= (car form) 'quasiquote)))
+    (and (list? form) (not (empty? form)) (symbol? (first form)) (= (first form) 'quasiquote)))
   (if (< level 0)
     (error "unquote or unquote-splicing form must appear within quasiquote"))
-  (cond [(null? exp) ()]
+  (cond [(empty? exp) ()]
         [(not (list? exp)) (list 'quote exp)]
         [else
-          (let [(subexp (car exp))]
+          (let [(subexp (first exp))]
             (cond [(unquote? subexp)
                      (if (= level 0)
-                       (list 'spartan.core:cons (cadr subexp) (%quasiquote (cdr exp) 0))
-                       (list 'spartan.core:cons (%quasiquote subexp (- level 1)) (%quasiquote (cdr exp) level)))]
+                       (list 'spartan.core:adjoin (second subexp) (%quasiquote (rest exp) 0))
+                       (list 'spartan.core:adjoin (%quasiquote subexp (- level 1)) (%quasiquote (rest exp) level)))]
                   [(unquote-splicing? subexp)
                      (if (= level 0)
-                       (list 'spartan.core:list-concat (cadr subexp) (%quasiquote (cdr exp) 0))
-                       (list 'spartan.core:cons (%quasiquote subexp (- level 1)) (%quasiquote (cdr exp) level)))]
+                       (list 'spartan.core:concat (second subexp) (%quasiquote (rest exp) 0))
+                       (list 'spartan.core:adjoin (%quasiquote subexp (- level 1)) (%quasiquote (rest exp) level)))]
                   [(quasiquote? subexp)
-                     (list 'spartan.core:cons (%quasiquote subexp (+ 1 level)) (%quasiquote (cdr exp) level))]
+                     (list 'spartan.core:adjoin (%quasiquote subexp (+ 1 level)) (%quasiquote (rest exp) level))]
                   [else
-                     (list 'spartan.core:cons (%quasiquote (car exp) level) (%quasiquote (cdr exp) level))]))]))
+                     (list 'spartan.core:adjoin (%quasiquote (first exp) level) (%quasiquote (rest exp) level))]))]))
 
 ; quasiquote implemented as a macro; just calls the procedure %quasiquote on its (unevaluated) argument
-(defmacro quasiquote (exp)
-  (%quasiquote exp 0))
+;(defmacro quasiquote (exp)
+;  (%quasiquote exp 0))
 
 (defmacro in-package (package-name)
   `(spartan.core:set-current-package!
@@ -68,19 +68,19 @@
 (defmacro compose (& fs)
   (def x (gensym))
   (defun loop (fs)
-    (if (null? (cdr fs))
-      `(,(car fs) ,x)
-      `(,(car fs) ,(loop (cdr fs)))))
-  `(fun (,x) ,(loop (list-reverse fs))))
+    (if (empty? (rest fs))
+      `(,(first fs) ,x)
+      `(,(first fs) ,(loop (rest fs)))))
+  `(fun (,x) ,(loop (reverse fs))))
 
 ; (->> x (f ...)) => (f ... x)
 ; (->> x (f ...) (g ...)) => (g ... (f ... x))
 ; (->> x (f ...) (g ...) (h ...)) => (h ... (g ... (f ... x)))
 
 (defmacro ->> (arg form & forms)
-  (for ((forms forms (cdr forms))
-        (result (list-append arg form) (list-append result (car forms))))
-    ((null? forms) result)))
+  (for ((forms forms (rest forms))
+        (result (append arg form) (append result (first forms))))
+    ((empty? forms) result)))
 
 ; (curry () ...) => (fun () ...)
 ; (curry (x) ...) => (fun (x) ...)
@@ -88,28 +88,28 @@
 
 (defmacro curry (args & body)
   (defun loop (args)
-    (cond ((null? args)
+    (cond ((empty? args)
            `(fun () ,@body))
-          ((null? (cdr args))
-           `(fun (,(car args)) ,@body))
+          ((empty? (rest args))
+           `(fun (,(first args)) ,@body))
           (#true
-           `(fun (,(car args)) ,(loop (cdr args))))))
+           `(fun (,(first args)) ,(loop (rest args))))))
   (loop args))
     
 (defun min (x & xs)
   (let ((lo x))
-    (while (not (null? xs))
-      (if (< (car xs) lo)
-        (set! lo (car xs)))
-      (set! xs (cdr xs)))
+    (while (not (empty? xs))
+      (if (< (first xs) lo)
+        (set! lo (first xs)))
+      (set! xs (rest xs)))
   lo))
 
 (defun max (x & xs)
   (let ((hi x))
-    (while (not (null? xs))
-      (if (> (car xs) hi)
-        (set! hi (car xs)))
-      (set! xs (cdr xs)))
+    (while (not (empty? xs))
+      (if (> (first xs) hi)
+        (set! hi (first xs)))
+      (set! xs (rest xs)))
   hi))
 
 (load "stdlib/lists.s")
@@ -119,8 +119,8 @@
 ; (letrec ((f (fun (var1 ... varN) body..)))
 ;   (f init1 ... initN))
 (defmacro rec (symbol bindings & body)
-  (let ((vars (list-map car bindings))
-        (inits (list-map cadr bindings)))
+  (let ((vars (map first bindings))
+        (inits (map second bindings)))
     `(letrec ((,symbol (fun ,vars ,@body)))
        (,symbol ,@inits))))
 
@@ -131,12 +131,12 @@
 
 (defmacro let-values (bindings & body)
   (rec loop ((bindings bindings))
-    (if (null? bindings)
+    (if (empty? bindings)
       `(do ,@body)
-      (let* [(binding (car bindings))
-             (formals (car binding))
-             (exp (cadr binding))]
-        `(apply (fun ,formals ,(loop (cdr bindings))) ,exp)))))
+      (let* [(binding (first bindings))
+             (formals (first binding))
+             (exp (second binding))]
+        `(apply (fun ,formals ,(loop (rest bindings))) ,exp)))))
 
 (load "stdlib/vectors.s")
 (load "stdlib/defrecord.s")

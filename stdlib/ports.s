@@ -4,7 +4,7 @@
      (let ((f ,fname))
        (fun (& args)
          (let-values (((result error) (apply f args)))
-           (if (not (void? error))
+           (if (not (nil? error))
              (raise (make-exception 'io-error error))
              result))))))
 

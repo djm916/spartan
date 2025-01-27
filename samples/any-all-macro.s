@@ -16,9 +16,9 @@
 ;
 
 (defmacro any? (& xs)
-  (if (null? xs)
+  (if (empty? xs)
     #false
-    `(if ,(car xs) #true (any? ,@(cdr xs)))))
+    `(if ,(first xs) #true (any? ,@(rest xs)))))
 
 ; "all?" implements a short-circuiting "and" operation mapped over a list.
 ;
@@ -28,9 +28,9 @@
 ;
 
 (defmacro all? (& xs)
-  (if (null? xs)
+  (if (empty? xs)
     #true
-    `(if (not ,(car xs)) #false (all? ,@(cdr xs)))))
+    `(if (not ,(first xs)) #false (all? ,@(rest xs)))))
 
 (print-line "(any?) = " (any?))
 (print-line "(any? #false) = " (any? #false))

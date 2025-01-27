@@ -1,7 +1,6 @@
 package spartan.builtins;
 
 import spartan.data.*;
-import spartan.data.Void; // shadows java.lang.Void
 import spartan.errors.TypeMismatch;
 import spartan.runtime.VirtualMachine;
 
@@ -22,7 +21,7 @@ public final class VectorLib
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof IInt length))
         throw new TypeMismatch();
-      var init = vm.args.isEmpty() ? Void.VALUE : vm.popArg();
+      var init = vm.args.isEmpty() ? Nil.VALUE : vm.popArg();
       vm.result = new Vector(length.intValue(), init);
       vm.popFrame();      
     }
@@ -47,7 +46,7 @@ public final class VectorLib
         throw new TypeMismatch();
       var item = vm.popArg();
       vector.set(index.intValue(), item);
-      vm.result = Void.VALUE;
+      vm.result = Nil.VALUE;
       vm.popFrame();
     }
   };
@@ -80,7 +79,7 @@ public final class VectorLib
         throw new TypeMismatch();
       var e = vm.popArg();
       v.append(e);
-      vm.result = Void.VALUE;
+      vm.result = Nil.VALUE;
       vm.popFrame();
     }
   };
@@ -91,7 +90,7 @@ public final class VectorLib
         throw new TypeMismatch();
       var e = vm.popArg();
       v.insert(i.intValue(), e);
-      vm.result = Void.VALUE;
+      vm.result = Nil.VALUE;
       vm.popFrame();
     }
   };
@@ -101,7 +100,7 @@ public final class VectorLib
       if (!(vm.popArg() instanceof Vector v && vm.popArg() instanceof IInt i))
         throw new TypeMismatch();
       v.remove(i.intValue());
-      vm.result = Void.VALUE;
+      vm.result = Nil.VALUE;
       vm.popFrame();
     }
   };

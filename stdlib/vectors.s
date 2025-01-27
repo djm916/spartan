@@ -61,7 +61,7 @@
     result))
 
 (defun vector-unfold (g n)
-  (def result (make-vector n void))
+  (def result (make-vector n #nil))
   (let [(i 0)]
     (while (< i n)
       (vector-set! result i (g i))
@@ -114,6 +114,6 @@
         (inc! k))))
       
    (let* [(n    (vector-length v))
-          (dest (make-vector n void))]
+          (dest (make-vector n #nil))]
      (sort v 0 n dest)
      dest))

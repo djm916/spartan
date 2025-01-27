@@ -1,19 +1,19 @@
 package spartan.data;
 
-public final class Void implements Datum, IEq
+public final class Nil implements Datum, IEq
 {
-  public static final Void VALUE = new Void();
+  public static final Nil VALUE = new Nil();
   
   @Override // Datum
   public Type type()
   {
-    return Type.VOID;
+    return Type.NIL;
   }
   
   @Override // Datum
   public String repr()
   {
-    return "#void";
+    return "#nil";
   }
   
   @Override // Datum
@@ -23,10 +23,10 @@ public final class Void implements Datum, IEq
   }
   
   @Override // IEq
-  public boolean isEqual(Void rhs)
+  public boolean isEqual(Nil rhs)
   {
     return this == rhs;
   }
   
-  private Void() {}
+  private Nil() {}
 }
