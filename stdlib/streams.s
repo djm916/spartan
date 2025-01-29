@@ -19,17 +19,17 @@
 
 ; Add an element to the front of a stream
 
-(defmacro stream-cons (e s) `(delay (list ,e ,s)))
+(defmacro stream-adjoin (e s) `(delay (list ,e ,s)))
 
-;(defmacro stream-cons (e s) `(cons ,e (delay ,s)))
+;(defmacro stream-adjoin (e s) `(adjoin ,e (delay ,s)))
 
 ; Return the first element of a stream
 
-(defun stream-car (s) (first (force s)))
+(defun stream-first (s) (first (force s)))
 
 ; Return the rest of a stream
 
-(defun stream-cdr (s) (second (force s)))
+(defun stream-rest (s) (second (force s)))
 
 ; Determine if a stream is empty
 
@@ -41,33 +41,33 @@
 
 (defun stream-map (f s)
   (if (stream-empty? s) s
-    (stream-cons (f (stream-car s)) (stream-map f (stream-cdr s)))))
+    (stream-adjoin (f (stream-first s)) (stream-map f (stream-rest s)))))
 
 (defun stream-for-each (f s)
   (if (stream-empty? s) #nil
-    (do (f (stream-car s))
-        (stream-for-each f (stream-cdr s)))))
+    (do (f (stream-first s))
+        (stream-for-each f (stream-rest s)))))
 
 (defun stream-filter (f s)
   (cond ((stream-empty? s) s)
-        ((f (stream-car s)) (stream-cons (stream-car s) (stream-filter f (stream-cdr s))))
-        (else (stream-filter f (stream-cdr s)))))
+        ((f (stream-first s)) (stream-adjoin (stream-first s) (stream-filter f (stream-rest s))))
+        (else (stream-filter f (stream-rest s)))))
 
 (defun stream-take (n s)
   (if (or (stream-empty? s) (= n 0)) stream-empty
-    (stream-cons (stream-car s) (stream-take (- n 1) (stream-cdr s)))))
+    (stream-adjoin (stream-first s) (stream-take (- n 1) (stream-rest s)))))
 
 (defun stream-reduce (f i s)
   (if (stream-empty? s) i
-    (stream-reduce f (f i (stream-car s)) (stream-cdr s))))
+    (stream-reduce f (f i (stream-first s)) (stream-rest s))))
 
 (defun stream-enumerate (i s)
   (if (stream-empty? s) ()
-    (stream-cons (list i (stream-car s)) (stream-enumerate (+ i 1) (stream-cdr s)))))
+    (stream-adjoin (list i (stream-first s)) (stream-enumerate (+ i 1) (stream-rest s)))))
 
 (defun stream->list (s)
   (if (stream-empty? s) ()
-    (adjoin (stream-car s) (stream->list (stream-cdr s)))))
+    (adjoin (stream-first s) (stream->list (stream-rest s)))))
 
 (defun generator->stream (g)
   (delay

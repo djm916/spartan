@@ -126,11 +126,11 @@ permits EmptyList
   public static <E extends Datum> List concat(Iterable<E> lists)
   {
     var builder = new List.Builder();
-    for (var car : lists) {
-      if (!(car instanceof List list))
+    for (var e1 : lists) {
+      if (!(e1 instanceof List))
         throw new TypeMismatch();
-      for (var elem : list)
-        builder.add(elem);
+      for (var e2 : (List)e1)
+        builder.add(e2);
     }
     return builder.build();
   }
@@ -211,12 +211,14 @@ permits EmptyList
   
   public Datum take(int n)
   {
-    return drop(this, n);
+    return take(this, n);
   }
   
-  public Datum get(int index)
+  public Datum nth(int index)
   {
-    return get(this, index);
+    if (index < 0)
+      throw new NoSuchElement();
+    return nth(this, index);
   }
   
   public int length()
@@ -326,7 +328,7 @@ permits EmptyList
     return length;
   }
   
-  private static Datum get(List list, int index)
+  private static Datum nth(List list, int index)
   {
     for (; !list.isEmpty() && index > 0; list = list.rest(), --index)
       ;

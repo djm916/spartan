@@ -153,6 +153,12 @@ public final class Text implements Datum, IEq, IOrd
     return value.equals(rhs.value);
   }
   
+  @Override // Object
+  public boolean equals(Object rhs)
+  {
+    return (rhs instanceof Text other) && value.equals(other.value);
+  }
+  
   public Cursor cursor()
   {
     return new Cursor(value, 0);

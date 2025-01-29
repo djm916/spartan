@@ -144,4 +144,13 @@ public final class ListLib
       vm.popFrame();
     }
   };
+  
+  public static final Primitive NTH = new Primitive(Signature.fixed(2)) {
+    public void apply(VirtualMachine vm) {
+      if (!(vm.popArg() instanceof IInt n && vm.popArg() instanceof List list))
+        throw new TypeMismatch();      
+      vm.result = list.nth(n.intValue());
+      vm.popFrame();
+    }
+  };
 }

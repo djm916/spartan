@@ -237,7 +237,7 @@ public final class CoreLib
     }
   };
     
-  public static final Primitive ABORT = new Primitive(Signature.fixed(1)) {
+  public static final Primitive ERROR = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Text errMsg))
         throw new TypeMismatch();

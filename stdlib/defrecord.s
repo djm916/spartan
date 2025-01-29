@@ -1,5 +1,5 @@
 
-; Basic syntactic records library
+; defrecord - a simple syntactic record type facility
 ;
 ; A record is a compound data type composed of a set of named fields.
 ;
@@ -16,9 +16,9 @@
 ; point-type     ; the record type descriptor
 ; make-point     ; the constructor
 ; point?         ; predicate
-; point-x        ; accessors
+; point-x        ; field accessors
 ; point-y
-; point-x-set!   ; mutators
+; point-x-set!   ; field mutators
 ; point-y-set!
 
 (in-package spartan.core)
@@ -38,14 +38,6 @@
 ; Generate the name of a record field mutator
 (defun generate-mutator-name (name field)
   (string->symbol (string-concat (symbol->string name) "-" (symbol->string field) "-set!")))
-
-; Generate the name of a record destructor
-(defun generate-destructor-name (name)
-  (string->symbol (string-concat "unpack-" (symbol->string name))))
-  
-; Generate the name of a record matcher
-(defun generate-matcher-name (name)
-  (string->symbol (string-concat "with-" (symbol->string name))))
 
 (defmacro defrecord (name fields)
   `(let ((rtd (spartan.core:make-record-type ',name ',fields))) ; Create record type descriptor

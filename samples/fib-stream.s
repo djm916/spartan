@@ -1,13 +1,13 @@
 
 (defun sum-streams (s1 s2)
-  (stream-cons (+ (stream-car s1) (stream-car s2))
-               (sum-streams (stream-cdr s1) (stream-cdr s2))))
+  (stream-adjoin (+ (stream-first s1) (stream-first s2))
+                 (sum-streams (stream-rest s1) (stream-rest s2))))
 
 ; fibs                                  | 0 1 1 2 3 5 ...
-; (stream-cdr fibs)                     | 1 1 2 3 5 ...
-; (sum-streams fibs (stream-cdr fibs))  | 1 2 3 5 ...
+; (stream-rest fibs)                    | 1 1 2 3 5 ...
+; (sum-streams fibs (stream-rest fibs)) | 1 2 3 5 ...
 
-(def fibs (stream-cons 0 (stream-cons 1 (sum-streams fibs (stream-cdr fibs)))))
+(def fibs (stream-adjoin 0 (stream-adjoin 1 (sum-streams fibs (stream-rest fibs)))))
 
 (def N 10)
 

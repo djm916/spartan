@@ -34,10 +34,11 @@
       (find f (rest xs)))))
 
 (defun find-index (f xs)
-  (rec loop [(i 0) (xs xs)]
+  (defun loop (i xs)
     (cond [(empty? xs)    -1]
           [(f (first xs))  i]
-          [else (loop (+ 1 i) (rest xs))])))
+          [else (loop (+ 1 i) (rest xs))]))
+  (loop 0 xs))
 
 (defun contains? (x xs)
   (not (nil? (find (fun (y) (= x y)) xs))))

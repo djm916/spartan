@@ -18,9 +18,9 @@
 
 (defun dynamic-wind (pre thunk post)
   (pre)
-  (set! *winders* (cons (list pre post) *winders*))
+  (set! *winders* (adjoin (list pre post) *winders*))
   (let ((result (thunk)))
-    (set! *winders* (cdr *winders*))
+    (set! *winders* (rest *winders*))
     (post)
     result))
 
@@ -36,16 +36,16 @@
 (defun %do-winds (from to)
   (set! *winders* from)
   (if (not (identical? from to))
-      (cond ((null? from)
-               (%do-winds from (cdr to))
-               ((car (car to))))
-            ((null? to)
-               ((cadr (car from)))
-               (%do-winds (cdr from) to))
+      (cond ((empty? from)
+               (%do-winds from (rest to))
+               ((first (first to))))
+            ((empty? to)
+               ((second (first from)))
+               (%do-winds (rest from) to))
             (else
-               ((cadr (car from)))
-               (%do-winds (cdr from) (cdr to))
-               ((car (car to))))))
+               ((second (first from)))
+               (%do-winds (rest from) (rest to))
+               ((first (first to))))))
   (set! *winders* to))
 
 ; ==========
@@ -60,24 +60,24 @@
                                 (symbol->string (exception-name ex))
                                 ": "
                                 (exception-message ex))))
-    (abort message)))
+    (error message)))
 
 (def *handlers* ())
 
 (defun %push-handler (h k)
-  (set! *handlers* (cons (list h k) *handlers*)))
+  (set! *handlers* (adjoin (list h k) *handlers*)))
 
 (defun %pop-handler ()
-  (let ((top (car *handlers*)))
-    (set! *handlers* (cdr *handlers*))
+  (let ((top (first *handlers*)))
+    (set! *handlers* (rest *handlers*))
     top))
 
 (defun raise (exn)
-  (if (null? *handlers*)
+  (if (empty? *handlers*)
     (*default-exception-handler* exn)
     (let* ((top (%pop-handler))
-           (h (car top))
-           (k (cadr top)))
+           (h (first top))
+           (k (second top)))
       (k (h exn)))))
 
 ;(defun try (thunk handler)
@@ -103,10 +103,10 @@
 
 (defmacro guard (clauses & body)
   (defun generate-handler-body (var clauses)
-    (if (null? clauses) ()
-      (let ((clause (car clauses)))
-        (cons `((= ',(car clause) (exception-name ,var)) ,@(cdr clause))
-              (generate-handler-body var (cdr clauses))))))
+    (if (empty? clauses) ()
+      (let ((clause (first clauses)))
+        (adjoin `((= ',(first clause) (exception-name ,var)) ,@(rest clause))
+                  (generate-handler-body var (rest clauses))))))
   (let ((var (gensym)))
     `(with-exception-handler
        (fun (,var)

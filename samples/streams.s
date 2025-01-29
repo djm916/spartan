@@ -1,7 +1,7 @@
 ; Example of stream usage
 
 (defun integer-stream (n)
-  (stream-cons n (integer-stream (+ 1 n))))
+  (stream-adjoin n (integer-stream (+ 1 n))))
 
 (def nats (stream-take 10 (integer-stream 1)))
 

@@ -34,10 +34,6 @@ permits QualifiedSymbol
   public static final Symbol AND = new Symbol("and");
   public static final Symbol OR = new Symbol("or");
   public static final Symbol AMPERSAND = new Symbol("&");
-  //public static final Symbol CAR = new Symbol("car");
-  //public static final Symbol CDR = new Symbol("cdr");
-  //public static final Symbol Q_CAR = new QualifiedSymbol("spartan.core", "car");
-  //public static final Symbol Q_CDR = new QualifiedSymbol("spartan.core", "cdr");
   public static final Symbol Q_ADJOIN = new QualifiedSymbol("spartan.core", "adjoin");
   public static final Symbol Q_CONCAT = new QualifiedSymbol("spartan.core", "concat");
   public static final Symbol MATCH = new Symbol("match");

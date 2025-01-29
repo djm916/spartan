@@ -3,12 +3,12 @@
 
 ; Define a stream of integers
 (defun integer-stream (n)
-  (stream-cons n (integer-stream (+ 1 n))))
+  (stream-adjoin n (integer-stream (+ 1 n))))
 
 (defun prime-sieve (s)
-  (stream-cons (stream-car s)
-               (prime-sieve (stream-filter (fun (n) (not (divisible? n (stream-car s))))
-                                           (stream-cdr s)))))
+  (stream-adjoin (stream-first s)
+                 (prime-sieve (stream-filter (fun (n) (not (divisible? n (stream-first s))))
+                                             (stream-rest s)))))
 
 ; Define a stream of prime numbers using the prime generator defined above
 (def primes (prime-sieve (integer-stream 2)))

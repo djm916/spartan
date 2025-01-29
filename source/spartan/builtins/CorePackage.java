@@ -40,7 +40,7 @@ public final class CorePackage extends spartan.data.Package
     bind(Symbol.of("type"), CoreLib.TYPE);    
     bind(Symbol.of("load"), CoreLib.LOAD);    
     bind(Symbol.of("gensym"), CoreLib.GENSYM);    
-    bind(Symbol.of("abort"), CoreLib.ABORT);
+    bind(Symbol.of("error"), CoreLib.ERROR);
     bind(Symbol.of("macroexpand-1"), CoreLib.MACROEXPAND1);
     bind(Symbol.of("identity-hash"), CoreLib.IDENTITY_HASH);
     bind(Symbol.of("identical?"), CoreLib.IS_IDENTICAL);
@@ -130,8 +130,8 @@ public final class CorePackage extends spartan.data.Package
     bind(Symbol.of("append"), ListLib.APPEND);
     //bind(Symbol.of("take"), ListLib.TAKE);
     //bind(Symbol.of("drop"), ListLib.DROP);
-    //bind(Symbol.of("nth"), ListLib.NTH);
-    //bind(Symbol.of("nth-rest"), ListLib.NTH_REST);
+    bind(Symbol.of("nth"), ListLib.NTH);
+    bind(Symbol.of("nth-rest"), ListLib.DROP);
     
     /* Vector procedures */
     
