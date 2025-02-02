@@ -433,8 +433,8 @@ public class Reader implements AutoCloseable
   /** Read a symbol with the following grammar:
    *
    * <symbol> -> <qualified-symbol> | <bare-symbol>
-   * <qualified-symbol> => <package-name>:<base-name>
-   * <package-name> => <bare-symbol>
+   * <qualified-symbol> => <namespace>:<base-name>
+   * <namespace> => <bare-symbol>
    * <base-name> => <bare-symbol>
    * <bare-symbol> -> <symbol-start-char> <symbol-follow-char>*
    *
@@ -457,10 +457,10 @@ public class Reader implements AutoCloseable
       return withPosition(new Symbol(text.toString()), position);
   }
   
-  /** Read the base-name part of a package-qualified symbol
+  /** Read the base-name part of a qualified symbol
    *
    */
-  private QualifiedSymbol readQualifiedSymbol(String pkgName, StringBuilder text, Position position)
+  private QualifiedSymbol readQualifiedSymbol(String nsName, StringBuilder text, Position position)
   {
     getChar();
     text.append((char)lastChar); // the separator ":" is part of the symbol's full name
@@ -476,9 +476,9 @@ public class Reader implements AutoCloseable
       getChar();
       text.append((char)lastChar);
     }
-    var name = text.toString();
-    var baseName = name.substring(splitIndex);
-    return withPosition(new QualifiedSymbol(text.toString(), pkgName, baseName), position);
+    var fullName = text.toString();
+    var baseName = fullName.substring(splitIndex);
+    return withPosition(new QualifiedSymbol(fullName, nsName, baseName), position);
   }
   
   private Symbol readKeyword()

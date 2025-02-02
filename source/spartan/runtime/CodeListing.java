@@ -273,13 +273,13 @@ public class CodeListing
   {
     return switch (code) {
       case Apply      inst -> String.format("(apply %d)", inst.numArgs());
-      case BindGlobal inst -> String.format("(bind-global %s:%s)", inst.packageName().str(), inst.baseName().str());
+      case BindGlobal inst -> String.format("(bind-global %s:%s)", inst.nsName().str(), inst.baseName().str());
       case BranchTrue inst -> String.format("(branch-true %s)", ctx.labels.get(inst.right()));
       case BranchFalse inst -> String.format("(branch-false %s)", ctx.labels.get(inst.right()));
       case Halt        inst -> "(halt)";
       case Jump        inst -> String.format("(jump %s)", ctx.labels.get(inst.target()));
       case LoadConst inst -> String.format("(load-const %s)", inst.value().repr());
-      case LoadGlobal inst -> String.format("(load-global %s:%s)", inst.packageName().str(), inst.baseName().str());
+      case LoadGlobal inst -> String.format("(load-global %s:%s)", inst.nsName().str(), inst.baseName().str());
       case LoadLocal inst -> String.format("(load-local %d %d)", inst.depth(), inst.offset());
       case LoadLocal0 inst -> String.format("(load-local 0 %d)", inst.offset());
       case MakeClosure inst -> String.format("(make-closure %s)", ctx.labels.get(inst.proc().body()));
@@ -292,7 +292,7 @@ public class CodeListing
       case PushEnv inst -> String.format("(push-env %d)", inst.numSlots());
       case PushFrame inst -> "(push-frame)";
       case Raise inst -> "(raise)";
-      case StoreGlobal inst -> String.format("(store-global %s:%s)", inst.packageName().str(), inst.baseName().str());
+      case StoreGlobal inst -> String.format("(store-global %s:%s)", inst.nsName().str(), inst.baseName().str());
       case StoreLocal inst -> String.format("(store-local %d %d)", inst.depth(), inst.offset());
       case StoreLocal0 inst -> String.format("(store-local 0 %d)", inst.offset());
     };

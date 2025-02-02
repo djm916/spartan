@@ -1,7 +1,7 @@
 
 ; Standard list processing library
 
-(in-package spartan.core)
+(in-ns spartan.core)
 
 ; map - Maps a procedure across a list
 ;

@@ -1,5 +1,5 @@
 
-(in-package spartan.core)
+(in-ns spartan.core)
 
 (defrecord promise (thunk value has-value))
 

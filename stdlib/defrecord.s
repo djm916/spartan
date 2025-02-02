@@ -21,7 +21,7 @@
 ; point-x-set!   ; field mutators
 ; point-y-set!
 
-(in-package spartan.core)
+(in-ns spartan.core)
 
 ; Generate the name of a record constructor
 (defun generate-constructor-name (name)

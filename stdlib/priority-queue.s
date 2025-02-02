@@ -1,5 +1,5 @@
 
-(in-package spartan.priority-queue)
+(in-ns spartan.priority-queue)
 
 (defrecord queue-type (comparator elems))
 

@@ -1,15 +1,15 @@
 package spartan;
 
-import spartan.builtins.CorePackage;
+import spartan.builtins.CoreNS;
 import spartan.data.Symbol;
 import spartan.data.QualifiedSymbol;
 import spartan.data.Datum;
-import spartan.data.Package;
+import spartan.data.Namespace;
 import spartan.data.Macro;
 import spartan.data.RecordDescriptor;
 import spartan.errors.MultipleDefinition;
 import spartan.errors.UnboundSymbol;
-import spartan.errors.NoSuchPackage;
+import spartan.errors.NoSuchNamespace;
 import java.util.Map;
 import java.util.IdentityHashMap;
 import java.util.Optional;
@@ -20,75 +20,94 @@ import java.nio.file.Path;
 public final class Runtime
 {
   /**
-   * Returns the current package
-   */
-  public static Package currentPackage()
-  {
-    return currentPackage;
-  }
-  
-  /**
-   * Set the current package
-   */
-  public static void currentPackage(Package pkg)
-  {
-    currentPackage = pkg;
-  }
-  
-  /**
-   * Creates the package if it doesn't exist, and sets it as the current package
-   */
-  public static void enterPackage(Symbol pkgName)
-  {
-    currentPackage(getOrCreatePackage(pkgName));
-  }
-  
-  /**
-   * Find a package
+   * Returns the current namespace
    *
-   * First searches for a local package alias of the given name, then for a
-   * global package with the given name.
+   * @return the current namespace
    */
-  public static Package getPackage(Symbol pkgName)
+  public static Namespace currentNS()
   {
-    var pkg = currentPackage().getPackageAlias(pkgName);
-    if (pkg != null)
-      return pkg;
-    pkg = packages.get(pkgName);
-    if (pkg == null)
-      throw new NoSuchPackage(pkgName);
-    return pkg;
+    return currentNS;
   }
   
   /**
-   * Creates and returns a new package if it doesn't exist, otherwise returns the
-   * existing package.
+   * Set the current namespace
+   *
+   * @param ns the namespace
    */
-  public static Package getOrCreatePackage(Symbol pkgName)
+  public static void currentNS(Namespace ns)
   {
-    return packages.computeIfAbsent(pkgName, (name) -> new Package(name, CorePackage.INSTANCE));
+    currentNS = ns;
   }
   
   /**
-   * Add a package, overwriting any existing mapping to an existing package.
+   * Set the current namespace, creating it if it doesn't exist
+   *
+   * @param nsName the namespace name
    */
-  public static void addPackage(Package pkg)
+  public static void enterNS(Symbol nsName)
   {
-    packages.put(pkg.name(), pkg);
+    currentNS(getOrCreateNS(nsName));
+  }
+  
+  /**
+   * Find a namespace
+   *
+   * First searches for the namespace under a local alias in the current namespace,
+   * otherwise search the global namespace registry.
+   *
+   * @param nsName the namespace name to search for
+   * @return the namespace found
+   * @throws NoSuchNamespace if no such namespace exists
+   */
+  public static Namespace getNS(Symbol nsName)
+  {
+    var ns = currentNS().getAlias(nsName);
+    if (ns != null)
+      return ns;
+    ns = namespaces.get(nsName);
+    if (ns == null)
+      throw new NoSuchNamespace(nsName);
+    return ns;
+  }
+  
+  /**
+   * Creates and returns a new namespace if it doesn't exist, otherwise returns the
+   * existing namespace.
+   */
+  public static Namespace getOrCreateNS(Symbol nsName)
+  {
+    return namespaces.computeIfAbsent(nsName, (_) -> new Namespace(nsName, CoreNS.INSTANCE));
+  }
+  
+  /**
+   * Add a namespace, overwriting any existing mapping to an existing namespace.
+   */
+  public static void addNS(Namespace ns)
+  {
+    namespaces.put(ns.name(), ns);
+  }
+  
+  public static Namespace createNS(Symbol nsName)
+  {
+    //if (namespaces.containsKey(nsName))
+      //throw new DuplicateNamespace(nsName);
+    var ns = new Namespace(nsName, CoreNS.INSTANCE);
+    namespaces.put(nsName, ns);
+    return ns;
   }
   
   public static Datum lookup(Symbol s)
   {
     return (s instanceof QualifiedSymbol qs)
-           ? getPackage(Symbol.of(qs.packageName())).lookup(Symbol.of(qs.baseName()))
-           : currentPackage().lookup(s.intern());
+           ? getNS(Symbol.of(qs.nameSpace())).lookup(Symbol.of(qs.baseName()))
+           : currentNS().lookup(s.intern());
   }
   
   /** Resolve the given symbol in the global environment
    *
    * @param s the symbol to look up
    * @return the value bound to the symbol
-   * @throws NoSuchPackage if the symbol is qualified and the package does not exist
+   * @throws NoSuchNamespace if the symbol is qualified and the namespace does not exist
    * @throws UnboundSymbol if the symbol could not be resolved
    */
   public static Optional<Datum> tryLookup(Symbol s)
@@ -96,7 +115,7 @@ public final class Runtime
     try {
       return Optional.of(lookup(s));
     }
-    catch (UnboundSymbol | NoSuchPackage err) {
+    catch (UnboundSymbol | NoSuchNamespace err) {
       return Optional.empty();
     }
   }
@@ -114,27 +133,27 @@ public final class Runtime
   /** Bootstrap the initial system state and global environment.
    *
    *  <ul>
-   *    <li>Add the "spartan.core" package</li>
+   *    <li>Add the "spartan.core" namespace</li>
    *    <li>Load the "builtins.s" file</li>
-   *    <li>Set the current package to the "user" package</li>
+   *    <li>Set the current namespace to the "user" namespace</li>
    *  </ul>
    */
   public static void boot()
   {
     if (Config.LOG_DEBUG)
       log.info(() -> String.format("initializing runtime environment"));
-    var corePackage = CorePackage.INSTANCE;
-    addPackage(corePackage);
-    currentPackage(corePackage);
+    var coreNS = CoreNS.INSTANCE;
+    addNS(coreNS);
+    currentNS(coreNS);
     Loader.load(Config.HOME_DIR.resolve(Path.of("stdlib", "builtins.s")));
-    var userPackage = new Package(Symbol.of("user"), corePackage);
-    addPackage(userPackage);
-    currentPackage(userPackage);
+    var userNS = new Namespace(Symbol.of("user"), coreNS);
+    addNS(userNS);
+    currentNS(userNS);
   }
   
   private Runtime() { }
   
-  private static Package currentPackage;
-  private static final Map<Symbol, Package> packages = new IdentityHashMap<>();
+  private static Namespace currentNS;
+  private static final Map<Symbol, Namespace> namespaces = new IdentityHashMap<>();
   private static final Logger log = Logger.getLogger(Runtime.class.getName());
 }

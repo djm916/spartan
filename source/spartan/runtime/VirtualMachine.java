@@ -13,7 +13,6 @@ import spartan.errors.WrongNumberArgs;
 import spartan.errors.TypeMismatch;
 import spartan.errors.MultipleDefinition;
 import spartan.errors.UnboundSymbol;
-import spartan.errors.NoSuchPackage;
 import spartan.parsing.Position;
 
 /**
@@ -46,19 +45,19 @@ public final class VirtualMachine
    */
   public Kon kon;
   
-  private static void bindGlobal(Symbol packageName, Symbol baseName, Datum value)
+  private static void bindGlobal(Symbol nsName, Symbol baseName, Datum value)
   {
-    spartan.Runtime.getPackage(packageName).bind(baseName, value);
+    spartan.Runtime.getNS(nsName).bind(baseName, value);
   }
   
-  private static Datum loadGlobal(Symbol packageName, Symbol baseName)
+  private static Datum loadGlobal(Symbol nsName, Symbol baseName)
   {
-    return spartan.Runtime.getPackage(packageName).lookup(baseName);
+    return spartan.Runtime.getNS(nsName).lookup(baseName);
   }
   
-  private static void storeGlobal(Symbol packageName, Symbol baseName, Datum value)
+  private static void storeGlobal(Symbol nsName, Symbol baseName, Datum value)
   {
-    spartan.Runtime.getPackage(packageName).store(baseName, value);
+    spartan.Runtime.getNS(nsName).store(baseName, value);
   }
   
   private static Datum loadLocal(Env env, int depth, int offset)
@@ -92,9 +91,9 @@ public final class VirtualMachine
             }
             break;
           }
-          case BindGlobal(var packageName, var baseName, var source, var next): {
+          case BindGlobal(var nsName, var baseName, var source, var next): {
             try {
-              bindGlobal(packageName, baseName, result);
+              bindGlobal(nsName, baseName, result);
               control = next;
             }
             catch (Error err) {
@@ -124,9 +123,9 @@ public final class VirtualMachine
             control = next;
             break;
           }
-          case LoadGlobal(var packageName, var baseName, var source, var next): {
+          case LoadGlobal(var nsName, var baseName, var source, var next): {
             try {
-              result = loadGlobal(packageName, baseName);
+              result = loadGlobal(nsName, baseName);
               control = next;
             }
             catch (Error err) {
@@ -191,9 +190,9 @@ public final class VirtualMachine
           case Raise(var err, _): {
             throw err;
           }
-          case StoreGlobal(var packageName, var baseName, var source, var next): {
+          case StoreGlobal(var nsName, var baseName, var source, var next): {
             try {
-              storeGlobal(packageName, baseName, result);
+              storeGlobal(nsName, baseName, result);
               control = next;
             }
             catch (Error err) {

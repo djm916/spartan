@@ -117,9 +117,9 @@ public class Compiler
   private Inst compileGlobalVarRef(Symbol s, Inst next)
   {
     if (s instanceof QualifiedSymbol qs)
-      return new LoadGlobal(Symbol.of(qs.packageName()), Symbol.of(qs.baseName()), new SourceInfo(qs, positionOf(qs)), next);
+      return new LoadGlobal(Symbol.of(qs.nameSpace()), Symbol.of(qs.baseName()), new SourceInfo(qs, positionOf(qs)), next);
     else
-      return new LoadGlobal(spartan.Runtime.currentPackage().name(), s.intern(), new SourceInfo(s, positionOf(s)), next);
+      return new LoadGlobal(spartan.Runtime.currentNS().name(), s.intern(), new SourceInfo(s, positionOf(s)), next);
   }
   
   
@@ -157,10 +157,10 @@ public class Compiler
   private Inst compileSetGlobalVar(Symbol s, Inst next)
   {
     if (s instanceof QualifiedSymbol qs)
-      return new StoreGlobal(Symbol.of(qs.packageName()), Symbol.of(qs.baseName()), new SourceInfo(qs, positionOf(qs)),
+      return new StoreGlobal(Symbol.of(qs.nameSpace()), Symbol.of(qs.baseName()), new SourceInfo(qs, positionOf(qs)),
              new LoadConst(Nil.VALUE, next));
     else
-      return new StoreGlobal(spartan.Runtime.currentPackage().name(), s.intern(), new SourceInfo(s, positionOf(s)),
+      return new StoreGlobal(spartan.Runtime.currentNS().name(), s.intern(), new SourceInfo(s, positionOf(s)),
              new LoadConst(Nil.VALUE, next));
   }
   
@@ -170,7 +170,7 @@ public class Compiler
       throw malformedExp(exp);
     var init = exp.third();  
     return compile(init, scope, false,
-           new BindGlobal(spartan.Runtime.currentPackage().name(), s.intern(), new SourceInfo(exp, positionOf(s)),
+           new BindGlobal(spartan.Runtime.currentNS().name(), s.intern(), new SourceInfo(exp, positionOf(s)),
            new LoadConst(Nil.VALUE, next)));
   }
   
@@ -1281,7 +1281,7 @@ public class Compiler
     var body = exp.drop3();
     var macro = new Macro(makeProcedure(params, body, Scope.EMPTY));
     try {
-      spartan.Runtime.currentPackage().bind(symbol.intern(), macro);
+      spartan.Runtime.currentNS().bind(symbol.intern(), macro);
     }
     catch (MultipleDefinition err) {
       err.setSource(new SourceInfo(exp, positionOf(symbol)));

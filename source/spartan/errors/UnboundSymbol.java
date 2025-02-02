@@ -6,13 +6,13 @@ public class UnboundSymbol extends Error
 {
   private static final String MSG_FMT = "unable to resolve symbol \"%s:%s\"";
   
-  public UnboundSymbol(Symbol pkg, Symbol sym)
+  public UnboundSymbol(Symbol nsName, Symbol symbol)
   {
-    this(pkg, sym, null);
+    this(nsName, symbol, null);
   }
   
-  public UnboundSymbol(Symbol pkg, Symbol sym, SourceInfo source)
+  public UnboundSymbol(Symbol nsName, Symbol symbol, SourceInfo source)
   {
-    super(String.format(MSG_FMT, pkg.repr(), sym.repr()), source);
+    super(String.format(MSG_FMT, nsName.repr(), symbol.repr()), source);
   }
 }

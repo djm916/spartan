@@ -5,26 +5,26 @@ import java.util.Optional;
 import java.util.logging.Logger;
 
 /**
- * The spartan.core package.
+ * The "spartan.core" namespace
  */
-public final class CorePackage extends spartan.data.Package
+public final class CoreNS extends Namespace
 {
-  private static final Logger log = Logger.getLogger(CorePackage.class.getName());
+  private static final Logger log = Logger.getLogger(CoreNS.class.getName());
   
   public static final String NAME = "spartan.core";
   
-  public static final CorePackage INSTANCE = new CorePackage();
-    
-  private CorePackage()
+  public static final CoreNS INSTANCE = new CoreNS();
+  
+  private CoreNS()
   {
     super(Symbol.of(NAME), null);
   }
   
   {
-    // populate the package
+    // populate the namespace
     
     if (spartan.Config.LOG_DEBUG)
-      log.info(() -> String.format("initializing package %s", NAME));
+      log.info(() -> String.format("initializing namespace %s", NAME));
     
     bind(Symbol.of("="), CoreLib.EQ);
     bind(Symbol.of("/="), CoreLib.NE);
@@ -201,21 +201,21 @@ public final class CorePackage extends spartan.data.Package
     
     bind(Symbol.of("symbol-intern"), CoreLib.SYMBOL_INTERN);
     bind(Symbol.of("make-symbol"), CoreLib.MAKE_SYMBOL);
-    bind(Symbol.of("symbol-package"), CoreLib.SYMBOL_PACKAGE);
+    bind(Symbol.of("symbol-namespace"), CoreLib.SYMBOL_NS);
     bind(Symbol.of("symbol-basename"), CoreLib.SYMBOL_BASENAME);
     bind(Symbol.of("symbol-qualified?"), CoreLib.SYMBOL_IS_QUALIFIED);
     
-    /* Package-related procedures */
+    /* Namespace related procedures */
     
-    bind(Symbol.of("current-package"), PackageLib.CURRENT_PACKAGE);
-    bind(Symbol.of("set-current-package!"), PackageLib.SET_CURRENT_PACKAGE);
-    bind(Symbol.of("make-package"), PackageLib.MAKE);
-    bind(Symbol.of("find-package"), PackageLib.FIND);
-    bind(Symbol.of("the-package"), PackageLib.GET);
-    bind(Symbol.of("package-symbols"), PackageLib.SYMBOLS);
-    bind(Symbol.of("package-alias"), PackageLib.ALIAS);
-    bind(Symbol.of("package-bind"), PackageLib.BIND);
-    bind(Symbol.of("package-resolve"), PackageLib.RESOLVE);
+    bind(Symbol.of("current-ns"), CoreLib.CURRENT_NS);
+    bind(Symbol.of("set-current-ns!"), CoreLib.SET_CURRENT_NS);
+    bind(Symbol.of("make-ns"), CoreLib.MAKE_NS);
+    bind(Symbol.of("find-ns"), CoreLib.FIND_NS);
+    bind(Symbol.of("the-ns"), CoreLib.THE_NS);
+    bind(Symbol.of("ns-symbols"), CoreLib.NS_SYMBOLS);
+    bind(Symbol.of("ns-alias"), CoreLib.NS_ALIAS);
+    bind(Symbol.of("ns-bind"), CoreLib.NS_BIND);
+    bind(Symbol.of("ns-resolve"), CoreLib.NS_RESOLVE);
     
   }
 }

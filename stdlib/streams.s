@@ -15,7 +15,7 @@
 ; gen   A generator procedure that produces succesive stream values
 ;       each time it is called.
 
-(in-package spartan.core)
+(in-ns spartan.core)
 
 ; Add an element to the front of a stream
 

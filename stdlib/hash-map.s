@@ -1,4 +1,4 @@
-(in-package spartan.hashmap)
+(in-ns spartan.hashmap)
 
 (defrecord map-type (hash-fn equal-fn table size))
 

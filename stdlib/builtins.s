@@ -4,7 +4,7 @@
 ; This file is pre-loaded when the interpreter starts and
 ; itself loads several other files.
 
-;(set! spartan.core:*package* (the-package 'spartan.core))
+(set-current-ns! (the-ns 'spartan.core))
 
 (defun %quasiquote (exp level)
   (defun unquote? (form)
@@ -36,10 +36,10 @@
 ;(defmacro quasiquote (exp)
 ;  (%quasiquote exp 0))
 
-(defmacro in-package (package-name)
-  `(spartan.core:set-current-package!
-     (let ((pkg (find-package ',package-name)))
-       (if pkg pkg (make-package ',package-name)))))
+(defmacro in-ns (ns-name)
+  `(spartan.core:set-current-ns!
+     (let ((ns (find-ns ',ns-name)))
+       (if ns ns (make-ns ',ns-name)))))
 
 (defmacro inc! (var)
   `(set! ,var (+ 1 ,var)))
@@ -145,4 +145,3 @@
 (load "stdlib/import.s")
 (load "stdlib/control.s")
 (load "stdlib/ports.s")
-;(load "stdlib/match.s")

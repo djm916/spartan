@@ -4,7 +4,7 @@
 ; A queue is implemented here as a list containing the elements currently in the queue,
 ; and a (pointer to) the last element of that list (allowing constant-time push).
 
-(in-package queue)
+(in-ns queue)
 
 (defrecord queue-type (front back))
 
@@ -36,7 +36,7 @@
             (first node))]))
 
 
-(in-package user)
+(in-ns user)
 (import queue :as queue)
 (def q (queue:make-queue))
 (print-line "is queue? " (queue:queue? q))

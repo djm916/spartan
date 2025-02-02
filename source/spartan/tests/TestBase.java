@@ -4,7 +4,7 @@ import spartan.parsing.Reader;
 import spartan.compiling.Compiler;
 import spartan.data.Datum;
 import spartan.data.Symbol;
-import spartan.data.Package; // shadows java.lang.Package
+import spartan.data.Namespace;
 import spartan.runtime.VirtualMachine;
 import java.io.EOFException;
 
@@ -12,10 +12,11 @@ public abstract class TestBase
 {
   public static Datum eval(String code)
   {
-    // Set up a testbed package as the current package
-    var testPkg = new Package(Symbol.of("testbed"), spartan.builtins.CorePackage.INSTANCE);
-    spartan.Runtime.addPackage(testPkg);
-    spartan.Runtime.currentPackage(testPkg);
+    // Set up a namespace "testbed" as the current one
+    //var testNS = new Namespace(Symbol.of("testbed"), spartan.builtins.CoreNS.INSTANCE);
+    //spartan.Runtime.add(testPkg);
+    //spartan.Runtime.currentPackage(testPkg);
+    spartan.Runtime.enterNS(Symbol.of("testbed"));
     // Evaluate each top-level form in the source code
     try (Reader r = Reader.forString(code)) {
       var vm = new VirtualMachine();

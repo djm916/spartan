@@ -1,4 +1,6 @@
 
+(in-ns spartan.core)
+
 (defmacro wrap-io-primitive (fname)
   `(set! ,fname
      (let ((f ,fname))
