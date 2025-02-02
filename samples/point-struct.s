@@ -8,9 +8,9 @@
 (print-line "p is a point? " (point? p))
 (print-line "(type p) = " (type p))
 (print-line "p = " (point->string p))
-(point-x-set! p 1.0)
-(point-y-set! p 2.0)
+(set-point-x! p 1.0)
+(set-point-y! p 2.0)
 (print-line "p = " (point->string p))
-(match (make-point 1.0 2.0)
+(match p
   [(record point a b)
    (print-line "matched point (" a ", " b ")")])

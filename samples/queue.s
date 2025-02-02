@@ -20,19 +20,19 @@
 (defun push (self item)
   (let [(node (adjoin item ()))]
     (cond [(empty? self)
-             (queue-type-front-set! self node)
-             (queue-type-back-set! self node)]
+             (set-queue-type-front! self node)
+             (set-queue-type-back! self node)]
           [else
              (set-rest! (queue-type-back self) node)
-             (queue-type-back-set! self node)])))
+             (set-queue-type-back! self node)])))
 
 (defun pop (self)
   (cond [(empty? self) #nil]
         [else
           (let [(node (queue-type-front self))]
-            (queue-type-front-set! self (rest node))
+            (set-queue-type-front! self (rest node))
             (if (spartan.core:empty? (queue-type-front self))
-              (queue-type-back-set! self ()))
+              (set-queue-type-back! self ()))
             (first node))]))
 
 

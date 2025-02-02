@@ -11,15 +11,15 @@
 ;   * a type predicate
 ;   * accessors and mutators for each field
 ;
-; For example, (defstruct point (x y)) defines the following:
+; For example, (defrecord point (x y)) defines the following:
 ;
-; point-type     ; the record type descriptor
-; make-point     ; the constructor
+; point          ; the record type descriptor
+; make-point     ; constructor
 ; point?         ; predicate
 ; point-x        ; field accessors
 ; point-y
-; point-x-set!   ; field mutators
-; point-y-set!
+; set-point-x!   ; field mutators
+; set-point-y!
 
 (in-ns spartan.core)
 
@@ -37,7 +37,7 @@
 
 ; Generate the name of a record field mutator
 (defun generate-mutator-name (name field)
-  (string->symbol (string-concat (symbol->string name) "-" (symbol->string field) "-set!")))
+  (string->symbol (string-concat "set-" (symbol->string name) "-" (symbol->string field) "!")))
 
 (defmacro defrecord (name fields)
   `(let ((rtd (spartan.core:make-record-type ',name ',fields))) ; Create record type descriptor

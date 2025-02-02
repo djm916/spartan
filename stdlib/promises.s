@@ -13,8 +13,8 @@
         [else
          (if (not (promise-has-value p))
            (do
-             (promise-value-set! p ((promise-thunk p)))
-             (promise-has-value-set! p #true)
-             (promise-thunk-set! p #nil)))
+             (set-promise-value! p ((promise-thunk p)))
+             (set-promise-has-value! p #true)
+             (set-promise-thunk! p #nil)))
          (promise-value p)]))
   
