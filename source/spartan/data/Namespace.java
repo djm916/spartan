@@ -77,14 +77,14 @@ public class Namespace implements Datum
   }
   
   /**
-   * Add a local namespace alias into this namespace
+   * Add an alias for a namespace into this namespace
    *
-   * @param nsName The alias for the namespace
+   * @param alias The alias
    * @param ns The namespace to create an alias for
    */
-  public void addAlias(Symbol alias, Symbol nsName)
+  public void addAlias(Symbol alias, Namespace ns)
   {
-    aliases.put(alias.name(), nsName.name());
+    aliases.put(alias, ns);
   }
   
   /**
@@ -93,7 +93,7 @@ public class Namespace implements Datum
    * @param alias A namespace alias
    * @return The canonical namespace name
    */
-  public Optional<String> canonicalName(String alias)
+  public Optional<Namespace> lookupAlias(Symbol alias)
   {
     return Optional.ofNullable(aliases.get(alias));
   }
@@ -166,7 +166,7 @@ public class Namespace implements Datum
   
   protected final Symbol name;
   protected final Map<Symbol, Datum> bindings = new IdentityHashMap<>();
-  protected final Map<String, String> aliases = new HashMap<>();
+  protected final Map<Symbol, Namespace> aliases = new IdentityHashMap<>();
   protected final Namespace parent;
 }
  

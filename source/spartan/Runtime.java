@@ -93,13 +93,13 @@ public final class Runtime
   public static Datum lookup(Symbol s)
   {
     return (s instanceof QualifiedSymbol qs)
-           ? getNS(Symbol.of(canonicalName(qs.nameSpace()))).lookup(Symbol.of(qs.baseName()))
+           ? getNS(canonicalName(Symbol.of(qs.nameSpace()))).lookup(Symbol.of(qs.baseName()))
            : currentNS().lookup(s.intern());
   }
   
-  private static String canonicalName(String s)
+  private static Symbol canonicalName(Symbol nsName)
   {
-    return spartan.Runtime.currentNS().canonicalName(s).map(nsName -> nsName).orElse(s);
+    return spartan.Runtime.currentNS().lookupAlias(nsName).map(ns -> ns.name()).orElse(nsName);
   }
   
   /** Resolve the given symbol in the global environment
