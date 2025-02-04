@@ -38,8 +38,8 @@
 
 (defmacro in-ns (ns-name)
   `(spartan.core:set-current-ns!
-     (let ((ns (find-ns ',ns-name)))
-       (if ns ns (make-ns ',ns-name)))))
+     (let ((ns (spartan.core:find-ns ',ns-name)))
+       (if ns ns (spartan.core:make-ns ',ns-name)))))
 
 (defmacro inc! (var)
   `(set! ,var (+ 1 ,var)))

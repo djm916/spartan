@@ -4,15 +4,15 @@ import spartan.data.Symbol;
 
 public class UnboundSymbol extends Error
 {
-  private static final String MSG_FMT = "unable to resolve symbol \"%s:%s\"";
+  private static final String MSG_FMT = "unable to resolve symbol \"%s\"";
   
-  public UnboundSymbol(Symbol nsName, Symbol symbol)
+  public UnboundSymbol(Symbol symbol)
   {
-    this(nsName, symbol, null);
+    this(symbol, null);
   }
   
-  public UnboundSymbol(Symbol nsName, Symbol symbol, SourceInfo source)
+  public UnboundSymbol(Symbol symbol, SourceInfo source)
   {
-    super(String.format(MSG_FMT, nsName.repr(), symbol.repr()), source);
+    super(String.format(MSG_FMT, symbol.repr()), source);
   }
 }

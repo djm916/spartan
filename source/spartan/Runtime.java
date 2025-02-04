@@ -52,19 +52,13 @@ public final class Runtime
   /**
    * Find a namespace
    *
-   * First searches for the namespace under a local alias in the current namespace,
-   * otherwise search the global namespace registry.
-   *
    * @param nsName the namespace name to search for
    * @return the namespace found
    * @throws NoSuchNamespace if no such namespace exists
    */
   public static Namespace getNS(Symbol nsName)
   {
-    var ns = currentNS().getAlias(nsName);
-    if (ns != null)
-      return ns;
-    ns = namespaces.get(nsName);
+    var ns = namespaces.get(nsName);
     if (ns == null)
       throw new NoSuchNamespace(nsName);
     return ns;
@@ -99,8 +93,13 @@ public final class Runtime
   public static Datum lookup(Symbol s)
   {
     return (s instanceof QualifiedSymbol qs)
-           ? getNS(Symbol.of(qs.nameSpace())).lookup(Symbol.of(qs.baseName()))
+           ? getNS(Symbol.of(canonicalName(qs.nameSpace()))).lookup(Symbol.of(qs.baseName()))
            : currentNS().lookup(s.intern());
+  }
+  
+  private static String canonicalName(String s)
+  {
+    return spartan.Runtime.currentNS().canonicalName(s).map(nsName -> nsName).orElse(s);
   }
   
   /** Resolve the given symbol in the global environment

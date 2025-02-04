@@ -676,8 +676,7 @@ public final class CoreLib
         throw new InvalidArgument();
       if (!alias.isSimple())
         throw new InvalidArgument();
-      var fromNS = spartan.Runtime.getNS(nsName);
-      toNS.addAlias(alias, fromNS);
+      toNS.addAlias(alias, nsName);
       vm.result = Nil.VALUE;
       vm.popFrame();
     }

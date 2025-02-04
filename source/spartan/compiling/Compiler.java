@@ -117,7 +117,7 @@ public class Compiler
   private Inst compileGlobalVarRef(Symbol s, Inst next)
   {
     if (s instanceof QualifiedSymbol qs)
-      return new LoadGlobal(Symbol.of(qs.nameSpace()), Symbol.of(qs.baseName()), new SourceInfo(qs, positionOf(qs)), next);
+      return new LoadGlobal(Symbol.of(canonicalName(qs.nameSpace())), Symbol.of(qs.baseName()), new SourceInfo(qs, positionOf(qs)), next);
     else
       return new LoadGlobal(spartan.Runtime.currentNS().name(), s.intern(), new SourceInfo(s, positionOf(s)), next);
   }
@@ -157,11 +157,16 @@ public class Compiler
   private Inst compileSetGlobalVar(Symbol s, Inst next)
   {
     if (s instanceof QualifiedSymbol qs)
-      return new StoreGlobal(Symbol.of(qs.nameSpace()), Symbol.of(qs.baseName()), new SourceInfo(qs, positionOf(qs)),
+      return new StoreGlobal(Symbol.of(canonicalName(qs.nameSpace())), Symbol.of(qs.baseName()), new SourceInfo(qs, positionOf(qs)),
              new LoadConst(Nil.VALUE, next));
     else
       return new StoreGlobal(spartan.Runtime.currentNS().name(), s.intern(), new SourceInfo(s, positionOf(s)),
              new LoadConst(Nil.VALUE, next));
+  }
+  
+  private static String canonicalName(String s)
+  {
+    return spartan.Runtime.currentNS().canonicalName(s).map(nsName -> nsName).orElse(s);
   }
   
   private Inst compileDef(List exp, Scope scope, boolean tail, Inst next)

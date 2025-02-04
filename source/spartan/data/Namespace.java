@@ -5,6 +5,7 @@ import spartan.errors.UnboundSymbol;
 import spartan.errors.MultipleDefinition;
 import java.util.Map;
 import java.util.IdentityHashMap;
+import java.util.HashMap;
 import java.util.Optional;
 import java.util.Set;
 
@@ -81,21 +82,20 @@ public class Namespace implements Datum
    * @param nsName The alias for the namespace
    * @param ns The namespace to create an alias for
    */
-  public void addAlias(Symbol nsName, Namespace ns)
+  public void addAlias(Symbol alias, Symbol nsName)
   {
-    aliases.put(nsName, ns);
+    aliases.put(alias.name(), nsName.name());
   }
   
   /**
-   * Get a local namespace alias
+   * Get the canonical name for an aliased namespace
    *
-   * @param nsName A namespace alias
-   * @return The (optional) namespace aliased by nsName
+   * @param alias A namespace alias
+   * @return The canonical namespace name
    */
-  public Namespace getAlias(Symbol nsName)
+  public Optional<String> canonicalName(String alias)
   {
-    // size check is an optimization to avoid a call to IdentityHashMap.get in common case of a namespace having no local aliases
-    return aliases.size() == 0 ? null : aliases.get(nsName);
+    return Optional.ofNullable(aliases.get(alias));
   }
   
   /**
@@ -128,7 +128,7 @@ public class Namespace implements Datum
   public void store(Symbol name, Datum value)
   {
     if (!bindings.containsKey(name))
-      throw new UnboundSymbol(this.name, name);
+      throw new UnboundSymbol(name);
     bindings.put(name, value);
   }
   
@@ -147,7 +147,7 @@ public class Namespace implements Datum
     if (parent != null)
       value = parent.lookup(name);
     if (value == null)
-      throw new UnboundSymbol(this.name, name);
+      throw new UnboundSymbol(name);
     return value;
   }
   
@@ -166,6 +166,7 @@ public class Namespace implements Datum
   
   protected final Symbol name;
   protected final Map<Symbol, Datum> bindings = new IdentityHashMap<>();
-  protected final Map<Symbol, Namespace> aliases = new IdentityHashMap<>();
+  protected final Map<String, String> aliases = new HashMap<>();
   protected final Namespace parent;
 }
+ 
