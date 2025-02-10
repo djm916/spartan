@@ -285,9 +285,14 @@ refer to any previous binding <i>var<sub>i</sub></i>, where <i>i < j</i>.</p>
 
 <div class="codeblock">(letrec ((<i>var<sub>1</sub></i> <i>init<sub>1</sub></i>) ...) <i>body</i> ...)</div>
 
-</p>is evaluated as follows: First, the current environment is extended with each <i>var</i> bound to an undefined value.
-Then, each <i>init<sub>i</sub></i> is evaluated (in some unspecified order) and bound to the corresponding <i>var<sub>i</sub></i> in the extended environment.
-Finally, the <i>body</i> expressions are evaluated in sequence in the extended environment and the result is returned as the value of the entire expression.</p>
+<p>is semantically equivalent to the form using let and set!</p>
+
+<div class="codeblock"><pre>
+(let ((<i>var<sub>1</sub></i> #nil) ...)
+  (set! <i>var<sub>1</sub></i> <i>init<sub>1</sub></i>)
+  ...
+  <i>body</i>)
+</pre></div>
 
 <p>The recursive form allows the definition of self-recursive and sets of
 mutually-recursive functions. Each <i>init</i> is typically a lambda expression,
