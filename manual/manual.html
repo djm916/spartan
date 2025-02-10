@@ -24,33 +24,18 @@
 <a id="intro"><h2>Introduction</h2></a>
 
 <h3>What is Spartan?</h3>
-<p>Spartan is an experimental Lisp dialect based on Scheme, a minimal and elegant programming language used widely in computer science pedogogy.
+<p>Spartan is an experimental Lisp dialect. It is primarily based on Scheme, a minimal and elegant programming language used widely in computer science pedogogy.
 To learn Scheme, the canonical source is "Structured Interpretation of Computer Programs", commonly referred to as "SICP" or "The Wizard Book".
 For technical reference, the standard "Revised^N Report on the Algorithmic Language Scheme", or simply "RNRS". The current revision is R7RS.
 Spartan was created primarily for the author's own education into Scheme and functional programming.
 </p>
 
 <h3>Overview</h3>
-<p>
-This document specifies the design and implementation of a Scheme-like language (Spartan) into bytecode instructions for a virtual machine.
+<p>This document specifies the design and implementation of the Spartan language. It includes  into bytecode instructions for a virtual machine.
 All of Scheme's major features are included: S-expression based syntax, first-class anonymous procedures, lexical closures,
 proper tail recursion, metaprogramming via macros, first-class continuations, etc.
 The compilation method and instruction set design are based on the heap model given in "Three Implementation Models for Scheme".
 The virtual machine design is based on the "CEK" abstract machine model.
-</p>
-
-The host language is Java (JDK 17+), so for readers to understand the implementation, a familiarity with Java is assumed.
-
-
-However, Spartan is not properly a Scheme, since it does not conform to any Scheme standard and the design differs in many ways. Most notable are:
-
-<ul>
-  <li>No pairs: There is no pair data type. Instead, the fundamental data type is the (proper) list. A pair is simply a list of 2 elements.</li>
-  <li>Numbers: There is a full numeric tower, but there is no distinction between extact and inexact numbers.</li>
-  <li>Macros are not hygenic: a defmacro special form is provided, but there is no facility for define-syntax, syntax-case, etc.</li>
-  <li>Packages: symbols are organized into distinct namespaces.</li>  
-</ul>
-
 </p>
 
 <a id="chapter_1"><h2>Basic Concepts</h2></a>
@@ -61,11 +46,11 @@ essential terminology, which is used throughout.</p>
 
 <h3>Values and Types</h3>
 
-<p>A <i>value</i> is a unit of data. Every value has a <i>type</i>.
-Examples of value types include: number, text, list, function, etc. In
-general, operations will have restrictions on what types are acceptable as input
-parameters, depending upon the specific operation involved. It is an error to invoke
-any operation on value types which the operation does not accept.</p>
+<p>A <i>value</i> is a discrete unit of data. Each value belongs to a (singular) <i>type</i>.
+Examples of types include: number, text, list, etc. In mathematical terms, a type is a description
+of a set of values and a set of operations 
+In general, operations will have restrictions on what types are acceptable as input parameters, depending upon the specific operation involved.
+It is an error to invoke any operation on value types which the operation does not accept.</p>
 
 <h3>Expressions and Evaluation</h3>
 
@@ -97,29 +82,44 @@ It is an error to refer to an unbound variable.</p>
 
 <a id="chapter_2"><h2>Types</h2></a>
 
-<h3>Void</h3>
+<h3>Nil</h3>
 
-<p>The <i>void</i> value, denoted <code>void</code> is the singular value of type <i>void</i>.
-It signifies the absence of any meaningful value.</p>
+<p>The <i>nil</i> value, denoted <code>#nil</code> is the singular value of type <i>nil</i>.
+<code>#nil</code> signifies the absence of any meaningful value.
+It is typically used to represent a "missing" value, or as the result of procedures called solely for effect.
+<code>#nil</code> is considered false for the purposes of a boolean test.
+</p>
 
 <h3>Boolean</h3>
 
-<p>The boolean values, denoted <code>true</code> and <code>false</code> are the basic
-units of logical operations.</p>
+<p>The <i>boolean</i> logic values are denoted <code>#true</code> and <code>#false</code>.
+Only the values <code>#false</code> and <code>#nil</code> are considered false for the purposes of a boolean test.</p>
 
 <h3>Symbols</h3>
 
-<p>A <i>symbol</i> is a unique value denoted by a name (i.e., a string of characters).
-All identical names denote the same unique symbol. unique named constant value.
-A symbol is not a variable, but symbols are used to denote variables within expressions.
-Unlike a variable, whose value usually changes with each evaluation of an expression, a symbol
-never changes -- it always denotes itself.</p>
+<p>A <i>symbol</i> is a unique value denoted by a name (i.e., an identifier).
+Identical names denote identical symbols.
+Symbols are used to represent variables but are not themselves variable.
+A symbol's value never changes, it always denotes itself.</p>
 
 <h3>Numeric</h3>
 
-<p>The numeric types are <i>integer</i>, <i>rational</i>, <i>real</i>  and <i>complex</i>.
-The set of numeric types forms a natural heirarchy of subtypes: every integer is rational, every rational is real, and every real is complex.
-Many, but not all, mathematical operations will accept arguments of any numeric type.</p>
+<p>The numeric types are <i>integer</i>, <i>rational</i>, <i>float</i>  and <i>complex</i>.
+
+<ul>
+  <li>Integers are arbitrary precision (their magnitude is limited only by available memory).</li>
+  <li>Floats use the IEEE double-precision (64 bit) floating-point format.</li>
+  <li>Rationals are represented by two arbitrary-precision integers for the numerator and denominator.</li>
+  <li>Complex numbers consist of two floating point numbers for the real and imaginary parts.</li>
+</ul>
+
+
+In mathematics, numbers form natural heirarchy of subtypes: every integer is rational, every rational is real, and every real is complex.
+However, in computing the natural limits of hardware, choice of data representation, and concern for efficiency complicate this.
+In particular, there is no type that precisely models mathematical real numbers.
+Real numbers can be represented precisely but inefficiently by the rational type, or efficiently but imprecisely by the float type.
+Converting an integer or rational to a float or complex (or vice-versa) may result in a loss of accuracy and/or precision.
+</p>
 
 <h3>Lists</h3>
 
@@ -131,24 +131,40 @@ Many, but not all, mathematical operations will accept arguments of any numeric 
 
 <p>The empty list is denoted <code>()</code>.</p>
 
+<p>Lists are a recursive structure defined as follows. A list is either:</p>
+
+<ul>
+  <li>the empty list, denoted <code>()</code>.</li>
+  <li>the first element of the list, followed by the rest of the sequence (a list).</li>
+</ul>
+
+<p>Any function on lists can be built on the fundamental operations:</p>
+
+<ul>
+  <li><code>(adjoin x xs)</code> constructs a list whose first element is x and whose remaining elements are in xs.</li>
+  <li><code>(empty? xs)</code> is true only if xs is the empty list.</li>
+  <li><code>(first (adjoin x xs))</code> gives x.</li>
+  <li><code>(rest (adjoin x xs))</code> gives xs.</li>
+</ul>
+
 <h3>Functions</h3>
 
-<p><i>Function</i>s are fundamental in any language. They are one of the primary
-means of abstraction and composition. They may be pure or effectful. Functions are
-first-class, and may be passed freely to and returned from other functions. Functions are
-lexical closures, meaning they capture the values of the free variables in their scope.<p>
+<p><i>Function</i>s are fundamental in any language.
+They are one of the primary means of abstraction and composition.
+They may be pure or effectful.
+Functions are first-class values, so may be passed to and returned from other functions.
+Functions capture the values of the free variables in their scope (i.e., they are lexical closures).<p>
 
 <h3>Strings</h3>
 
-<p>A <i>string</i> is an immutable sequence of zero or more Unicode characters.
-A <i>string literal</i> is a sequence of Unicode characters encoded directly in the source text.
-This encoding may (optionally) be specified; the default is UTF-8.</p>
+<p>A <i>string</i> is an immutable sequence of zero or more Unicode characters (code points).
+The source file encoding may optionally be specified; the default is UTF-8.</p>
 
 <p>String literals are delimited with double quotes (<code>"</code>). Inside a
 string literal, the following escape sequences have special meaning:</p>
 
 <ul>
-  <li><code>\u{xxxx}</code>, where x is a hexadecimal digit, denotes the Unicode character whose code point is equal to the specified value.</li>
+  <li><code>\u{xxxx}</code>, where each x is a hexadecimal digit, denotes the Unicode character whose code point is equal to the specified value.</li>
   <li><code>\n</code> denotes the newline character.</li>
   <li><code>\t</code> denotes the tab character.</li>
   <li><code>\\</code> denotes a literal <code>\</code></li>
@@ -165,13 +181,27 @@ between Spartan and an external device. Spartan values may be converted to
 
 <h3>Promises</h3>
 
-<p>Promises, along with the operators <code>delay</code> and <code>force</code>
-provide a simple interface to support lazy evaluation. The operator
-<code>delay</code> accepts an expression (which is not immediately evaluated),
-and returns a promise to return its value. The counterpart operator, <code>force</code>,
-accepts a promise and evaluates the original expression, in the context of its
-original environment, and returns the result. The expression is guaranteed to
-only be evaluated once.</p>
+<p>Promises, along with <code>delay</code> and <code>force</code> provide a simple primitive for lazy evaluation.
+The syntax <code>(delay <i>expression</i>)</code> does not immediately evaluate <i>expression</i>; instead, it returns a <i>promise</i> to evaluate it later.
+The procedure <code>force</code> accepts a promise and returns the result of evaluating the delayed expression (in the context of its original environment).
+The expression is guaranteed to only be evaluated once.</p>
+
+<h3>Records</h3>
+
+<p>New types are created by defining records. A record consists of a set of named values, called its fields. A record definition, of the form
+
+<div class = "codeblock"><pre>
+(defrecord <i>type</i> (<i>field<sub>1</sub></i> ... <i>field<sub>N<sub></i>))
+</pre></div>
+
+defines a new, unique record type <i>type</i> and creates the following procedures:
+
+<ul>
+  <li>A constructor <code>(<i>type</i> <i>field<sub>1</sub></i> ... <i>field<sub>N</sub></i>)</code> creates new records of the type</li>
+  <li>A predicate <code><i>type</i>?</code> determines if a record is of the type</li>
+  <li>For each field <i>field<sub>i</sub></i>, accessor and mutator procedures <code><i>type</i>-<i>field<sub>i</sub></i></code> and <code>set-<i>type</i>-<i>field<sub>i</sub>!</i></code></li>
+</ul>
+</p>
 
 <a id="chapter_3"><h2>Expressions</h2></a>
 
@@ -184,46 +214,59 @@ It is always an error to refer to an unbound variable.</p>
 
 <h3>Conditionals</h3>
 
-<p>A conditional expression of the form</p>
-<div class="codeblock">
-(if <i>exp<sub>1</sub></i> <i>exp<sub>2</sub></i> <i>exp<sub>3</sub></i>)
-</div>
-<p>first evaluates <i>exp<sub>1</sub></i>. If the result is true, <i>exp<sub>2</sub></i> is evaluated and its value is returned.
-Otherwise, <i>exp<sub>3</sub></i> is evaluated and its value is returned. If <i>exp<sub>3</sub></i> is not given and <i>exp<sub>1</sub></i> is <code>false</code>,
-void is returned.</p>
+<p>The form</p>
+
+<div class="codeblock">(if <i>exp<sub>1</sub></i> <i>exp<sub>2</sub></i> <i>exp<sub>3</sub></i>)</div>
+
+<p>first evaluates <i>exp<sub>1</sub></i>.
+If the result is true, <i>exp<sub>2</sub></i> is evaluated and its value is returned.
+Otherwise, <i>exp<sub>3</sub></i> is evaluated and its value is returned.
+If <i>exp<sub>3</sub></i> is not given and <i>exp<sub>1</sub></i> is <code>false</code>, void is returned.</p>
+
+<p>The form</p>
+
+<div class="codeblock">(cond ((<i>exp<sub>1</sub></i> <i>body<sub>1</sub></i>...)))</div>
+
+<p>is semantically equivalent to the series of nested if expressions</p>
+
+<div class="codeblock"><pre>
+(if <i>exp<sub>1</sub></i>
+    (do <i>body<sub>1</sub></i>...)
+    (if <i>exp<sub>2</sub></i>
+        (do <i>body<sub>2</sub></i>...)
+        ...
+        (if <i>exp<sub>N</sub></i>
+            (do <i>body<sub>N</sub></i>...)
+            #nil)))
+</pre></div>
 
 <h3>Sequencing</h3>
 
-<p>An expression sequence</p>
-<div class="codeblock">
-(do <i>exp<sub>1</sub></i> ... <i>exp<sub>N</sub></i>)
-</div>
-<p>evaluates each <code><i>exp</i></code> in order from 1 to <i>N</i>. The
-value of <code><i>exp<sub>N</sub></i></code> is returned as the result of the
-entire expression.</p>
+<p>The form</p>
+
+<div class="codeblock">(do <i>exp<sub>1</sub></i> ... <i>exp<sub>N</sub></i>)</div>
+
+<p>evaluates each <code><i>exp</i></code> in order from 1 to <i>N</i>.
+The value of <code><i>exp<sub>N</sub></i></code> is returned as the result of the entire expression.</p>
 
 <h3>Let Expressions</h3>
 
-<p>A let expression binds a set of local variables in a new environment and
-evaluates its body expression in the context of that environment. There are
+<p>This class of forms bind a set of lexical variables in a new environment and
+evaluate the body expression in the context of that environment. There are
 three forms: basic, sequential, and recursive.</p>
 
-<p>The basic let expression has the form</p>
+<p>The basic form</p>
 
-<div class="codeblock"><pre>
-(let ((<i>var<sub>1</sub></i> <i>init<sub>1</sub></i>) ...) <i>body</i> ...)
-</pre></div>
+<div class="codeblock">(let ((<i>var<sub>1</sub></i> <i>init<sub>1</sub></i>) ...) <i>body</i> ...)</div>
 
-<p>The basic form is evaluated as follows: First, the <i>init</i> expressions are evaluated in the current environment (in some unspecified order).
+<p>is evaluated as follows: First, the <i>init</i> expressions are evaluated in the current environment (in some unspecified order).
 Then the current environment is extended with <i>var<sub>i</sub></i> bound to the value of <i>init<sub>i</sub></i>.
 Finally, the <i>body</i> expressions are evaluated in sequence in the extended environment and the result is returned as the value of the entire expression.
 </p>
 
 <p>The sequential form</p>
 
-<div class="codeblock"><pre>
-(let* ((<i>var<sub>1</sub></i> <i>init<sub>1</sub></i>) ...) <i>body</i> ...)
-</pre></div>
+<div class="codeblock">(let* ((<i>var<sub>1</sub></i> <i>init<sub>1</sub></i>) ...) <i>body</i> ...)</div>
 
 <p>is semantically equivalent to the series of nested let expressions</p>
 
@@ -238,13 +281,11 @@ Finally, the <i>body</i> expressions are evaluated in sequence in the extended e
 <p>The bindings are performed sequentially, so any <i>init<sub>j</sub></i> may
 refer to any previous binding <i>var<sub>i</sub></i>, where <i>i < j</i>.</p>
 
-<p>A recursive let expression has the form<p>
+<p>The recursive form<p>
 
-<div class="codeblock"><pre>
-(letrec ((<i>var<sub>1</sub></i> <i>init<sub>1</sub></i>) ...) <i>body</i> ...)
-</pre></div>
+<div class="codeblock">(letrec ((<i>var<sub>1</sub></i> <i>init<sub>1</sub></i>) ...) <i>body</i> ...)</div>
 
-</p>and is evaluated as follows: First, the current environment is extended with each <i>var</i> bound to an undefined value.
+</p>is evaluated as follows: First, the current environment is extended with each <i>var</i> bound to an undefined value.
 Then, each <i>init<sub>i</sub></i> is evaluated (in some unspecified order) and bound to the corresponding <i>var<sub>i</sub></i> in the extended environment.
 Finally, the <i>body</i> expressions are evaluated in sequence in the extended environment and the result is returned as the value of the entire expression.</p>
 
@@ -269,10 +310,10 @@ It is an error if <i>f</i> does not evaluate to a function or if the number of a
 <p>Functions are defined by "lambda" expressions. The term lambda comes from the lambda calculus, where the Greek symbol lambda was used to denote a function.
 An expression of the form</p>
 
-<div class="codeblock">
+<div class="codeblock"><pre>
 (fun (<i>var<sub>1</sub></i> ... <i>var<sub>N</sub></i>)
   <i>body</i>...)
-</div>
+</pre></div>
 
 <p>evaluates to a new function <i>f</i> with N parameters. The scope of the <i>body</i>
 includes all variables in the scope of the lambda expression in addition to the formal parameters.
@@ -298,10 +339,9 @@ defined inductively as follows:</p>
 
 <a id="chapter_5"><h2>Virtual Machine</h2></a>
 
-<p>The Spartan virtual machine design is based on a CESK machine, modified to support a Scheme-like programming language.
-The CESK machine is based on the CEK machine, an abstract machine model for evaluating the lambda calculus.
-The lambda calculus, including lambda expressions, applications, and variables, is sufficient to support functional programming.
-The CESK machine extends the CEK machine with a store, to support mutable variables. The CESK machine has 4 components:</p>
+<p>The Spartan virtual machine design is based on a CESK machine, an abstract machine model for evaluating lambda calculus.
+Lambda calculus, including lambda expressions, applications, and variables, is the basis for functional programming languages.
+The CESK machine has 4 components:</p>
 
 <ul>
   <li>C: control, the current expression being evaluated</li>
@@ -312,254 +352,179 @@ The CESK machine extends the CEK machine with a store, to support mutable variab
 </p>
 
 <p>In modern hardware parlance, the C component is analogous to the instruction pointer (IP), E is analogous to the stack,
-S is analogous to the heap, and K is analogous to the call stack. In a tradional language like C, the call stack is used for both
-activation frame records, and to store the values of parameters and local variables. In the CESK machine, these purposes are split</p>
+S is analogous to the heap, and K is analogous to the call stack. In a traditional language like C, the call stack contains
+both activation frames and parameter values. In the CESK machine, these purposes are split into two stacks, E for parameters and and K for activation frames.
+</p>
 
-<p>The Spartan virtual machine's state consists of 5 components:</p>
+<p>Spartan's virtual machine state consists of 6 components:</p>
 
 <ul>
   <li>RES: result, stores result of evaluated expressions</li>
   <li>CTL: control, the current instruction being executed</li>
-  <li>ARG: arguments, evaluated procedure arguments list</li>
-  <li>ENV: environment, head of the environment chain</li>
-  <li>KON: continuation, head of the continuation chain</li>
+  <li>ARG: arguments, list of evaluated procedure arguments</li>
+  <li>ENV: environment, head of the chain of environment frames</li>
+  <li>KON: continuation, head of the chain of continuation frames</li>
+  <li>STO: store, the top-level, global environment</li>
 </ul>
 
-<p>In the CESK machine, the C component serves a dual purpose: it is either an expression to evaluate or a data value which is the result of evaluating an expression (the only values in the lambda calculus are functions).
-In the Spartan VM, these purposes are split into to registers. The RES stores evaluation results, and the CTL register points to an instruction.
+<h3>Closures</h3>
+<p>The functions created by lambda expressions are so-called lexical closures because they retain the values of free variables in the body of the lambda.
+That is, lambda bodies are always evaluated in their defining environment, extended with any parameters.
+In the virtual machine closures are represented by a closure object, denoted Clo(env, body), where
+env points to the function's defining environment, and body points to the function's entry point.
+When a function is called, the environment stored in the closure is extended with a frame for the parameters and made current before evaluating the function body.
+When the function returns, the previous environment is restored.</p>
 
-<p>Closures<p>
-The function values created by lambda expressions are so-called lexical closures because they
-retain values for the free variables in the body of the lambda. That is, lambda bodies are always evaluated with respect to their defining environment,
-plus any parameters.
-In the virtual machine, function values are represented by
-a closure object: a pair containing 1) a pointer to the function's entry point, 2) a pointer to the function's defining environment.
-When a function is called, the environment stored in the closure is extended with a frame for the parameters and made current before
-evaluating the function body. When the function returns, the previous environment is restored.
+<h3>Environments and environment frames</h3>
+<p>Every expression is evaluated in the context of an environment, which stores a value for each (lexical) variable in the expression.
+In the virtual machine, an environment is represented as a chain of environment frames.
+Each frame is denoted Env([n], parent), where [n] denotes an array of n mutable cells to store variable values and parent points to the environment of the nearest lexically enclosing lambda expression.
+Lexical variables are located in the environment using DeBruijn indices: an ordered pair (depth, offset),
+where depth indicates the number of intervening frames and offset is the index of a cell within that environment.
+</p>
 
-<p>Environments and environment frames</p>
-Conceptually, every expression is evaluated in the context of an environment, which stores the value of each variable in the expression.
-In the virtual machine, an environment is represented as a linked list of environment frames.
-Each environment frame contains 1) an array of parameter values, and 2) a pointer to its parent environment.
-The parent pointer points to the environment of the nearest lexically enclosing lambda expression,
-forming a chain of environment frames which is used to resolve variables in the body of the lambda expression.
-
-<p>Continuation and continuation frames</p>
-Conceptually, the continuation of a computation refers what happens after the current computation is complete.
+<h3>Continuation and continuation frames</h3>
+<p>Conceptually, the continuation of a computation refers what happens after the current computation is complete.
 In the virtual machine, the continuation is represented as a stack of continuation frames.
 Each continuation frame on the stack represents a suspended function awaiting a result.
 When a function is called, a new frame is pushed on the stack which records the virtual machine state required to resume execution after the call.
 When the call returns, the continuation stack is popped, and the virtual machine's state is restored to the state saved just prior to the call.
+A frame is denoted Kon(return, env, parent), where return points to an instruction (the "return address"), env points to the caller's environment, and parent points to the caller's continuation frame.
+</p>
 
-<h3>Instruction Set Architecture</h3>
+</p>
 
-<table border="1">
-  <tr><th>Instruction</td><th>Description</th><th>Operation</th></tr>
+<h3>Instruction Set</h3>
+
+<p>In the description of the instruction set, the following notations are used:
+
+<ul>
+  <li>Clo(env, body) denotes a closure, where env is the environment of definition and body is the function's entry instruction.</li>
+  <li>Env([n], parent) denotes an environment frame, where [n] denotes an array of n mutable cells and env is the next outermost environment.</li>
+  <li>Kon(return, env, parent) denotes a continuation frame, where return is the return instruction, env is the caller's environment, parent is the caller's continuation.</li>
+  <li>ENV[i, j] denotes the value (or location) of the lexical variable with DeBruijn index (i, j) in the current lexical environment.
+  <li>STO[id] denotes the value (or location) of the global variable id in the top-level environment.</li>
+  <li>Arg(first, rest) denotes an argument list whose first element is first and whose remaining arguments are in rest.</li>
+</ul>
+
+<table class="isatable" border="1">
+  <tr><th>Instruction</th><th>Description</th><th>Operation</th></tr>
   <tr>
-    <td>(load-const x)</td>
-    <td>Loads the constant value x</td>
+    <td>(load-const <i>x</i>)</td>
+    <td>Load the constant value <i>x</i></td>
     <td>RES ← x</td></tr>
   <tr>
-    <td>(load-local i j)</td>
-    <td>Loads a local variable</td>
-    <td>RES ← lookup(ENV, (i, j))</td>
+    <td>(load-local <i>i j</i>)</td>
+    <td>Load lexical variable
+(i, j) is the variable's DeBruijn index</td>
+    <td>RES ← ENV[i, j]</td>
   </tr>
   <tr>
-    <td>(load-global id)</td>
-    <td>Loads a global variable</td>
-    <td>RES ← lookup(S, id)</td>
+    <td>(store-local <i>i j</i>)</td>
+    <td>Store lexical variable
+(i, j) is the variable's DeBruijn index</td>
+    <td>ENV[i, j] ← RES</td>
   </tr>
   <tr>
-    <td>(store-local i j v)</td>
-    <td>Stores a local variable</td>
-    <td>bind(ENV, (i, j), v)</td>
+    <td>(load-global <i>id</i>)</td>
+    <td>Load global variable</td>
+    <td>RES ← STO[id]</td>
   </tr>
   <tr>
-    <td>(store-global s v)</td>
-    <td>Stores a global variable</td>
-    <td>bind(S, s, v)
+    <td>(store-global <i>id</i>)</td>
+    <td>Store value in global variable</td>
+    <td>STO[id] ← RES</td>
   </tr>
   <tr>
     <td>(push-arg)</td>
-    <td>Push a value onto arguments stack</td>
-    <td>ARG ← push(ARG, RES)
+    <td>Push a value onto the argument list</td>
+    <td>ARGS ← Arg(RES, ARGS)</td>
   </tr>
   <tr>
     <td>(pop-arg)</td>
-    <td>Push a value onto arguments stack</td>
-    <td>ARG ← pop(ARG)
+    <td>Pop a value off the argument list</td>
+    <td>Given ARGS = Arg(arg, rest),
+RES ← arg
+ARGS ← rest</td>
   </tr>
   <tr>
     <td>(push-env n)</td>
-    <td>Push a </td>
-    <td>ENV ← extend(ENV, RES)
+    <td>Extend current environment with new frame
+n is the number of variable cells</td>
+    <td>ENV ← Env([n], ENV)</td>
   </tr>
   <tr>
     <td>(pop-env)</td>
-    <td>Push a value onto arguments stack</td>
-    <td>ARG ← pop(ARG)
+    <td>Restore parent of current environment</td>
+    <td>ENV ← ENV<sub>parent</sub></td>
   </tr>
   <tr>
-    <td>(push-kont return)</td>
-    <td>Push a continuation frame</td>
-    <td>KON ← Kont(KON, ENV, return)
+    <td>(push-frame return)</td>
+    <td>Push a continuation frame for call</td>
+    <td>KON ← Kon(return, ENV, KON)
   </tr>
   <tr>
-    <td>(pop-kont)</td>
-    <td>Restores VM state from the current continuation KON = Kont(return, env, parent)</td>
-    <td><div class="codeblock">
-CTL ← return
-ENV ← env
-KON ← parent</div>
-    </td>
+    <td>(pop-frame)</td>
+    <td>Restore caller's continuation</td>
+    <td>Given KON = Kon(return, env, parent),
+CTL ← KON<sub>return</sub>
+ENV ← KON<sub>env</sub>
+KON ← KON<sub>parent</sub></td>
   </tr>
   <tr>
     <td>(apply n)</td>
-    <td>Apply function</td>
-    <td><div class="codeblock">
-if RES is a primitive P
-  RES ← apply(P, ARG)
-else RES is a closure C
-  ENV ← C<sub>env</sub>
-  CTL ← C<sub>body</sub></div>
-    </td>
+    <td>Apply function
+n is the number of arguments</td>
+    <td>if RES is a primitive P
+  RES ← apply(P, ARGS)
+else RES is a closure Clo(env, body)
+  ENV ← env
+  CTL ← body</td>
   </tr>
-  
-<table>
+  <tr>
+    <td>(branch left right)</td>
+    <td>Conditional branch</td>
+    <td>if RES
+  CTL ← left
+else
+  CTL ← right</td>
+  </tr>
+  <tr>
+    <td>(jump target)</td>
+    <td>Unconditional jump</td>
+    <td>CTL ← target</td>
+  </tr>
+  <tr>
+    <td>(close body)</td>
+    <td>Create a closure object</td>
+    <td>RES ← Clo(ENV, body)</td>
+  </tr>
+</table>
 
-popkont()
-
-	Restores VM state from the current continuation.
-
-	CTL ← KON.return()
-	ENV ← KON.env()
-	KON ← KON.parent()
-
-apply()
-
-	Performs a function application.
-
-	Preconditions:
-    RES is a primitive or closure C = Clo(body, env)
-    
-	fun ← RES
-
-  Operation:
-  
-	if (RES is primitive p)
-		RES ← primApply(p, ARG)
-	else
-		ENV ← env
-		CTL ← body
-
-branch(ifTrue, ifFalse)
-
-	Performs a conditional branch based on a boolean truth value.
-	
-	if (RES)
-		CTL ← ifTrue
-	else
-		CTL ← ifFalse
-
-jump(target)
-
-	Performs an unconditional jump to the given target instruction.
-
-makefunc(body)
-
-	Sets RES to a new function with the given body.
-
-	RES ← Clo(ENV, body)
-  
-<p>
+</p>
 
 <a id="chapter_8"><h2>Miscellaneous</h2></a>
-
-<h3>Operators vs. Functions</h3>
-
-<p>While an operator is conceptually equivalent to a function, there is subtle
-syntactic difference between the two. For instance, the expression</p>
-
-<div class="codeblock">
-<i>x</i> &#x2A01; <i>y</i>
-</div>
-
-<p>denotes the immediate application of a binary function &#x2A01; to some
-arguments <i>x</i> and <i>y</i>. However, the operator symbol &#x2A01 itself
-does not syntactically denote a function, and the arguments <b>must</b>
-be supplied immediately. <i>Operator literals</i> provide a concise way of
-referring to any operator as a function. The operator literal expression</p>
-
-<div class="codeblock">
-op &#x2A01
-</div>
-
-<p>denotes the value of the (unary or binary) function that implements the operator &#x2A01;.</p>
- 
-<h3>Integer Division</h3>
-
-<p>When the division operator <code>/</code> is applied to two integers,
-it returns a real-valued approximation of the rational number.
-The operators <code>//</code> and <code>%</code> perform integral division
-and modulus (remainder after division), respectively.</p>
-
-<h3>Short Circuit Boolean Operators</h3>
-
-<p>The operators <code>and</code> and <code>or</code> always evaluate both
-operands and return <code>true</code> or <code>false</code>. The short circuit
-boolean operators <code>andalso</code> and <code>orelse</code> may not evaluate
-both operands if the result can be determined without doing so, and return
-one of their operands, not necessarily a boolean-typed value. Specifically,
-<code><i>x</i> andalso <i>y</i></code> is equivalent to
-<code>if <i>x</i> then <i>y</i> else <i>x</i></code>, and 
-<code><i>x</i> orelse <i>y</i></code> is equivalent to
-<code>if <i>x</i> then <i>x</i> else <i>y</i></code>, except that <i>x</i>
-is evaluated only once.</p>
-
-<h3>Record and Tuple Selectors</h3>
-
-<p>The <code>.</code> operator is used to retrieve an element of a tuple or
-record. The expression <code><i>r</i>.<i>id</i></code> evaluates to the
-value of the named element <i>id</i> in record <i>r</i>, and the expression
-<code><i>t</i>.<i>i</i></code> evaluates to the <i>i</i>th element in tuple
-<i>t</i>. It is an error if no such element exists.</p>
-
-<h2>Programming Techniques</h2>
-
-<h3>Modeling Objects</h3>
-
-<p>Among other things, the closure property of functions allows one to model stateful objects and
-methods. For example, consider a simple monotonically increasing counter, with
-two associated operations: <i>value</i>, which gets the current value of the
-counter, and <i>tick</i> which increments the counter. This can expressed as</p>
-
-<div class="codeblock"><pre>
-let Counter = \ ->
-  let count = ref 0,
-      value = \ -> val count,
-      tick = \ -> set count (+ 1 (val count))
-  in { value, tick };
-  
-let c = Counter();
-(.value c)();  # 0
-(.tick c)();
-(.value c)();  # 1
-</pre></div>
-
-<p>This technique of modeling objects with functions easily extends to more
-complex cases.</p>
 
 <a id="appendix_1"><h2>Formal Grammar</h2></a>
 
 <p>This section contains Spartan's complete formal grammar, specified in EBNF.
-We use <b>bold</b> to designate terminals and <i>italics</i> to designate
-non-terminals.<p>
 
-<p>Following the grammar is a LL(1) conversion.</p>
+<ul>
+  <li><b>bold</b> designates terminal symbols</li>
+  <li><i>italics</i> designate non-terminal symbols</li>
+  <li>( ) delimits a group
+  <li>| separates alternatives
+  <li>* indicates zero or more repetitions</li>
+  <li>+ indicates one or more repetitions</li>
+  <li>? indicates zero or one repetition</li>
+</ul>
+
+The following subset of the grammar is for S-expressions recognized by the reader:
 
 <pre>
-<i>exp</i> → <i>atom</i> | <b>(</b> <i>exp</i>* <b>)</b>
-<i>atom</i> → <i>boolean</i> | <i>number</i> | <i>symbol</i> | <i>string</i>
+<i>sexp</i> → <i>atom</i> | <i>list</i>
+<i>list</i> → <b>(</b> <i>sexp</i>* <b>)</b>
+<i>atom</i> → <b>#nil</b> | <b>#true</b> | <b>#false</b> | <i>number</i> | <i>symbol</i> | <i>keyword</i> | <i>string</i>
 <i>number</i> → <i>sign</i>? (<i>integer</i> | <i>rational</i> | <i>real</i> | <i>complex</i>)
 <i>integer</i> → <i>digit</i>+
 <i>rational</i> → <i>integer</i> <b>/</b> <i>integer</i>
@@ -568,17 +533,53 @@ non-terminals.<p>
 <i>exponent</i> → ( <b>e</b> | <b>E</b> ) <i>sign</i>? <i>integer</i>
 <i>sign</i> → <b>+</b> | <b>-</b>
 <i>digit</i> → <b>0</b> | <b>1</b> | ... | <b>9</b>
-<i>symbol</i> → <i>qualified-id</i> | <i>id</i>
-<i>qualified-id</i> → <i>id</i> <b>:</b> <i>id</i>
-<i>id</i> → <i>id-start</i> <i>id-follow</i>*
-<i>id-first</i> → a non-digit alphabetic or special character
-<i>id-follow</i> → a alphabetic or special character
+<i>symbol</i> → <i>qualified-symbol</i> | <i>bare-symbol</i>
+<i>qualified-symbol</i> → <i>namespace</i><b>:</b><i>bare-symbol</i>
+<i>namespace</i> → <i>bare-symbol</i>
+<i>bare-symbol</i> → <i>symbol-start-char</i> <i>symbol-follow-char</i>*
+<i>keyword</i> → <b>:</b><i>bare-symbol</i>
+<i>symbol-start-char</i> → a non-digit alphabetic or special character
+<i>symbol-follow-char</i> → an alphabetic or special character
 </pre>
 
-<p>The grammar as given is ambiguous for easier understanding, but may easily be
-converted to an unambiguous LL(1) grammar by removing left recursion and by
-enforcing operator precedence in the grammar itself. This is left as an excercise
-for the reader.</p>
+Below is the grammar for expressions in the Spartan core language, built on top of S-expressions.
+
+<pre>
+<i>expr</i> → <i>literal-value</i> | <i>variable-reference</i> | <i>special-form</i> | <i>application</i>
+<i>literal-value</i> → <i>atom</i>
+<i>variable-reference</i> → <i>symbol</i>
+<i>application</i> → <b>(</b><i>expr</i>+<b>)</b>
+<i>special-form</i> → <b>(if</b> <i>expr</i> <i>expr</i> <i>expr</i>?<b>)</b>
+             | <b>(cond</b> <i>clauses</i><b>)</b>
+             | <b>(fun</b> <i>parameters</i> <i>body</i><b>)</b>
+             | <b>(set!</b> <i>symbol</i> <i>expr</i><b>)</b>
+             | <b>(do</b> <i>expr</i>+<b>)</b>
+             | <b>(let</b> <i>bindings</i> <i>expr</i>+<b>)</b>
+             | <b>(let*</b> <i>bindings</i> <i>expr</i>+<b>)</b>
+             | <b>(letrec</b> <i>bindings</i> <i>expr</i>+<b>)</b>
+             | <b>(and</b> <i>expr</i>*<b>)</b>
+             | <b>(or</b> <i>expr</i>*<b>)</b>
+             | <b>(quote</b> <i>expr</i><b>)</b>
+             | <b>(quasiquote</b> <i>expr</i><b>)</b>
+<i>clauses</i> → <i>clause</i>+ <i>else-clause</i>?
+<i>clause</i> → <b>(</b><i>expr</i> <i>expr</i>+<b>)</b>
+<i>else-clause</i> → <b>(else</b> <i>expr</i>+<b>)</b>
+<i>parameters</i> → <b>(</b><i>symbol</i>* <i>rest-parameter</i>?<b>)</b>
+<i>rest-parameter</i> → <b>&</b> <i>symbol</i>
+<i>body</i> → <i>inner-definition</i>* <i>expr</i>+
+<i>bindings</i> → <b>(</b><i>binding</i>+<b>)</b>
+<i>binding</i> → <b>(</b><i>symbol</i> <i>expr</i><b>)</b>
+</pre>
+
+Below is the grammar for Spartan programs.
+
+<pre>
+<i>program</i> → (<i>definition</i> | <i>expr</i>)*
+<i>definition</i> → <b>(def</b> <i>symbol</i> <i>expr</i><b>)</b>
+           | <b>(defun</b> <b>(</b><i>parameters</i><b>)</b> <i>body</i><b>)</b>
+           | <b>(defmacro</b> <b>(</b><i>parameters</i><b>)</b> <i>body</i><b>)</b>
+</pre>
+</p>
 
 <hr/>
 

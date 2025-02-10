@@ -473,18 +473,18 @@ public final class CoreLib
     }
   };
   
-  // Ensure all record fields are distinct, simple symbols
+  // Ensure record field list consists of distinct, simple symbols
   private static void validateFields(List fields)
   {
     var fieldSet = new java.util.HashSet<Symbol>();
-    for (var e : fields) {
-      if (!(e instanceof Symbol f))
+    for (var f : fields) {
+      if (!(f instanceof Symbol s))
         throw new TypeMismatch();
-      if (!f.isSimple())
+      if (!s.isSimple())
         throw new InvalidArgument();
-      if (fieldSet.contains(f))
+      if (fieldSet.contains(s))
         throw new InvalidArgument();
-      fieldSet.add(f);
+      fieldSet.add(s);
     }
   }
   

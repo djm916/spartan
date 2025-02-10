@@ -88,10 +88,10 @@ public class Namespace implements Datum
   }
   
   /**
-   * Get the canonical name for an aliased namespace
+   * Lookup an aliased namespace
    *
    * @param alias A namespace alias
-   * @return The canonical namespace name
+   * @return The aliased namespace
    */
   public Optional<Namespace> lookupAlias(Symbol alias)
   {

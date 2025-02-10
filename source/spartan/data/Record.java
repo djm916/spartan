@@ -18,6 +18,7 @@ public record Record(RecordDescriptor rtd, Datum[] fields) implements Datum
    * Gets the field value at the given index
    *
    * @param index the field index
+   * @return the field value
    */
   public Datum get(int index)
   {

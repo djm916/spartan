@@ -14,8 +14,15 @@ body {
 div.codeblock {
   font-family: monospace;
   white-space: pre;
+  color: white;
+  background-color: black;
 }
 
 .code {
   font-family: monospace;
+}
+
+table.isatable td {
+  font-family: monospace;
+  white-space: pre;
 }
