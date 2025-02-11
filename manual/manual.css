@@ -18,8 +18,16 @@ div.codeblock {
   background-color: black;
 }
 
-.code {
+span.code {
   font-family: monospace;
+  color: white;
+  background-color: black;
+}
+
+code {
+  font-family: monospace;
+  color: yellow;
+  background-color: black;
 }
 
 table.isatable td {

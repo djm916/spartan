@@ -84,23 +84,34 @@ It is an error to refer to an unbound variable.</p>
 
 <h3>Nil</h3>
 
-<p>The <i>nil</i> value, denoted <code>#nil</code> is the singular value of type <i>nil</i>.
-<code>#nil</code> signifies the absence of any meaningful value.
+<p>The <i>nil</i> value, denoted <code>#nil</code>, is the singular value of type <i>nil</i>.
+Somewhat paradoxically, <code>#nil</code> is a value that represents the absence of any otherwise meaningful value.
 It is typically used to represent a "missing" value, or as the result of procedures called solely for effect.
-<code>#nil</code> is considered false for the purposes of a boolean test.
-</p>
+<code>#nil</code> is considered equivalent to <code>#false</code> in a boolean context.</p>
 
 <h3>Boolean</h3>
 
 <p>The <i>boolean</i> logic values are denoted <code>#true</code> and <code>#false</code>.
-Only the values <code>#false</code> and <code>#nil</code> are considered false for the purposes of a boolean test.</p>
+
+<p>The fundamental boolean-valued expressions are</p>
+
+<ul>
+  <li><code>(not <i>x</i>)</code> returns the logical inverse of <i>x</i></li>
+  <li><code>(and <i>x<sub>1</sub></i> ... <i>x<sub>N</sub></i>)</code> returns the logical conjunction of boolean values <i>x<sub>i</sub></i></li>
+  <li><code>(or <i>x<sub>1</sub></i> ... <i>x<sub>N</sub></i>)</code> returns the logical disjunction of boolean values <i>x<sub>i</sub></i></li>
+</ul>
+
+<p>The values <code>#false</code> and <code>#nil</code> are considered false in a boolean context; all other values are considered true.</p>
 
 <h3>Symbols</h3>
 
 <p>A <i>symbol</i> is a unique value denoted by a name (i.e., an identifier).
 Identical names denote identical symbols.
-Symbols are used to represent variables but are not themselves variable.
-A symbol's value never changes, it always denotes itself.</p>
+Though symbols are used to represent variables in code, they are not themselves variables.
+A symbol's value never changes, it always denotes itself.
+Symbols can be unqualified or qualified.
+Unqualified symbols are resolved in the current namespace.
+Qualified symbols, of the form <code><i>namespace</i>:<i>name</i></code>, are resolved with respect to the given namespace.</p>
 
 <h3>Numeric</h3>
 
@@ -134,17 +145,17 @@ Converting an integer or rational to a float or complex (or vice-versa) may resu
 <p>Lists are a recursive structure defined as follows. A list is either:</p>
 
 <ul>
-  <li>the empty list, denoted <code>()</code>.</li>
-  <li>the first element of the list, followed by the rest of the sequence (a list).</li>
+  <li>the empty list</li>
+  <li>the first element followed by the rest of the elements (i.e., another list)</li>
 </ul>
 
 <p>Any function on lists can be built on the fundamental operations:</p>
 
 <ul>
-  <li><code>(adjoin x xs)</code> constructs a list whose first element is x and whose remaining elements are in xs.</li>
-  <li><code>(empty? xs)</code> is true only if xs is the empty list.</li>
-  <li><code>(first (adjoin x xs))</code> gives x.</li>
-  <li><code>(rest (adjoin x xs))</code> gives xs.</li>
+  <li><code>(empty? xs)</code> is true only if xs is the empty list</li>
+  <li><code>(adjoin x xs)</code> constructs a list whose first element is x and whose remaining elements are in xs</li>
+  <li><code>(first xs)</code> returns the first element a (non-empty) list</li>
+  <li><code>(rest xs)</code> returns the rest of a (non-empty) list (i.e., another list)</li>
 </ul>
 
 <h3>Functions</h3>
@@ -199,7 +210,8 @@ defines a new, unique record type <i>type</i> and creates the following procedur
 <ul>
   <li>A constructor <code>(<i>type</i> <i>field<sub>1</sub></i> ... <i>field<sub>N</sub></i>)</code> creates new records of the type</li>
   <li>A predicate <code><i>type</i>?</code> determines if a record is of the type</li>
-  <li>For each field <i>field<sub>i</sub></i>, accessor and mutator procedures <code><i>type</i>-<i>field<sub>i</sub></i></code> and <code>set-<i>type</i>-<i>field<sub>i</sub>!</i></code></li>
+  <li>For each field <i>field<sub>i</sub></i>, a field accessor <code><i>type</i>-<i>field<sub>i</sub></i></code></li>
+  <li>For each field <i>field<sub>i</sub></i>, a field mutator <code>set-<i>type</i>-<i>field<sub>i</sub></i>!</code></li>
 </ul>
 </p>
 
@@ -225,6 +237,10 @@ If <i>exp<sub>3</sub></i> is not given and <i>exp<sub>1</sub></i> is <code>false
 
 <p>The form</p>
 
+<span class="code">(if <i>exp<sub>1</sub></i> <i>exp<sub>2</sub></i>)</span> is equivalent to <span class="code">(if <i>exp<sub>1</sub></i> <i>exp<sub>2</sub></i> <b>#nil</b>)</span>
+
+<p>The form</p>
+
 <div class="codeblock">(cond ((<i>exp<sub>1</sub></i> <i>body<sub>1</sub></i>...)))</div>
 
 <p>is semantically equivalent to the series of nested if expressions</p>
@@ -246,14 +262,14 @@ If <i>exp<sub>3</sub></i> is not given and <i>exp<sub>1</sub></i> is <code>false
 
 <div class="codeblock">(do <i>exp<sub>1</sub></i> ... <i>exp<sub>N</sub></i>)</div>
 
-<p>evaluates each <code><i>exp</i></code> in order from 1 to <i>N</i>.
-The value of <code><i>exp<sub>N</sub></i></code> is returned as the result of the entire expression.</p>
+<p>evaluates each <i>exp<sub>i</sub></i> in order from 1 to <i>N</i>.
+The value of <i>exp<sub>N</sub></i> is returned as the result of the entire expression.</p>
 
 <h3>Let Expressions</h3>
 
 <p>This class of forms bind a set of lexical variables in a new environment and
-evaluate the body expression in the context of that environment. There are
-three forms: basic, sequential, and recursive.</p>
+evaluate a sequence of expressions (the body) in that environment.
+There are three forms: basic, sequential, and recursive.</p>
 
 <p>The basic form</p>
 
@@ -261,7 +277,7 @@ three forms: basic, sequential, and recursive.</p>
 
 <p>is evaluated as follows: First, the <i>init</i> expressions are evaluated in the current environment (in some unspecified order).
 Then the current environment is extended with <i>var<sub>i</sub></i> bound to the value of <i>init<sub>i</sub></i>.
-Finally, the <i>body</i> expressions are evaluated in sequence in the extended environment and the result is returned as the value of the entire expression.
+Finally, the <i>body</i> is evaluated in the extended environment and the result is returned as the value of the entire expression.
 </p>
 
 <p>The sequential form</p>
@@ -285,7 +301,7 @@ refer to any previous binding <i>var<sub>i</sub></i>, where <i>i < j</i>.</p>
 
 <div class="codeblock">(letrec ((<i>var<sub>1</sub></i> <i>init<sub>1</sub></i>) ...) <i>body</i> ...)</div>
 
-<p>is semantically equivalent to the form using let and set!</p>
+<p>is semantically equivalent to the derived form</p>
 
 <div class="codeblock"><pre>
 (let ((<i>var<sub>1</sub></i> #nil) ...)
@@ -294,10 +310,13 @@ refer to any previous binding <i>var<sub>i</sub></i>, where <i>i < j</i>.</p>
   <i>body</i>)
 </pre></div>
 
-<p>The recursive form allows the definition of self-recursive and sets of
-mutually-recursive functions. Each <i>init</i> is typically a lambda expression,
-but need not be. The only requirement is that no <i>init</i> expression refer to
-any <i>var</i> before it has been initialized.</p>
+<p>The recursive form allows the definition of recursive and mutually-recursive functions.
+First, the current environment is extended with each <i>var<sub>i</sub></i> bound to #nil.
+Then, the each <i>init</i><sub>i</sub> is evaluated in order and the result assigned to <i>var<sub>i</sub></i>.
+Finally, the <i>body</i> is evaluated in the extended environment and the result is returned as the value of the entire expression.</p>
+
+<p>Each <i>init</i> is typically a lambda expression, but need not be.
+The only caveat is that no <i>init</i> expression should refer to a <i>var</i> before it has been <code>set!</code>.</p>
 
 <h3>Function Application</h3>
 
@@ -312,18 +331,84 @@ It is an error if <i>f</i> does not evaluate to a function or if the number of a
 
 <h3>Lambdas</h3>
 
-<p>Functions are defined by "lambda" expressions. The term lambda comes from the lambda calculus, where the Greek symbol lambda was used to denote a function.
-An expression of the form</p>
+<p>Functions are defined by "lambda" expressions.
+The term lambda comes from the lambda calculus, where the Greek symbol lambda was used to denote a function.
+A lambda expression, of the form</p>
 
 <div class="codeblock"><pre>
 (fun (<i>var<sub>1</sub></i> ... <i>var<sub>N</sub></i>)
   <i>body</i>...)
 </pre></div>
 
-<p>evaluates to a new function <i>f</i> with N parameters. The scope of the <i>body</i>
-includes all variables in the scope of the lambda expression in addition to the formal parameters.
-When <i>f</i> is applied to arguments <i>x<sub>i</sub></i>, <i>body</i> is evaluated in the environment of the lambda expression,
+<p>evaluates to a new function <i>f</i> of exactly <i>N</i> parameters.
+The scope of the <i>body</i> includes all variables in the scope of the lambda expression in addition to the formal parameters.
+When <i>f</i> is applied to some arguments <i>x<sub>i</sub></i>, <i>body</i> is evaluated in the defining environment of the lambda expression,
 extended with <i>var<sub>i</sub></i> bound to the argument <i>x<sub>i</sub></i>.</p>
+
+<p>Variadic functions, of the form</p>
+
+<div class="codeblock"><pre>
+(fun (<i>var<sub>1</sub></i> ... <i>var<sub>N</sub></i> &amp <i>rest</i>)
+  <i>body</i>...)
+</pre></div>
+
+<p>accept at least <i>N</i> arguments. The <i>rest</i> parameter is bound to a list containing any excess arguments.</p>
+
+<h3>Assignment</h3>
+
+<p>The form <span class="code">(set! <i>var</i> <i>exp</i>)</span> evaluates <i>exp</i> and assigns the result to <i>var</i>.</p>
+
+<h3>Boolean and</h3>
+
+<p>The form</p>
+
+<div class="codeblock"><pre>
+(and <i>x<sub>1</sub></i> ... <i>x<sub>N</sub></i>)
+</pre></div>
+
+<p>is equivalent to the derived form</p>
+
+<div class="codeblock"><pre>
+(let ((<i>t<sub>1</sub></i> <i>x<sub>1</sub></i>))
+  (if (not <i>t<sub>1</sub></i>)
+    <i>t<sub>1</sub></i>
+    ...
+    (let ((<i>t<sub>N</sub></i> <i>x<sub>N</sub></i>))
+      (if (not <i>t<sub>N</sub></i>)
+        <i>t<sub>N</sub></i>
+        #true))))
+</pre></div>
+
+<p>where each <i>t<sub>i</sub></i> is a unique symbol.</p>
+
+<p>Simply, <b>and</b> evaluates its argument expressions in order, immediately returning the first false value.
+If no argument is false, or there are no arguments, the result is <code>#true</code>.</p>
+
+<h3>Boolean or</h3>
+
+<p>The form</p>
+
+<div class="codeblock"><pre>
+(or <i>x<sub>1</sub></i> ... <i>x<sub>N</sub></i>)
+</pre></div>
+
+<p>is equivalent to the derived form</p>
+
+<div class="codeblock"><pre>
+(let ((<i>t<sub>1</sub></i> <i>x<sub>1</sub></i>))
+  (if <i>t<sub>1</sub></i>
+    <i>t<sub>1</sub></i>
+    ...
+    (let ((<i>t<sub>N</sub></i> <i>x<sub>N</sub></i>))
+      (if <i>t<sub>N</sub></i>
+        <i>t<sub>N</sub></i>
+        #false))))
+</pre></div>
+
+<p>where each <i>t<sub>i</sub></i> is a unique symbol.</p>
+
+<p>Simply, <b>or</b> evaluates its argument expressions in order, immediately returning the first true value.
+If no argument is true, or there are no arguments, the result is <code>#false</code>.</p>
 
 <a id="chapter_4"><h2>Proper Tail Recursion</h2></a>
 
@@ -508,7 +593,9 @@ else
 
 </p>
 
-<a id="chapter_8"><h2>Miscellaneous</h2></a>
+<a id="chapter_8"><h2>Compilation</h2></a>
+
+
 
 <a id="appendix_1"><h2>Formal Grammar</h2></a>
 
