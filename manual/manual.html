@@ -500,61 +500,61 @@ A frame is denoted Kon(return, env, parent), where return points to an instructi
 <table class="isatable" border="1">
   <tr><th>Instruction</th><th>Description</th><th>Operation</th></tr>
   <tr>
-    <td>(load-const <i>x</i>)</td>
+    <td>ldc <i>x</i></td>
     <td>Load the constant value <i>x</i></td>
     <td>RES ← x</td></tr>
   <tr>
-    <td>(load-local <i>i j</i>)</td>
+    <td>ld <i>i j</i></td>
     <td>Load lexical variable
 (i, j) is the variable's DeBruijn index</td>
     <td>RES ← ENV[i, j]</td>
   </tr>
   <tr>
-    <td>(store-local <i>i j</i>)</td>
+    <td>st <i>i j</i></td>
     <td>Store lexical variable
 (i, j) is the variable's DeBruijn index</td>
     <td>ENV[i, j] ← RES</td>
   </tr>
   <tr>
-    <td>(load-global <i>id</i>)</td>
+    <td>ldg <i>id</i></td>
     <td>Load global variable</td>
     <td>RES ← STO[id]</td>
   </tr>
   <tr>
-    <td>(store-global <i>id</i>)</td>
-    <td>Store value in global variable</td>
+    <td>stg <i>id</i></td>
+    <td>Store global variable</td>
     <td>STO[id] ← RES</td>
   </tr>
   <tr>
-    <td>(push-arg)</td>
+    <td>pusha</td>
     <td>Push a value onto the argument list</td>
     <td>ARGS ← Arg(RES, ARGS)</td>
   </tr>
   <tr>
-    <td>(pop-arg)</td>
+    <td>popa</td>
     <td>Pop a value off the argument list</td>
     <td>Given ARGS = Arg(arg, rest),
 RES ← arg
 ARGS ← rest</td>
   </tr>
   <tr>
-    <td>(push-env n)</td>
+    <td>pushe n</td>
     <td>Extend current environment with new frame
 n is the number of variable cells</td>
     <td>ENV ← Env([n], ENV)</td>
   </tr>
   <tr>
-    <td>(pop-env)</td>
+    <td>pope</td>
     <td>Restore parent of current environment</td>
     <td>ENV ← ENV<sub>parent</sub></td>
   </tr>
   <tr>
-    <td>(push-frame return)</td>
+    <td>pushk return</td>
     <td>Push a continuation frame for call</td>
     <td>KON ← Kon(return, ENV, KON)
   </tr>
   <tr>
-    <td>(pop-frame)</td>
+    <td>popk</td>
     <td>Restore caller's continuation</td>
     <td>Given KON = Kon(return, env, parent),
 CTL ← KON<sub>return</sub>
@@ -562,7 +562,7 @@ ENV ← KON<sub>env</sub>
 KON ← KON<sub>parent</sub></td>
   </tr>
   <tr>
-    <td>(apply n)</td>
+    <td>app n</td>
     <td>Apply function
 n is the number of arguments</td>
     <td>if RES is a primitive P
@@ -572,7 +572,7 @@ else RES is a closure Clo(env, body)
   CTL ← body</td>
   </tr>
   <tr>
-    <td>(branch left right)</td>
+    <td>bt left right</td>
     <td>Conditional branch</td>
     <td>if RES
   CTL ← left
@@ -580,12 +580,12 @@ else
   CTL ← right</td>
   </tr>
   <tr>
-    <td>(jump target)</td>
+    <td>jmp target</td>
     <td>Unconditional jump</td>
     <td>CTL ← target</td>
   </tr>
   <tr>
-    <td>(close body)</td>
+    <td>clo body</td>
     <td>Create a closure object</td>
     <td>RES ← Clo(ENV, body)</td>
   </tr>
@@ -593,9 +593,138 @@ else
 
 </p>
 
+<!-- Compilation -->
+
 <a id="chapter_8"><h2>Compilation</h2></a>
 
+<p>This section describes compilation: the translation of expressions into instruction fragments.</p>
 
+<!-- literals -->
+
+<p>Literal values are compiled into the single instruction</p>
+
+<div class="codeblock"><pre>
+ldc <i>x</i>
+</pre></div>
+
+<!-- variable reference -->
+
+<p>Lexical variable references are compiled as the single instruction</p>
+
+<div class="codeblock"><pre>
+ld <i>i j</i>
+</pre></div>
+
+<p>where (i, j) is the DeBruijn index of the variable.</p>
+
+<p>Global variable references are compiled as the single instruction</p>
+
+<div class="codeblock"><pre>
+ldg <i>id</i>
+</pre></div>
+
+<p>where id is a fully-qualified symbol.</p>
+
+<!-- assignment -->
+
+<p>The form <span class="code">(set! <i>var</i> <i>exp</i>)</span> is compiled as</p>
+
+<div class="codeblock"><pre>
+  &lt&lt<i>exp</i>&gt&gt
+  ld i, j
+</pre></div>
+
+<p>when <i>var</i> is a lexical variable, and into</p>
+
+<div class="codeblock"><pre>
+  &lt&lt<i>exp</i>&gt&gt
+  ldg <i>var</i>
+</pre></div>
+
+<p>when <i>var</i> is a global variable.</p>
+
+<p>Assignment to a lexical variable is compiled as the single instruction</p>
+
+<div class="codeblock"><pre>
+st <i>i j</i>
+</pre></div>
+
+<p>where (i, j) is the DeBruijn index of the variable.</p>
+
+<p>Assignment to a global variable is compiled as the single instruction</p>
+
+<div class="codeblock"><pre>
+stg <i>id</i>
+</pre></div>
+
+<p>where id is a fully-qualified symbol.</p>
+
+<!-- if -->
+
+<p>The form</p>
+
+<div class="codeblock">(if <i>exp<sub>1</sub></i> <i>exp<sub>2</sub></i> <i>exp<sub>3</sub></i>)</div>
+
+<p>is compiled as</p>
+
+<div class="codeblock"><pre>
+      &lt&lt<i>exp<sub>1</sub></i>&gt&gt
+      bf L1
+      &lt&lt<i>exp<sub>2</sub></i>&gt&gt
+      jmp next
+L1:   &lt&lt<i>exp<sub>3</sub></i>&gt&gt
+next: ...
+</pre></div>
+
+<!-- lambda -->
+
+<p>The form</p>
+
+<div class="codeblock"><pre>
+(fun (<i>var<sub>1</sub></i> ... <i>var<sub>N</sub></i>)
+  <i>body</i>...)
+</pre></div>
+
+<p>is compiled into the single instruction 
+
+<div class="codeblock"><pre>
+    close <i>body</i>
+</pre></div>
+
+<p>where <i>body</i> points to the compiled function body, as</p>
+
+<div class="codeblock"><pre>
+    pushe N          // extend environment for N arguments
+    popa             // bind arguments to parameters
+    st 0, 0
+    ...
+    popa
+    st 0, N-1
+    &lt&ltbody&gt&gt   // evaluate body
+    popk           // return to caller
+</pre></div>
+
+<!-- call -->
+
+<p>The form</p>
+
+<div class="codeblock"><pre>
+(<i>f</i> <i>arg<sub>1</sub></i> ... <i>arg<sub>N</sub></i>)
+</pre></div>
+
+<p>is translated as</p>
+
+<div class="codeblock"><pre>
+      pushk next
+      &lt&lt<i>arg<sub>N</sub></i>&gt&gt
+      pusha
+      ...
+      &lt&lt<i>arg<sub>1</sub></i>&gt&gt
+      pusha
+      &lt&lt<i>f</i>&gt&gt
+      app N
+next: ...
+</pre></div>
 
 <a id="appendix_1"><h2>Formal Grammar</h2></a>
 
