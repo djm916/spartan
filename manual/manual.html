@@ -597,134 +597,95 @@ else
 
 <a id="chapter_8"><h2>Compilation</h2></a>
 
-<p>This section describes compilation: the translation of expressions into instruction fragments.</p>
+<p>This section describes the translation of expressions into instructions for the virtual machine.
+Only the compilation of the core special forms is given, not those of derived forms.</p>
 
-<!-- literals -->
+<table class="transtable" border="1">
+  <th>Expression</th><th>Translation</th>
+  <tr>
+    <td>Literal <i>x</i></td>
+    <td>       ldc <i>x</i></td>
+  </tr>
+  <tr>
+    <td>Variable reference <i>var</i></td>
+    <td>
+when <i>var</i> is lexical:
 
-<p>Literal values are compiled into the single instruction</p>
+       ld <i>i j</i>
 
-<div class="codeblock"><pre>
-ldc <i>x</i>
-</pre></div>
+when <i>var</i> is global:
 
-<!-- variable reference -->
+       ldg <i>var</i>
+    </td>
+  </tr>  
+  <tr>
+    <td>(set! <i>var</i> <i>exp</i>)</td>
+    <td>
+when <i>var</i> is lexical:
 
-<p>Lexical variable references are compiled as the single instruction</p>
+       &lt&lt<i>exp</i>&gt&gt
+       st <i>i j</i>
 
-<div class="codeblock"><pre>
-ld <i>i j</i>
-</pre></div>
+when <i>var</i> is global:
 
-<p>where (i, j) is the DeBruijn index of the variable.</p>
-
-<p>Global variable references are compiled as the single instruction</p>
-
-<div class="codeblock"><pre>
-ldg <i>id</i>
-</pre></div>
-
-<p>where id is a fully-qualified symbol.</p>
-
-<!-- assignment -->
-
-<p>The form <span class="code">(set! <i>var</i> <i>exp</i>)</span> is compiled as</p>
-
-<div class="codeblock"><pre>
-  &lt&lt<i>exp</i>&gt&gt
-  ld i, j
-</pre></div>
-
-<p>when <i>var</i> is a lexical variable, and into</p>
-
-<div class="codeblock"><pre>
-  &lt&lt<i>exp</i>&gt&gt
-  ldg <i>var</i>
-</pre></div>
-
-<p>when <i>var</i> is a global variable.</p>
-
-<p>Assignment to a lexical variable is compiled as the single instruction</p>
-
-<div class="codeblock"><pre>
-st <i>i j</i>
-</pre></div>
-
-<p>where (i, j) is the DeBruijn index of the variable.</p>
-
-<p>Assignment to a global variable is compiled as the single instruction</p>
-
-<div class="codeblock"><pre>
-stg <i>id</i>
-</pre></div>
-
-<p>where id is a fully-qualified symbol.</p>
-
-<!-- if -->
-
-<p>The form</p>
-
-<div class="codeblock">(if <i>exp<sub>1</sub></i> <i>exp<sub>2</sub></i> <i>exp<sub>3</sub></i>)</div>
-
-<p>is compiled as</p>
-
-<div class="codeblock"><pre>
-      &lt&lt<i>exp<sub>1</sub></i>&gt&gt
-      bf L1
-      &lt&lt<i>exp<sub>2</sub></i>&gt&gt
-      jmp next
-L1:   &lt&lt<i>exp<sub>3</sub></i>&gt&gt
-next: ...
-</pre></div>
-
-<!-- lambda -->
-
-<p>The form</p>
-
-<div class="codeblock"><pre>
+       &lt&lt<i>exp</i>&gt&gt
+       stg <i>var</i>
+    </td>
+  </tr>
+  <tr>
+    <td>(do <i>exp<sub>1</sub></i> ... <i>exp<sub>N</sub></i>)</td>
+    <td>
+       &lt&lt<i>exp<sub>1</sub></i>&gt&gt
+       ...
+       &lt&lt<i>exp<sub>N</sub></i>&gt&gt
+    </td>
+  </tr>
+  <tr>
+    <td>(if <i>exp<sub>1</sub></i> <i>exp<sub>2</sub></i> <i>exp<sub>3</sub></i>)</td>
+    <td>
+       &lt&lt<i>exp<sub>1</sub></i>&gt&gt
+       bf L1
+       &lt&lt<i>exp<sub>2</sub></i>&gt&gt
+       jmp next
+L1:    &lt&lt<i>exp<sub>3</sub></i>&gt&gt
+next:  ...
+    </td>
+  </tr>
+  <tr>
+    <td><pre>
 (fun (<i>var<sub>1</sub></i> ... <i>var<sub>N</sub></i>)
-  <i>body</i>...)
-</pre></div>
+  <i>body</i>...)</pre>
+    </td>
+    <td>
+       close <i>body</i>
 
-<p>is compiled into the single instruction 
+where <i>body</i> points to the compiled function body
 
-<div class="codeblock"><pre>
-    close <i>body</i>
-</pre></div>
-
-<p>where <i>body</i> points to the compiled function body, as</p>
-
-<div class="codeblock"><pre>
-    pushe N          // extend environment for N arguments
-    popa             // bind arguments to parameters
-    st 0, 0
-    ...
-    popa
-    st 0, N-1
-    &lt&ltbody&gt&gt   // evaluate body
-    popk           // return to caller
-</pre></div>
-
-<!-- call -->
-
-<p>The form</p>
-
-<div class="codeblock"><pre>
-(<i>f</i> <i>arg<sub>1</sub></i> ... <i>arg<sub>N</sub></i>)
-</pre></div>
-
-<p>is translated as</p>
-
-<div class="codeblock"><pre>
-      pushk next
-      &lt&lt<i>arg<sub>N</sub></i>&gt&gt
-      pusha
-      ...
-      &lt&lt<i>arg<sub>1</sub></i>&gt&gt
-      pusha
-      &lt&lt<i>f</i>&gt&gt
-      app N
-next: ...
-</pre></div>
+       pushe N     // extend environment for N arguments
+       popa        // bind arguments to parameters
+       st 0, 0
+       ...
+       popa
+       st 0, N-1
+       &lt&ltbody&gt&gt    // evaluate body
+       popk        // return to caller
+    </td>
+  </tr>
+  <tr>
+    <td>(<i>f</i> <i>arg<sub>1</sub></i> ... <i>arg<sub>N</sub></i>)</td>
+    <td>
+       pushk next  // save current continuation
+       &lt&lt<i>arg<sub>N</sub></i>&gt&gt    // push arguments
+       pusha
+       ...
+       &lt&lt<i>arg<sub>1</sub></i>&gt&gt
+       pusha
+       &lt&lt<i>f</i>&gt&gt
+       app N       // apply function
+next:  ...         // control returns here
+    </td>
+  </tr>
+</table>
 
 <a id="appendix_1"><h2>Formal Grammar</h2></a>
 

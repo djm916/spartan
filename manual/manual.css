@@ -34,3 +34,8 @@ table.isatable td {
   font-family: monospace;
   white-space: pre;
 }
+
+table.transtable td {
+  font-family: monospace;
+  white-space: pre;
+}
