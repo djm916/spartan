@@ -24,19 +24,30 @@
 <a id="intro"><h2>Introduction</h2></a>
 
 <h3>What is Spartan?</h3>
+
 <p>Spartan is an experimental Lisp dialect. It is primarily based on Scheme, a minimal and elegant programming language used widely in computer science pedogogy.
 To learn Scheme, the canonical source is "Structured Interpretation of Computer Programs", commonly referred to as "SICP" or "The Wizard Book".
 For technical reference, the standard "Revised^N Report on the Algorithmic Language Scheme", or simply "RNRS". The current revision is R7RS.
-Spartan was created primarily for the author's own education into Scheme and functional programming.
-</p>
+Spartan was created primarily for the author's own education into Scheme and functional programming.</p>
+
+<p>Spartan is essentially an R5RS Scheme. All of Scheme's major features are included: S-expression based syntax, first-class anonymous procedures, lexical closures,
+proper tail recursion, metaprogramming via macros, first-class continuations, etc. However, Spartan has the following differences and features:</p>
+
+<ul>
+  <li>Lists are proper: no dotted lists, cons, car, or cdr</li>
+  <li>Namespaces to organize symbols the top-level environment</li>
+  <li>User-defined record types</li>
+  <li>Procedural (non-hygenic) macros</li>
+  <li>Pattern matching</li>
+  <li>Immutable Unicode strings</li>
+</ul>
 
 <h3>Overview</h3>
-<p>This document specifies the design and implementation of the Spartan language. It includes  into bytecode instructions for a virtual machine.
-All of Scheme's major features are included: S-expression based syntax, first-class anonymous procedures, lexical closures,
-proper tail recursion, metaprogramming via macros, first-class continuations, etc.
+
+<p>This document specifies the design and implementation of Spartan, including: formal syntax, language specification,
+virtual machine, instruction set, and compilation method.
 The compilation method and instruction set design are based on the heap model given in "Three Implementation Models for Scheme".
-The virtual machine design is based on the "CEK" abstract machine model.
-</p>
+The virtual machine design is based on the "CEK" abstract machine model.</p>
 
 <a id="chapter_1"><h2>Basic Concepts</h2></a>
 
@@ -280,6 +291,12 @@ Then the current environment is extended with <i>var<sub>i</sub></i> bound to th
 Finally, the <i>body</i> is evaluated in the extended environment and the result is returned as the value of the entire expression.
 </p>
 
+<p>The basic form is semantically equivalent to</p>
+
+<div class="codeblock"><pre>
+((fun (<i>var<sub>1</sub></i> ... <i>var<sub>N</sub></i>) <i>body</i>...) <i>init<sub>1</sub></i> ... <i>init<sub>N</sub></i>)
+</pre></div>
+
 <p>The sequential form</p>
 
 <div class="codeblock">(let* ((<i>var<sub>1</sub></i> <i>init<sub>1</sub></i>) ...) <i>body</i> ...)</div>
@@ -356,7 +373,7 @@ extended with <i>var<sub>i</sub></i> bound to the argument <i>x<sub>i</sub></i>.
 
 <h3>Assignment</h3>
 
-<p>The form <span class="code">(set! <i>var</i> <i>exp</i>)</span> evaluates <i>exp</i> and assigns the result to <i>var</i>.</p>
+<p>The form <span class="code">(set! <i>var</i> <i>exp</i>)</span> assigns to <i>var</i> the result of evaluating <i>exp</i>.</p>
 
 <h3>Boolean and</h3>
 
@@ -409,6 +426,38 @@ If no argument is false, or there are no arguments, the result is <code>#true</c
 
 <p>Simply, <b>or</b> evaluates its argument expressions in order, immediately returning the first true value.
 If no argument is true, or there are no arguments, the result is <code>#false</code>.</p>
+
+<h3>Quotation and Quasi-quotation</h3>
+
+<p>The form <span class="code">(quote <i>exp</i>)</span> returns the value of <i>exp</i> as a datum;
+<i>exp</i> is not evaluated.
+
+<p>The form <span class="code">(quasiquote <i>exp</i>)</span> is similar to <b>quote</b>,
+but allows parts of the expression to be evaluated by being <b>unquote</b>d.
+Quasiquotation is useful for creating templated list structure, where some parts will be "filled in".
+For example, this is particularly useful when generating the source code returned by a macro.</p>
+
+<p>Within a quasiquotation, the form <span class="code">(unquote <i>exp</i>)</span> causes <i>exp</i> to be evaluated and its value substituted into the resulting list.
+The form <span class="code">(unquote-splicing <i>exp</i>)</span> is similiar, but <i>exp</i> must evaluate to a list.
+The (multiple) elements of this list are then substituted in place of the (single) unquote-splicing form in the resulting list.</p>
+
+<p>Quasiquotes may be nested. In this case, substitutions are made for unquoted expressions only at nesting level 0 (i.e., the outermost nesting level).
+Each nested quasiquote increases the level, and each unquote or unquote-splicing decreases the level.</p>
+
+<p>Let (QQ<sub>N</sub> <i>exp</i>) denote the quasiquote transformation of exp with nesting level N.
+QQ is defined as follows:</p>
+
+<ul>
+  <li>(QQ<sub>N</sub> x) → (quote x), for non-list value x</li>
+  <li>(QQ<sub>0</sub> ((unquote x) xs...)) → (adjoin x (QQ<sub>0</sub> xs))</li>
+  <li>(QQ<sub>N</sub> ((unquote x) xs...)) → (adjoin (QQ<sub>N-1</sub> (unquote x)) (QQ<sub>N</sub> xs)), N > 0</li>
+  <li>(QQ<sub>0</sub> ((unquote-splicing x) xs...)) → (concat x (QQ<sub>0</sub> xs))</li>
+  <li>(QQ<sub>N</sub> ((unquote-splicing x) xs...)) → (concat (QQ<sub>N-1</sub> (unquote-splicing x)) (QQ<sub>N</sub> xs), N > 0</li>
+  <li>(QQ<sub>N</sub> ((quasiquote x) xs...)) → (adjoin (QQ<sub>N+1</sub> (quasiquote x)) (QQ<sub>N</sub> xs))</li>
+  <li>(QQ<sub>N</sub> ((x xs...)) → (adjoin (QQ<sub>N</sub> x) (QQ<sub>N</sub> xs))</li>
+</ul>
+
+<p>Then <span class="code">(quasiquote <i>exp</i>)</span> is equivalent to (QQ<sub>0</sub> <i>exp</i>).</p>
 
 <a id="chapter_4"><h2>Proper Tail Recursion</h2></a>
 
@@ -598,16 +647,16 @@ else
 <a id="chapter_8"><h2>Compilation</h2></a>
 
 <p>This section describes the translation of expressions into instructions for the virtual machine.
-Only the compilation of the core special forms is given, not those of derived forms.</p>
+Translations are given only of the core special forms, not derived forms.</p>
 
 <table class="transtable" border="1">
   <th>Expression</th><th>Translation</th>
   <tr>
-    <td>Literal <i>x</i></td>
+    <td>A self-evaluating value <i>x</i>, or (quote x)</td>
     <td>       ldc <i>x</i></td>
   </tr>
   <tr>
-    <td>Variable reference <i>var</i></td>
+    <td>A variable reference <i>var</i></td>
     <td>
 when <i>var</i> is lexical:
 
@@ -701,12 +750,12 @@ next:  ...         // control returns here
   <li>? indicates zero or one repetition</li>
 </ul>
 
-The following subset of the grammar is for S-expressions recognized by the reader:
+The following subset of the grammar for datums recognized by the reader:
 
 <pre>
-<i>sexp</i> → <i>atom</i> | <i>list</i>
-<i>list</i> → <b>(</b> <i>sexp</i>* <b>)</b>
+<i>datum</i> → <i>atom</i> | <i>list</i>
 <i>atom</i> → <b>#nil</b> | <b>#true</b> | <b>#false</b> | <i>number</i> | <i>symbol</i> | <i>keyword</i> | <i>string</i>
+<i>list</i> → <b>(</b> <i>sexp</i>* <b>)</b>
 <i>number</i> → <i>sign</i>? (<i>integer</i> | <i>rational</i> | <i>real</i> | <i>complex</i>)
 <i>integer</i> → <i>digit</i>+
 <i>rational</i> → <i>integer</i> <b>/</b> <i>integer</i>
@@ -718,13 +767,13 @@ The following subset of the grammar is for S-expressions recognized by the reade
 <i>symbol</i> → <i>qualified-symbol</i> | <i>bare-symbol</i>
 <i>qualified-symbol</i> → <i>namespace</i><b>:</b><i>bare-symbol</i>
 <i>namespace</i> → <i>bare-symbol</i>
-<i>bare-symbol</i> → <i>symbol-start-char</i> <i>symbol-follow-char</i>*
+<i>bare-symbol</i> → <i>symbol-start</i> <i>symbol-follow</i>*
 <i>keyword</i> → <b>:</b><i>bare-symbol</i>
-<i>symbol-start-char</i> → a non-digit alphabetic or special character
-<i>symbol-follow-char</i> → an alphabetic or special character
+<i>symbol-start</i> → a non-digit alphabetic or special character
+<i>symbol-follow</i> → an alphabetic or special character
 </pre>
 
-Below is the grammar for expressions in the Spartan core language, built on top of S-expressions.
+Below is the grammar for expressions in the Spartan core language:
 
 <pre>
 <i>expr</i> → <i>literal-value</i> | <i>variable-reference</i> | <i>special-form</i> | <i>application</i>
@@ -769,7 +818,7 @@ Below is the grammar for Spartan programs.
 
 <a id="footnote_1">
 <p>[1] Since the value bound to a variable is fixed, the term 
-"variable" may seem a misnomer from those coming from 
+"variable" may seem a misnomer for those coming from 
 traditional programming languages, in which a variable 
 denotes a mutable memory cell. It does, however, coincide 
 with common mathematical usage. Furthermore, immutability of 
