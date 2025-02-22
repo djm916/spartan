@@ -57,11 +57,10 @@ essential terminology, which is used throughout.</p>
 
 <h3>Values and Types</h3>
 
-<p>A <i>value</i> is a discrete unit of data. Each value belongs to a (singular) <i>type</i>.
-Examples of types include: number, text, list, etc. In mathematical terms, a type is a description
-of a set of values and a set of operations 
-In general, operations will have restrictions on what types are acceptable as input parameters, depending upon the specific operation involved.
-It is an error to invoke any operation on value types which the operation does not accept.</p>
+<p>A <i>value</i> is a discrete unit of data. Every value belongs to a (singular) <i>type</i>.
+Examples of types in Spartan include: number, list, function, etc.
+Spartan is a dynamically, but strongly typed language. 
+It is an error to invoke an operation on arguments whose types or values values which the operation does not accept.</p>
 
 <h3>Expressions and Evaluation</h3>
 
@@ -230,10 +229,24 @@ defines a new, unique record type <i>type</i> and creates the following procedur
 
 <h3>Variables</h3>
 
-<p>Symbols in a program denote either a variable reference or a variable binding, depending on the context in which they appear.
-Symbols denote variable bindings in contexts such as definitions and function parameter lists.
-If not in a binding context, a symbol denotes a variable reference.
-It is always an error to refer to an unbound variable.</p>
+<p>In an expression, symbols denote both variable references and variable bindings, depending on the context.
+A symbol normally denotes a variable reference.
+In some contexts, such as definitions and function parameters, symbols denote variable bindings.
+Variables are either local or global.
+Local variables follow lexical scoping rules and are bound by lambda expressions or forms derived thereof (e.g., let).
+Global variables are global in scope and are bound in a namespace by definitions (e.g., def, defun).
+It is an error to refer to an unbound variable.</p>
+
+<h4>Variable Resolution Rules</h4>
+
+<p>To resolve a variable, the following rules are applied:</p>
+
+<ul>
+  <li>If the variable is qualified then it resolves to its binding in the specified namespace.</li>
+  <li>Otherwise, if the variable is bound by a lexically-enclosing binding construct, then it resolves to that binding.</li>
+  <li>Otherwise, the variable resolves to its binding in the current namespace.</li>
+  <li>If there is no such binding, an error is raised.</li>
+</ul>
 
 <h3>Conditionals</h3>
 
@@ -243,8 +256,7 @@ It is always an error to refer to an unbound variable.</p>
 
 <p>first evaluates <i>exp<sub>1</sub></i>.
 If the result is true, <i>exp<sub>2</sub></i> is evaluated and its value is returned.
-Otherwise, <i>exp<sub>3</sub></i> is evaluated and its value is returned.
-If <i>exp<sub>3</sub></i> is not given and <i>exp<sub>1</sub></i> is <code>false</code>, void is returned.</p>
+Otherwise, <i>exp<sub>3</sub></i> is evaluated and its value is returned.</p>
 
 <p>The form</p>
 
@@ -458,6 +470,55 @@ QQ is defined as follows:</p>
 </ul>
 
 <p>Then <span class="code">(quasiquote <i>exp</i>)</span> is equivalent to (QQ<sub>0</sub> <i>exp</i>).</p>
+
+<h3>Internal Definitions</h3>
+
+<p>The body of a function may optionally begin with a sequence of internal definitions. Such a function has the form</p>
+
+<div class="codeblock"><pre>
+(fun (<i>param</i>...)
+  (def <i>var<sub>1</sub></i> <i>init<sub>1</sub></i>)
+  ...
+  (def <i>var<sub>N</sub></i> <i>init<sub>N</sub></i>)
+  <i>exp</i>...)
+</pre></div>
+
+<p>and is semantically equivalent to the form</p>
+
+<div class="codeblock"><pre>
+(fun (...)
+  (letrec ((<i>var<sub>1</sub></i> <i>init<sub>1</sub></i>)
+           ...
+           (<i>var<sub>N</sub></i> <i>init<sub>N</sub></i>))
+    <i>exp</i>...))
+</pre></div>
+
+<p>That is, each <i>init<sub>i</sub></i> is evaluated, in order, in an environment where all <i>var<sub>i</sub></i> are bound.</p>
+
+<h3>Definitions</h3>
+
+<p>The form</p>
+
+<div class="codeblock"><pre>
+(def <i>var</i> <i>exp</i>)
+</pre></div>
+
+<p>evaluates <i>exp</i> and binds the result to <i>var</i> in the current namespace.</p>
+
+<p>The form</p>
+
+<div class="codeblock"><pre>
+(defun <i>var</i> (<i>param</i>...)
+  <i>body</i>...)
+</pre></div>
+
+<p>is semantically equivalent to the form</p>
+
+<div class="codeblock"><pre>
+(def <i>var</i>
+  (fun (<i>param</i> ...)
+    <i>body</i>...))
+</pre></div>
 
 <a id="chapter_4"><h2>Proper Tail Recursion</h2></a>
 

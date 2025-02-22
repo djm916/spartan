@@ -13,11 +13,14 @@ Building on Linux systems is currently not supported; the project can only be bu
 To build the project, the following dependencies must first be installed on your development machine:
 
 * Java SDK version 22 or higher
-* A C environment (e.g., MSYS2) including a compiler and "make"
+* A C environment (e.g., MSYS2) including a C99 compiler and the "make" utility
 * Ant
 * JUnit
 
-This project uses the Ant build system for Java. To build on your system, you will need to modify the build.xml file in the root directory such that the project's "classpath" property includes the full paths to all required Java .jar dependencies.
+To build on your system, you will need to modify:
+
+* build.xml, such that the project's "classpath" property includes the full paths to all required Java .jar dependencies.
+* native/Makefile, such that the JDK_INC and JDK_INC_WIN32 refer to Java's JNI include files directory
 
 To compile the project use:
 
@@ -25,7 +28,10 @@ To compile the project use:
 ant compile
 ```
 
-This will generate the executable JAR, Spartan.jar.
+This will generate the primary artifacts required to run Spartan:
+
+* Spartan.jar - an executable JAR containing the implementation of Spartan CLI
+* libspartan.dll - the supporting C library
 
 To generate Javadoc use:
 
@@ -68,6 +74,30 @@ You can also invoke Spartan in "debug mode" using the script:
 ```
 spartan-debug.bat
 ```
+
+## Configuration
+
+Spartan has the following configuration options, set via Java system properties:
+
+**spartan.optimize-tail-calls**
+
+Enables or disables optimization of tail calls (e.g., the removal of call frames for calls in tail position). It can be useful to disable this optimization when debugging. The default is "true". 
+
+**spartan.debug-logging**
+
+Enables or disables debug logging. The default is "false". When enabled ("true"), the following options are also recognized:
+
+**spartan.emit-bytecode**
+
+Enables or disables the emission of bytecode listings during compilation. Default is "true".
+
+**spartan.show-macro-expansion**
+
+Enables or disables the logging of macro expansions during compilation. Default is "true".
+
+The environment variable **SPARTANPATH**, if set, must contain a list of directories separated by a (system-specific) delimiter. This list of directories will be searched, in order, when Spartan needs to load a source file. If not set, the default value is the current working directory.
+
+The environment variable **SPARTANHOME**, if set, should be set to Spartan's installation directory. This should be set once when installing Spartan on a given system. 
 
 ## Contributing
 

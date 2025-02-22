@@ -101,6 +101,8 @@ public class Compiler
    */
   private Inst compileVarRef(Symbol s, Scope scope, Inst next)
   {
+    if (s.isQualified())
+      return compileGlobalVarRef(s, next);
     return scope.lookup(s)
                 .map(i -> compileLocalVarRef(i, next))
                 .orElseGet(() -> compileGlobalVarRef(s, next));
@@ -147,6 +149,9 @@ public class Compiler
       throw malformedExp(exp);
     
     var init = exp.third();
+    
+    if (s.isQualified())
+      return compileGlobalVarRef(s, next);
     return compile(init, scope, false,
            scope.lookup(s)
                 .map(i -> compileSetLocalVar(i, next))

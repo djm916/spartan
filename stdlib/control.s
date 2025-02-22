@@ -80,15 +80,6 @@
            (k (second top)))
       (k (h exn)))))
 
-;(defun try (thunk handler)
-;  (let ((save *handlers*))
-;    (call/cc
-;      (fun (k)
-;        (dynamic-wind
-;          (fun () (%push-handler handler k))
-;          thunk
-;          (fun () (set! *handlers* save)))))))
-
 (defun with-exception-handler (handler thunk)
   (let ((save *handlers*))
     (call/cc
@@ -98,17 +89,30 @@
           thunk
           (fun () (set! *handlers* save)))))))
 
-; <guard-exp> => (guard <guard-clause>* <exp>*)
-; <guard-clause> => (<symbol> <exp>*)
+; <guard-exp> => (guard <exp> <guard-clause>+)
+; <guard-clause> => (<symbol> <exp>+)
+;
+; (guard exp
+;   (id1 body1...)
+;   ...)
+;
+; ==>
+;
+; (with-exception-handler
+;   (fun (exn)
+;     (let ((exn-id (exception-name exn)))
+;       (cond
+;         ((= exn-id id1) body1...)
+;         ...
+;         (#true (raise exn)))))
+;   (fun () exp))
 
-(defmacro guard (clauses & body)
-  (defun generate-handler-body (var clauses)
-    (if (empty? clauses) ()
-      (let ((clause (first clauses)))
-        (adjoin `((= ',(first clause) (exception-name ,var)) ,@(rest clause))
-                  (generate-handler-body var (rest clauses))))))
-  (let ((var (gensym)))
+(defmacro guard (exp & clauses)
+  (let ((exn (gensym))
+        (name (gensym)))
     `(with-exception-handler
-       (fun (,var)
-         (cond ,@(generate-handler-body var clauses)))
-       (fun () ,@body))))
+       (fun (,exn)
+         (let ((,name (exception-name ,exn)))
+           (cond ,@(map (fun (c) `((= ',(first c) ,name) ,@(rest c))) clauses)
+                 (#true (raise ,exn)))))
+       (fun () ,exp))))
