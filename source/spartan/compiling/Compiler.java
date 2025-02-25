@@ -955,7 +955,7 @@ public class Compiler
    
      Syntax: (for ((var1 init1 step1) ...)
                (test result)
-               body ...)
+               body...)
      
      Compilation:
      

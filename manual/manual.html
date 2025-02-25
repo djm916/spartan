@@ -232,20 +232,22 @@ defines a new, unique record type <i>type</i> and creates the following procedur
 <p>In an expression, symbols denote both variable references and variable bindings, depending on the context.
 A symbol normally denotes a variable reference.
 In some contexts, such as definitions and function parameters, symbols denote variable bindings.
-Variables are either local or global.
+Variables are either local (bound) or global (free).
 Local variables follow lexical scoping rules and are bound by lambda expressions or forms derived thereof (e.g., let).
-Global variables are global in scope and are bound in a namespace by definitions (e.g., def, defun).
-It is an error to refer to an unbound variable.</p>
+Global variables are global in scope and are bound in a namespace by definitions (e.g., def, defun).</p>
 
-<h4>Variable Resolution Rules</h4>
+<h4>Variable Resolution</h4>
 
 <p>To resolve a variable, the following rules are applied:</p>
 
 <ul>
-  <li>If the variable is qualified then it resolves to its binding in the specified namespace.</li>
-  <li>Otherwise, if the variable is bound by a lexically-enclosing binding construct, then it resolves to that binding.</li>
-  <li>Otherwise, the variable resolves to its binding in the current namespace.</li>
-  <li>If there is no such binding, an error is raised.</li>
+  <li>If the variable is <i>bound</i> (i.e., by a lexically-enclosing binding construct) then it resolves to the nearest lexically enclosing binding of that variable.</li>
+  <li>If the variable is <i>free</i> (i.e., not bound) then
+    <ul>
+      <li>If the variable is qualified then it resolves to its binding in the specified namespace.</li>
+      <li>If the variable is unqualified then it resolves to its binding in the current namespace.</li>
+    </ul>
+  </li>
 </ul>
 
 <h3>Conditionals</h3>
@@ -518,6 +520,47 @@ QQ is defined as follows:</p>
 (def <i>var</i>
   (fun (<i>param</i> ...)
     <i>body</i>...))
+</pre></div>
+
+<h3>Iteration</h3>
+
+<h4>while</h4>
+
+<p>The form</p>
+
+<div class="codeblock"><pre>
+(while <i>exp</i> <i>body</i>...)
+</pre></div>
+
+<p>repeatedly executes the <i>body</i> expressions while <i>exp</i> evaluates true.
+The value of a <b>while</b> expression is <code>#nil</code>.</p>
+
+<h4>iterate</h4>
+
+<p>The form</p>
+
+<div class="codeblock"><pre>
+(iterate ((<i>var</i> <i>init</i> <i>step</i>)
+          ...
+          (<i>var</i> <i>init</i> <i>step</i>))
+  (<i>test</i> <i>exp</i>)
+  <i>body</i>...)
+</pre></div>
+
+<p>is evaluated as follows: First, each <i>init</i> is evaluated and bound to the corresponding <i>var</i>.
+In each iteration, <i>test</i> is evaluated.
+If it is true, then the iteration terminates, <i>exp</i> is evaluated and its result returned as the result of the entire expression.
+If <i>test</i> evaluates false, then the (possibly empty) <i>body</i> expressions are evaluated for effect, each <i>step</i> is evaluated and assigned to the corresponding <i>var</i>, and iteration continues.
+It is semantically equivalent to the dervied form</p>
+
+<div class="codeblock"><pre>
+(let ((<i>var</i> <i>init</i>) ...)
+  (while (not <i>test</i>)
+    <i>body</i>...
+    (let ((<i>t</i> <i>step</i>) ...)
+      (set! <i>var</i> <i>t</i>)
+      ...))
+  <i>result</i>)
 </pre></div>
 
 <a id="chapter_4"><h2>Proper Tail Recursion</h2></a>

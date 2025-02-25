@@ -48,57 +48,56 @@ public class CodeListing
   {
     while (code != null) {
       switch (code) {
-        case Apply inst: {
-          code = inst.next();
+        case Apply(_, _, var next): {
+          code = next;
           break;
         }
-        case BindGlobal inst: {
-          code = inst.next();
+        case BindGlobal(_, _, _, var next): {
+          code = next;
           break;
         }
-        case BranchFalse inst: {
-          ctx.labels.put(inst.right(), ctx.genLabel());
-          generateLabels(inst.left(), ctx);
-          code = inst.right();
+        case BranchFalse(var left, var right): {
+          ctx.labels.put(right, ctx.genLabel());
+          generateLabels(left, ctx);
+          code = right;
           break;
         }
-        case BranchTrue inst: {
-          ctx.labels.put(inst.right(), ctx.genLabel());
-          generateLabels(inst.left(), ctx);
-          code = inst.right();
+        case BranchTrue(var left, var right): {
+          ctx.labels.put(right, ctx.genLabel());
+          generateLabels(left, ctx);
+          code = right;
           break;
         }
-        case Halt inst: {
+        case Halt(): {
           code = null;
           break;
         }
-        case Jump inst: {
-          ctx.labels.put(inst.target(), ctx.genLabel());
+        case Jump j: {
+          ctx.labels.put(j.target(), ctx.genLabel());
           code = null;
           break;
         }
-        case LoadConst inst: {
-          code = inst.next();
+        case LoadConst(_, var next): {
+          code = next;
           break;
         }
-        case LoadGlobal inst: {
-          code = inst.next();
+        case LoadGlobal(_, _, _, var next): {
+          code = next;
           break;
         }
-        case LoadLocal inst: {
-          code = inst.next();
+        case LoadLocal(_, _, var next): {
+          code = next;
           break;
         }
-        case LoadLocal0 inst: {
-          code = inst.next();
+        case LoadLocal0(_, var next): {
+          code = next;
           break;
         }
-        case MakeClosure inst: {
-          var body = inst.proc().body();
-          ctx.labels.put(body, ctx.genLabel());
-          ctx.procEntries.add(body);
-          generateLabels(body, ctx);
-          code = inst.next();
+        case MakeClosure(var proc, var next): {
+          ctx.labels.put(proc.body(), ctx.genLabel());
+          ctx.procEntries.add(proc.body());
+          generateLabels(proc.body(), ctx);
+          code = next;
           break;
         }
         case Match(_, var left, var right): {
@@ -107,48 +106,48 @@ public class CodeListing
           code = right;
           break;
         }
-        case PopArg inst: {
-          code = inst.next();
+        case PopArg(var next): {
+          code = next;
           break;
         }
-        case PopEnv inst: {
-          code = inst.next();
+        case PopEnv(var next): {
+          code = next;
           break;
         }
-        case PopFrame inst: {
+        case PopFrame(): {
           code = null;
           break;
         }
-        case PopRestArgs inst: {
-          code = inst.next();
+        case PopRestArgs(var next): {
+          code = next;
           break;
         }
-        case PushArg inst: {
-          code = inst.next();
+        case PushArg(var next): {
+          code = next;
           break;
         }
-        case PushEnv inst: {
-          code = inst.next();
+        case PushEnv(_, var next): {
+          code = next;
           break;
         }
-        case PushFrame inst: {
-          code = inst.next();
+        case PushFrame(_, _, var next): {
+          code = next;
           break;
         }
-        case Raise inst: {
-          code = inst.next();
+        case Raise(_, var next): {
+          code = next;
           break;
         }
-        case StoreGlobal inst: {
-          code = inst.next();
+        case StoreGlobal(_, _, _, var next): {
+          code = next;
           break;
         }
-        case StoreLocal inst: {
-          code = inst.next();
+        case StoreLocal(_, _, var next): {
+          code = next;
           break;
         }
-        case StoreLocal0 inst: {
-          code = inst.next();
+        case StoreLocal0(_, var next): {
+          code = next;
           break;
         }
       }
@@ -170,50 +169,50 @@ public class CodeListing
       sb.append(emit(code, ctx));
       sb.append("\n");
       switch (code) {
-        case Apply inst: {
-          code = inst.next();
+        case Apply(_, _, var next): {
+          code = next;
           break;
         }
-        case BindGlobal inst: {
-          code = inst.next();
+        case BindGlobal(_, _, _, var next): {
+          code = next;
           break;
         }
-        case BranchFalse inst: {
-          emitListing(inst.left(), ctx, sb);
-          code = inst.right();
+        case BranchFalse(var left, var right): {
+          emitListing(left, ctx, sb);
+          code = right;
           break;
         }
-        case BranchTrue inst: {
-          emitListing(inst.left(), ctx, sb);
-          code = inst.right();
+        case BranchTrue(var left, var right): {
+          emitListing(left, ctx, sb);
+          code = right;
           break;
         }
-        case Halt inst: {
+        case Halt(): {
           code = null;
           break;
         }
-        case Jump inst: {          
+        case Jump j: {          
           code = null;
           break;
         }
-        case LoadConst inst: {
-          code = inst.next();
+        case LoadConst(_, var next): {
+          code = next;
           break;
         }
-        case LoadGlobal inst: {
-          code = inst.next();
+        case LoadGlobal(_, _, _, var next): {
+          code = next;
           break;
         }
-        case LoadLocal inst: {
-          code = inst.next();
+        case LoadLocal(_, _, var next): {
+          code = next;
           break;
         }
-        case LoadLocal0 inst: {
-          code = inst.next();
+        case LoadLocal0(_, var next): {
+          code = next;
           break;
         }
-        case MakeClosure inst: {
-          code = inst.next();
+        case MakeClosure(_, var next): {
+          code = next;
           break;
         }
         case Match(_, var left, var right): {
@@ -221,48 +220,48 @@ public class CodeListing
           code = right;
           break;
         }
-        case PopArg inst: {
-          code = inst.next();
+        case PopArg(var next): {
+          code = next;
           break;
         }
-        case PopEnv inst: {
-          code = inst.next();
+        case PopEnv(var next): {
+          code = next;
           break;
         }
-        case PopFrame inst: {
+        case PopFrame(): {
           code = null;
           break;
         }
-        case PopRestArgs inst: {
-          code = inst.next();
+        case PopRestArgs(var next): {
+          code = next;
           break;
         }
-        case PushArg inst: {
-          code = inst.next();
+        case PushArg(var next): {
+          code = next;
           break;
         }
-        case PushEnv inst: {
-          code = inst.next();
+        case PushEnv(_, var next): {
+          code = next;
           break;
         }
-        case PushFrame inst: {
-          code = inst.next();
+        case PushFrame(_, _, var next): {
+          code = next;
           break;
         }
-        case Raise inst: {
-          code = inst.next();
+        case Raise(_, var next): {
+          code = next;
           break;
         }
-        case StoreGlobal inst: {
-          code = inst.next();
+        case StoreGlobal(_, _, _, var next): {
+          code = next;
           break;
         }
-        case StoreLocal inst: {
-          code = inst.next();
+        case StoreLocal(_, _, var next): {
+          code = next;
           break;
         }
-        case StoreLocal0 inst: {
-          code = inst.next();
+        case StoreLocal0(_, var next): {
+          code = next;
           break;
         }
       }
@@ -272,29 +271,29 @@ public class CodeListing
   private static String emit(Inst code, Context ctx)
   {
     return switch (code) {
-      case Apply      inst -> String.format("(apply %d)", inst.numArgs());
-      case BindGlobal inst -> String.format("(bind-global %s:%s)", inst.nsName().str(), inst.baseName().str());
-      case BranchTrue inst -> String.format("(branch-true %s)", ctx.labels.get(inst.right()));
-      case BranchFalse inst -> String.format("(branch-false %s)", ctx.labels.get(inst.right()));
-      case Halt        inst -> "(halt)";
-      case Jump        inst -> String.format("(jump %s)", ctx.labels.get(inst.target()));
-      case LoadConst inst -> String.format("(load-const %s)", inst.value().repr());
-      case LoadGlobal inst -> String.format("(load-global %s:%s)", inst.nsName().str(), inst.baseName().str());
-      case LoadLocal inst -> String.format("(load-local %d %d)", inst.depth(), inst.offset());
-      case LoadLocal0 inst -> String.format("(load-local 0 %d)", inst.offset());
-      case MakeClosure inst -> String.format("(make-closure %s)", ctx.labels.get(inst.proc().body()));
+      case Apply(var numArgs, _, _) -> String.format("(apply %d)", numArgs);
+      case BindGlobal(var nsName, var baseName, _, _) -> String.format("(bind-global %s:%s)", nsName.str(), baseName.str());
+      case BranchFalse(var left, var right) -> String.format("(branch-true %s)", ctx.labels.get(right));
+      case BranchTrue(var left, var right)-> String.format("(branch-false %s)", ctx.labels.get(right));
+      case Halt() -> "(halt)";
+      case Jump j -> String.format("(jump %s)", ctx.labels.get(j.target()));
+      case LoadConst(var value, _) -> String.format("(load-const %s)", value.repr());
+      case LoadGlobal(var nsName, var baseName, _, _) -> String.format("(load-global %s:%s)", nsName.str(), baseName.str());
+      case LoadLocal(var depth, var offset, _) -> String.format("(load-local %d %d)", depth, offset);
+      case LoadLocal0(var offset, _) -> String.format("(load-local 0 %d)", offset);
+      case MakeClosure(var proc, _) -> String.format("(make-closure %s)", ctx.labels.get(proc.body()));
       case Match(var pattern, _, var right) -> String.format("(match %s %s)", pattern.toString(), ctx.labels.get(right));
       case PopArg inst -> "(pop-arg)";
       case PopRestArgs inst -> "(pop-arg*)";
       case PopEnv inst -> "(pop-env)";
       case PopFrame inst -> "(pop-frame)";
       case PushArg inst -> "(push-arg)";
-      case PushEnv inst -> String.format("(push-env %d)", inst.numSlots());
+      case PushEnv(var numSlots, _) -> String.format("(push-env %d)", numSlots);
       case PushFrame inst -> "(push-frame)";
       case Raise inst -> "(raise)";
-      case StoreGlobal inst -> String.format("(store-global %s:%s)", inst.nsName().str(), inst.baseName().str());
-      case StoreLocal inst -> String.format("(store-local %d %d)", inst.depth(), inst.offset());
-      case StoreLocal0 inst -> String.format("(store-local 0 %d)", inst.offset());
+      case StoreGlobal(var nsName, var baseName, _, _) -> String.format("(store-global %s:%s)", nsName.str(), baseName.str());
+      case StoreLocal(var depth, var offset, _) -> String.format("(store-local %d %d)", depth, offset);
+      case StoreLocal0(var offset, _) -> String.format("(store-local 0 %d)", offset);
     };
   }
 }
