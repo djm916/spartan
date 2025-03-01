@@ -124,7 +124,7 @@
     `(letrec ((,symbol (fun ,vars ,@body)))
        (,symbol ,@inits))))
 
-; (let-values (((var...) init)) body...)
+; (let-values (((var...) init)...) body...)
 ; ==>
 ; (apply (fun (var...) (do body...)) init)
 ;

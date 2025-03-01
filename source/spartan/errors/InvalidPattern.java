@@ -2,7 +2,7 @@ package spartan.errors;
 
 public class InvalidPattern extends Error
 {
-  private static final String MSG_FMT = "invalid pattern syntax";
+  private static final String MSG_FMT = "invalid pattern";
   
   public InvalidPattern()
   {
