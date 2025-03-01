@@ -487,69 +487,7 @@ public class Compiler
       return new StoreLocal0(offset,
              compileInitRecEnv(offset + 1, numBindings, next));
   }
-  
-  /* Compile the "rec" special form, a shorthand for defining and invoking recursive procedures
-  
-     Syntax:     (rec f ((var1 init1) ... (varN initN)) body...)
-      
-     Transform:  (letrec ((f (fun (var1 ... varN) body..)))
-                   (f init1 ... initN))
-  */
-  /* Compiles the "rec" special form
-
-     Syntax:  (rec label ((var1 init1) ... (varN initN)) body...)
-     
-     Equivalent to: (letrec ((label (fun (var1 ... varN) body..)))
-                      (label init1 ... initN))
-     
-     Compilation:
-
-           <<initN>>
-           push-arg
-           ...
-           <<init1>>
-           push-arg
-           push-env N
-     tailEntry:
-           pop-arg
-           store-local 0 0
-           ...
-           pop-arg
-           store-local 0 N-1
-           <<body>>
-           pop-env
-     next: ...
-     
-     Within body, a tail call of the form (label arg1 ... argN) shall be compiled as:
-     
-           
-  */
-  private Inst compileRec(List exp, Scope scope, boolean tail, Inst next)
-  {
-    if (!(exp.length() >= 4 && exp.second() instanceof Symbol s && s.isSimple() && exp.third() instanceof List bindings && checkBindingListForm(bindings)))
-      throw malformedExp(exp);
     
-    var xform = transformRec(s, bindings, exp.drop3());
-    
-    if (Config.LOG_DEBUG && Config.SHOW_MACRO_EXPANSION)
-      log.info(() -> String.format("rec transform: %s => %s", exp.repr(), xform.repr()));
-    
-    try {
-      return compile(xform, scope, tail, next);
-    }
-    catch (Error err) {
-      err.setSource(new SourceInfo(xform, positionOf(exp)));
-      throw err;
-    }
-  }
-  
-  private List transformRec(Symbol f, List bindings, List body)
-  {
-    var vars = extractFirst(bindings);
-    var inits = extractSecond(bindings);
-    return List.of(Symbol.LETREC, List.adjoin(List.of(f, List.adjoin(Symbol.FUN, List.adjoin(vars, body))), List.EMPTY), List.adjoin(f, inits));
-  }
-  
   /* Check that a binding list for a "let" expression is well-formed */
   
   private boolean checkBindingListForm(List bindings)
@@ -580,25 +518,6 @@ public class Compiler
       if (!(params.first() instanceof Symbol param && param.isSimple()) || (param.equals(Symbol.AMPERSAND) && (params.rest().isEmpty() || !params.drop2().isEmpty())))
         return false;
     return true;
-  }
-
-  /* Check that a typed parameter list is well-formed
-   * 
-   * <typed-parameter-list> => "(" <typed-parameter>* <rest-parameter>? ")"
-   * <typed-parameter> => "(" <symbol> <symbol> ")"
-   * <rest-parameter> => "&" <symbol>
-   */
-  private boolean checkTypedParamListForm(List params)
-  {
-    for (; !params.isEmpty(); params = params.rest())
-      if (!(params.first() instanceof List param && checkTypedParamForm(param)) || (Symbol.AMPERSAND.equals(param) && (params.rest().isEmpty() || !params.drop2().isEmpty())))
-        return false;
-    return true;
-  }
-  
-  private boolean checkTypedParamForm(List param)
-  {
-    return param.length() == 2 && param.first() instanceof Symbol name && name.isSimple() && param.second() instanceof Symbol type && type.isSimple();
   }
   
   /* Check that a clause list is well-formed
@@ -659,17 +578,17 @@ public class Compiler
   
   /* Compiles a procedure application.
 
-     Syntax: (proc arg1 arg2 ... argN)
+     Syntax: (f arg1 arg2 ... argN)
 
      Compilation:
 
-           push-frame  // Omitted if this expression occurs in tail context
+           push-frame  // Omit when this expression occurs in tail context
            <<argN>>
            push-arg
            ...
            <<arg1>>
            push-arg
-           <<proc>>
+           <<f>>
            apply
      next: ...
   */
@@ -776,8 +695,8 @@ public class Compiler
     
   /* Compiles a lambda expression (anonymous procedure)
    *
-   * Syntax: (fun (args...) body...)
-   *         (fun (args... & rest) body...)
+   * Syntax: (fun (param...) body...)
+   *         (fun (param... & rest) body...)
    *
    */
   private Inst compileFun(List exp, Scope scope, boolean tail, Inst next)
@@ -786,31 +705,29 @@ public class Compiler
       throw malformedExp(exp);
     var body = exp.drop2();
     var proc = makeProcedure(params, body, scope);    
-    //if (Config.LOG_DEBUG)
-      //log.info(() -> String.format("Listing for procedure defined at %s\n%s", positionOf(exp), CodeListing.generate(proc.body())));
     return new MakeClosure(proc, next);
   }
 
   /* Transforms a sequence of inner definitions at the beginning
      of a procedure body:
 
-     (fun f params
-       (def symb1 init1)
+     (fun (param...)
+       (def var1 init1)
        ...
-       (def symbN initN)
+       (def varN initN)
        body...)
 
      into an equivalent nested letrec form:
 
-     (fun f params
-       (letrec ((symb1 init1)
+     (fun (param...)
+       (letrec ((var1 init1)
                 ...
-                (symbN initN))
+                (varN initN))
          body...))
 
      Inner "defun" forms are first transformed:
 
-     (defun symb params body) => (def symb (fun params body))
+     (defun var params body) => (def var (fun params body))
   */
   private List transformInnerDefs(List body)
   {
@@ -827,9 +744,7 @@ public class Compiler
     return List.adjoin(Symbol.LETREC, List.adjoin(bindings.build(), body));
   }
 
-  /* Determine if an expression is an inner-define form, i.e. a list beginning
-     with the symbol "def" or "defun".
-  */
+  // Determine if an expression is an inner-define form, i.e. a list beginning with the symbol "def" or "defun".
   private boolean isInnerDef(Datum exp)
   {
     return exp instanceof List form && !form.isEmpty() && (Symbol.DEF.equals(form.first()) || Symbol.DEFUN.equals(form.first()));
@@ -932,7 +847,7 @@ public class Compiler
          jf L1
          <<body>>
          j L0
-     L1: ldc nil
+     L1: ldc #nil
      next: ...
   */
 
@@ -1078,42 +993,6 @@ public class Compiler
     }
   }
 
-  // Reduce a quasiquote form (quasiquote x) to equivalent list form.
-
-/*
-  private List transformQuasiquote(Datum exp, int level)
-  {
-    if (!(exp instanceof List list)) {
-      return List.of(Symbol.QUOTE, exp);
-    }
-    else if (list.car() instanceof Symbol s && s.equals(Symbol.QUASIQUOTE)) {
-      return transformQuasiquote(list.cadr(), level + 1);
-    }
-    else if (list.car() instanceof Symbol s && s.equals(Symbol.UNQUOTE)) {
-      if (level == 0)
-        return list.cdr();
-      return transformQuasiquote(list.cadr(), level - 1);
-    }
-    else if (list.car() instanceof List inner && inner.car() instanceof Symbol s && s.equals(Symbol.UNQUOTE_SPLICING)) {
-      if (level == 0)
-        return List.cons(Symbol.Q_CONCAT,
-               List.cons(inner.cadr(),
-               List.cons(transformQuasiquote(list.cdr(), level),
-               List.EMPTY)));
-      return List.cons(Symbol.Q_CONCAT,
-             List.cons(transformQuasiquote(inner.cadr(), level - 1),
-             List.cons(transformQuasiquote(list.cdr(), level),
-             List.EMPTY)));
-    }
-    else {
-      return List.cons(Symbol.Q_CONS,
-             List.cons(transformQuasiquote(list.car(), level),
-             List.cons(transformQuasiquote(list.cdr(), level),
-             List.EMPTY)));
-    }
-  }
-*/
-
   /**
    * Transform a quasiquoted expression
    * 
@@ -1128,7 +1007,8 @@ public class Compiler
    * QQ(((quasiquote x) xs...), N) => (adjoin QQ((quasiquote x), N+1) QQ(xs..., N))
    * QQ((x xs...), N) => (adjoin QQ(x, N) QQ(xs..., N))
    */
-  
+
+  // Reduce a quasiquote form (quasiquote x) to equivalent list form.
   private List transformQuasiquote(Datum exp, int level)
   {
     if (exp == List.EMPTY)
@@ -1264,8 +1144,6 @@ public class Compiler
      pop-arg             // bind all but last argument to parameters
      store-local 0 0
      ...
-     pop-arg
-     store-local 0 N-2
      pop-rest-args       // bind all additional arguments to rest parameter
      store-local 0 N-1
      <<body>>            // evaluate body
@@ -1415,9 +1293,6 @@ public class Compiler
     var body = clause.rest();
     var vars = patternVars(patt);
     var extendedScope = scope.extend(vars);
-    
-    //System.out.println("pattern = " + patt.repr());
-    //System.out.println("pattern vars = " + vars.repr());    
     
     return new Match(compilePattern(patt, vars),
                      compileSequence(body, extendedScope, tail, new Jump(next)),
@@ -1576,7 +1451,7 @@ public class Compiler
            .orElse(false);
   }
   
-  /* Compile a combination (i.e., special forms, procedure application, and macro expansion.
+  /* Compile a combination (i.e., a special form, function application, or macro usage.
      
      Evaluation rules:
      
@@ -1587,8 +1462,8 @@ public class Compiler
         
      2. If <exp0> is a symbol bound to a macro, then macroexpansion occurs.
         
-     3. Otherwise, <exp0> is assumed to evaluate to a procedure and the rules
-        of procedure application apply.
+     3. Otherwise, <exp0> must evaluate to a function and the rules of function
+        application apply.
   */
   
   private Inst compileCombo(List exp, Scope scope, boolean tail, Inst next)
@@ -1618,17 +1493,16 @@ public class Compiler
     Map.entry(Symbol.DEF, this::compileDef),
     Map.entry(Symbol.DEFUN, this::compileDefun),
     Map.entry(Symbol.DEFMACRO, this::compileDefmacro),
+    Map.entry(Symbol.FUN, this::compileFun),
     Map.entry(Symbol.IF, this::compileIf),
     Map.entry(Symbol.COND, this::compileCond),
     Map.entry(Symbol.LET, this::compileLet),
     Map.entry(Symbol.LETSTAR, this::compileLetStar),
     Map.entry(Symbol.LETREC, this::compileLetRec),
-    Map.entry(Symbol.FUN, this::compileFun),
     Map.entry(Symbol.DO, this::compileDo),
-    Map.entry(Symbol.FOR, this::compileFor),
-    //Map.entry(Symbol.REC, this::compileRec),
-    Map.entry(Symbol.SET, this::compileSet),
     Map.entry(Symbol.WHILE, this::compileWhile),
+    Map.entry(Symbol.SET, this::compileSet),
+    Map.entry(Symbol.FOR, this::compileFor),
     Map.entry(Symbol.QUOTE, this::compileQuote),
     Map.entry(Symbol.QUASIQUOTE, this::compileQuasiquote),
     Map.entry(Symbol.OR, this::compileOr),

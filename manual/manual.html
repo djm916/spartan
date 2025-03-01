@@ -229,20 +229,28 @@ defines a new, unique record type <i>type</i> and creates the following procedur
 
 <h3>Variables</h3>
 
-<p>In an expression, symbols denote both variable references and variable bindings, depending on the context.
+<p>In an expression, symbols denote both variable references and variable bindings, depending on the context of use.
 A symbol normally denotes a variable reference.
-In some contexts, such as definitions and function parameters, symbols denote variable bindings.
-Variables are either local (bound) or global (free).
-Local variables follow lexical scoping rules and are bound by lambda expressions or forms derived thereof (e.g., let).
-Global variables are global in scope and are bound in a namespace by definitions (e.g., def, defun).</p>
+In some contexts, such as a function parameter lists, symbols denote variable bindings.
+Variables are either local or global.
+Local variables follow lexical scope rules and are bound by lambda expressions or forms derived thereof (e.g., let).
+Global variables are global in scope and are bound by definitions (e.g., def, defun).</p>
+
+<h4>Namespaces</h4>
+
+<p>The top-level, global environment is divided into namespaces.
+A <i>namespace</i> consists of a set of variable bindings.
+A binding is an association between a symbol and some value.
+At any point during evaluation, one namespace is <i>current</i>.
+Definitions create bindings in the current environment, and (unqualified) global variable references resolve in the current environment.</p>
 
 <h4>Variable Resolution</h4>
 
 <p>To resolve a variable, the following rules are applied:</p>
 
 <ul>
-  <li>If the variable is <i>bound</i> (i.e., by a lexically-enclosing binding construct) then it resolves to the nearest lexically enclosing binding of that variable.</li>
-  <li>If the variable is <i>free</i> (i.e., not bound) then
+  <li>If the variable is <i>local</i> (i.e., bound by a lexically-enclosing binding construct) then it resolves to the nearest lexically enclosing binding of that variable.</li>
+  <li>If the variable is <i>global</i> then
     <ul>
       <li>If the variable is qualified then it resolves to its binding in the specified namespace.</li>
       <li>If the variable is unqualified then it resolves to its binding in the current namespace.</li>
@@ -488,7 +496,7 @@ QQ is defined as follows:</p>
 <p>and is semantically equivalent to the form</p>
 
 <div class="codeblock"><pre>
-(fun (...)
+(fun (<i>param</i>...)
   (letrec ((<i>var<sub>1</sub></i> <i>init<sub>1</sub></i>)
            ...
            (<i>var<sub>N</sub></i> <i>init<sub>N</sub></i>))
@@ -533,7 +541,7 @@ QQ is defined as follows:</p>
 </pre></div>
 
 <p>repeatedly executes the <i>body</i> expressions while <i>exp</i> evaluates true.
-The value of a <b>while</b> expression is <code>#nil</code>.</p>
+The <i>body</i> expressions are only evaluated for effect; the return value of a <b>while</b> expression is <code>#nil</code>.</p>
 
 <h4>iterate</h4>
 
@@ -838,6 +846,16 @@ where <i>body</i> points to the compiled function body
 next:  ...         // control returns here
     </td>
   </tr>
+  <tr>
+    <td>(while <i>test</i> <i>body</i>...)</td>
+    <td>
+L0:    &lt&lt<i>test</i>&gt&gt
+       bf L1
+       &lt&lt<i>body</i>&gt&gt
+       jmp L0
+L1:    ldc #nil
+next:  ...
+    </td>
 </table>
 
 <a id="appendix_1"><h2>Formal Grammar</h2></a>

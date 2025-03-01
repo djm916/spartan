@@ -45,8 +45,8 @@ record MatchList(IPattern first, IPattern rest) implements IPattern
 {
   public boolean match(Datum arg, Env env)
   {
-    return (arg instanceof List list) && !list.isEmpty() &&
-           first.match(list.first(), env) && rest.match(list.rest(), env);
+    return (arg instanceof List list) && !list.isEmpty()
+        && first.match(list.first(), env) && rest.match(list.rest(), env);
   }
 }
 

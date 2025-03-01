@@ -1,24 +1,8 @@
+(in-ns spartan.priority-queue.internal)
 
-(in-ns spartan.priority-queue)
+(defrecord queue (comparator elems))
 
-(defrecord queue-type (comparator elems))
-
-(defun make-priority-queue (comparator)
-  (make-queue-type comparator (vector)))
-
-(defun priority-queue? (self)
-  (queue-type? self))
-
-(defun empty? (self)
-  (= 0 (vector-length (queue-type-elems self))))
-
-(defun push (self item)
-  (def v (queue-type-elems self))
-  (def c (queue-type-comparator self))
-  (vector-append! v item)
-  (__reheap-up v c))
-
-(defun __reheap-up (v c)
+(defun reheap-up (v c)
   (let [(root (- (vector-length v) 1))]
     (while (> root 0)
       (let [(parent (quotient (- root 1) 2))]
@@ -26,17 +10,7 @@
           (vector-swap! v root parent)
           (set! root parent))))))
 
-(defun pop (self)
-  (def v (queue-type-elems self))
-  (def c (queue-type-comparator self))
-  (if (empty? self) void
-    (let [(top (vector-ref v 0)) (last (- (vector-length v) 1))]
-      (vector-set! v 0 (vector-ref v last))
-      (vector-remove! v last)
-      (__reheap-down v c)
-      top)))
-
-(defun __reheap-down (v c)
+(defun reheap-down (v c)
   (let [(root 0) (left 1) (right 2) (last (vector-length v)) (done #false)]
     (while (and (not done) (< left last))
       (let [(child (cond [(not (< right last)) left]
@@ -49,3 +23,31 @@
             (set! left (+ 1 (* 2 root)))
             (set! right (+ 2 (* 2 root))))
           (set! done #true))))))
+
+(in-ns spartan.priority-queue)
+(import spartan.priority-queue.internal :as internal)
+
+(defun make-priority-queue (comparator)
+  (internal:make-queue comparator (vector)))
+
+(defun priority-queue? (self)
+  (internal:queue? self))
+
+(defun empty? (self)
+  (= 0 (vector-length (internal:queue-elems self))))
+
+(defun push (self item)
+  (def v (internal:queue-elems self))
+  (def c (internal:queue-comparator self))
+  (vector-append! v item)
+  (internal:reheap-up v c))
+
+(defun pop (self)
+  (def v (internal:queue-elems self))
+  (def c (internal:queue-comparator self))
+  (if (empty? self) void
+    (let [(top (vector-ref v 0)) (last (- (vector-length v) 1))]
+      (vector-set! v 0 (vector-ref v last))
+      (vector-remove! v last)
+      (internal:reheap-down v c)
+      top)))
