@@ -216,6 +216,6 @@ public final class CoreNS extends Namespace
     bind(Symbol.of("ns-alias"), CoreLib.NS_ALIAS);
     bind(Symbol.of("ns-bind"), CoreLib.NS_BIND);
     bind(Symbol.of("ns-resolve"), CoreLib.NS_RESOLVE);
-    
+    bind(Symbol.of("ns-name->path"), CoreLib.NSNAME_TO_PATH);
   }
 }

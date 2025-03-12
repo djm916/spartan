@@ -24,8 +24,8 @@
             <Keywords name="Folders in comment, open"></Keywords>
             <Keywords name="Folders in comment, middle"></Keywords>
             <Keywords name="Folders in comment, close"></Keywords>
-            <Keywords name="Keywords1">def defun defmacro defrecord fun if cond else let let* letrec rec set! do while for delay and or load in-package import inc! dec! when unless quote unquote unquote-splicing quasiquote match</Keywords>
-            <Keywords name="Keywords2">not list vector apply force&#x000D;&#x000A;cons car cdr cadr cddr&#x000D;&#x000A;set-car! set-cdr!&#x000D;&#x000A;gensym&#x000D;&#x000A;print print-line&#x000D;&#x000A;quotient remainder&#x000D;&#x000A;numerator denominator&#x000D;&#x000A;void? null? list? vector? boolean? symbol? number? string?&#x000D;&#x000A;call/cc dynamic-wind</Keywords>
+            <Keywords name="Keywords1">def defun defmacro defrecord fun if cond else let let* letrec rec set! do while for delay and or load in-ns import use inc! dec! when unless quote unquote unquote-splicing quasiquote match</Keywords>
+            <Keywords name="Keywords2">not vector apply force&#x000D;&#x000A;adjoin first rest empty? length&#x000D;&#x000A;list list* first second third fourth&#x000D;&#x000A;set-first! set-rest!&#x000D;&#x000A;gensym&#x000D;&#x000A;print print-line&#x000D;&#x000A;quotient remainder&#x000D;&#x000A;numerator denominator&#x000D;&#x000A;nil? list? vector? boolean? symbol? number? string?&#x000D;&#x000A;call/cc dynamic-wind&#x000D;&#x000A;error</Keywords>
             <Keywords name="Keywords3">:</Keywords>
             <Keywords name="Keywords4">#</Keywords>
             <Keywords name="Keywords5"></Keywords>

@@ -144,7 +144,8 @@ public final class Runtime
     var coreNS = CoreNS.INSTANCE;
     addNS(coreNS);
     currentNS(coreNS);
-    Loader.load(Config.HOME_DIR.resolve(Path.of("stdlib", "builtins.s")));
+    var bootFile = Config.HOME_DIR.resolve(Path.of("stdlib", "spartan", "core", "core.s"));
+    Loader.load(bootFile);
     var userNS = new Namespace(Symbol.of("user"), coreNS);
     addNS(userNS);
     currentNS(userNS);

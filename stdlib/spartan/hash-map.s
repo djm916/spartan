@@ -1,6 +1,6 @@
-(in-ns spartan.hashmap.internal)
+(in-ns spartan.hash-map.internal)
 
-(defrecord hashmap (hash-fn equal-fn table size))
+(defrecord hash-map (hash-fn equal-fn table size))
 
 (defun find-node (table equal? index key)
   (def node-list (vector-ref table index))
@@ -26,41 +26,41 @@
   (if found (list (first node-list) prev) ()))
 
 (defun resize-to-capacity! (self)
-  (def old-table (hashmap-table self))
+  (def old-table (hash-map-table self))
   (def old-capacity (vector-length old-table))
   (def new-capacity (* 2 old-capacity))
   (def new-table (make-vector new-capacity ()))
-  (set-hashmap-table! self new-table)
-  (set-hashmap-size! self 0)
+  (set-hash-map-table! self new-table)
+  (set-hash-map-size! self 0)
   (let ((index 0))
     (while (< index old-capacity)
       (let ((node-list (vector-ref old-table index)))
         (while (not (empty? node-list))
           (let ((node (first node-list)))
-            (spartan.hashmap:insert! self (first node) (second node)))
+            (spartan.hash-map:insert! self (first node) (second node)))
           (set! node-list (rest node-list))))
       (inc! index))))
 
-(in-ns spartan.hashmap)
-(import spartan.hashmap.internal :as internal)
+(in-ns spartan.hash-map)
+(import spartan.hash-map.internal :as internal)
 
-(defun make-hashmap (hash-fn equal-fn)
+(defun make-hash-map (hash-fn equal-fn)
   (def initial-capacity 2)
   (def table (make-vector initial-capacity ()))
-  (internal:make-hashmap hash-fn equal-fn table 0))
+  (internal:make-hash-map hash-fn equal-fn table 0))
 
-(defun hashmap? (self)
-  (internal:hashmap? self))
+(defun hash-map? (self)
+  (internal:hash-map? self))
 
 (defun empty? (self)
-  (= 0 (internal:hashmap-size self)))
+  (= 0 (internal:hash-map-size self)))
 
 (defun size (self)
-  (internal:hashmap-size self))
+  (internal:hash-map-size self))
 
 (defun insert! (self key value)
   (match self
-    ((record internal:hashmap hash-fn equal-fn table size)
+    ((record internal:hash-map hash-fn equal-fn table size)
      (let* ((capacity (vector-length table))
             (index (remainder (hash-fn key) capacity))
             (node (internal:find-node table equal-fn index key)))
@@ -71,14 +71,14 @@
          (let ((node-list (vector-ref table index))
                (new-node (list key value)))
            (vector-set! table index (adjoin new-node node-list))
-           (internal:set-hashmap-size! self (+ 1 size))
+           (internal:set-hash-map-size! self (+ 1 size))
            ; Expand table capacity when load factor exceeded
            (if (> (/ size capacity) 0.75)
              (internal:resize-to-capacity! self))))))))
 
 (defun contains? (self key)
   (match self
-    ((record internal:hashmap hash-fn equal-fn table size)
+    ((record internal:hash-map hash-fn equal-fn table size)
      (let* ((capacity (vector-length table))
             (index (remainder (hash-fn key) capacity))
             (node (internal:find-node table equal-fn index key)))
@@ -86,7 +86,7 @@
 
 (defun remove! (self key)
   (match self
-    ((record internal:hashmap hash-fn equal-fn table size)
+    ((record internal:hash-map hash-fn equal-fn table size)
      (let* ((capacity (vector-length table))
             (index (remainder (hash-fn key) capacity))
             (node-list (vector-ref table index))
@@ -97,11 +97,11 @@
            (if (nil? prev)
              (vector-set! table index ())
              (set-rest! prev (rest node)))
-           (internal:set-hashmap-size! self (- size 1))))))))
+           (internal:set-hash-map-size! self (- size 1))))))))
 
 (defun find-or-default (self key default)
   (match self
-    ((record internal:hashmap hash-fn equal-fn table size)
+    ((record internal:hash-map hash-fn equal-fn table size)
      (let* ((capacity (vector-length table))
             (index (remainder (hash-fn key) capacity))
             (node (internal:find-node table equal-fn index key)))
@@ -112,7 +112,7 @@
 
 (defun for-each (self proc)
   (match self
-    ((record internal:hashmap hash-fn equal-fn table size)
+    ((record internal:hash-map hash-fn equal-fn table size)
      (let* ((capacity (vector-length table))
             (index 0))
        (while (< index capacity)

@@ -160,6 +160,20 @@ public final class CoreLib
     }
   };
   
+  // (ns-name->path ns-name)
+  
+  public static final Primitive NSNAME_TO_PATH = new Primitive(Signature.fixed(1)) {
+    public void apply(VirtualMachine vm) {
+      if (!(vm.popArg() instanceof Symbol nsName))
+        throw new TypeMismatch();
+      if (!nsName.isSimple())
+        throw new InvalidArgument();
+      var path = nsName.str().replace('.', '/') + ".s";
+      vm.result = new Text(path);
+      vm.popFrame();
+    }
+  };
+  
   public static final Primitive SYMBOL_TO_TEXT = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Symbol x))
