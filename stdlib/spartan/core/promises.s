@@ -8,7 +8,6 @@
 
 (defun force (p)
   (cond [(not (promise? p))
-         (print-line "forced non-promise")
          p]
         [else
          (if (not (promise-has-value p))

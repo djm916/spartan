@@ -61,8 +61,8 @@ public class Compiler
   private Position positionOf(Datum exp)
   {
     var pos = positionMap.get(exp);
-    //if (pos == null)
-      //log.warning(() -> String.format("The position is null for the expression %s", exp.repr()));
+    if (pos == null)
+      log.warning(() -> String.format("The position is null for the expression %s", exp.repr()));
     return pos;
   }
   
@@ -980,6 +980,7 @@ public class Compiler
       throw malformedExp(exp);
 
     var xform = transformQuasiquote(exp.second(), 0);
+    augmentSourceMap(xform, positionOf(exp));
     
     if (Config.LOG_DEBUG && Config.SHOW_MACRO_EXPANSION)
       log.info(() -> String.format("quasiquote transform: %s => %s", exp.repr(), xform.repr()));

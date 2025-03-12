@@ -43,3 +43,7 @@
          (symbols (remove (fun (s) (contains? s excludes))
                           (ns-symbols ns))))
     (%import ns symbols alias-map)))
+
+(defmacro use (ns-name & args)
+  `(do (spartan.core:load ,(ns-name->path ns-name))
+       (spartan.core:import ,ns-name ,@args)))

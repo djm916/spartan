@@ -57,6 +57,9 @@
   (if (or (stream-empty? s) (= n 0)) stream-empty
     (stream-adjoin (stream-first s) (stream-take (- n 1) (stream-rest s)))))
 
+(defun stream-drop (n s)
+  (if (= 0 n) s (stream-drop (- n 1) (stream-rest s))))
+
 (defun stream-reduce (f i s)
   (if (stream-empty? s) i
     (stream-reduce f (f i (stream-first s)) (stream-rest s))))
@@ -64,6 +67,9 @@
 (defun stream-enumerate (i s)
   (if (stream-empty? s) ()
     (stream-adjoin (list i (stream-first s)) (stream-enumerate (+ i 1) (stream-rest s)))))
+
+(defun stream-ref (i s)
+  (stream-first (stream-drop i s)))
 
 (defun stream->list (s)
   (if (stream-empty? s) ()

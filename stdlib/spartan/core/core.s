@@ -112,7 +112,7 @@
       (set! xs (rest xs)))
   hi))
 
-(load "stdlib/lists.s")
+(load "spartan/core/lists.s")
 
 ; (rec f ((var1 init1) ... (varN initN)) body...)
 ; ==>
@@ -138,10 +138,10 @@
              (exp (second binding))]
         `(apply (fun ,formals ,(loop (rest bindings))) ,exp)))))
 
-(load "stdlib/vectors.s")
-(load "stdlib/defrecord.s")
-(load "stdlib/promises.s")
-(load "stdlib/streams.s")
-(load "stdlib/import.s")
-(load "stdlib/control.s")
-(load "stdlib/ports.s")
+(load "spartan/core/vectors.s")
+(load "spartan/core/defrecord.s")
+(load "spartan/core/promises.s")
+(load "spartan/core/streams.s")
+(load "spartan/core/import.s")
+(load "spartan/core/control.s")
+(load "spartan/core/ports.s")

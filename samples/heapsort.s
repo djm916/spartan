@@ -1,7 +1,5 @@
 
-(load "stdlib/priority-queue.s")
-
-(import spartan.priority-queue :as pq)
+(use spartan.priority-queue :as pq)
 
 (def N 20)
 
