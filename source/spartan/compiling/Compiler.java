@@ -151,7 +151,8 @@ public class Compiler
     var init = exp.third();
     
     if (s.isQualified())
-      return compileGlobalVarRef(s, next);
+      return compile(init, scope, false,
+             compileSetGlobalVar(s, next));
     return compile(init, scope, false,
            scope.lookup(s)
                 .map(i -> compileSetLocalVar(i, next))
