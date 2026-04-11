@@ -69,7 +69,7 @@ public final class Loader
       var vm = new VirtualMachine();
       var compiler = new Compiler(vm);
       
-      var saveNS = spartan.Runtime.currentNS();
+      var saveModule = spartan.Runtime.currentModule();
       
       try {        
         while (true) {
@@ -83,7 +83,7 @@ public final class Loader
         System.err.println(err);
       }
       finally {
-        spartan.Runtime.currentNS(saveNS);
+        spartan.Runtime.currentModule(saveModule);
       }      
     }
     catch (FileNotFoundException ex) {

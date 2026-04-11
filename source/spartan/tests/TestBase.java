@@ -4,7 +4,7 @@ import spartan.parsing.Reader;
 import spartan.compiling.Compiler;
 import spartan.data.Datum;
 import spartan.data.Symbol;
-import spartan.data.Namespace;
+import spartan.data.Module;
 import spartan.runtime.VirtualMachine;
 import java.io.EOFException;
 
@@ -16,7 +16,7 @@ public abstract class TestBase
     //var testNS = new Namespace(Symbol.of("testbed"), spartan.builtins.CoreNS.INSTANCE);
     //spartan.Runtime.add(testPkg);
     //spartan.Runtime.currentPackage(testPkg);
-    spartan.Runtime.enterNS(Symbol.of("testbed"));
+    spartan.Runtime.enterModule(Symbol.of("testbed"));
     // Evaluate each top-level form in the source code
     try (Reader r = Reader.forString(code)) {
       var vm = new VirtualMachine();

@@ -1,5 +1,5 @@
 
-(in-ns spartan.core)
+(in-module spartan.base)
 
 (defmacro wrap-io-primitive (fname)
   `(set! ,fname
@@ -18,3 +18,12 @@
 (wrap-io-primitive port-position)
 (wrap-io-primitive port-seek)
 (wrap-io-primitive port-size)
+
+(export port-open-file
+        port-read
+        port-write
+        port-close
+        port-open?
+        port-position
+        port-seek
+        port-size)

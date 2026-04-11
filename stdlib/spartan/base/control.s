@@ -1,5 +1,5 @@
 
-(in-ns spartan.core)
+(in-module spartan.base)
 
 ; ============
 ; Dynamic Wind

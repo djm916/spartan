@@ -38,8 +38,8 @@ public record Type(int id, String name)
   public static final Type STRING_CURSOR = TypeRegistry.register(Symbol.of("string-cursor"));
   /** The builtin "port" type */
   public static final Type PORT = TypeRegistry.register(Symbol.of("port"));
-  /** The builtin "namespace" type */
-  public static final Type NAMESPACE = TypeRegistry.register(Symbol.of("namespace"));
+  /** The builtin "module" type */
+  public static final Type MODULE = TypeRegistry.register(Symbol.of("module"));
   /** The builtin "record descriptor" type */
   public static final Type RECORD_DESC = TypeRegistry.register(Symbol.of("record-descriptor"));  
 };

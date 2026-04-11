@@ -1,15 +1,15 @@
 package spartan;
 
-import spartan.builtins.CoreNS;
+import spartan.builtins.BaseModule;
 import spartan.data.Symbol;
 import spartan.data.QualifiedSymbol;
 import spartan.data.Datum;
-import spartan.data.Namespace;
+import spartan.data.Module;
 import spartan.data.Macro;
 import spartan.data.RecordDescriptor;
 import spartan.errors.MultipleDefinition;
 import spartan.errors.UnboundSymbol;
-import spartan.errors.NoSuchNamespace;
+import spartan.errors.ModuleDoesNotExist;
 import java.util.Map;
 import java.util.IdentityHashMap;
 import java.util.Optional;
@@ -24,9 +24,9 @@ public final class Runtime
    *
    * @return the current namespace
    */
-  public static Namespace currentNS()
+  public static Module currentModule()
   {
-    return currentNS;
+    return currentModule;
   }
   
   /**
@@ -34,79 +34,77 @@ public final class Runtime
    *
    * @param ns the namespace
    */
-  public static void currentNS(Namespace ns)
+  public static void currentModule(Module module)
   {
-    currentNS = ns;
+    currentModule = module;
   }
   
   /**
    * Set the current namespace, creating it if it doesn't exist
    *
-   * @param nsName the namespace name
+   * @param moduleName the namespace name
    */
-  public static void enterNS(Symbol nsName)
+  public static void enterModule(Symbol moduleName)
   {
-    currentNS(getOrCreateNS(nsName));
+    currentModule(getOrCreateModule(moduleName));
   }
   
   /**
    * Find a namespace
    *
-   * @param nsName the namespace name to search for
+   * @param moduleName the namespace name to search for
    * @return the namespace found
-   * @throws NoSuchNamespace if no such namespace exists
+   * @throws ModuleDoesNotExist if no such namespace exists
    */
-  public static Namespace getNS(Symbol nsName)
+  public static Module getModule(Symbol moduleName)
   {
-    var ns = namespaces.get(nsName);
-    if (ns == null)
-      throw new NoSuchNamespace(nsName);
-    return ns;
+    var module = modules.get(moduleName);
+    if (module == null)
+      throw new ModuleDoesNotExist(moduleName);
+    return module;
   }
   
   /**
    * Creates and returns a new namespace if it doesn't exist, otherwise returns the
    * existing namespace.
    */
-  public static Namespace getOrCreateNS(Symbol nsName)
+  public static Module getOrCreateModule(Symbol moduleName)
   {
-    return namespaces.computeIfAbsent(nsName, (_) -> new Namespace(nsName, CoreNS.INSTANCE));
+    return modules.computeIfAbsent(moduleName, (_) -> new Module(moduleName, BaseModule.INSTANCE));
   }
   
   /**
    * Add a namespace, overwriting any existing mapping to an existing namespace.
    */
-  public static void addNS(Namespace ns)
+  public static void addModule(Module module)
   {
-    namespaces.put(ns.name(), ns);
+    modules.put(module.name(), module);
   }
   
-  public static Namespace createNS(Symbol nsName)
+  public static Module createModule(Symbol moduleName)
   {
-    //if (namespaces.containsKey(nsName))
-      //throw new DuplicateNamespace(nsName);
-    var ns = new Namespace(nsName, CoreNS.INSTANCE);
-    namespaces.put(nsName, ns);
-    return ns;
+    var module = new Module(moduleName, BaseModule.INSTANCE);
+    modules.put(moduleName, module);
+    return module;
   }
   
   public static Datum lookup(Symbol s)
   {
     return (s instanceof QualifiedSymbol qs)
-           ? getNS(canonicalName(Symbol.of(qs.nameSpace()))).lookup(Symbol.of(qs.baseName()))
-           : currentNS().lookup(s.intern());
+           ? getModule(canonicalName(Symbol.of(qs.moduleName()))).lookup(Symbol.of(qs.baseName()))
+           : currentModule().lookup(s.intern());
   }
   
-  private static Symbol canonicalName(Symbol nsName)
+  private static Symbol canonicalName(Symbol moduleName)
   {
-    return spartan.Runtime.currentNS().lookupAlias(nsName).map(ns -> ns.name()).orElse(nsName);
+    return currentModule().lookupAlias(moduleName).orElse(moduleName);
   }
   
   /** Resolve the given symbol in the global environment
    *
    * @param s the symbol to look up
    * @return the value bound to the symbol
-   * @throws NoSuchNamespace if the symbol is qualified and the namespace does not exist
+   * @throws ModuleDoesNotExist if the symbol is qualified and the namespace does not exist
    * @throws UnboundSymbol if the symbol could not be resolved
    */
   public static Optional<Datum> tryLookup(Symbol s)
@@ -114,7 +112,7 @@ public final class Runtime
     try {
       return Optional.of(lookup(s));
     }
-    catch (UnboundSymbol | NoSuchNamespace err) {
+    catch (UnboundSymbol | ModuleDoesNotExist err) {
       return Optional.empty();
     }
   }
@@ -141,19 +139,22 @@ public final class Runtime
   {
     if (Config.LOG_DEBUG)
       log.info(() -> String.format("initializing runtime environment"));
-    var coreNS = CoreNS.INSTANCE;
-    addNS(coreNS);
-    currentNS(coreNS);
-    var bootFile = Config.HOME_DIR.resolve(Path.of("stdlib", "spartan", "core", "core.s"));
+    var baseModule = BaseModule.INSTANCE;
+    addModule(baseModule);
+    currentModule(baseModule);
+    var bootFile = Config.HOME_DIR.resolve(Path.of("stdlib", "spartan", "base", "base.s"));
     Loader.load(bootFile);
-    var userNS = new Namespace(Symbol.of("user"), coreNS);
-    addNS(userNS);
-    currentNS(userNS);
+    // NOTE: Ensure all bindings exported by the spartan.base module are actually defined,
+    // or an "unbound variable" error with be thrown (with no source location) when
+    // attempting to import into the user module here.
+    var userModule = new Module(Symbol.of("user"), baseModule);
+    addModule(userModule);
+    currentModule(userModule);
   }
   
   private Runtime() { }
   
-  private static Namespace currentNS;
-  private static final Map<Symbol, Namespace> namespaces = new IdentityHashMap<>();
+  private static Module currentModule;
+  private static final Map<Symbol, Module> modules = new IdentityHashMap<>();
   private static final Logger log = Logger.getLogger(Runtime.class.getName());
 }

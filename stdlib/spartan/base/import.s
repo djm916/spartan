@@ -1,4 +1,4 @@
-(in-ns spartan.core)
+(in-module spartan.base)
 
 ; <import-statement> => (import <symbol> :as <symbol>)
 ;                     | (import <symbol> :only (<symbol>+) [:rename ((<symbol> <symbol>)+)])

@@ -21,7 +21,9 @@
 ; set-point-x!   ; field mutators
 ; set-point-y!
 
-(in-ns spartan.core)
+(in-module spartan.base)
+
+(export defrecord)
 
 (defmacro defrecord (name fields)
   ; Generate the name of a record constructor
@@ -40,14 +42,14 @@
   (defun mutator-name (name field)
     (string->symbol (string-concat "set-" (symbol->string name) "-" (symbol->string field) "!")))
 
-  `(let ((rtd (spartan.core:make-record-type ',name ',fields))) ; Create record type descriptor
+  `(let ((rtd (spartan.base:make-record-type ',name ',fields))) ; Create record type descriptor
      ; Bind record type name to the record type descriptor
      (def ,name rtd)
      ; Define constructor
-     (def ,(constructor-name name) (spartan.core:record-constructor rtd))
+     (def ,(constructor-name name) (spartan.base:record-constructor rtd))
      ; Define type predicate
-     (def ,(predicate-name name) (spartan.core:record-predicate rtd))
+     (def ,(predicate-name name) (spartan.base:record-predicate rtd))
      ; Define accessors
-     ,@(spartan.core:map (fun (field) `(def ,(accessor-name name field) (spartan.core:record-accessor rtd ',field))) fields)
+     ,@(spartan.base:map (fun (field) `(def ,(accessor-name name field) (spartan.base:record-accessor rtd ',field))) fields)
      ; Define mutators
-     ,@(spartan.core:map (fun (field) `(def ,(mutator-name name field) (spartan.core:record-mutator rtd ',field))) fields)))
+     ,@(spartan.base:map (fun (field) `(def ,(mutator-name name field) (spartan.base:record-mutator rtd ',field))) fields)))

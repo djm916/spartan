@@ -1,6 +1,7 @@
 package spartan.builtins;
 
 import spartan.data.*;
+import spartan.data.Module; // shadows java.lang.Module
 import spartan.data.Record; // shadows java.lang.Record
 import spartan.errors.Error;
 import spartan.errors.TypeMismatch;
@@ -8,7 +9,7 @@ import spartan.errors.InvalidArgument;
 import spartan.errors.WrongNumberArgs;
 import spartan.errors.UnboundSymbol;
 import spartan.errors.IOError;
-import spartan.errors.NoSuchNamespace;
+import spartan.errors.ModuleDoesNotExist;
 import java.io.IOException;
 import spartan.runtime.VirtualMachine;
 import spartan.Config;
@@ -16,9 +17,9 @@ import spartan.parsing.Reader;
 import spartan.errors.SourceInfo;
 
 /**
- * Contains implementations of Spartan Scheme's core builtin procedures.
+ * Contains implementations of the spartan.base module procedures.
  */
-public final class CoreLib
+public final class BaseLib
 {
   public static Bool not(Datum x)
   {
@@ -157,20 +158,6 @@ public final class CoreLib
         vm.result = Nil.VALUE;
         vm.popFrame();
       }
-    }
-  };
-  
-  // (ns-name->path ns-name)
-  
-  public static final Primitive NSNAME_TO_PATH = new Primitive(Signature.fixed(1)) {
-    public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof Symbol nsName))
-        throw new TypeMismatch();
-      if (!nsName.isSimple())
-        throw new InvalidArgument();
-      var path = nsName.str().replace('.', '/') + ".s";
-      vm.result = new Text(path);
-      vm.popFrame();
     }
   };
   
@@ -401,20 +388,20 @@ public final class CoreLib
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Text baseName))
         throw new TypeMismatch();
-      if (!((vm.args.isEmpty() ? new Text(spartan.Runtime.currentNS().name().name()) : vm.popArg()) instanceof Text nsName))
+      if (!((vm.args.isEmpty() ? new Text(spartan.Runtime.currentModule().name().name()) : vm.popArg()) instanceof Text moduleName))
         throw new TypeMismatch();
-      vm.result = new QualifiedSymbol(nsName.str(), baseName.str());
+      vm.result = new QualifiedSymbol(moduleName.str(), baseName.str());
       vm.popFrame();
     }    
   };
     
-  // (symbol-ns symbol)
+  // (symbol-modulename symbol)
   
-  public static final Primitive SYMBOL_NS = new Primitive(Signature.fixed(1)) {
+  public static final Primitive SYMBOL_MODULENAME = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Symbol s))
         throw new TypeMismatch();
-      vm.result = s instanceof QualifiedSymbol qs ? new Text(qs.nameSpace()) : Nil.VALUE;
+      vm.result = s instanceof QualifiedSymbol qs ? new Text(qs.moduleName()) : Nil.VALUE;
       vm.popFrame();
     }
   };
@@ -479,7 +466,7 @@ public final class CoreLib
       if (!(vm.popArg() instanceof List fields))
         throw new TypeMismatch();
       validateFields(fields);
-      var fullName = new QualifiedSymbol(spartan.Runtime.currentNS().name().name(), name.name()).intern();
+      var fullName = new QualifiedSymbol(spartan.Runtime.currentModule().name().name(), name.name()).intern();
       var fieldArray = fields.streamOf(Symbol.class).toArray(Symbol[]::new);
       var type = TypeRegistry.register(fullName);
       vm.result = new RecordDescriptor(type, fullName, fieldArray);
@@ -571,127 +558,183 @@ public final class CoreLib
   };
   
   //
-  // Namespace related procedures
+  // Module related procedures
   //
   
-  // (make-ns ns-name)
+  // (make-module module-name)
   
-  public static final Primitive MAKE_NS = new Primitive(Signature.fixed(1)) {
+  public static final Primitive MAKE_MODULE = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof Symbol nsName))
+      if (!(vm.popArg() instanceof Symbol moduleName))
         throw new TypeMismatch();
-      vm.result = spartan.Runtime.createNS(nsName);
+      vm.result = spartan.Runtime.createModule(moduleName);
       vm.popFrame();
     }
   };
   
-  // (current-ns)
+  // (current-module)
   
-  public static final Primitive CURRENT_NS = new Primitive(Signature.fixed(0)) {
+  public static final Primitive CURRENT_MODULE = new Primitive(Signature.fixed(0)) {
     public void apply(VirtualMachine vm) {
-      vm.result = spartan.Runtime.currentNS();
+      vm.result = spartan.Runtime.currentModule();
       vm.popFrame();
     }
   };
   
-  // (set-current-ns! ns)
+  // (set-current-module! module)
   
-  public static final Primitive SET_CURRENT_NS = new Primitive(Signature.fixed(1)) {
+  public static final Primitive SET_CURRENT_MODULE = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof Namespace ns))
+      if (!(vm.popArg() instanceof Module module))
         throw new TypeMismatch();
-      spartan.Runtime.currentNS(ns);
+      spartan.Runtime.currentModule(module);
       vm.result = Nil.VALUE;
       vm.popFrame();
     }
   };
   
-  // (find-ns nsName)
+  // (find-module module-name)
   
-  public static final Primitive FIND_NS = new Primitive(Signature.fixed(1)) {
+  public static final Primitive FIND_MODULE = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof Symbol nsName))
+      if (!(vm.popArg() instanceof Symbol moduleName))
         throw new TypeMismatch();
       try {
-        vm.result = spartan.Runtime.getNS(nsName);
+        vm.result = spartan.Runtime.getModule(moduleName);
       }
-      catch (NoSuchNamespace err) {
+      catch (ModuleDoesNotExist err) {
         vm.result = Nil.VALUE;
       }
       vm.popFrame();
     }
   };
   
-  // (the-ns nsName)
+  // (the-module module-name)
   
-  public static final Primitive THE_NS = new Primitive(Signature.fixed(1)) {
+  public static final Primitive THE_MODULE = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof Symbol nsName))
+      if (!(vm.popArg() instanceof Symbol moduleName))
         throw new TypeMismatch();
-      vm.result = spartan.Runtime.getNS(nsName);
+      vm.result = spartan.Runtime.getModule(moduleName);
       vm.popFrame();
     }
   };
   
-  // (ns-bind symbol value [ns])
+  // (module-bind symbol value [module])
   
-  public static final Primitive NS_BIND = new Primitive(Signature.variadic(2, 1)) {
+  public static final Primitive MODULE_BIND = new Primitive(Signature.variadic(2, 1)) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Symbol symbol))
         throw new TypeMismatch();
       var value = vm.popArg();
-      if (!((vm.args.isEmpty() ? spartan.Runtime.currentNS() : vm.popArg()) instanceof Namespace ns))
+      if (!((vm.args.isEmpty() ? spartan.Runtime.currentModule() : vm.popArg()) instanceof Module module))
         throw new TypeMismatch();
       if (!symbol.isSimple())
         throw new InvalidArgument();
-      ns.bind(symbol, value);
+      module.bind(symbol, value);
       vm.result = Nil.VALUE;
       vm.popFrame();
     }
   };
   
-  // (ns-resolve symbol [ns])
+  // (module-resolve symbol [module])
   
-  public static final Primitive NS_RESOLVE = new Primitive(Signature.variadic(1, 1)) {
+  public static final Primitive MODULE_RESOLVE = new Primitive(Signature.variadic(1, 1)) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Symbol symbol))
         throw new TypeMismatch();
-      if (!((vm.args.isEmpty() ? spartan.Runtime.currentNS() : vm.popArg()) instanceof Namespace ns))
+      if (!((vm.args.isEmpty() ? spartan.Runtime.currentModule() : vm.popArg()) instanceof Module module))
         throw new TypeMismatch();
       if (!symbol.isSimple())
         throw new InvalidArgument();
-      vm.result = ns.lookup(symbol);
+      vm.result = module.lookup(symbol);
       vm.popFrame();
     }
   };
   
-  // (ns-symbols [ns])
+  // (module-import from-module symbol [alias] [module])
   
-  public static final Primitive NS_SYMBOLS = new Primitive(Signature.variadic(0, 1)) {
+  public static final Primitive MODULE_IMPORT = new Primitive(Signature.variadic(2, 2)) {
     public void apply(VirtualMachine vm) {
-      if (!((vm.args.isEmpty() ? spartan.Runtime.currentNS() : vm.popArg()) instanceof Namespace ns))
+      if (!(vm.popArg() instanceof Module fromModule))
         throw new TypeMismatch();
-      vm.result = List.of(ns.symbols());
-      vm.popFrame();
-    }
-  };
-  
-  // (ns-alias ns-name alias [ns])
-  
-  public static final Primitive NS_ALIAS = new Primitive(Signature.variadic(2, 1)) {    
-    public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof Symbol nsName))
+      if (!(vm.popArg() instanceof Symbol symbol))
         throw new TypeMismatch();
-      if (!(vm.popArg() instanceof Symbol alias))
-        throw new TypeMismatch();      
-      if (!((vm.args.isEmpty() ? spartan.Runtime.currentNS() : vm.popArg()) instanceof Namespace toNS))
+      if (!((vm.args.isEmpty() ? symbol : vm.popArg()) instanceof Symbol alias))
         throw new TypeMismatch();
-      if (!nsName.isSimple())
+      if (!((vm.args.isEmpty() ? spartan.Runtime.currentModule() : vm.popArg()) instanceof Module toModule))
+        throw new TypeMismatch();
+      if (!symbol.isSimple())
         throw new InvalidArgument();
       if (!alias.isSimple())
         throw new InvalidArgument();
-      toNS.addAlias(alias, spartan.Runtime.getNS(nsName));
+      toModule._import(fromModule, symbol, alias);
       vm.result = Nil.VALUE;
+      vm.popFrame();
+    }
+  };
+  
+  // (module-export symbols [module])
+  
+  public static final Primitive MODULE_EXPORT = new Primitive(Signature.variadic(1, 1)) {
+    public void apply(VirtualMachine vm) {
+      if (!(vm.popArg() instanceof List symbols))
+        throw new TypeMismatch();
+      if (!((vm.args.isEmpty() ? spartan.Runtime.currentModule() : vm.popArg()) instanceof Module module))
+        throw new TypeMismatch();
+      for (var elem : symbols) {
+        if (!(elem instanceof Symbol s))
+          throw new InvalidArgument();
+        if (!s.isSimple())
+          throw new InvalidArgument();
+        module.export(s);
+      }
+      vm.result = Nil.VALUE;
+      vm.popFrame();
+    }
+  };
+  
+  // (module-symbols [module])
+  
+  public static final Primitive MODULE_SYMBOLS = new Primitive(Signature.variadic(0, 1)) {
+    public void apply(VirtualMachine vm) {
+      if (!((vm.args.isEmpty() ? spartan.Runtime.currentModule() : vm.popArg()) instanceof Module module))
+        throw new TypeMismatch();
+      vm.result = List.of(module.symbolsPublic());
+      vm.popFrame();
+    }
+  };
+  
+  // (module-alias module-name alias [module])
+  
+  public static final Primitive MODULE_ALIAS = new Primitive(Signature.variadic(2, 1)) {    
+    public void apply(VirtualMachine vm) {
+      if (!(vm.popArg() instanceof Symbol moduleName))
+        throw new TypeMismatch();
+      if (!(vm.popArg() instanceof Symbol alias))
+        throw new TypeMismatch();      
+      if (!((vm.args.isEmpty() ? spartan.Runtime.currentModule() : vm.popArg()) instanceof Module toModule))
+        throw new TypeMismatch();
+      if (!moduleName.isSimple())
+        throw new InvalidArgument();
+      if (!alias.isSimple())
+        throw new InvalidArgument();
+      toModule.addAlias(alias, moduleName);
+      vm.result = Nil.VALUE;
+      vm.popFrame();
+    }
+  };
+  
+  // (module-name->path module-name)
+  
+  public static final Primitive MODULENAME_TO_PATH = new Primitive(Signature.fixed(1)) {
+    public void apply(VirtualMachine vm) {
+      if (!(vm.popArg() instanceof Symbol moduleName))
+        throw new TypeMismatch();
+      if (!moduleName.isSimple())
+        throw new InvalidArgument();
+      var path = moduleName.str().replace('.', '/') + ".s";
+      vm.result = new Text(path);
       vm.popFrame();
     }
   };

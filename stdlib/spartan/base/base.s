@@ -4,7 +4,7 @@
 ; This file is pre-loaded when the interpreter starts and
 ; itself loads several other files.
 
-(set-current-ns! (the-ns 'spartan.core))
+(set-current-module! (the-module 'spartan.base))
 
 (defun %quasiquote (exp level)
   (defun unquote? (form)
@@ -21,25 +21,80 @@
           (let [(subexp (first exp))]
             (cond [(unquote? subexp)
                      (if (= level 0)
-                       (list 'spartan.core:adjoin (second subexp) (%quasiquote (rest exp) 0))
-                       (list 'spartan.core:adjoin (%quasiquote subexp (- level 1)) (%quasiquote (rest exp) level)))]
+                       (list 'spartan.base:adjoin (second subexp) (%quasiquote (rest exp) 0))
+                       (list 'spartan.base:adjoin (%quasiquote subexp (- level 1)) (%quasiquote (rest exp) level)))]
                   [(unquote-splicing? subexp)
                      (if (= level 0)
-                       (list 'spartan.core:concat (second subexp) (%quasiquote (rest exp) 0))
-                       (list 'spartan.core:adjoin (%quasiquote subexp (- level 1)) (%quasiquote (rest exp) level)))]
+                       (list 'spartan.base:concat (second subexp) (%quasiquote (rest exp) 0))
+                       (list 'spartan.base:adjoin (%quasiquote subexp (- level 1)) (%quasiquote (rest exp) level)))]
                   [(quasiquote? subexp)
-                     (list 'spartan.core:adjoin (%quasiquote subexp (+ 1 level)) (%quasiquote (rest exp) level))]
+                     (list 'spartan.base:adjoin (%quasiquote subexp (+ 1 level)) (%quasiquote (rest exp) level))]
                   [else
-                     (list 'spartan.core:adjoin (%quasiquote (first exp) level) (%quasiquote (rest exp) level))]))]))
+                     (list 'spartan.base:adjoin (%quasiquote (first exp) level) (%quasiquote (rest exp) level))]))]))
 
 ; quasiquote implemented as a macro; just calls the procedure %quasiquote on its (unevaluated) argument
 ;(defmacro quasiquote (exp)
 ;  (%quasiquote exp 0))
 
-(defmacro in-ns (ns-name)
-  `(spartan.core:set-current-ns!
-     (let ((ns (spartan.core:find-ns ',ns-name)))
-       (if (not (nil? ns)) ns (spartan.core:make-ns ',ns-name)))))
+(defmacro in-module (module-name)
+  `(spartan.base:set-current-module!
+     (let ((m (spartan.base:find-module ',module-name)))
+       (if (not (nil? m)) m (spartan.base:make-module ',module-name)))))
+
+(defmacro export (& symbols)
+  `(spartan.base:module-export ',symbols))
+
+(export ->> compose curry in-module export inc! dec! let-values max min rec 
+        swap! when unless import)
+
+(defmacro use (module-name & args)
+  `(do (spartan.base:load ,(module-name->path module-name))
+       (spartan.base:import ,module-name ,@args)))
+
+; <import-form> => (import <module-name> :as <alias>)
+;                | (import <module-name> :all <alias-map>?)
+;                | (import <module-name> :only (<symbol>+) <alias-map>?)
+;                | (import <module-name> :except (<symbol>+) <alias-map>?)
+; <alias-map> => :rename ((<symbol> <symbol>)+)
+
+(defmacro import (module-name & args)
+  (match args
+    [(list :as local-alias)
+     `(spartan.base:module-alias ',module-name ',local-alias)]
+    [(list :all)
+     `(spartan.base:%import-all ',module-name ())]
+    [(list :all :rename alias-map)
+     `(spartan.base:%import-all ',module-name ',alias-map)]
+    [(list :only symbols)
+     `(spartan.base:%import-only ',module-name ',symbols ())]
+    [(list :only symbols :rename alias-map)
+     `(spartan.base:%import-only ',module-name ',symbols ',alias-map)]
+    [(list :except excludes)
+     `(spartan.base:%import-except ',module-name ',excludes ())]
+    [(list :except excludes :rename alias-map)
+     `(spartan.base:%import-except ',module-name ',excludes ',alias-map)]))
+
+(defun %import (module symbols alias-map)
+  (defun lookup-alias (symbol)
+    (let ((entry (find (fun (pair) (= symbol (first pair))) alias-map)))
+      (if (nil? entry) symbol (second entry))))
+  (for-each
+    (fun (symbol) (module-import module symbol (lookup-alias symbol)))
+    symbols))
+
+(defun %import-only (module-name symbols alias-map)
+  (%import (the-module module-name) symbols alias-map))
+
+(defun %import-all (module-name alias-map)
+  (let* ((module (the-module module-name))
+         (symbols (module-symbols module)))
+    (%import module symbols alias-map)))
+
+(defun %import-except (module-name excludes alias-map)
+  (let* ((module (the-module module-name))
+         (symbols (remove (fun (s) (contains? s excludes))
+                          (module-symbols module))))
+    (%import module symbols alias-map)))
 
 (defmacro inc! (var)
   `(set! ,var (+ 1 ,var)))
@@ -112,7 +167,7 @@
       (set! xs (rest xs)))
   hi))
 
-(load "spartan/core/lists.s")
+(load "spartan/base/lists.s")
 
 ; (rec f ((var1 init1) ... (varN initN)) body...)
 ; ==>
@@ -138,10 +193,10 @@
              (exp (second binding))]
         `(apply (fun ,formals ,(loop (rest bindings))) ,exp)))))
 
-(load "spartan/core/vectors.s")
-(load "spartan/core/defrecord.s")
-(load "spartan/core/promises.s")
-(load "spartan/core/streams.s")
-(load "spartan/core/import.s")
-(load "spartan/core/control.s")
-(load "spartan/core/ports.s")
+(load "spartan/base/vectors.s")
+(load "spartan/base/defrecord.s")
+(load "spartan/base/promises.s")
+(load "spartan/base/streams.s")
+;(load "spartan/base/import.s")
+(load "spartan/base/control.s")
+(load "spartan/base/ports.s")

@@ -15,13 +15,30 @@
 ; gen   A generator procedure that produces succesive stream values
 ;       each time it is called.
 
-(in-ns spartan.core)
+(in-module spartan.base)
+
+(export stream-empty
+        stream-adjoin
+        stream-first
+        stream-rest
+        stream-empty?
+        stream-map
+        stream-filter
+        stream-for-each
+        stream-take
+        stream-drop
+        stream-reduce
+        stream-enumerate
+        stream-ref
+        stream->list
+        generator->stream
+)
 
 ; Add an element to the front of a stream
 
-(defmacro stream-adjoin (e s) `(delay (list ,e ,s)))
+(defmacro stream-adjoin (e s) `(spartan.base:delay (list ,e ,s)))
 
-;(defmacro stream-adjoin (e s) `(adjoin ,e (delay ,s)))
+;(defmacro stream-adjoin (e s) `(spartan.base:adjoin ,e (spartan.base:delay ,s)))
 
 ; Return the first element of a stream
 

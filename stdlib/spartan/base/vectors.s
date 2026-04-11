@@ -1,7 +1,14 @@
 
 ; Standard vector library
 
-(in-ns spartan.core)
+(in-module spartan.base)
+
+(export vector-map vector-filter
+        vector-foreach vector-foreach/index
+        vector-swap!
+        vector-fold vector-unfold
+        vector-reverse
+        vector-sort)
 
 (defun vector-map! (f v)
   (let [(i 0) (n (vector-length v))]
@@ -21,13 +28,13 @@
       (dec! i))
     result))
 
-(defun vector-for-each (f v)
+(defun vector-foreach (f v)
   (let [(i 0) (n (vector-length v))]
     (while (< i n)
       (f (vector-ref v i))
       (inc! i))))
 
-(defun vector-for-each/index (f v)
+(defun vector-foreach/index (f v)
   (let [(i 0) (n (vector-length v))]
     (while (< i n)
       (f i (vector-ref v i))
@@ -35,12 +42,12 @@
 
 (defun vector-filter (f v)
   (let [(result (vector))]
-    (vector-for-each (fun (x) (if (f x) (vector-append! result x))) v)
+    (vector-foreach (fun (x) (if (f x) (vector-append! result x))) v)
     result))
 
-(defun vector-reduce (f e v)
+(defun vector-fold (f e v)
   (let [(result e)]
-    (vector-for-each (fun (x) (set! result (f result x))) v)
+    (vector-foreach (fun (x) (set! result (f result x))) v)
     result))
 
 (defun vector-swap! (v i j)

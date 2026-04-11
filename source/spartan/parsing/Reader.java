@@ -460,7 +460,7 @@ public class Reader implements AutoCloseable
   /** Read the base-name part of a qualified symbol
    *
    */
-  private QualifiedSymbol readQualifiedSymbol(String nsName, StringBuilder text, Position position)
+  private QualifiedSymbol readQualifiedSymbol(String moduleName, StringBuilder text, Position position)
   {
     getChar();
     text.append((char)lastChar); // the separator ":" is part of the symbol's full name
@@ -478,7 +478,7 @@ public class Reader implements AutoCloseable
     }
     var fullName = text.toString();
     var baseName = fullName.substring(splitIndex);
-    return withPosition(new QualifiedSymbol(fullName, nsName, baseName), position);
+    return withPosition(new QualifiedSymbol(fullName, moduleName, baseName), position);
   }
   
   private Symbol readKeyword()

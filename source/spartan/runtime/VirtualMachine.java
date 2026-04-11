@@ -45,19 +45,19 @@ public final class VirtualMachine
    */
   public Kon kon;
   
-  private static void bindGlobal(Symbol nsName, Symbol baseName, Datum value)
+  private static void bindGlobal(Symbol moduleName, Symbol baseName, Datum value)
   {
-    spartan.Runtime.getNS(nsName).bind(baseName, value);
+    spartan.Runtime.getModule(moduleName).bind(baseName, value);
   }
   
-  private static Datum loadGlobal(Symbol nsName, Symbol baseName)
+  private static Datum loadGlobal(Symbol moduleName, Symbol baseName, boolean publicOnly)
   {
-    return spartan.Runtime.getNS(nsName).lookup(baseName);
+    return spartan.Runtime.getModule(moduleName).lookup(baseName, publicOnly);
   }
   
-  private static void storeGlobal(Symbol nsName, Symbol baseName, Datum value)
+  private static void storeGlobal(Symbol moduleName, Symbol baseName, Datum value, boolean publicOnly)
   {
-    spartan.Runtime.getNS(nsName).store(baseName, value);
+    spartan.Runtime.getModule(moduleName).update(baseName, value, publicOnly);
   }
   
   private static Datum loadLocal(Env env, int depth, int offset)
@@ -91,9 +91,9 @@ public final class VirtualMachine
             }
             break;
           }
-          case BindGlobal(var nsName, var baseName, var source, var next): {
+          case BindGlobal(var moduleName, var baseName, var source, var next): {
             try {
-              bindGlobal(nsName, baseName, result);
+              bindGlobal(moduleName, baseName, result);
               control = next;
             }
             catch (Error err) {
@@ -123,9 +123,9 @@ public final class VirtualMachine
             control = next;
             break;
           }
-          case LoadGlobal(var nsName, var baseName, var source, var next): {
+          case LoadGlobal(var moduleName, var baseName, var source, var publicOnly, var next): {
             try {
-              result = loadGlobal(nsName, baseName);
+              result = loadGlobal(moduleName, baseName, publicOnly);
               control = next;
             }
             catch (Error err) {
@@ -190,9 +190,9 @@ public final class VirtualMachine
           case Raise(var err, _): {
             throw err;
           }
-          case StoreGlobal(var nsName, var baseName, var source, var next): {
+          case StoreGlobal(var moduleName, var baseName, var source, var publicOnly, var next): {
             try {
-              storeGlobal(nsName, baseName, result);
+              storeGlobal(moduleName, baseName, result, publicOnly);
               control = next;
             }
             catch (Error err) {

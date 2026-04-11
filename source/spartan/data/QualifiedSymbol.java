@@ -2,27 +2,27 @@ package spartan.data;
 
 public final class QualifiedSymbol extends Symbol
 {
-  private final String nsName;   // namespace (qualified) portion
+  private final String moduleName;   // namespace (qualified) portion
   private final String baseName; // base (unqualified) portion
   
   /**
    * Create a new, uninterned qualified symbol
    */
-  public QualifiedSymbol(String name, String nsName, String baseName)
+  public QualifiedSymbol(String name, String moduleName, String baseName)
   {
     super(name);
-    this.nsName = nsName;
+    this.moduleName = moduleName;
     this.baseName = baseName;
   }
   
-  public QualifiedSymbol(String nsName, String baseName)
+  public QualifiedSymbol(String moduleName, String baseName)
   {
-    this(nsName + ":" + baseName, nsName, baseName);
+    this(moduleName + ":" + baseName, moduleName, baseName);
   }
   
-  public String nameSpace()
+  public String moduleName()
   {
-    return nsName;
+    return moduleName;
   }
   
   public String baseName()

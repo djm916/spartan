@@ -1,7 +1,11 @@
 
 ; Standard list processing library
 
-(in-ns spartan.core)
+(in-module spartan.base)
+
+(export fold-right unfold-left unfold-right enumerate take take-while drop drop-while 
+        map map/index for-each filter find find-index contains? remove fold-left 
+        zip list-compare)
 
 ; map - Maps a procedure across a list
 ;

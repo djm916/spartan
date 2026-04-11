@@ -1,10 +1,16 @@
 
-; Example implementation of a queue, making use of defstruct
+; Example module implementing a simple queue data structure
 
+(in-module queue)
+
+(export make-queue
+        queue?
+        empty?
+        push
+        pop)
+        
 ; A queue is implemented here as a list containing the elements currently in the queue,
 ; and a (pointer to) the last element of that list (allowing constant-time push).
-
-(in-ns queue)
 
 (defrecord queue-type (front back))
 
@@ -15,7 +21,7 @@
   (queue-type? self))
 
 (defun empty? (self)
-  (spartan.core:empty? (queue-type-front self)))
+  (spartan.base:empty? (queue-type-front self)))
 
 (defun push (self item)
   (let [(node (adjoin item ()))]
@@ -31,13 +37,13 @@
         [else
           (let [(node (queue-type-front self))]
             (set-queue-type-front! self (rest node))
-            (if (spartan.core:empty? (queue-type-front self))
+            (if (spartan.base:empty? (queue-type-front self))
               (set-queue-type-back! self ()))
             (first node))]))
 
-
-(in-ns user)
-(import queue :as queue)
+(in-module user)
+;(import queue :as queue)
+(print-line "the module queue exports the symbols: " (module-symbols (the-module 'queue)))
 (def q (queue:make-queue))
 (print-line "is queue? " (queue:queue? q))
 (queue:push q 1)

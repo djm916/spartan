@@ -42,10 +42,10 @@
   row)
 
 (defun print-row (row)
-  (vector-for-each (fun (n) (print n " ")) row)
+  (vector-foreach (fun (n) (print n " ")) row)
   (print-line))
 
 (defun print-triangle (triangle)
-  (vector-for-each print-row triangle))
+  (vector-foreach print-row triangle))
 
 (print-triangle (pascals-triangle 5))

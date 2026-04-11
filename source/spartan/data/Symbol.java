@@ -34,8 +34,8 @@ permits QualifiedSymbol
   public static final Symbol AND = new Symbol("and");
   public static final Symbol OR = new Symbol("or");
   public static final Symbol AMPERSAND = new Symbol("&");
-  public static final Symbol Q_ADJOIN = new QualifiedSymbol("spartan.core", "adjoin");
-  public static final Symbol Q_CONCAT = new QualifiedSymbol("spartan.core", "concat");
+  public static final Symbol Q_ADJOIN = new QualifiedSymbol("spartan.base", "adjoin");
+  public static final Symbol Q_CONCAT = new QualifiedSymbol("spartan.base", "concat");
   public static final Symbol MATCH = new Symbol("match");
   public static final Symbol UNDERSCORE = new Symbol("_");
   public static final Symbol LIST = new Symbol("list");
