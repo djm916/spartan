@@ -10,6 +10,7 @@ import spartan.data.RecordDescriptor;
 import spartan.errors.MultipleDefinition;
 import spartan.errors.UnboundSymbol;
 import spartan.errors.ModuleDoesNotExist;
+import spartan.util.Box;
 import java.util.Map;
 import java.util.IdentityHashMap;
 import java.util.Optional;
@@ -87,14 +88,7 @@ public final class Runtime
     modules.put(moduleName, module);
     return module;
   }
-  
-  public static Datum lookup(Symbol s)
-  {
-    return (s instanceof QualifiedSymbol qs)
-           ? getModule(canonicalName(Symbol.of(qs.moduleName()))).lookup(Symbol.of(qs.baseName()))
-           : currentModule().lookup(s.intern());
-  }
-  
+    
   private static Symbol canonicalName(Symbol moduleName)
   {
     return currentModule().lookupAlias(moduleName).orElse(moduleName);
@@ -107,24 +101,23 @@ public final class Runtime
    * @throws ModuleDoesNotExist if the symbol is qualified and the namespace does not exist
    * @throws UnboundSymbol if the symbol could not be resolved
    */
-  public static Optional<Datum> tryLookup(Symbol s)
+  
+  public static Optional<Datum> lookup(Symbol s)
   {
-    try {
-      return Optional.of(lookup(s));
-    }
-    catch (UnboundSymbol | ModuleDoesNotExist err) {
-      return Optional.empty();
-    }
+    return ((s instanceof QualifiedSymbol qs)
+             ? getModule(canonicalName(Symbol.of(qs.moduleName()))).lookupPublic(Symbol.of(qs.baseName()))
+             : currentModule().lookup(s.intern())).map(Box::get);
+             
   }
   
   public static Optional<Macro> lookupMacro(Symbol s)
   {
-    return tryLookup(s).filter(Macro.class::isInstance).map(Macro.class::cast);
+    return lookup(s).filter(Macro.class::isInstance).map(Macro.class::cast);
   }
   
   public static Optional<RecordDescriptor> lookupRTD(Symbol s)
   {
-    return tryLookup(s).filter(RecordDescriptor.class::isInstance).map(RecordDescriptor.class::cast);
+    return lookup(s).filter(RecordDescriptor.class::isInstance).map(RecordDescriptor.class::cast);
   }
   
   /** Bootstrap the initial system state and global environment.

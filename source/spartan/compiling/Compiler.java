@@ -8,6 +8,7 @@ import spartan.parsing.Position;
 import spartan.errors.SourceInfo;
 import spartan.errors.Error;
 import spartan.errors.SyntaxError;
+import spartan.errors.UnboundSymbol;
 import spartan.errors.MultipleDefinition;
 import spartan.errors.MatchFailure;
 import spartan.errors.InvalidPattern;
@@ -127,16 +128,22 @@ public class Compiler
   */
   private Inst compileGlobalVarRef(Symbol s, Inst next)
   {
-    if (s instanceof QualifiedSymbol qs)
-      return new LoadGlobal(canonicalName(Symbol.of(qs.moduleName())),
-                            Symbol.of(qs.baseName()),
-                            new SourceInfo(qs, positionOf(qs)),
-                            true, next);
-    else
-      return new LoadGlobal(spartan.Runtime.currentModule().name(),
-                            s.intern(),
-                            new SourceInfo(s, positionOf(s)),
-                            false, next);
+    if (s instanceof QualifiedSymbol qs) {
+      var moduleName = canonicalName(Symbol.of(qs.moduleName()));
+      var baseName = Symbol.of(qs.baseName());
+      var loc = spartan.Runtime.getModule(moduleName)
+                .lookup(baseName, true)
+                .orElseThrow(() -> new UnboundSymbol(s, new SourceInfo(s, positionOf(s))));
+      return new LoadGlobal(moduleName, baseName, loc, next);
+    }
+    else {
+      var moduleName = spartan.Runtime.currentModule().name();
+      var baseName = s.intern();
+      var loc = spartan.Runtime.getModule(moduleName)
+                .lookup(baseName, false)
+                .orElseThrow(() -> new UnboundSymbol(s, new SourceInfo(s, positionOf(s))));
+      return new LoadGlobal(moduleName, baseName, loc, next);
+    }
   }
   
   /* Compile a variable assignment.
@@ -176,18 +183,24 @@ public class Compiler
   
   private Inst compileSetGlobalVar(Symbol s, Inst next)
   {
-    if (s instanceof QualifiedSymbol qs)
-      return new StoreGlobal(canonicalName(Symbol.of(qs.moduleName())),
-                             Symbol.of(qs.baseName()),
-                             new SourceInfo(qs, positionOf(qs)),
-                             true,
-                             new LoadConst(Nil.VALUE, next));
-    else
-      return new StoreGlobal(spartan.Runtime.currentModule().name(),
-                             s.intern(),
-                             new SourceInfo(s, positionOf(s)),
-                             false,
-                             new LoadConst(Nil.VALUE, next));
+    if (s instanceof QualifiedSymbol qs) {
+      var moduleName = canonicalName(Symbol.of(qs.moduleName()));
+      var baseName = Symbol.of(qs.baseName());
+      var loc = spartan.Runtime.getModule(moduleName)
+                .lookup(baseName, true)
+                .orElseThrow(() -> new UnboundSymbol(s, new SourceInfo(s, positionOf(s))));
+      return new StoreGlobal(moduleName, baseName, loc,
+             new LoadConst(Nil.VALUE, next));
+    }
+    else {
+      var moduleName = spartan.Runtime.currentModule().name();
+      var baseName = s.intern();
+      var loc = spartan.Runtime.getModule(moduleName)
+                .lookup(baseName, false)
+                .orElseThrow(() -> new UnboundSymbol(s, new SourceInfo(s, positionOf(s))));
+      return new StoreGlobal(moduleName, baseName, loc,
+             new LoadConst(Nil.VALUE, next));
+    }
   }
   
   private static Symbol canonicalName(Symbol moduleName)
@@ -199,9 +212,12 @@ public class Compiler
   {
     if (!(exp.length() == 3 && exp.second() instanceof Symbol s && s.isSimple()))
       throw malformedExp(exp);
-    var init = exp.third();  
+    var init = exp.third();
+    var moduleName = spartan.Runtime.currentModule().name();
+    var baseName = s.intern();
+    var loc = spartan.Runtime.currentModule().bind(s.intern());
     return compile(init, scope, false,
-           new BindGlobal(spartan.Runtime.currentModule().name(), s.intern(), new SourceInfo(exp, positionOf(s)),
+           new StoreGlobal(moduleName, baseName, loc, 
            new LoadConst(Nil.VALUE, next)));
   }
   

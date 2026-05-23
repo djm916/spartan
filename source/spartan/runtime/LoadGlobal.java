@@ -1,7 +1,8 @@
 package spartan.runtime;
 
 import spartan.data.Symbol;
-import spartan.errors.SourceInfo;
+import spartan.data.Datum;
+import spartan.util.Box;
 
-public record LoadGlobal(Symbol moduleName, Symbol baseName, SourceInfo source, boolean publicOnly, Inst next) implements Inst
+public record LoadGlobal(Symbol moduleName, Symbol baseName, Box<Datum> location, Inst next) implements Inst
 {}

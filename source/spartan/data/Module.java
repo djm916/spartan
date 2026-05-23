@@ -2,9 +2,11 @@ package spartan.data;
 
 import spartan.errors.UnboundSymbol;
 import spartan.errors.MultipleDefinition;
+import spartan.util.Box;
 import java.util.Map;
 import java.util.IdentityHashMap;
 import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.Optional;
 import java.util.Set;
 
@@ -19,7 +21,6 @@ public class Module implements Datum
   {
     this.name = name;
     this.parent = parent;
-    //_import(parent);
   }
   
   @Override // Datum
@@ -62,9 +63,10 @@ public class Module implements Datum
    */
   public void _import(Module module, Symbol symbol, Symbol alias)
   {
-    if (!spartan.Config.ALLOW_REDEFINITION && bindingMap.containsKey(symbol))
-      throw new MultipleDefinition(symbol);
-    bind(alias, module.lookupPublic(symbol));
+    var value = module.lookupPublic(symbol)
+                .orElseThrow(() -> new UnboundSymbol(symbol))
+                .get();
+    bind(alias, value);
   }
   
   /**
@@ -112,6 +114,11 @@ public class Module implements Datum
   {
     return Optional.ofNullable(aliasMap.get(alias));
   }
+    
+  public Box<Datum> bind(Symbol name)
+  {
+    return bindings.computeIfAbsent(name, (_) -> new Box<Datum>());
+  }
   
   /**
    * Bind a variable. The symbol is not exported.
@@ -122,9 +129,7 @@ public class Module implements Datum
    */
   public void bind(Symbol name, Datum value)
   {
-    if (!spartan.Config.ALLOW_REDEFINITION && bindingMap.containsKey(name))
-      throw new MultipleDefinition(name);
-    bindingMap.put(name, value);
+    bind(name).set(value);
   }
   
   /**
@@ -139,38 +144,7 @@ public class Module implements Datum
     bind(name, value);
     export(name);
   }
-    
-  /**
-   * Update a variable
-   *
-   * @param name The symbol to update
-   * @param value The symbol's new value
-   * @throws UnboundSymbol If symbol is not bound in this module
-   */
-  public void update(Symbol name, Datum value)
-  {
-    update(name, value, false);
-  }
   
-  /**
-   * Update a variable
-   *
-   * @param name The symbol to update
-   * @param value The symbol's new value
-   * @throws UnboundSymbol If symbol is not bound and public in this module
-   */
-  public void updatePublic(Symbol name, Datum value)
-  {
-    update(name, value, true);
-  }
-  
-  public void update(Symbol name, Datum value, boolean publicOnly)
-  {
-    if (!bindingMap.containsKey(name) || (publicOnly && !exportSet.contains(name)))
-      throw new UnboundSymbol(name);
-    bindingMap.put(name, value);
-  }
-
   /**
    * Lookup a variable
    * 
@@ -178,7 +152,7 @@ public class Module implements Datum
    * @return The value of the symbol
    * @throws UnboundSymbol If symbol is not accessible in this module
    */
-  public Datum lookup(Symbol name)
+  public Optional<Box<Datum>> lookup(Symbol name)
   {
     return lookup(name, false);
   }
@@ -190,19 +164,19 @@ public class Module implements Datum
    * @return The value of the symbol
    * @throws UnboundSymbol If symbol is not publicly accessible in this module
    */
-  public Datum lookupPublic(Symbol name)
+  public Optional<Box<Datum>> lookupPublic(Symbol name)
   {
     return lookup(name, true);
   }
 
-  public Datum lookup(Symbol name, boolean publicOnly)
+  public Optional<Box<Datum>> lookup(Symbol name, boolean publicOnly)
   {
-    var value = bindingMap.get(name);
-    if (value != null && (!publicOnly || (publicOnly && exportSet.contains(name))))
-      return value;
+    var loc = bindings.get(name);
+    if (loc != null && (!publicOnly || (publicOnly && exportSet.contains(name))))
+      return Optional.of(loc);
     if (parent != null)
       return parent.lookupPublic(name);
-    throw new UnboundSymbol(name);
+    return Optional.empty();
   }
   
   /**
@@ -218,12 +192,12 @@ public class Module implements Datum
    */
   public Set<Symbol> symbols()
   {
-    return bindingMap.keySet();
+    return bindings.keySet();
   }
   
   protected final Symbol name;
   protected final Module parent;
-  protected final Map<Symbol, Datum> bindingMap = new IdentityHashMap<>();
+  protected final Map<Symbol, Box<Datum>> bindings = new IdentityHashMap<>();
   protected final Map<Symbol, Symbol> aliasMap = new IdentityHashMap<>();
   protected final Set<Symbol> exportSet = java.util.Collections.newSetFromMap(new IdentityHashMap<>());
 }

@@ -52,10 +52,6 @@ public class CodeListing
           code = next;
           break;
         }
-        case BindGlobal(_, _, _, var next): {
-          code = next;
-          break;
-        }
         case BranchFalse(var left, var right): {
           ctx.labels.put(right, ctx.genLabel());
           generateLabels(left, ctx);
@@ -81,7 +77,7 @@ public class CodeListing
           code = next;
           break;
         }
-        case LoadGlobal(_, _, _, _, var next): {
+        case LoadGlobal(_, _, _, var next): {
           code = next;
           break;
         }
@@ -138,7 +134,7 @@ public class CodeListing
           code = next;
           break;
         }
-        case StoreGlobal(_, _, _, _, var next): {
+        case StoreGlobal(_, _, _, var next): {
           code = next;
           break;
         }
@@ -173,10 +169,6 @@ public class CodeListing
           code = next;
           break;
         }
-        case BindGlobal(_, _, _, var next): {
-          code = next;
-          break;
-        }
         case BranchFalse(var left, var right): {
           emitListing(left, ctx, sb);
           code = right;
@@ -199,7 +191,7 @@ public class CodeListing
           code = next;
           break;
         }
-        case LoadGlobal(_, _, _, _, var next): {
+        case LoadGlobal(_, _, _, var next): {
           code = next;
           break;
         }
@@ -252,7 +244,7 @@ public class CodeListing
           code = next;
           break;
         }
-        case StoreGlobal(_, _, _, _, var next): {
+        case StoreGlobal(_, _, _, var next): {
           code = next;
           break;
         }
@@ -272,13 +264,12 @@ public class CodeListing
   {
     return switch (code) {
       case Apply(var numArgs, _, _) -> String.format("(apply %d)", numArgs);
-      case BindGlobal(var moduleName, var baseName, _, _) -> String.format("(bind-global %s:%s)", moduleName.str(), baseName.str());
       case BranchFalse(var left, var right) -> String.format("(branch-true %s)", ctx.labels.get(right));
       case BranchTrue(var left, var right)-> String.format("(branch-false %s)", ctx.labels.get(right));
       case Halt() -> "(halt)";
       case Jump j -> String.format("(jump %s)", ctx.labels.get(j.target()));
       case LoadConst(var value, _) -> String.format("(load-const %s)", value.repr());
-      case LoadGlobal(var moduleName, var baseName, _, _, _) -> String.format("(load-global %s:%s)", moduleName.str(), baseName.str());
+      case LoadGlobal(var moduleName, var baseName, _, _) -> String.format("(load-global %s:%s)", moduleName.str(), baseName.str());
       case LoadLocal(var depth, var offset, _) -> String.format("(load-local %d %d)", depth, offset);
       case LoadLocal0(var offset, _) -> String.format("(load-local 0 %d)", offset);
       case MakeClosure(var proc, _) -> String.format("(make-closure %s)", ctx.labels.get(proc.body()));
@@ -291,7 +282,7 @@ public class CodeListing
       case PushEnv(var numSlots, _) -> String.format("(push-env %d)", numSlots);
       case PushFrame inst -> "(push-frame)";
       case Raise inst -> "(raise)";
-      case StoreGlobal(var moduleName, var baseName, _, _, _) -> String.format("(store-global %s:%s)", moduleName.str(), baseName.str());
+      case StoreGlobal(var moduleName, var baseName, _, _) -> String.format("(store-global %s:%s)", moduleName.str(), baseName.str());
       case StoreLocal(var depth, var offset, _) -> String.format("(store-local %d %d)", depth, offset);
       case StoreLocal0(var offset, _) -> String.format("(store-local 0 %d)", offset);
     };

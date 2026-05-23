@@ -45,21 +45,6 @@ public final class VirtualMachine
    */
   public Kon kon;
   
-  private static void bindGlobal(Symbol moduleName, Symbol baseName, Datum value)
-  {
-    spartan.Runtime.getModule(moduleName).bind(baseName, value);
-  }
-  
-  private static Datum loadGlobal(Symbol moduleName, Symbol baseName, boolean publicOnly)
-  {
-    return spartan.Runtime.getModule(moduleName).lookup(baseName, publicOnly);
-  }
-  
-  private static void storeGlobal(Symbol moduleName, Symbol baseName, Datum value, boolean publicOnly)
-  {
-    spartan.Runtime.getModule(moduleName).update(baseName, value, publicOnly);
-  }
-  
   private static Datum loadLocal(Env env, int depth, int offset)
   {
     for (; depth > 0; --depth)
@@ -91,17 +76,6 @@ public final class VirtualMachine
             }
             break;
           }
-          case BindGlobal(var moduleName, var baseName, var source, var next): {
-            try {
-              bindGlobal(moduleName, baseName, result);
-              control = next;
-            }
-            catch (Error err) {
-              err.setSource(source);
-              throw err;
-            }
-            break;
-          }
           case BranchFalse(var left, var right): {
             control = !result.boolValue() ? right : left;
             break;
@@ -123,15 +97,9 @@ public final class VirtualMachine
             control = next;
             break;
           }
-          case LoadGlobal(var moduleName, var baseName, var source, var publicOnly, var next): {
-            try {
-              result = loadGlobal(moduleName, baseName, publicOnly);
-              control = next;
-            }
-            catch (Error err) {
-              err.setSource(source);
-              throw err;
-            }
+          case LoadGlobal(_, _, var loc, var next): {
+            result = loc.get();
+            control = next;
             break;
           }
           case LoadLocal(var depth, var offset, var next): {
@@ -190,15 +158,9 @@ public final class VirtualMachine
           case Raise(var err, _): {
             throw err;
           }
-          case StoreGlobal(var moduleName, var baseName, var source, var publicOnly, var next): {
-            try {
-              storeGlobal(moduleName, baseName, result, publicOnly);
-              control = next;
-            }
-            catch (Error err) {
-              err.setSource(source);
-              throw err;
-            }
+          case StoreGlobal(_, _, var loc, var next): {
+            loc.set(result);
+            control = next;
             break;
           }
           case StoreLocal(var depth, var offset, var next): {

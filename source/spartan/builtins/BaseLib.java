@@ -620,6 +620,8 @@ public final class BaseLib
     }
   };
   
+  /*
+  
   // (module-bind symbol value [module])
   
   public static final Primitive MODULE_BIND = new Primitive(Signature.variadic(2, 1)) {
@@ -651,6 +653,8 @@ public final class BaseLib
       vm.popFrame();
     }
   };
+  
+  */
   
   // (module-import from-module symbol [alias] [module])
   
