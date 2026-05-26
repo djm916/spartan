@@ -4,5 +4,10 @@ import spartan.data.Symbol;
 import spartan.data.Datum;
 import spartan.util.Box;
 
+/*
+public record StoreGlobal(Symbol moduleName, Symbol baseName, Box<Box<Datum>> location, Inst next) implements Inst
+{}
+*/
+
 public record StoreGlobal(Symbol moduleName, Symbol baseName, Box<Datum> location, Inst next) implements Inst
 {}

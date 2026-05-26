@@ -599,12 +599,8 @@ public final class BaseLib
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Symbol moduleName))
         throw new TypeMismatch();
-      try {
-        vm.result = spartan.Runtime.getModule(moduleName);
-      }
-      catch (ModuleDoesNotExist err) {
-        vm.result = Nil.VALUE;
-      }
+      var module = spartan.Runtime.getModule(moduleName);
+      vm.result = module.isPresent() ? module.get() : Nil.VALUE;
       vm.popFrame();
     }
   };
@@ -615,7 +611,7 @@ public final class BaseLib
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Symbol moduleName))
         throw new TypeMismatch();
-      vm.result = spartan.Runtime.getModule(moduleName);
+      vm.result = spartan.Runtime.getModule(moduleName).orElseThrow(() -> new ModuleDoesNotExist(moduleName));
       vm.popFrame();
     }
   };

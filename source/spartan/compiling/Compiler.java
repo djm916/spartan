@@ -9,6 +9,7 @@ import spartan.errors.SourceInfo;
 import spartan.errors.Error;
 import spartan.errors.SyntaxError;
 import spartan.errors.UnboundSymbol;
+import spartan.errors.ModuleDoesNotExist;
 import spartan.errors.MultipleDefinition;
 import spartan.errors.MatchFailure;
 import spartan.errors.InvalidPattern;
@@ -19,6 +20,8 @@ import java.util.Optional;
 import java.util.Map;
 import static java.util.Map.entry;
 import static spartan.Runtime.lookupMacro;
+import static spartan.Runtime.currentModule;
+import spartan.util.Box;
 
 interface ISpecialForm
 {
@@ -38,7 +41,7 @@ public class Compiler
     this.vm = vm;
   }
   
-  /** Compile a source expression.
+  /** Compile a single top-level source expression.
    *
    * @param exp the expression to compile
    * @return the compiled bytecode (an instruction graph)
@@ -52,7 +55,7 @@ public class Compiler
       log.info(() -> String.format("Listing for expression at %s\n%s", positionOf(exp.datum()), CodeListing.generate(code)));
     return code;
   }
-
+  
   /** Convenience method for creating instances of SyntaxError for malformed expressions. */
   private SyntaxError malformedExp(Datum exp)
   {
@@ -132,15 +135,16 @@ public class Compiler
       var moduleName = canonicalName(Symbol.of(qs.moduleName()));
       var baseName = Symbol.of(qs.baseName());
       var loc = spartan.Runtime.getModule(moduleName)
-                .lookup(baseName, true)
-                .orElseThrow(() -> new UnboundSymbol(s, new SourceInfo(s, positionOf(s))));
+                .orElseThrow(() -> new ModuleDoesNotExist(moduleName, new SourceInfo(s, positionOf(s))))
+                .lookupPublic(baseName)
+                .orElseThrow(() -> new UnboundSymbol(baseName, new SourceInfo(s, positionOf(s))));
       return new LoadGlobal(moduleName, baseName, loc, next);
     }
     else {
-      var moduleName = spartan.Runtime.currentModule().name();
+      var moduleName = currentModule().name();
       var baseName = s.intern();
-      var loc = spartan.Runtime.getModule(moduleName)
-                .lookup(baseName, false)
+      var loc = currentModule()
+                .lookup(baseName)
                 .orElseThrow(() -> new UnboundSymbol(s, new SourceInfo(s, positionOf(s))));
       return new LoadGlobal(moduleName, baseName, loc, next);
     }
@@ -187,17 +191,26 @@ public class Compiler
       var moduleName = canonicalName(Symbol.of(qs.moduleName()));
       var baseName = Symbol.of(qs.baseName());
       var loc = spartan.Runtime.getModule(moduleName)
+                .orElseThrow(() -> new ModuleDoesNotExist(moduleName, new SourceInfo(s, positionOf(s))))
                 .lookup(baseName, true)
-                .orElseThrow(() -> new UnboundSymbol(s, new SourceInfo(s, positionOf(s))));
+                .orElseThrow(() -> new UnboundSymbol(baseName, new SourceInfo(s, positionOf(s))));
+      /*
+      return new StoreGlobal(moduleName, baseName, new Box<>(loc),
+             new LoadConst(Nil.VALUE, next));
+      */
       return new StoreGlobal(moduleName, baseName, loc,
              new LoadConst(Nil.VALUE, next));
     }
     else {
-      var moduleName = spartan.Runtime.currentModule().name();
+      var moduleName = currentModule().name();
       var baseName = s.intern();
-      var loc = spartan.Runtime.getModule(moduleName)
+      var loc = currentModule()
                 .lookup(baseName, false)
                 .orElseThrow(() -> new UnboundSymbol(s, new SourceInfo(s, positionOf(s))));
+      /*
+      return new StoreGlobal(moduleName, baseName, new Box<>(loc),
+             new LoadConst(Nil.VALUE, next));
+      */
       return new StoreGlobal(moduleName, baseName, loc,
              new LoadConst(Nil.VALUE, next));
     }
@@ -205,7 +218,7 @@ public class Compiler
   
   private static Symbol canonicalName(Symbol moduleName)
   {
-    return spartan.Runtime.currentModule().lookupAlias(moduleName).orElse(moduleName);
+    return currentModule().lookupAlias(moduleName).orElse(moduleName);
   }
   
   private Inst compileDef(List exp, Scope scope, boolean tail, Inst next)
@@ -213,11 +226,19 @@ public class Compiler
     if (!(exp.length() == 3 && exp.second() instanceof Symbol s && s.isSimple()))
       throw malformedExp(exp);
     var init = exp.third();
-    var moduleName = spartan.Runtime.currentModule().name();
+    var moduleName = currentModule().name();
     var baseName = s.intern();
-    var loc = spartan.Runtime.currentModule().bind(s.intern());
+    /*
+    var loc = new Box<Box<Datum>>();
+    var result = compile(init, scope, false,
+                 new StoreGlobal(moduleName, baseName, loc,
+                 new LoadConst(Nil.VALUE, next)));
+    loc.set(currentModule().bind(s.intern()));
+    return result;
+    */
+    var loc = currentModule().bind(s.intern());
     return compile(init, scope, false,
-           new StoreGlobal(moduleName, baseName, loc, 
+           new StoreGlobal(moduleName, baseName, loc,
            new LoadConst(Nil.VALUE, next)));
   }
   
@@ -236,6 +257,8 @@ public class Compiler
     if (Config.LOG_DEBUG && Config.SHOW_MACRO_EXPANSION)
       log.info(() -> String.format("defun transform: %s => %s", exp.repr(), xform.repr()));
     
+    // TODO: Any error raised by compiling the body will have its position
+    // reset incorrectly here!
     try {
       return compile(xform, scope, false, next);
     }
@@ -272,7 +295,7 @@ public class Compiler
      
      Syntax (1-branch form): (if pred sub)
      
-     Translation: (if pred sub void)
+     Translation: (if pred sub #nil)
   */
   private Inst compileIf(List exp, Scope scope, boolean tail, Inst next)
   {
@@ -711,7 +734,7 @@ public class Compiler
   */
   private Inst compileBody(List body, Scope scope, Inst next)
   {
-    if (isInnerDef(body.first())) {
+    if (isDefinition(body.first())) {
       var xform = transformInnerDefs(body);
       if (Config.LOG_DEBUG && Config.SHOW_MACRO_EXPANSION)
         log.info(() -> String.format("inner defs transform: %s => %s", body.repr(), xform.repr()));
@@ -761,7 +784,7 @@ public class Compiler
   {
     List.Builder bindings = new List.Builder();
 
-    while (!body.isEmpty() && isInnerDef(body.first())) {
+    while (!body.isEmpty() && isDefinition(body.first())) {
       var exp = (List) body.first();
       if (Symbol.DEFUN.equals(exp.first()))
         exp = transformDefun(exp);
@@ -773,7 +796,7 @@ public class Compiler
   }
 
   // Determine if an expression is an inner-define form, i.e. a list beginning with the symbol "def" or "defun".
-  private boolean isInnerDef(Datum exp)
+  private boolean isDefinition(Datum exp)
   {
     return exp instanceof List form && !form.isEmpty() && (Symbol.DEF.equals(form.first()) || Symbol.DEFUN.equals(form.first()));
   }
@@ -854,17 +877,57 @@ public class Compiler
 
   /* Compiles the "do" special form.
 
-     Syntax: (do exp...)
-  */
+     Syntax: (do def* exp...)
+  
 
   private Inst compileDo(List exp, Scope scope, boolean tail, Inst next)
   {
     if (exp.length() < 2)
       throw malformedExp(exp);
-
+    
+    var d = exp.rest();
+    while (!d.isEmpty() && isDefinition(d.first())) {
+      var s = (Symbol)((List)d.first()).second();
+      currentModule().bind(s.intern());
+      d = d.rest();
+    }
+    
     return compileSequence(exp.rest(), scope, tail, next);
   }
-
+  */
+  
+  private Inst compileDo(List exp, Scope scope, boolean tail, Inst next)
+  {
+    if (exp.length() < 2)
+      throw malformedExp(exp);
+    
+    return compileDoWithDefs(exp.rest(), scope, tail, next);
+  }
+  
+  private Inst compileDoWithDefs(List exp, Scope scope, boolean tail, Inst next)
+  {
+    if (exp.isEmpty()) {
+      return next;
+    }
+    else if (isDefinition(exp.first())) {
+      var defExp = (List)exp.first();
+      if (!(defExp.length() == 3 && defExp.second() instanceof Symbol s && s.isSimple()))
+        throw malformedExp(defExp);
+      var init = defExp.third();
+      var moduleName = currentModule().name();
+      var baseName = s.intern();
+      var loc = currentModule().bind(s.intern());
+      System.out.println("bound " + s.name());
+      return compile(init, scope, false,
+             new StoreGlobal(moduleName, baseName, loc,
+             new LoadConst(Nil.VALUE,
+             compileDoWithDefs(exp.rest(), scope, tail, next))));
+    }
+    else {
+      return compileSequence(exp, scope, tail, next);
+    }
+  }
+  
   /* Compiles the "while" special form.
 
      Syntax: (while pred body...)
@@ -1207,7 +1270,7 @@ public class Compiler
     var body = exp.drop3();
     var macro = new Macro(makeProcedure(params, body, Scope.EMPTY));
     try {
-      spartan.Runtime.currentModule().bind(symbol.intern(), macro);
+      currentModule().bind(symbol.intern(), macro);
     }
     catch (MultipleDefinition err) {
       err.setSource(new SourceInfo(exp, positionOf(symbol)));
@@ -1514,7 +1577,7 @@ public class Compiler
     else 
       return compileCombo((List)exp, scope, tail, next);
   }
-  
+    
   private final Map<Symbol, ISpecialForm> specialForms = Map.ofEntries(
     Map.entry(Symbol.DEF, this::compileDef),
     Map.entry(Symbol.DEFUN, this::compileDefun),

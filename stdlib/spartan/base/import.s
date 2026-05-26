@@ -1,49 +1,52 @@
 (in-module spartan.base)
 
-; <import-statement> => (import <symbol> :as <symbol>)
-;                     | (import <symbol> :only (<symbol>+) [:rename ((<symbol> <symbol>)+)])
-;                     | (import <symbol> :all [:rename ((<symbol> <symbol>)+)])
-;                     | (import <symbol> :except (<symbol>+) [:rename ((<symbol> <symbol>)+)])
+; <import-form> => (import <module-name> :as <alias>)
+;                | (import <module-name> :all <alias-map>?)
+;                | (import <module-name> :only (<symbol>+) <alias-map>?)
+;                | (import <module-name> :except (<symbol>+) <alias-map>?)
+; <alias-map> => :rename ((<symbol> <symbol>)+)
 
-(defmacro import (ns-name & args)
+(export use import %import-all %import-only %import-except)
+
+(defmacro use (module-name & args)
+  `(do (spartan.base:load ,(module-name->path module-name))
+       (spartan.base:import ,module-name ,@args)))
+
+(defmacro import (module-name & args)
   (match args
     [(list :as local-alias)
-     `(spartan.core:ns-alias ',ns-name ',local-alias)]
+     `(spartan.base:module-alias ',module-name ',local-alias)]
     [(list :all)
-     `(spartan.core:%import-all ',ns-name ())]
+     `(spartan.base:%import-all ',module-name ())]
     [(list :all :rename alias-map)
-     `(spartan.core:%import-all ',ns-name ',alias-map)]
+     `(spartan.base:%import-all ',module-name ',alias-map)]
     [(list :only symbols)
-     `(spartan.core:%import-only ',ns-name ',symbols ())]
+     `(spartan.base:%import-only ',module-name ',symbols ())]
     [(list :only symbols :rename alias-map)
-     `(spartan.core:%import-only ',ns-name ',symbols ',alias-map)]
+     `(spartan.base:%import-only ',module-name ',symbols ',alias-map)]
     [(list :except excludes)
-     `(spartan.core:%import-except ',ns-name ',excludes ())]
+     `(spartan.base:%import-except ',module-name ',excludes ())]
     [(list :except excludes :rename alias-map)
-     `(spartan.core:%import-except ',ns-name ',excludes ',alias-map)]))
+     `(spartan.base:%import-except ',module-name ',excludes ',alias-map)]))
 
-(defun %import (ns symbols alias-map)
-  (defun lookup (symbol)
+(defun %import (module symbols alias-map)
+  (defun lookup-alias (symbol)
     (let ((entry (find (fun (pair) (= symbol (first pair))) alias-map)))
       (if (nil? entry) symbol (second entry))))
   (for-each
-    (fun (symbol) (ns-bind (lookup symbol) (ns-resolve symbol ns)))
+    (fun (symbol) (module-import module symbol (lookup-alias symbol)))
     symbols))
 
-(defun %import-only (ns-name symbols alias-map)
-  (%import (the-ns ns-name) symbols alias-map))
+(defun %import-only (module-name symbols alias-map)
+  (%import (the-module module-name) symbols alias-map))
 
-(defun %import-all (ns-name alias-map)
-  (let* ((ns (the-ns ns-name))
-         (symbols (ns-symbols ns)))
-    (%import ns symbols alias-map)))
+(defun %import-all (module-name alias-map)
+  (let* ((module (the-module module-name))
+         (symbols (module-symbols module)))
+    (%import module symbols alias-map)))
 
-(defun %import-except (ns-name excludes alias-map)
-  (let* ((ns (the-ns ns-name))
+(defun %import-except (module-name excludes alias-map)
+  (let* ((module (the-module module-name))
          (symbols (remove (fun (s) (contains? s excludes))
-                          (ns-symbols ns))))
-    (%import ns symbols alias-map)))
-
-(defmacro use (ns-name & args)
-  `(do (spartan.core:load ,(ns-name->path ns-name))
-       (spartan.core:import ,ns-name ,@args)))
+                          (module-symbols module))))
+    (%import module symbols alias-map)))

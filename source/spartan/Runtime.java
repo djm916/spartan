@@ -57,12 +57,9 @@ public final class Runtime
    * @return the namespace found
    * @throws ModuleDoesNotExist if no such namespace exists
    */
-  public static Module getModule(Symbol moduleName)
+  public static Optional<Module> getModule(Symbol moduleName)
   {
-    var module = modules.get(moduleName);
-    if (module == null)
-      throw new ModuleDoesNotExist(moduleName);
-    return module;
+    return Optional.ofNullable(modules.get(moduleName));
   }
   
   /**
@@ -84,11 +81,12 @@ public final class Runtime
   
   public static Module createModule(Symbol moduleName)
   {
+    //return modules.computeIfAbsent(moduleName, (_) -> new Module(moduleName, BaseModule.INSTANCE));
     var module = new Module(moduleName, BaseModule.INSTANCE);
     modules.put(moduleName, module);
     return module;
   }
-    
+  
   private static Symbol canonicalName(Symbol moduleName)
   {
     return currentModule().lookupAlias(moduleName).orElse(moduleName);
@@ -104,10 +102,14 @@ public final class Runtime
   
   public static Optional<Datum> lookup(Symbol s)
   {
-    return ((s instanceof QualifiedSymbol qs)
-             ? getModule(canonicalName(Symbol.of(qs.moduleName()))).lookupPublic(Symbol.of(qs.baseName()))
-             : currentModule().lookup(s.intern())).map(Box::get);
-             
+    if (s instanceof QualifiedSymbol qs) {
+      var moduleName = canonicalName(Symbol.of(qs.moduleName()));
+      var baseName = Symbol.of(qs.baseName());
+      return getModule(moduleName)
+             .flatMap(module -> module.lookupPublic(baseName))
+             .map(Box::get);
+    }
+    else return currentModule().lookup(s.intern()).map(Box::get);
   }
   
   public static Optional<Macro> lookupMacro(Symbol s)

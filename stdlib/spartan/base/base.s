@@ -6,6 +6,7 @@
 
 (set-current-module! (the-module 'spartan.base))
 
+(def %quasiquote #nil)
 (defun %quasiquote (exp level)
   (defun unquote? (form)
     (and (list? form) (not (empty? form)) (symbol? (first form)) (= (first form) 'unquote)))
@@ -44,57 +45,8 @@
 (defmacro export (& symbols)
   `(spartan.base:module-export ',symbols))
 
-(export ->> compose curry in-module export inc! dec! let-values max min rec 
+(export ->> compose curry in-module export inc! dec! let-values max min rec defrec
         swap! when unless import)
-
-(defmacro use (module-name & args)
-  `(do (spartan.base:load ,(module-name->path module-name))
-       (spartan.base:import ,module-name ,@args)))
-
-; <import-form> => (import <module-name> :as <alias>)
-;                | (import <module-name> :all <alias-map>?)
-;                | (import <module-name> :only (<symbol>+) <alias-map>?)
-;                | (import <module-name> :except (<symbol>+) <alias-map>?)
-; <alias-map> => :rename ((<symbol> <symbol>)+)
-
-(defmacro import (module-name & args)
-  (match args
-    [(list :as local-alias)
-     `(spartan.base:module-alias ',module-name ',local-alias)]
-    [(list :all)
-     `(spartan.base:%import-all ',module-name ())]
-    [(list :all :rename alias-map)
-     `(spartan.base:%import-all ',module-name ',alias-map)]
-    [(list :only symbols)
-     `(spartan.base:%import-only ',module-name ',symbols ())]
-    [(list :only symbols :rename alias-map)
-     `(spartan.base:%import-only ',module-name ',symbols ',alias-map)]
-    [(list :except excludes)
-     `(spartan.base:%import-except ',module-name ',excludes ())]
-    [(list :except excludes :rename alias-map)
-     `(spartan.base:%import-except ',module-name ',excludes ',alias-map)]))
-
-(defun %import (module symbols alias-map)
-  (defun lookup-alias (symbol)
-    (let ((entry (find (fun (pair) (= symbol (first pair))) alias-map)))
-      (if (nil? entry) symbol (second entry))))
-  (for-each
-    (fun (symbol) (module-import module symbol (lookup-alias symbol)))
-    symbols))
-
-(defun %import-only (module-name symbols alias-map)
-  (%import (the-module module-name) symbols alias-map))
-
-(defun %import-all (module-name alias-map)
-  (let* ((module (the-module module-name))
-         (symbols (module-symbols module)))
-    (%import module symbols alias-map)))
-
-(defun %import-except (module-name excludes alias-map)
-  (let* ((module (the-module module-name))
-         (symbols (remove (fun (s) (contains? s excludes))
-                          (module-symbols module))))
-    (%import module symbols alias-map)))
 
 (defmacro inc! (var)
   `(set! ,var (+ 1 ,var)))
@@ -179,6 +131,18 @@
     `(letrec ((,symbol (fun ,vars ,@body)))
        (,symbol ,@inits))))
 
+; (defrec
+;   (f (fun (param ...) body...))
+;   ...)
+; ==>
+; (def f #nil)
+; (set! f (fun (param ...) body...))
+
+(defmacro defrec (& forms)
+  `(do
+     ,@(map (fun (form) `(def ,(first form) #nil)) forms)
+     ,@(map (fun (form) `(set! ,(first form) ,(second form))) forms)))
+
 ; (let-values (((var...) init)...) body...)
 ; ==>
 ; (apply (fun (var...) (do body...)) init)
@@ -197,6 +161,6 @@
 (load "spartan/base/defrecord.s")
 (load "spartan/base/promises.s")
 (load "spartan/base/streams.s")
-;(load "spartan/base/import.s")
+(load "spartan/base/import.s")
 (load "spartan/base/control.s")
 (load "spartan/base/ports.s")

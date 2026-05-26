@@ -24,7 +24,7 @@
 (defun vector->list (v)
   (let [(i (- (vector-length v) 1)) (result ())]
     (while (>= i 0)
-      (set! result (cons (v i) result))
+      (set! result (adjoin (v i) result))
       (dec! i))
     result))
 

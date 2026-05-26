@@ -16,6 +16,21 @@
 
 (def *winders* ())
 
+(defun %do-winds (from to)
+  (set! *winders* from)
+  (if (not (identical? from to))
+      (cond ((empty? from)
+               (%do-winds from (rest to))
+               ((first (first to))))
+            ((empty? to)
+               ((second (first from)))
+               (%do-winds (rest from) to))
+            (else
+               ((second (first from)))
+               (%do-winds (rest from) (rest to))
+               ((first (first to))))))
+  (set! *winders* to))
+
 (defun dynamic-wind (pre thunk post)
   (pre)
   (set! *winders* (adjoin (list pre post) *winders*))
@@ -32,21 +47,6 @@
                  (proc (fun (result)
                          (%do-winds *winders* save)
                          (k result)))))))))
-
-(defun %do-winds (from to)
-  (set! *winders* from)
-  (if (not (identical? from to))
-      (cond ((empty? from)
-               (%do-winds from (rest to))
-               ((first (first to))))
-            ((empty? to)
-               ((second (first from)))
-               (%do-winds (rest from) to))
-            (else
-               ((second (first from)))
-               (%do-winds (rest from) (rest to))
-               ((first (first to))))))
-  (set! *winders* to))
 
 ; ==========
 ; Exceptions

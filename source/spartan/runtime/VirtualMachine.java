@@ -11,8 +11,6 @@ import spartan.compiling.Procedure;
 import spartan.errors.Error;
 import spartan.errors.WrongNumberArgs;
 import spartan.errors.TypeMismatch;
-import spartan.errors.MultipleDefinition;
-import spartan.errors.UnboundSymbol;
 import spartan.parsing.Position;
 
 /**
@@ -159,6 +157,7 @@ public final class VirtualMachine
             throw err;
           }
           case StoreGlobal(_, _, var loc, var next): {
+            //loc.get().set(result);
             loc.set(result);
             control = next;
             break;
