@@ -102,6 +102,10 @@ public class CodeListing
           code = right;
           break;
         }
+        case Nop inst: {
+          code = inst.next;
+          break;
+        }
         case PopArg(var next): {
           code = next;
           break;
@@ -212,6 +216,10 @@ public class CodeListing
           code = right;
           break;
         }
+        case Nop inst: {
+          code = inst.next;
+          break;
+        }
         case PopArg(var next): {
           code = next;
           break;
@@ -274,6 +282,7 @@ public class CodeListing
       case LoadLocal0(var offset, _) -> String.format("(load-local 0 %d)", offset);
       case MakeClosure(var proc, _) -> String.format("(make-closure %s)", ctx.labels.get(proc.body()));
       case Match(var pattern, _, var right) -> String.format("(match %s %s)", pattern.toString(), ctx.labels.get(right));
+      case Nop inst -> "(nop)";
       case PopArg inst -> "(pop-arg)";
       case PopRestArgs inst -> "(pop-arg*)";
       case PopEnv inst -> "(pop-env)";

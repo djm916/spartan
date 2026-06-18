@@ -910,18 +910,10 @@ public class Compiler
       return next;
     }
     else if (isDefinition(exp.first())) {
-      var defExp = (List)exp.first();
-      if (!(defExp.length() == 3 && defExp.second() instanceof Symbol s && s.isSimple()))
-        throw malformedExp(defExp);
-      var init = defExp.third();
-      var moduleName = currentModule().name();
-      var baseName = s.intern();
-      var loc = currentModule().bind(s.intern());
-      System.out.println("bound " + s.name());
-      return compile(init, scope, false,
-             new StoreGlobal(moduleName, baseName, loc,
-             new LoadConst(Nil.VALUE,
-             compileDoWithDefs(exp.rest(), scope, tail, next))));
+      var end = new Nop();
+      var result = compileDef((List)exp.first(), scope, false, end);
+      end.next = compileDoWithDefs(exp.rest(), scope, tail, next);
+      return result;
     }
     else {
       return compileSequence(exp, scope, tail, next);

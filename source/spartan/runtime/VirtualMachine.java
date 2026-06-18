@@ -119,6 +119,10 @@ public final class VirtualMachine
             control = pattern.match(result, env) ? left : right;
             break;
           }
+          case Nop inst: {
+            control = inst.next;
+            break;
+          }
           case PopArg(var next): {
             result = popArg();
             control = next;

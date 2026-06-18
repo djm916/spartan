@@ -1,4 +1,4 @@
 package spartan.runtime;
 
-public record BranchFalse(Inst left, Inst right) implements Inst
+public record BranchFalse(Inst next, Inst target) implements Inst
 {}
