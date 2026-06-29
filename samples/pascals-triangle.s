@@ -14,19 +14,6 @@
 ; each row begins and ends with a 1
 ; the ith element of a row on level L
 
-; Generate Pascal's Triangle
-; The triangle is represented as a vector of vectors. Each element of
-; the outer vector represents a of row of the triangle.
-(defun pascals-triangle (height)
-  (def triangle (vector (vector 1)))
-  (def level 1)  
-  (while (< level height)
-    (let* ((row-above (vector-ref triangle (- level 1)))
-           (row (generate-row row-above)))
-      (vector-append! triangle row)
-      (inc! level)))
-  triangle)
-
 (defun generate-row (row-above)
   (def len-above (vector-length row-above))
   (def len (+ 1 len-above))
@@ -40,6 +27,19 @@
       (inc! i))
   (vector-set! row (- (vector-length row) 1) 1)
   row)
+
+; Generate Pascal's Triangle
+; The triangle is represented as a vector of vectors. Each element of
+; the outer vector represents a of row of the triangle.
+(defun pascals-triangle (height)
+  (def triangle (vector (vector 1)))
+  (def level 1)  
+  (while (< level height)
+    (let* ((row-above (vector-ref triangle (- level 1)))
+           (row (generate-row row-above)))
+      (vector-append! triangle row)
+      (inc! level)))
+  triangle)
 
 (defun print-row (row)
   (vector-foreach (fun (n) (print n " ")) row)
