@@ -807,17 +807,11 @@ public class Compiler
 
      Compilation:
 
-             <<exp1>>
-             branchf L1
-             jump next
-     L1:     <<exp2>>           
-             branchf LN
-             jump next
-     ...
-     LN:     <<expN>>
-             branchf next
-             jump next
-     next:   ...
+            <<exp1>>
+            jt next
+            ...
+            <<expN>>
+      next: ...
   */
 
   private Inst compileOr(List exp, Scope scope, boolean tail, Inst next)
@@ -830,12 +824,11 @@ public class Compiler
 
   private Inst compileDisjunction(List exp, Scope scope, boolean tail, Inst next)
   {
-    if (exp.isEmpty())
-      return next;
+    if (exp.rest().isEmpty())
+      return compile(exp.first(), scope, tail, next);
 
-    return compile(exp.first(), scope, (tail && exp.rest().isEmpty()),
-           new BranchFalse(new Jump(next),
-                           compileDisjunction(exp.rest(), scope, tail, next)));
+    return compile(exp.first(), scope, false,
+           new BranchTrue(compileDisjunction(exp.rest(), scope, tail, next), next));
   }
 
   /* Compiles the "and" special form, a logical conjunction.
@@ -844,17 +837,11 @@ public class Compiler
 
      Compilation:
 
-             <<exp1>>
-             brancht L1
-             jump next
-     L1:     <<exp2>>           
-             brancht LN
-             jump next
-     ...
-     LN:     <<expN>>
-             brancht next
-             jump next
-     next:   ...
+            <<exp1>>
+            jf next
+            ...
+            <<expN>>
+      next: ...
   */
 
   private Inst compileAnd(List exp, Scope scope, boolean tail, Inst next)
@@ -867,12 +854,11 @@ public class Compiler
 
   private Inst compileConjuction(List exp, Scope scope, boolean tail, Inst next)
   {
-    if (exp.isEmpty())
-      return next;
+    if (exp.rest().isEmpty())
+      return compile(exp.first(), scope, tail, next);
 
-    return compile(exp.first(), scope, (tail && exp.rest().isEmpty()),
-           new BranchTrue(new Jump(next),
-                          compileConjuction(exp.rest(), scope, tail, next)));
+    return compile(exp.first(), scope, false,
+           new BranchFalse(compileConjuction(exp.rest(), scope, tail, next), next));
   }
 
   /* Compiles the "do" special form.
