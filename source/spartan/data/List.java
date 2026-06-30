@@ -11,6 +11,8 @@ import java.util.stream.StreamSupport;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.function.Supplier;
+import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 import spartan.errors.Error;
 import spartan.errors.TypeMismatch;
 import spartan.errors.NoSuchElement;
@@ -256,6 +258,18 @@ permits EmptyList
     return map(this, f);
   }
   
+  /*
+  public void forEach(Consumer<Datum> f)
+  {
+    return forEach(this, f);
+  }
+  */
+  
+  public void forEach(BiConsumer<Datum, Integer> f)
+  {
+    forEach(this, f);
+  }
+  
   public boolean equals(Object other)
   {
     return other instanceof List rhs && isEqual(this, rhs, (a, b) -> a.equals(b));
@@ -390,6 +404,20 @@ permits EmptyList
     for (; !list.isEmpty(); list = list.rest())
       result.add(f.apply(list.first));
     return result.build();
+  }
+  
+  /*
+  private static void forEach(List list, Consumer<Datum> f)
+  {
+    for (; !list.isEmpty(); list = list.rest())
+      f.accept(list.first());
+  }
+  */
+  
+  private static void forEach(List list, BiConsumer<Datum, Integer> f)
+  {
+    for (int i = 0; !list.isEmpty(); list = list.rest(), ++i)
+      f.accept(list.first(), i);
   }
   
   private static boolean isEqual(List lhs, List rhs, BiPredicate<Datum, Datum> equals)
