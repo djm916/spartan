@@ -25,7 +25,7 @@ import spartan.util.Box;
 
 interface ISpecialForm
 {
-  Inst compile(List exp, Scope scope, boolean tail, Inst next);
+  Inst compile(List exp, Scope scope, boolean tail, boolean allowDefs, Inst next);
 }
 
 /**
@@ -50,7 +50,7 @@ public class Compiler
   public Inst compile(SourceDatum exp)
   {
     positionMap = exp.positionMap();
-    var code = compile(exp.datum(), Scope.EMPTY, false, new Halt());
+    var code = compile(exp.datum(), Scope.EMPTY, false, true, new Halt());
     if (Config.LOG_DEBUG && Config.EMIT_BYTECODE)
       log.info(() -> String.format("Listing for expression at %s\n%s", positionOf(exp.datum()), CodeListing.generate(code)));
     return code;
@@ -159,7 +159,7 @@ public class Compiler
 
      Otherwise, assume the symbol is a global variable, and generate a store-global instruction.
   */
-  private Inst compileSet(List exp, Scope scope, boolean tail, Inst next)
+  private Inst compileSet(List exp, Scope scope, boolean tail, boolean allowDefs, Inst next)
   {
     if (!(exp.length() == 3 && exp.second() instanceof Symbol s))
       throw malformedExp(exp);
@@ -167,9 +167,9 @@ public class Compiler
     var init = exp.third();
     
     if (s.isQualified())
-      return compile(init, scope, false,
+      return compile(init, scope, false, false,
              compileSetGlobalVar(s, next));
-    return compile(init, scope, false,
+    return compile(init, scope, false, false,
            scope.lookup(s)
                 .map(i -> compileSetLocalVar(i, next))
                 .orElseGet(() -> compileSetGlobalVar(s, next)));
@@ -221,23 +221,17 @@ public class Compiler
     return currentModule().lookupAlias(moduleName).orElse(moduleName);
   }
   
-  private Inst compileDef(List exp, Scope scope, boolean tail, Inst next)
+  private Inst compileDef(List exp, Scope scope, boolean tail, boolean allowDefs, Inst next)
   {
     if (!(exp.length() == 3 && exp.second() instanceof Symbol s && s.isSimple()))
       throw malformedExp(exp);
+    if (!allowDefs)
+      throw new SyntaxError("definition not allowed here", new SourceInfo(exp, positionOf(exp)));
     var init = exp.third();
     var moduleName = currentModule().name();
     var baseName = s.intern();
-    /*
-    var loc = new Box<Box<Datum>>();
-    var result = compile(init, scope, false,
-                 new StoreGlobal(moduleName, baseName, loc,
-                 new LoadConst(Nil.VALUE, next)));
-    loc.set(currentModule().bind(s.intern()));
-    return result;
-    */
     var loc = currentModule().bind(s.intern());
-    return compile(init, scope, false,
+    return compile(init, scope, false, false,
            new StoreGlobal(moduleName, baseName, loc,
            new LoadConst(Nil.VALUE, next)));
   }
@@ -247,7 +241,7 @@ public class Compiler
      Syntax: (defun symbol (params...) body...)
   */
   
-  private Inst compileDefun(List exp, Scope scope, boolean tail, Inst next)
+  private Inst compileDefun(List exp, Scope scope, boolean tail, boolean allowDefs, Inst next)
   {
     if (exp.length() < 4)
       throw malformedExp(exp);
@@ -260,7 +254,7 @@ public class Compiler
     // TODO: Any error raised by compiling the body will have its position
     // reset incorrectly here!
     try {
-      return compile(xform, scope, false, next);
+      return compile(xform, scope, false, allowDefs, next);
     }
     catch (Error err) {
       err.setSource(new SourceInfo(xform, positionOf(exp)));
@@ -297,7 +291,7 @@ public class Compiler
      
      Translation: (if pred sub #nil)
   */
-  private Inst compileIf(List exp, Scope scope, boolean tail, Inst next)
+  private Inst compileIf(List exp, Scope scope, boolean tail, boolean allowDefs, Inst next)
   {
     int length = exp.length();
 
@@ -308,9 +302,9 @@ public class Compiler
     var sub = exp.third();
     var alt = length == 4 ? exp.fourth() : Nil.VALUE;
         
-    return compile(pred, scope, false,
-           new BranchFalse(compile(sub, scope, tail, new Jump(next)),
-                           compile(alt, scope, tail, next)));
+    return compile(pred, scope, false, false,
+           new BranchFalse(compile(sub, scope, tail, false, new Jump(next)),
+                           compile(alt, scope, tail, false, next)));
   }
 
   /* Compiles the "cond" special form.
@@ -352,7 +346,7 @@ public class Compiler
      default:  <<default>>
      next:     ...
   */
-  private Inst compileCond(List exp, Scope scope, boolean tail, Inst next)
+  private Inst compileCond(List exp, Scope scope, boolean tail, boolean allowDefs, Inst next)
   {
     if (exp.length() < 2 || !checkClauseListForm(exp.rest()))
       throw malformedExp(exp);
@@ -372,7 +366,7 @@ public class Compiler
     if (Symbol.ELSE.equals(pred))
       return compileSequence(body, scope, tail, next);
 
-    return compile(pred, scope, false,
+    return compile(pred, scope, false, false,
            new BranchFalse(compileSequence(body, scope, tail, new Jump(next)),
                            compileCondClauses(clauses.rest(), scope, tail, next)));
   }
@@ -404,7 +398,7 @@ public class Compiler
      next: ...
   */
 
-  private Inst compileLet(List exp, Scope scope, boolean tail, Inst next)
+  private Inst compileLet(List exp, Scope scope, boolean tail, boolean allowDefs, Inst next)
   {
     if (!(exp.length() >= 3 && exp.second() instanceof List bindings && checkBindingListForm(bindings)))
       throw malformedExp(exp);
@@ -441,7 +435,7 @@ public class Compiler
            pop-env
      next: ...
   */
-  private Inst compileLetStar(List exp, Scope scope, boolean tail, Inst next)
+  private Inst compileLetStar(List exp, Scope scope, boolean tail, boolean allowDefs, Inst next)
   {
     if (!(exp.length() >= 3 && exp.second() instanceof List bindings && checkBindingListForm(bindings)))
       throw malformedExp(exp);
@@ -468,7 +462,7 @@ public class Compiler
     var symb = (Symbol) binding.first();
     var init = binding.second();
 
-    return compile(init, scope, false,
+    return compile(init, scope, false, false,
                    new StoreLocal0(offset,
                    compileSequentialBindings(bindings.rest(), offset + 1, scope.bind(symb),
                    next)));
@@ -497,7 +491,7 @@ public class Compiler
            pop-env
      next: ...
   */
-  private Inst compileLetRec(List exp, Scope scope, boolean tail, Inst next)
+  private Inst compileLetRec(List exp, Scope scope, boolean tail, boolean allowDefs, Inst next)
   {
     if (!(exp.length() >= 3 && exp.second() instanceof List bindings && checkBindingListForm(bindings)))
       throw malformedExp(exp);
@@ -523,7 +517,7 @@ public class Compiler
     if (inits.isEmpty())
       return next;
 
-    return compile(inits.first(), scope, false,
+    return compile(inits.first(), scope, false, false,
            new StoreLocal0(offset,
            compileRecursiveBindings(inits.rest(), offset + 1, scope, next)));
   }
@@ -611,7 +605,7 @@ public class Compiler
       return next;
 
     return compilePushArgs(args.rest(), scope,
-           compile(args.first(), scope, false,
+           compile(args.first(), scope, false, false,
            new PushArg(next)));
   }
   
@@ -654,13 +648,13 @@ public class Compiler
     
     if (tail && Config.TAIL_CALLS) // Tail call optimization: omit call frame, return directly to the caller
       return compilePushArgs(args, scope,
-             compile(proc, scope, false,
+             compile(proc, scope, false, false,
              new Apply(numArgs, source,
              next)));
     else
       return new PushFrame(next, position,
              compilePushArgs(args, scope,
-             compile(proc, scope, false,
+             compile(proc, scope, false, false,
              new Apply(numArgs, source,
              next))));
   }
@@ -722,7 +716,7 @@ public class Compiler
     if (exp.isEmpty())
       return next;
 
-    return compile(exp.first(), scope, (tail && exp.rest().isEmpty()),
+    return compile(exp.first(), scope, (tail && exp.rest().isEmpty()), false,
            compileSequence(exp.rest(), scope, tail, next));
   }
 
@@ -734,11 +728,11 @@ public class Compiler
   */
   private Inst compileBody(List body, Scope scope, Inst next)
   {
-    if (isDefinition(body.first())) {
+    if (isInnerDefinition(body.first())) {
       var xform = transformInnerDefs(body);
       if (Config.LOG_DEBUG && Config.SHOW_MACRO_EXPANSION)
         log.info(() -> String.format("inner defs transform: %s => %s", body.repr(), xform.repr()));
-      return compile(xform, scope, true, next);
+      return compile(xform, scope, true, false, next);
     }
 
     return compileSequence(body, scope, true, next);
@@ -750,7 +744,7 @@ public class Compiler
    *         (fun (param... & rest) body...)
    *
    */
-  private Inst compileFun(List exp, Scope scope, boolean tail, Inst next)
+  private Inst compileFun(List exp, Scope scope, boolean tail, boolean allowDefs, Inst next)
   {
     if (!(exp.length() >= 3 && exp.second() instanceof List params && checkParamListForm(params)))
       throw malformedExp(exp);
@@ -784,7 +778,7 @@ public class Compiler
   {
     List.Builder bindings = new List.Builder();
 
-    while (!body.isEmpty() && isDefinition(body.first())) {
+    while (!body.isEmpty() && isInnerDefinition(body.first())) {
       var exp = (List) body.first();
       if (Symbol.DEFUN.equals(exp.first()))
         exp = transformDefun(exp);
@@ -795,12 +789,21 @@ public class Compiler
     return List.adjoin(Symbol.LETREC, List.adjoin(bindings.build(), body));
   }
 
-  // Determine if an expression is an inner-define form, i.e. a list beginning with the symbol "def" or "defun".
-  private boolean isDefinition(Datum exp)
+  // Determine if a form is an inner definition (i.e., "def", "defun")
+  // These can only appear at the top of a function body
+  private boolean isInnerDefinition(Datum exp)
   {
     return exp instanceof List form && !form.isEmpty() && (Symbol.DEF.equals(form.first()) || Symbol.DEFUN.equals(form.first()));
   }
 
+  // Determine if form is a top-level definition (i.e., "def", "defun", "defmacro")
+  // These can only appear at the top-level and within "do" forms at the top-level
+  private boolean isTopLevelDefinition(Datum exp)
+  {
+    //return exp instanceof List form && !form.isEmpty() && (Symbol.DEF.equals(form.first()) || Symbol.DEFUN.equals(form.first()) || Symbol.DEFMACRO.equals(form.first()) || Symbol.DO.equals(form.first()));
+    return exp instanceof List form && !form.isEmpty() && (Symbol.DEF.equals(form.first()) || Symbol.DEFUN.equals(form.first()) || Symbol.DEFMACRO.equals(form.first()));
+  }
+  
   /* Compiles the "or" special form, a logical disjunction.
 
      Syntax: (or exp1 ... expN)
@@ -814,7 +817,7 @@ public class Compiler
       next: ...
   */
 
-  private Inst compileOr(List exp, Scope scope, boolean tail, Inst next)
+  private Inst compileOr(List exp, Scope scope, boolean tail, boolean allowDefs, Inst next)
   {
     if (exp.length() < 2)
       throw malformedExp(exp);
@@ -825,9 +828,9 @@ public class Compiler
   private Inst compileDisjunction(List exp, Scope scope, boolean tail, Inst next)
   {
     if (exp.rest().isEmpty())
-      return compile(exp.first(), scope, tail, next);
+      return compile(exp.first(), scope, tail, false, next);
 
-    return compile(exp.first(), scope, false,
+    return compile(exp.first(), scope, false, false,
            new BranchTrue(compileDisjunction(exp.rest(), scope, tail, next), next));
   }
 
@@ -844,7 +847,7 @@ public class Compiler
       next: ...
   */
 
-  private Inst compileAnd(List exp, Scope scope, boolean tail, Inst next)
+  private Inst compileAnd(List exp, Scope scope, boolean tail, boolean allowDefs, Inst next)
   {
     if (exp.length() < 2)
       throw malformedExp(exp);
@@ -855,54 +858,36 @@ public class Compiler
   private Inst compileConjuction(List exp, Scope scope, boolean tail, Inst next)
   {
     if (exp.rest().isEmpty())
-      return compile(exp.first(), scope, tail, next);
+      return compile(exp.first(), scope, tail, false, next);
 
-    return compile(exp.first(), scope, false,
+    return compile(exp.first(), scope, false, false,
            new BranchFalse(compileConjuction(exp.rest(), scope, tail, next), next));
   }
 
-  /* Compiles the "do" special form.
-
-     Syntax: (do def* exp...)
+  /* Compiles the "do" special form. */
   
-
-  private Inst compileDo(List exp, Scope scope, boolean tail, Inst next)
+  private Inst compileDo(List exp, Scope scope, boolean tail, boolean allowDefs, Inst next)
   {
     if (exp.length() < 2)
       throw malformedExp(exp);
     
-    var d = exp.rest();
-    while (!d.isEmpty() && isDefinition(d.first())) {
-      var s = (Symbol)((List)d.first()).second();
-      currentModule().bind(s.intern());
-      d = d.rest();
-    }
-    
-    return compileSequence(exp.rest(), scope, tail, next);
-  }
-  */
-  
-  private Inst compileDo(List exp, Scope scope, boolean tail, Inst next)
-  {
-    if (exp.length() < 2)
-      throw malformedExp(exp);
-    
-    return compileDoWithDefs(exp.rest(), scope, tail, next);
+    return compileDoWithDefs(exp.rest(), scope, tail, allowDefs, next);
   }
   
-  private Inst compileDoWithDefs(List exp, Scope scope, boolean tail, Inst next)
+  private Inst compileDoWithDefs(List exp, Scope scope, boolean tail, boolean allowDefs, Inst next)
   {
     if (exp.isEmpty()) {
       return next;
     }
-    else if (isDefinition(exp.first())) {
+    else if (isTopLevelDefinition(exp.first())) {
       var end = new Nop();
-      var result = compileDef((List)exp.first(), scope, false, end);
-      end.next = compileDoWithDefs(exp.rest(), scope, tail, next);
+      var result = compile(exp.first(), scope, false, allowDefs, end);
+      end.next = compileDoWithDefs(exp.rest(), scope, tail && exp.rest().isEmpty(), allowDefs, next);
       return result;
     }
     else {
-      return compileSequence(exp, scope, tail, next);
+      return compile(exp.first(), scope, tail, allowDefs,
+             compileDoWithDefs(exp.rest(), scope, tail && exp.rest().isEmpty(), allowDefs, next));
     }
   }
   
@@ -920,7 +905,7 @@ public class Compiler
      next: ...
   */
 
-  private Inst compileWhile(List exp, Scope scope, boolean tail, Inst next)
+  private Inst compileWhile(List exp, Scope scope, boolean tail, boolean allowDefs, Inst next)
   {
     if (exp.length() < 3)
       throw malformedExp(exp);
@@ -928,7 +913,7 @@ public class Compiler
     var pred = exp.second();
     var body = exp.drop2();
     var jump = new Jump();
-    var loop = compile(pred, scope, false,
+    var loop = compile(pred, scope, false, false,
                new BranchFalse(compileSequence(body, scope, false, jump),
                                new LoadConst(Nil.VALUE, next)));
     jump.setTarget(loop);
@@ -984,7 +969,7 @@ public class Compiler
      done: <<result>>
            pop-env
   */
-  private Inst compileFor(List exp, Scope scope, boolean tail, Inst next)
+  private Inst compileFor(List exp, Scope scope, boolean tail, boolean allowDefs, Inst next)
   {
     if (!(exp.length() >= 3 && exp.second() instanceof List bindings && checkForBindingsForm(bindings)
           && exp.third() instanceof List third && (third.length() == 1 || third.length() == 2)))
@@ -1000,13 +985,13 @@ public class Compiler
     var body = exp.drop3();
     
     var jump = new Jump();
-    var loop = compile(test, extendedScope, false,
+    var loop = compile(test, extendedScope, false, false,
                new BranchTrue(
                           compileSequence(body, extendedScope, false,
                           compilePushArgs(steps, extendedScope,
                           compileBindLocals(0, numBindings,                          
                           jump))),
-                          compile(result, extendedScope, false,
+                          compile(result, extendedScope, false, false,
                           new PopEnv(next))));
     jump.setTarget(loop);                          
     return compilePushArgs(inits, scope,
@@ -1017,7 +1002,7 @@ public class Compiler
   
   // (quote x)
 
-  private Inst compileQuote(List exp, Scope scope, boolean tail, Inst next)
+  private Inst compileQuote(List exp, Scope scope, boolean tail, boolean allowDefs, Inst next)
   {
     if (exp.length() != 2)
       throw malformedExp(exp);
@@ -1043,7 +1028,7 @@ public class Compiler
   // Compile a (quasiquote x) form by reducing it to an equivalent
   // list form and compiling the result.
 
-  private Inst compileQuasiquote(List exp, Scope scope, boolean tail, Inst next)
+  private Inst compileQuasiquote(List exp, Scope scope, boolean tail, boolean allowDefs, Inst next)
   {
     if (exp.length() != 2)
       throw malformedExp(exp);
@@ -1055,7 +1040,7 @@ public class Compiler
       log.info(() -> String.format("quasiquote transform: %s => %s", exp.repr(), xform.repr()));
     
     try {
-      return compile(xform, scope, false, next);
+      return compile(xform, scope, false, false, next);
     }
     catch (Error err) {
       err.setSource(new SourceInfo(exp, positionOf(exp)));
@@ -1241,10 +1226,12 @@ public class Compiler
      which is then compiled and evaluated. 
   */
 
-  private Inst compileDefmacro(List exp, Scope scope, boolean tail, Inst next)
+  private Inst compileDefmacro(List exp, Scope scope, boolean tail, boolean allowDefs, Inst next)
   {
     if (!(exp.length() >= 4 && exp.second() instanceof Symbol symbol && symbol.isSimple() && exp.third() instanceof List params && checkParamListForm(params)))
       throw malformedExp(exp);
+    if (!allowDefs)
+      throw new SyntaxError("definition not allowed here", new SourceInfo(exp, positionMap.get(exp)));
     var body = exp.drop3();
     var macro = new Macro(makeProcedure(params, body, Scope.EMPTY));
     try {
@@ -1328,14 +1315,14 @@ public class Compiler
      DONE: pop-env
            ...
   */
-  private Inst compileMatch(List exp, Scope scope, boolean tail, Inst next)
+  private Inst compileMatch(List exp, Scope scope, boolean tail, boolean allowDefs, Inst next)
   {
     if (exp.length() < 3 || !checkMatchClauses(exp.drop2()))
       throw malformedExp(exp);
     
     var clauses = exp.drop2();
         
-    return compile(exp.second(), scope, false,
+    return compile(exp.second(), scope, false, false,
            new PushEnv(matchEnvSize(clauses),
            compileMatchClauses(exp, clauses, scope, tail,
            new PopEnv(next))));
@@ -1533,12 +1520,12 @@ public class Compiler
         application apply.
   */
   
-  private Inst compileCombo(List exp, Scope scope, boolean tail, Inst next)
+  private Inst compileCombo(List exp, Scope scope, boolean tail, boolean allowDefs, Inst next)
   {
     if (exp.first() instanceof Symbol s) {
       return Optional.ofNullable(specialForms.get(s))
-             .map(form -> form.compile(exp, scope, tail, next))
-             .or(() -> lookupMacro(s).map(macro -> compile(expand(macro, exp), scope, tail, next)))
+             .map(form -> form.compile(exp, scope, tail, allowDefs, next))
+             .or(() -> lookupMacro(s).map(macro -> compile(expand(macro, exp), scope, tail, allowDefs, next)))
              .orElseGet(() -> compileApply(exp, scope, tail, next));
     }
     return compileApply(exp, scope, tail, next);
@@ -1546,16 +1533,16 @@ public class Compiler
   
   /* This is the top-level compilation function that dispatches on the type of the expression. */
   
-  private Inst compile(Datum exp, Scope scope, boolean tail, Inst next)
+  private Inst compile(Datum exp, Scope scope, boolean tail, boolean allowDefs, Inst next)
   {
     if (isSelfEval(exp))
       return compileSelfEval(exp, next);
     else if (exp instanceof Symbol s)
       return compileVarRef(s, scope, next);
     else 
-      return compileCombo((List)exp, scope, tail, next);
+      return compileCombo((List)exp, scope, tail, allowDefs, next);
   }
-    
+  
   private final Map<Symbol, ISpecialForm> specialForms = Map.ofEntries(
     Map.entry(Symbol.DEF, this::compileDef),
     Map.entry(Symbol.DEFUN, this::compileDefun),

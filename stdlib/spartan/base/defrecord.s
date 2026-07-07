@@ -42,14 +42,14 @@
   (defun mutator-name (name field)
     (string->symbol (string-concat "set-" (symbol->string name) "-" (symbol->string field) "!")))
 
-  `(let ((rtd (spartan.base:make-record-type ',name ',fields))) ; Create record type descriptor
+  `(do
      ; Bind record type name to the record type descriptor
-     (def ,name rtd)
+     (def ,name (spartan.base:make-record-type ',name ',fields))
      ; Define constructor
-     (def ,(constructor-name name) (spartan.base:record-constructor rtd))
+     (def ,(constructor-name name) (spartan.base:record-constructor ,name))
      ; Define type predicate
-     (def ,(predicate-name name) (spartan.base:record-predicate rtd))
+     (def ,(predicate-name name) (spartan.base:record-predicate ,name))
      ; Define accessors
-     ,@(spartan.base:map (fun (field) `(def ,(accessor-name name field) (spartan.base:record-accessor rtd ',field))) fields)
+     ,@(spartan.base:map (fun (field) `(def ,(accessor-name name field) (spartan.base:record-accessor ,name ',field))) fields)
      ; Define mutators
-     ,@(spartan.base:map (fun (field) `(def ,(mutator-name name field) (spartan.base:record-mutator rtd ',field))) fields)))
+     ,@(spartan.base:map (fun (field) `(def ,(mutator-name name field) (spartan.base:record-mutator ,name ',field))) fields)))
