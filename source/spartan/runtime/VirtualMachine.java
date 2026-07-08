@@ -3,6 +3,7 @@ package spartan.runtime;
 import spartan.data.Datum;
 import spartan.data.List;
 import spartan.data.Symbol;
+import spartan.data.Bool;
 import spartan.data.IFun;
 import spartan.data.Primitive;
 import spartan.data.Closure;
@@ -74,12 +75,12 @@ public final class VirtualMachine
             }
             break;
           }
-          case BranchFalse(var left, var right): {
-            control = !result.boolValue() ? right : left;
+          case BranchFalse(var target, var next): {
+            control = !result.boolValue() ? target : next;
             break;
           }
-          case BranchTrue(var left, var right): {
-            control = result.boolValue() ? right : left;
+          case BranchTrue(var target, var next): {
+            control = result.boolValue() ? target : next;
             break;
           }
           case Halt(): {
@@ -115,12 +116,12 @@ public final class VirtualMachine
             control = next;
             break;
           }
-          case Match(var pattern, var left, var right): {
-            control = pattern.match(result, env) ? left : right;
+          case Match(var pattern, var target, var next): {
+            control = pattern.match(result, env) ? next : target;
             break;
           }
           case Nop inst: {
-            control = inst.next;
+            control = inst.next();
             break;
           }
           case PopArg(var next): {

@@ -4,13 +4,14 @@ public final class Jump implements Inst
 {
   public Jump()
   {
-    this(null);
+    this(null, null);
   }
   
-  public Jump(Inst target)
+  public Jump(Inst target, Inst next)
   {
     //this.target = target;
     setTarget(target);
+    this.next = next;
   }
   
   public Inst target()
@@ -26,5 +27,16 @@ public final class Jump implements Inst
     this.target = target;
   }
   
+  public Inst next()
+  {
+    return next;
+  }
+  
+  public void setNext(Inst next)
+  {
+    this.next = next;
+  }
+  
   private Inst target;
+  private Inst next;
 }

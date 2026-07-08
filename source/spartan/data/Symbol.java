@@ -71,6 +71,11 @@ permits QualifiedSymbol
     return name();
   }
   
+  public String toString()
+  {
+    return name();
+  }
+  
   public String name()
   {
     return name;

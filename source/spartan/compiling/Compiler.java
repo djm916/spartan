@@ -51,8 +51,15 @@ public class Compiler
   {
     positionMap = exp.positionMap();
     var code = compile(exp.datum(), Scope.EMPTY, false, true, new Halt());
-    if (Config.LOG_DEBUG && Config.EMIT_BYTECODE)
-      log.info(() -> String.format("Listing for expression at %s\n%s", positionOf(exp.datum()), CodeListing.generate(code)));
+    if (Config.LOG_DEBUG && Config.EMIT_BYTECODE) {
+      log.info(() -> String.format("Generating bytecode listing for expression at %s\n", positionOf(exp.datum())));
+      try {
+        CodeListing.generate(code);
+      }
+      catch (java.io.IOException _) {
+        // ignore
+      }
+    }
     return code;
   }
   
@@ -301,10 +308,18 @@ public class Compiler
     var pred = exp.second();
     var sub = exp.third();
     var alt = length == 4 ? exp.fourth() : Nil.VALUE;
-        
+    
+    var elseBranch = compile(alt, scope, tail, false, next);
+    return compile(pred, scope, false, false,
+           new BranchFalse(elseBranch,
+           compile(sub, scope, tail, false,
+           new Jump(next,
+           elseBranch))));
+    /*
     return compile(pred, scope, false, false,
            new BranchFalse(compile(sub, scope, tail, false, new Jump(next)),
                            compile(alt, scope, tail, false, next)));
+    */
   }
 
   /* Compiles the "cond" special form.
@@ -366,11 +381,19 @@ public class Compiler
     if (Symbol.ELSE.equals(pred))
       return compileSequence(body, scope, tail, next);
 
+    var nextClause = compileCondClauses(clauses.rest(), scope, tail, next);
+    return compile(pred, scope, false, false,
+           new BranchFalse(nextClause,
+           compileSequence(body, scope, tail,
+           new Jump(next,
+           nextClause))));
+    /*
     return compile(pred, scope, false, false,
            new BranchFalse(compileSequence(body, scope, tail, new Jump(next)),
                            compileCondClauses(clauses.rest(), scope, tail, next)));
+    */
   }
-
+  
   /* Compiles the "let" special form
 
      Syntax:  (let ((symb1 init1)
@@ -882,7 +905,7 @@ public class Compiler
     else if (isTopLevelDefinition(exp.first())) {
       var end = new Nop();
       var result = compile(exp.first(), scope, false, allowDefs, end);
-      end.next = compileDoWithDefs(exp.rest(), scope, tail && exp.rest().isEmpty(), allowDefs, next);
+      end.setNext(compileDoWithDefs(exp.rest(), scope, tail && exp.rest().isEmpty(), allowDefs, next));
       return result;
     }
     else {
@@ -912,12 +935,22 @@ public class Compiler
 
     var pred = exp.second();
     var body = exp.drop2();
-    var jump = new Jump();
+    
+    var jump = new Jump();    
+    var endOfLoop = new LoadConst(Nil.VALUE, next);
+    var topOfLoop = compile(pred, scope, false, false,
+                    new BranchFalse(endOfLoop,
+                    compileSequence(body, scope, false, jump)));
+    jump.setTarget(topOfLoop);
+    jump.setNext(endOfLoop);
+    return topOfLoop;
+    /*
     var loop = compile(pred, scope, false, false,
                new BranchFalse(compileSequence(body, scope, false, jump),
                                new LoadConst(Nil.VALUE, next)));
     jump.setTarget(loop);
     return loop;
+    */
   }
   
   /* Compile the "for" special form.
@@ -985,6 +1018,19 @@ public class Compiler
     var body = exp.drop3();
     
     var jump = new Jump();
+    var endOfLoop = compile(result, extendedScope, false, false,
+                    new PopEnv(next));
+    var topOfLoop = compile(test, extendedScope, false, false,
+                    new BranchTrue(endOfLoop,
+                    compileSequence(body, extendedScope, false,
+                    compilePushArgs(steps, extendedScope,
+                    compileBindLocals(0, numBindings,                          
+                    jump)))));
+    jump.setTarget(topOfLoop);
+    jump.setNext(endOfLoop);
+    return topOfLoop;
+    /*
+    var jump = new Jump();
     var loop = compile(test, extendedScope, false, false,
                new BranchTrue(
                           compileSequence(body, extendedScope, false,
@@ -998,6 +1044,7 @@ public class Compiler
            new PushEnv(numBindings,
            compileBindLocals(0, numBindings,
            loop)));
+    */
   }
   
   // (quote x)
@@ -1304,13 +1351,15 @@ public class Compiler
 
            <<exp>>
            push-env N_max      // extend environment
-     P1:   match pattern1 P2   // continue if pattern matches value in RES; otherwise try next pattern
+     P1:   match pattern1      // 
+           jf P2               // continue if pattern matches value in RES; otherwise try next pattern
            <<body1>>           // evaluate body
-           jump DONE
+           j DONE
      P2:   ...
-     PN:   match patternN FAIL
+     PN:   match patternN
+           jf FAIL
            <<bodyN>>
-           jump DONE
+           j DONE
      FAIL: raise               // all patterns failed to match; raise error
      DONE: pop-env
            ...
@@ -1321,7 +1370,7 @@ public class Compiler
       throw malformedExp(exp);
     
     var clauses = exp.drop2();
-        
+    
     return compile(exp.second(), scope, false, false,
            new PushEnv(matchEnvSize(clauses),
            compileMatchClauses(exp, clauses, scope, tail,
@@ -1353,9 +1402,16 @@ public class Compiler
     var vars = patternVars(patt);
     var extendedScope = scope.extend(vars);
     
+    var nextClause = compileMatchClauses(matchExp, clauses.rest(), scope, tail, next);
+    return new Match(compilePattern(patt, vars), nextClause,
+           compileSequence(body, extendedScope, tail,
+           new Jump(next,
+           nextClause)));
+    /*
     return new Match(compilePattern(patt, vars),
                      compileSequence(body, extendedScope, tail, new Jump(next)),
                      compileMatchClauses(matchExp, clauses.rest(), scope, tail, next));
+    */
   }
   
   private boolean checkMatchClauses(List clauses)

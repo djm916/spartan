@@ -7,4 +7,6 @@ public sealed interface Inst
 permits Apply, BranchFalse, BranchTrue, Halt, Jump, LoadConst, LoadGlobal,
         LoadLocal, LoadLocal0, MakeClosure, Match, PopArg, PopEnv, PopFrame, PopRestArgs,
         PushArg, PushEnv, PushFrame, Raise, StoreGlobal, StoreLocal, StoreLocal0, Nop
-{}
+{
+  public Inst next();
+}
