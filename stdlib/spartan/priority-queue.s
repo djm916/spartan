@@ -1,6 +1,12 @@
-(in-ns spartan.priority-queue.internal)
+(in-module spartan.priority-queue)
 
-(defrecord queue (comparator elems))
+(export make-queue
+        queue?
+        empty?
+        push
+        pop)
+
+(defrecord queue-impl (elems comparator))
 
 (defun reheap-up (v c)
   (let [(root (- (vector-length v) 1))]
@@ -24,30 +30,27 @@
             (set! right (+ 2 (* 2 root))))
           (set! done #true))))))
 
-(in-ns spartan.priority-queue)
-(import spartan.priority-queue.internal :as internal)
-
-(defun make-priority-queue (comparator)
-  (internal:make-queue comparator (vector)))
+(defun make-queue (comparator)
+  (make-queue-impl (vector) comparator))
 
 (defun priority-queue? (self)
-  (internal:queue? self))
+  (queue-impl? self))
 
 (defun empty? (self)
-  (= 0 (vector-length (internal:queue-elems self))))
+  (= 0 (vector-length (queue-impl-elems self))))
 
 (defun push (self item)
-  (def v (internal:queue-elems self))
-  (def c (internal:queue-comparator self))
-  (vector-append! v item)
-  (internal:reheap-up v c))
+  (match self
+    [(record queue-impl v c)
+     (vector-append! v item)
+     (reheap-up v c)]))
 
 (defun pop (self)
-  (def v (internal:queue-elems self))
-  (def c (internal:queue-comparator self))
-  (if (empty? self) void
-    (let [(top (vector-ref v 0)) (last (- (vector-length v) 1))]
-      (vector-set! v 0 (vector-ref v last))
-      (vector-remove! v last)
-      (internal:reheap-down v c)
-      top)))
+  (match self
+    [(record queue-impl v c)
+     (if (empty? self) #nil
+       (let [(top (vector-ref v 0)) (last (- (vector-length v) 1))]
+       (vector-set! v 0 (vector-ref v last))
+       (vector-remove! v last)
+       (reheap-down v c)
+       top))]))

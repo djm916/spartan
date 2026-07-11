@@ -2,13 +2,11 @@
 
 ; Test example
 
-(def m (map:make-hash-map string-hash =))
+(def m (map:make-mapping string-hash =))
 
-(print-line "is hash map? " (map:hash-map? m))
-
-(print-line "An empty hash map: ")
-(print-line "size = " (map:size m))
+(print-line "is a mapping? " (map:mapping? m))
 (print-line "empty? " (map:empty? m))
+(print-line "size = " (map:size m))
 
 (def elems '(("a" 1) ("b" 2) ("c" 3) ("d" 4) ("e" 5)))
 
@@ -25,7 +23,7 @@
   ((empty? e) #nil)
   (let ((pair (first e)))
     (if (not (map:contains? m (first pair)))
-      (error "hashmap does not contain expected key!"))
+      (error "mapping does not contain expected key!"))
     (print-line (first pair) " => " (map:find m (first pair)))))
 
 (print-line "entries = " (map:entries m))

@@ -1277,16 +1277,16 @@ public class Compiler
   }
   
   /**
-       <pattern> =>   _
-                    | <symbol>
-                    | <number>
-                    | <string>
-                    | <boolean>
-                    | (quote <datum>)
-                    | (list <pattern> ...)
+       <pattern> =>   _                               ; match anything
+                    | <symbol>                        ; match anything and bind to symbol
+                    | <number>                        ; match numeric value
+                    | <string>                        ; match string value
+                    | <boolean>                       ; match boolean value
+                    | (quote <datum>)                 ; match quoted value
+                    | (list <pattern> ...)            ; match list
                     | (list* <pattern> ...)
                     | (vector <pattern> ...)
-                    | (record <symbol> <pattern> ...)
+                    | (record <symbol> <pattern> ...) ;
                     | (and <pattern> ...)
                     | (or <pattern> ...)
                     

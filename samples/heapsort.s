@@ -5,9 +5,9 @@
 
 (def random-ints (vector-unfold (fun (i) (rand)) N))
 
-(def q (pq:make-priority-queue <))
+(def q (pq:make-queue <))
 
-(vector-for-each (fun (x) (pq:push q x)) random-ints)
+(vector-foreach (fun (x) (pq:push q x)) random-ints)
 
 (while (not (pq:empty? q))
   (print-line (format-decimal (pq:pop q))))
