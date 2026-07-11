@@ -69,6 +69,12 @@ public class Compiler
     return new SyntaxError("malformed expression", new SourceInfo(exp, positionOf(exp)));
   }
   
+  /** Convenience method for creating instances of SyntaxError for misplaced definitions. */
+  private SyntaxError defNotAllowed(Datum exp)
+  {
+    return new SyntaxError("definition not allowed in this context", new SourceInfo(exp, positionOf(exp)));
+  }
+  
   private Position positionOf(Datum exp)
   {
     var pos = positionMap.get(exp);
@@ -201,10 +207,6 @@ public class Compiler
                 .orElseThrow(() -> new ModuleDoesNotExist(moduleName, new SourceInfo(s, positionOf(s))))
                 .lookup(baseName, true)
                 .orElseThrow(() -> new UnboundSymbol(baseName, new SourceInfo(s, positionOf(s))));
-      /*
-      return new StoreGlobal(moduleName, baseName, new Box<>(loc),
-             new LoadConst(Nil.VALUE, next));
-      */
       return new StoreGlobal(moduleName, baseName, loc,
              new LoadConst(Nil.VALUE, next));
     }
@@ -214,10 +216,6 @@ public class Compiler
       var loc = currentModule()
                 .lookup(baseName, false)
                 .orElseThrow(() -> new UnboundSymbol(s, new SourceInfo(s, positionOf(s))));
-      /*
-      return new StoreGlobal(moduleName, baseName, new Box<>(loc),
-             new LoadConst(Nil.VALUE, next));
-      */
       return new StoreGlobal(moduleName, baseName, loc,
              new LoadConst(Nil.VALUE, next));
     }
@@ -230,14 +228,14 @@ public class Compiler
   
   private Inst compileDef(List exp, Scope scope, boolean tail, boolean allowDefs, Inst next)
   {
-    if (!(exp.length() == 3 && exp.second() instanceof Symbol s && s.isSimple()))
-      throw malformedExp(exp);
     if (!allowDefs)
-      throw new SyntaxError("definition not allowed here", new SourceInfo(exp, positionOf(exp)));
+      throw defNotAllowed(exp);
+    if (!(exp.length() == 3 && exp.second() instanceof Symbol s && s.isSimple()))
+      throw malformedExp(exp);   
     var init = exp.third();
     var moduleName = currentModule().name();
     var baseName = s.intern();
-    var loc = currentModule().bind(s.intern());
+    var loc = currentModule().bind(baseName);
     return compile(init, scope, false, false,
            new StoreGlobal(moduleName, baseName, loc,
            new LoadConst(Nil.VALUE, next)));
@@ -315,11 +313,6 @@ public class Compiler
            compile(sub, scope, tail, false,
            new Jump(next,
            elseBranch))));
-    /*
-    return compile(pred, scope, false, false,
-           new BranchFalse(compile(sub, scope, tail, false, new Jump(next)),
-                           compile(alt, scope, tail, false, next)));
-    */
   }
 
   /* Compiles the "cond" special form.
@@ -387,11 +380,6 @@ public class Compiler
            compileSequence(body, scope, tail,
            new Jump(next,
            nextClause))));
-    /*
-    return compile(pred, scope, false, false,
-           new BranchFalse(compileSequence(body, scope, tail, new Jump(next)),
-                           compileCondClauses(clauses.rest(), scope, tail, next)));
-    */
   }
   
   /* Compiles the "let" special form
@@ -681,43 +669,6 @@ public class Compiler
              new Apply(numArgs, source,
              next))));
   }
-
-  /* Compile the "call/cc" form, or "call-with-current-continuation"
-  
-     Syntax: (call/cc proc)
-     
-     Compilation:
-     
-           push-frame  // Omitted if this expression occurs in tail context
-           make-cont
-           push-arg
-           <<proc>>    
-           apply
-     next: ...
-    
-  private Inst compileCallCC(List exp, Scope scope, boolean tail, Inst next)
-  {
-    if (exp.length() != 2)
-      throw malformedExp(exp);
-    
-    var proc = exp.cadr();
-    var position = positionOf(exp);
-    
-    // Optimization: omit frame for call in tail position
-    
-    if (tail) // Tail call optimization: omit call frame, return directly to the caller
-      return new MakeCont(
-             new PushArg(
-             compile(proc, scope, tail,           
-             new Apply(1, position))));
-    else
-      return new PushFrame(next, position,
-             new MakeCont(
-             new PushArg(
-             compile(proc, scope, tail,           
-             new Apply(1, position)))));
-  }
-  */
   
   /* Compiles a sequence of expressions.
      The sequence elements are evaluated in order.
@@ -760,7 +711,7 @@ public class Compiler
 
     return compileSequence(body, scope, true, next);
   }
-    
+  
   /* Compiles a lambda expression (anonymous procedure)
    *
    * Syntax: (fun (param...) body...)
@@ -854,7 +805,8 @@ public class Compiler
       return compile(exp.first(), scope, tail, false, next);
 
     return compile(exp.first(), scope, false, false,
-           new BranchTrue(compileDisjunction(exp.rest(), scope, tail, next), next));
+           new BranchTrue(next,
+           compileDisjunction(exp.rest(), scope, tail, next)));
   }
 
   /* Compiles the "and" special form, a logical conjunction.
@@ -884,7 +836,8 @@ public class Compiler
       return compile(exp.first(), scope, tail, false, next);
 
     return compile(exp.first(), scope, false, false,
-           new BranchFalse(compileConjuction(exp.rest(), scope, tail, next), next));
+           new BranchFalse(next,
+           compileConjuction(exp.rest(), scope, tail, next)));
   }
 
   /* Compiles the "do" special form. */
@@ -944,13 +897,6 @@ public class Compiler
     jump.setTarget(topOfLoop);
     jump.setNext(endOfLoop);
     return topOfLoop;
-    /*
-    var loop = compile(pred, scope, false, false,
-               new BranchFalse(compileSequence(body, scope, false, jump),
-                               new LoadConst(Nil.VALUE, next)));
-    jump.setTarget(loop);
-    return loop;
-    */
   }
   
   /* Compile the "for" special form.
@@ -1028,7 +974,10 @@ public class Compiler
                     jump)))));
     jump.setTarget(topOfLoop);
     jump.setNext(endOfLoop);
-    return topOfLoop;
+    return compilePushArgs(inits, scope,
+           new PushEnv(numBindings,
+           compileBindLocals(0, numBindings,
+           topOfLoop)));
     /*
     var jump = new Jump();
     var loop = compile(test, extendedScope, false, false,
@@ -1275,10 +1224,10 @@ public class Compiler
 
   private Inst compileDefmacro(List exp, Scope scope, boolean tail, boolean allowDefs, Inst next)
   {
+    if (!allowDefs)
+      throw defNotAllowed(exp);
     if (!(exp.length() >= 4 && exp.second() instanceof Symbol symbol && symbol.isSimple() && exp.third() instanceof List params && checkParamListForm(params)))
       throw malformedExp(exp);
-    if (!allowDefs)
-      throw new SyntaxError("definition not allowed here", new SourceInfo(exp, positionMap.get(exp)));
     var body = exp.drop3();
     var macro = new Macro(makeProcedure(params, body, Scope.EMPTY));
     try {
@@ -1407,11 +1356,6 @@ public class Compiler
            compileSequence(body, extendedScope, tail,
            new Jump(next,
            nextClause)));
-    /*
-    return new Match(compilePattern(patt, vars),
-                     compileSequence(body, extendedScope, tail, new Jump(next)),
-                     compileMatchClauses(matchExp, clauses.rest(), scope, tail, next));
-    */
   }
   
   private boolean checkMatchClauses(List clauses)
@@ -1561,7 +1505,7 @@ public class Compiler
            .orElse(false);
   }
   
-  /* Compile a combination (i.e., a special form, function application, or macro usage.
+  /* Compile a compound expression (i.e., special forms, function application, or macro usage.)
      
      Evaluation rules:
      
@@ -1576,7 +1520,7 @@ public class Compiler
         application apply.
   */
   
-  private Inst compileCombo(List exp, Scope scope, boolean tail, boolean allowDefs, Inst next)
+  private Inst compileCompound(List exp, Scope scope, boolean tail, boolean allowDefs, Inst next)
   {
     if (exp.first() instanceof Symbol s) {
       return Optional.ofNullable(specialForms.get(s))
@@ -1587,7 +1531,7 @@ public class Compiler
     return compileApply(exp, scope, tail, next);
   }
   
-  /* This is the top-level compilation function that dispatches on the type of the expression. */
+  /* This is the generalized compilation function that dispatches on the type of the expression. */
   
   private Inst compile(Datum exp, Scope scope, boolean tail, boolean allowDefs, Inst next)
   {
@@ -1596,7 +1540,7 @@ public class Compiler
     else if (exp instanceof Symbol s)
       return compileVarRef(s, scope, next);
     else 
-      return compileCombo((List)exp, scope, tail, allowDefs, next);
+      return compileCompound((List)exp, scope, tail, allowDefs, next);
   }
   
   private final Map<Symbol, ISpecialForm> specialForms = Map.ofEntries(

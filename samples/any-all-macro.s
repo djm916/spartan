@@ -10,9 +10,9 @@
 
 ; "any?" implements a short-circuiting "or" operation mapped over a list.
 ;
-; (any?) => false
+; (any?) => #false
 ;
-; (any? xs...) => (if (car xs) true (any? (cdr xs)))
+; (any? xs...) => (if (first xs) #true (any? (rest xs)))
 ;
 
 (defmacro any? (& xs)
@@ -24,7 +24,7 @@
 ;
 ; (all?) => #true
 ;
-; (all? xs...) => (if (not (car xs)) #false (all? (cdr xs)))
+; (all? xs...) => (if (not (first xs)) #false (all? (rest xs)))
 ;
 
 (defmacro all? (& xs)

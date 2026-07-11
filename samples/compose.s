@@ -1,5 +1,5 @@
 
-; Example of using the "compose" and "->>" macros
+; Example of using the "compose" and "->>" (threading) macros
 
 (defun square (x) (* x x))
 (defun double (x) (* 2 x))

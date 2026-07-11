@@ -162,7 +162,6 @@ public final class VirtualMachine
             throw err;
           }
           case StoreGlobal(_, _, var loc, var next): {
-            //loc.get().set(result);
             loc.set(result);
             control = next;
             break;

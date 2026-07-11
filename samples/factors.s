@@ -25,7 +25,7 @@
   factors)
 
 (if (empty? *command-line-args*)
-  (error "required command line argument"))
+  (error "command line argument required"))
 
 (def N (string->int (first *command-line-args*)))
 
