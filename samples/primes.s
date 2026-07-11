@@ -15,5 +15,9 @@
 
 ; Display some primes
 (def N 20)
-(print-line "The first " N " primes are:")
+;(def first-N-primes (stream->list (stream-take N primes)))
+;(print-line "The first " N " primes are: " first-N-primes)
 (stream-for-each print-line (stream-take N primes))
+;(def first-N-primes (stream->list (stream-take N (integer-stream 2))))
+;(print-line first-N-primes)
+;(stream-for-each print-line (stream-take N (integer-stream 2)))

@@ -857,13 +857,13 @@ public class Compiler
     }
     else if (isTopLevelDefinition(exp.first())) {
       var end = new Nop();
-      var result = compile(exp.first(), scope, false, allowDefs, end);
-      end.setNext(compileDoWithDefs(exp.rest(), scope, tail && exp.rest().isEmpty(), allowDefs, next));
+      var result = compile(exp.first(), scope, tail && exp.rest().isEmpty(), allowDefs, end);
+      end.setNext(compileDoWithDefs(exp.rest(), scope, tail, allowDefs, next));
       return result;
     }
     else {
-      return compile(exp.first(), scope, tail, allowDefs,
-             compileDoWithDefs(exp.rest(), scope, tail && exp.rest().isEmpty(), allowDefs, next));
+      return compile(exp.first(), scope, tail && exp.rest().isEmpty(), allowDefs,
+             compileDoWithDefs(exp.rest(), scope, tail, allowDefs, next));
     }
   }
   

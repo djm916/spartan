@@ -61,7 +61,7 @@
     (stream-adjoin (f (stream-first s)) (stream-map f (stream-rest s)))))
 
 (defun stream-for-each (f s)
-  (if (stream-empty? s) #nil
+  (if (not (stream-empty? s))
     (do (f (stream-first s))
         (stream-for-each f (stream-rest s)))))
 
