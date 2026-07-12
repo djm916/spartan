@@ -1,4 +1,4 @@
-(use spartan.hash-map :as map)
+(use spartan.data.hash-map :as map)
 
 ; Test example
 
@@ -10,12 +10,16 @@
 
 (def elems '(("a" 1) ("b" 2) ("c" 3) ("d" 4) ("e" 5)))
 
-(print-line "Inserting " elems " ...")
+(print-line "Inserting key/value pairs...")
 
 (for ((e elems (rest e)))
   ((empty? e) #nil)
   (let ((pair (first e)))
-    (map:insert! m (first pair) (second pair))))
+    (print-line "inserting " (first e))
+    (map:insert! m (first pair) (second pair))
+    (print-line "keys = " (map:keys m))))
+
+(print-line "size = " (map:size m))
 
 (print-line "Key lookup:")
 
@@ -26,19 +30,13 @@
       (error "mapping does not contain expected key!"))
     (print-line (first pair) " => " (map:find m (first pair)))))
 
-(print-line "entries = " (map:entries m))
-(print-line "keys = " (map:keys m))
-(print-line "values = " (map:values m))
-(print-line "size = " (map:size m))
-
 (print-line "Removing all keys...")
 
 (for ((e elems (rest e)))
   ((empty? e) #nil)
   (let ((pair (first e)))
-    (map:remove! m (first pair))))
+    (print-line "removing " (first pair))
+    (map:remove! m (first pair))
+    (print-line "keys = " (map:keys m))))
 
-(print-line "entries = " (map:entries m))
-(print-line "keys = " (map:keys m))
-(print-line "values = " (map:values m))
 (print-line "size = " (map:size m))

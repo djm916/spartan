@@ -1,13 +1,13 @@
 
-(use spartan.priority-queue :as pq)
+(use spartan.data.priority-queue :as queue)
 
 (def N 20)
 
 (def random-ints (vector-unfold (fun (i) (rand)) N))
 
-(def q (pq:make-queue <))
+(def q (queue:make-queue <))
 
-(vector-foreach (fun (x) (pq:push q x)) random-ints)
+(vector-foreach (fun (x) (queue:push q x)) random-ints)
 
-(while (not (pq:empty? q))
-  (print-line (format-decimal (pq:pop q))))
+(while (not (queue:empty? q))
+  (print-line (format-decimal (queue:pop q))))

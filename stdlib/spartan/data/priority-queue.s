@@ -1,4 +1,4 @@
-(in-module spartan.priority-queue)
+(in-module spartan.data.priority-queue)
 
 (export make-queue
         queue?
