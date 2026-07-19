@@ -46,7 +46,7 @@
   `(spartan.base:module-export ',symbols))
 
 (export ->> compose curry in-module export inc! dec! let-values max min rec defrec
-        swap! when unless import)
+        swap! when unless import multi-arity-fun)
 
 (defmacro inc! (var)
   `(set! ,var (+ 1 ,var)))
@@ -143,6 +143,9 @@
      ,@(map (fun (form) `(def ,(first form) #nil)) forms)
      ,@(map (fun (form) `(set! ,(first form) ,(second form))) forms)))
 
+(defun values (& args)
+  (apply list args))
+
 ; (let-values (((var...) init)...) body...)
 ; ==>
 ; (apply (fun (var...) (do body...)) init)
@@ -156,6 +159,19 @@
              (formals (first binding))
              (exp (second binding))]
         `(apply (fun ,formals ,(loop (rest bindings))) ,exp)))))
+
+; (multi-arity-fun
+;   [params body]
+;   ...)
+(defmacro multi-arity-fun (& clauses)
+  (def restarg (gensym))
+  (defun generate-clause (clause)
+    (let ([params (first clause)]
+          [body (second clause)])
+      `(,(length params) (spartan.base:apply (fun ,params ,body) ,restarg))))
+  `(fun (& ,restarg)
+     (match (spartan.base:length ,restarg)
+       ,@(map generate-clause clauses))))
 
 (load "spartan/base/vectors.s")
 (load "spartan/base/defrecord.s")
