@@ -12,7 +12,7 @@ import spartan.errors.UnboundSymbol;
 import spartan.errors.ModuleDoesNotExist;
 import spartan.util.Box;
 import java.util.Map;
-import java.util.IdentityHashMap;
+import java.util.HashMap;
 import java.util.Optional;
 import java.util.logging.Logger;
 import java.nio.file.Path;
@@ -109,7 +109,7 @@ public final class Runtime
              .flatMap(module -> module.lookupPublic(baseName))
              .map(Box::get);
     }
-    else return currentModule().lookup(s.intern()).map(Box::get);
+    else return currentModule().lookup(s).map(Box::get);
   }
   
   public static Optional<Macro> lookupMacro(Symbol s)
@@ -150,6 +150,6 @@ public final class Runtime
   private Runtime() { }
   
   private static Module currentModule;
-  private static final Map<Symbol, Module> modules = new IdentityHashMap<>();
+  private static final Map<Symbol, Module> modules = new HashMap<>();
   private static final Logger log = Logger.getLogger(Runtime.class.getName());
 }

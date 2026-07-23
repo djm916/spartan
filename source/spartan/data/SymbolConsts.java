@@ -1,7 +1,6 @@
 package spartan.data;
 
-public sealed class Symbol implements Datum, IEq
-permits QualifiedSymbol
+public interface SymbolConsts
 {
   /*
      Define symbols for each of the special forms recognized by the compiler.
@@ -28,96 +27,12 @@ permits QualifiedSymbol
   public static final Symbol AND = new Symbol("and");
   public static final Symbol OR = new Symbol("or");
   public static final Symbol AMPERSAND = new Symbol("&");
-  public static final Symbol Q_ADJOIN = new QualifiedSymbol("spartan.base", "adjoin");
-  public static final Symbol Q_CONCAT = new QualifiedSymbol("spartan.base", "concat");
   public static final Symbol MATCH = new Symbol("match");
   public static final Symbol UNDERSCORE = new Symbol("_");
   public static final Symbol LIST = new Symbol("list");
   public static final Symbol LIST_STAR = new Symbol("list*");
   public static final Symbol VECTOR = new Symbol("vector");
   public static final Symbol RECORD = new Symbol("record");
-  
-  /**
-   * Returns a new symbol with the given name.
-   */
-  public static Symbol of(String name)
-  {
-    return new Symbol(name);
-  }
-  
-  /**
-   * Generates a new, globally unique symbol.
-   */
-  public static Symbol generateUnique()
-  {
-    return new Symbol(String.format("#%d", nextUniqueId++));
-  }
-  
-  /**
-   * Returns a new symbol with the given name.
-   */
-  public Symbol(String name)
-  {
-    this.name = name;
-  }
-  
-  @Override // Datum
-  public Type type()
-  {
-    return Type.SYMBOL;
-  }
-  
-  @Override // Datum
-  public String repr()
-  {
-    return name;
-  }
-  
-  public String toString()
-  {
-    return name;
-  }
-  
-  public String name()
-  {
-    return name;
-  }
-  
-  @Override // Object
-  public boolean equals(Object rhs)
-  {
-    return (rhs instanceof Symbol s) && name.equals(s.name);
-  }
-  
-  @Override // Object
-  public int hashCode()
-  {
-    return name.hashCode();
-  }
-  
-  public boolean equals(String rhs)
-  {
-    return name.equals(rhs);
-  }
-  
-  @Override // IEq
-  public boolean isEqual(Symbol rhs)
-  {
-    return this.name.equals(rhs.name);
-  }
-  
-  public boolean isQualified()
-  {
-    return false;
-  }
-  
-  public boolean isSimple()
-  {
-    return !isQualified();
-  }
-
-  // counter used to generate globally unique identifiers (to support "gensym", etc.)
-  private static int nextUniqueId;
-  // full (qualified or unqualified) print name of the symbol  
-  private final String name;
+  public static final QualifiedSymbol ADJOIN = new QualifiedSymbol("spartan.base", "adjoin");
+  public static final QualifiedSymbol CONCAT = new QualifiedSymbol("spartan.base", "concat");
 }

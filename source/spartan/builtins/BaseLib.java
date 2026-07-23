@@ -370,31 +370,20 @@ public final class BaseLib
   //
   // Symbol related procedures
   //
-  
-  // (symbol-intern symbol)
-  
-  public static final Primitive SYMBOL_INTERN = new Primitive(Signature.fixed(1)) {
-    public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof Symbol s))
-        throw new TypeMismatch();
-      vm.result = s.intern();
-      vm.popFrame();
-    }
-  };
-  
-  // (make-symbol base-name [ns-name])
+    
+  // (make-symbol name [module-name])
   
   public static final Primitive MAKE_SYMBOL = new Primitive(Signature.variadic(1, 1)) {
     public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof Text baseName))
+      if (!(vm.popArg() instanceof Text name))
         throw new TypeMismatch();
       if (!((vm.args.isEmpty() ? new Text(spartan.Runtime.currentModule().name().name()) : vm.popArg()) instanceof Text moduleName))
         throw new TypeMismatch();
-      vm.result = new QualifiedSymbol(moduleName.str(), baseName.str());
+      vm.result = new QualifiedSymbol(moduleName.str(), name.str());
       vm.popFrame();
     }    
   };
-    
+  
   // (symbol-modulename symbol)
   
   public static final Primitive SYMBOL_MODULENAME = new Primitive(Signature.fixed(1)) {
@@ -406,9 +395,9 @@ public final class BaseLib
     }
   };
   
-  // (symbol-basename symbol)
+  // (symbol-name symbol)
   
-  public static final Primitive SYMBOL_BASENAME = new Primitive(Signature.fixed(1)) {
+  public static final Primitive SYMBOL_NAME = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Symbol s))
         throw new TypeMismatch();
@@ -466,7 +455,7 @@ public final class BaseLib
       if (!(vm.popArg() instanceof List fields))
         throw new TypeMismatch();
       validateFields(fields);
-      var fullName = new QualifiedSymbol(spartan.Runtime.currentModule().name().name(), name.name()).intern();
+      var fullName = new QualifiedSymbol(spartan.Runtime.currentModule().name().name(), name.name());
       var fieldArray = fields.streamOf(Symbol.class).toArray(Symbol[]::new);
       var type = TypeRegistry.register(fullName);
       vm.result = new RecordDescriptor(type, fullName, fieldArray);
