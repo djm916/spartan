@@ -5,10 +5,6 @@ import spartan.util.WeakCache;
 public sealed class Symbol implements Datum, IEq
 permits QualifiedSymbol
 {
-  private static WeakCache<String, Symbol> cache = new WeakCache<>();
-  private static int nextUniqueId;
-  private final String name;    // full (qualified or unqualified) print name of the symbol  
-  
   /*
      Define symbols for each of the special forms recognized by the compiler.
   */
@@ -134,4 +130,8 @@ permits QualifiedSymbol
   {
     return cache.get(this.name, () -> this);
   }
+
+  private static WeakCache<String, Symbol> cache = new WeakCache<>();
+  private static int nextUniqueId;
+  private final String name;    // full (qualified or unqualified) print name of the symbol  
 }

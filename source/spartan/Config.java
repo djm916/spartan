@@ -22,11 +22,11 @@ public final class Config
   /** Enables or disables tail call optimization. Valid values are "true" and "false". Defaults to "true". */
   public static final boolean TAIL_CALLS = Boolean.valueOf(System.getProperty("spartan.optimize-tail-calls", "true"));
   
-  /** Enables or disables emitting bytecode listings. Valid values are "true" and "false". Defaults to "true". */
-  public static final boolean EMIT_BYTECODE = Boolean.valueOf(System.getProperty("spartan.emit-bytecode", "true"));
+  /** Enables or disables emitting bytecode listings. Valid values are "true" and "false". Defaults to "false". */
+  public static final boolean EMIT_BYTECODE = Boolean.valueOf(System.getProperty("spartan.emit-bytecode", "false"));
   
-  /** Enables or disables logging of macro expansion results. Valid values are "true" and "false". Defaults to "true". */
-  public static final boolean SHOW_MACRO_EXPANSION = Boolean.valueOf(System.getProperty("spartan.show-macro-expansion", "true"));
+  /** Enables or disables logging of macro expansion results. Valid values are "true" and "false". Defaults to "false". */
+  public static final boolean SHOW_MACRO_EXPANSION = Boolean.valueOf(System.getProperty("spartan.show-macro-expansion", "false"));
   
   public static boolean ALLOW_REDEFINITION = false;
   
