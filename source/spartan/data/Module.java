@@ -4,11 +4,11 @@ import spartan.errors.UnboundSymbol;
 import spartan.errors.MultipleDefinition;
 import spartan.util.Box;
 import java.util.Map;
+import java.util.IdentityHashMap;
 import java.util.HashMap;
-import java.util.Set;
-import java.util.HashSet;
 import java.util.ArrayList;
 import java.util.Optional;
+import java.util.Set;
 
 public class Module implements Datum
 {
@@ -197,7 +197,7 @@ public class Module implements Datum
   
   protected final Symbol name;
   protected final Module parent;
-  protected final Map<Symbol, Box<Datum>> bindings = new HashMap<>();
-  protected final Map<Symbol, Symbol> aliasMap = new HashMap<>();
-  protected final Set<Symbol> exportSet = new HashSet<>();
+  protected final Map<Symbol, Box<Datum>> bindings = new IdentityHashMap<>();
+  protected final Map<Symbol, Symbol> aliasMap = new IdentityHashMap<>();
+  protected final Set<Symbol> exportSet = java.util.Collections.newSetFromMap(new IdentityHashMap<>());
 }

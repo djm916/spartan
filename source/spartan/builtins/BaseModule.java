@@ -200,9 +200,10 @@ public final class BaseModule extends Module
     
     /* Symbol related procedures */
     
+    bindPublic(Symbol.of("symbol-intern"), BaseLib.SYMBOL_INTERN);
     bindPublic(Symbol.of("make-symbol"), BaseLib.MAKE_SYMBOL);
     bindPublic(Symbol.of("symbol-modulename"), BaseLib.SYMBOL_MODULENAME);
-    bindPublic(Symbol.of("symbol-name"), BaseLib.SYMBOL_NAME);
+    bindPublic(Symbol.of("symbol-basename"), BaseLib.SYMBOL_BASENAME);
     bindPublic(Symbol.of("symbol-qualified?"), BaseLib.SYMBOL_IS_QUALIFIED);
     
     /* Module related procedures */

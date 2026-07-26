@@ -481,7 +481,7 @@ public class Reader implements AutoCloseable
     return withPosition(new QualifiedSymbol(fullName, moduleName, baseName), position);
   }
   
-  private Keyword readKeyword()
+  private Symbol readKeyword()
   {
     var position = getTokenPosition();
     var text = new StringBuilder();
@@ -493,7 +493,7 @@ public class Reader implements AutoCloseable
       text.append((char)lastChar);
     }
     
-    return Keyword.of(text.toString());
+    return Symbol.of(text.toString());
   }
   
   private Datum readLiteral()

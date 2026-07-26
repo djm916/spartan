@@ -1,7 +1,7 @@
 package spartan.data;
 
 import java.util.Map;
-import java.util.HashMap;
+import java.util.IdentityHashMap;
 import spartan.errors.MultipleDefinition;
 
 /**
@@ -12,7 +12,7 @@ import spartan.errors.MultipleDefinition;
 public final class TypeRegistry
 {
   private static int nextTypeId = 0;
-  private static final Map<Symbol, Type> registry = new HashMap<>();
+  private static final Map<Symbol, Type> registry = new IdentityHashMap<>();
   
   /** Registers a new type in the system
    *

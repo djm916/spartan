@@ -96,7 +96,7 @@ public class Compiler
         || exp instanceof INum
         || exp instanceof Bool
         || exp instanceof Text
-        || exp instanceof Keyword;
+        || (exp instanceof Symbol s && s.isKeyword());
   }
   
   /* Compile a self-evaluating expression. */
@@ -150,14 +150,14 @@ public class Compiler
       var loc = spartan.Runtime.getModule(moduleName)
                 .orElseThrow(() -> new ModuleDoesNotExist(moduleName, new SourceInfo(s, positionOf(s))))
                 .lookupPublic(baseName)
-                .orElseThrow(() -> new UnboundSymbol(s, new SourceInfo(s, positionOf(s))));
+                .orElseThrow(() -> new UnboundSymbol(baseName, new SourceInfo(s, positionOf(s))));
       return new LoadGlobal(moduleName, baseName, loc, next);
     }
     else {
       var moduleName = currentModule().name();
-      var baseName = s;
+      var baseName = s.intern();
       var loc = currentModule()
-                .lookup(s)
+                .lookup(baseName)
                 .orElseThrow(() -> new UnboundSymbol(s, new SourceInfo(s, positionOf(s))));
       return new LoadGlobal(moduleName, baseName, loc, next);
     }
@@ -206,13 +206,13 @@ public class Compiler
       var loc = spartan.Runtime.getModule(moduleName)
                 .orElseThrow(() -> new ModuleDoesNotExist(moduleName, new SourceInfo(s, positionOf(s))))
                 .lookup(baseName, true)
-                .orElseThrow(() -> new UnboundSymbol(s, new SourceInfo(s, positionOf(s))));
+                .orElseThrow(() -> new UnboundSymbol(baseName, new SourceInfo(s, positionOf(s))));
       return new StoreGlobal(moduleName, baseName, loc,
              new LoadConst(Nil.VALUE, next));
     }
     else {
       var moduleName = currentModule().name();
-      var baseName = s;
+      var baseName = s.intern();
       var loc = currentModule()
                 .lookup(baseName, false)
                 .orElseThrow(() -> new UnboundSymbol(s, new SourceInfo(s, positionOf(s))));
@@ -234,7 +234,7 @@ public class Compiler
       throw malformedExp(exp);   
     var init = exp.third();
     var moduleName = currentModule().name();
-    var baseName = s;
+    var baseName = s.intern();
     var loc = currentModule().bind(baseName);
     return compile(init, scope, false, false,
            new StoreGlobal(moduleName, baseName, loc,
@@ -1003,9 +1003,24 @@ public class Compiler
     if (exp.length() != 2)
       throw malformedExp(exp);
     
-    return new LoadConst(exp.second(), next);
+    if (exp.second() instanceof Symbol s)
+      return new LoadConst(s.intern(), next);
+    else if (exp.second() instanceof List list)
+      return new LoadConst(quoteList(list), next);
+    else
+      return new LoadConst(exp.second(), next);
   }
 
+  private List quoteList(List list)
+  {
+    return list.map(
+      x -> switch (x) {
+        case Symbol s -> s.intern();
+        case List l -> quoteList(l);
+        default -> x;
+      });
+  }
+  
   // Compile a (quasiquote x) form by reducing it to an equivalent
   // list form and compiling the result.
 
@@ -1216,7 +1231,7 @@ public class Compiler
     var body = exp.drop3();
     var macro = new Macro(makeProcedure(params, body, Scope.EMPTY));
     try {
-      currentModule().bind(symbol, macro);
+      currentModule().bind(symbol.intern(), macro);
     }
     catch (MultipleDefinition err) {
       err.setSource(new SourceInfo(exp, positionOf(symbol)));
@@ -1237,7 +1252,7 @@ public class Compiler
   private Datum expand(Macro macro, List exp)
   {
     var position = positionOf(exp);
-    var args = exp.rest();
+    var args = quoteList(exp.rest());
     var xform = macro.expand(vm, args, new SourceInfo(exp, position));
     
     if (Config.LOG_DEBUG && Config.SHOW_MACRO_EXPANSION)
@@ -1353,7 +1368,7 @@ public class Compiler
     
   private List patternVars(Datum pattern)
   {
-    if (pattern instanceof Symbol symb && !Symbol.UNDERSCORE.equals(symb))
+    if (pattern instanceof Symbol symb && !symb.isKeyword() && !Symbol.UNDERSCORE.equals(symb))
       return List.of(symb);
     if (pattern instanceof List list && !list.isEmpty() && list.first() instanceof Symbol first) {
       if (first.equals(Symbol.LIST))
@@ -1384,8 +1399,8 @@ public class Compiler
   {
     if (pattern instanceof Symbol symb && Symbol.UNDERSCORE.equals(symb))
       return new MatchAny();
-    if (pattern instanceof Keyword kw)
-      return new MatchEqual(kw);
+    if (pattern instanceof Symbol symb && symb.isKeyword())
+      return new MatchEqual(symb);
     if (pattern instanceof Symbol symb)
       return new MatchVar(vars.index(symb::equals));
     if (pattern instanceof Bool || pattern instanceof IInt || pattern instanceof Text)
@@ -1418,7 +1433,7 @@ public class Compiler
   private IPattern compileQuotePattern(List pattern)
   {
     var datum = (IEq)pattern.second();
-    return new MatchEqual(datum);
+    return new MatchEqual(datum instanceof Symbol s ? s.intern() : datum);
   }
   
   private IPattern compileListPattern(List patterns, List vars)

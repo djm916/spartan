@@ -1,8 +1,14 @@
 package spartan.data;
 
+import spartan.util.WeakCache;
+
 public sealed class Symbol implements Datum, IEq
 permits QualifiedSymbol
 {
+  private static WeakCache<String, Symbol> cache = new WeakCache<>();
+  private static int nextUniqueId;
+  private final String name;    // full (qualified or unqualified) print name of the symbol  
+  
   /*
      Define symbols for each of the special forms recognized by the compiler.
   */
@@ -38,27 +44,19 @@ permits QualifiedSymbol
   public static final Symbol RECORD = new Symbol("record");
   
   /**
-   * Returns a new symbol with the given name.
+   * Returns an interned symbol with the given name.
    */
   public static Symbol of(String name)
   {
-    return new Symbol(name);
+    return cache.get(name, () -> new Symbol(name));
   }
   
   /**
-   * Generates a new, globally unique symbol.
+   * Generates a new, unique, uninterned symbol.
    */
   public static Symbol generateUnique()
   {
     return new Symbol(String.format("#%d", nextUniqueId++));
-  }
-  
-  /**
-   * Returns a new symbol with the given name.
-   */
-  public Symbol(String name)
-  {
-    this.name = name;
   }
   
   @Override // Datum
@@ -70,12 +68,12 @@ permits QualifiedSymbol
   @Override // Datum
   public String repr()
   {
-    return name;
+    return name();
   }
   
   public String toString()
   {
-    return name;
+    return name();
   }
   
   public String name()
@@ -103,7 +101,15 @@ permits QualifiedSymbol
   @Override // IEq
   public boolean isEqual(Symbol rhs)
   {
-    return this.name.equals(rhs.name);
+    return this == rhs;
+  }
+    
+  /**
+   * Create a new, uninterned symbol for the given identifier
+   */
+  public Symbol(String name)
+  {
+    this.name = name;
   }
   
   public boolean isQualified()
@@ -111,13 +117,21 @@ permits QualifiedSymbol
     return false;
   }
   
+  public boolean isKeyword()
+  {
+    return name.charAt(0) == ':';
+  }
+  
   public boolean isSimple()
   {
-    return !isQualified();
+    return !isQualified() && !isKeyword();
   }
-
-  // counter used to generate globally unique identifiers (to support "gensym", etc.)
-  private static int nextUniqueId;
-  // full (qualified or unqualified) print name of the symbol  
-  private final String name;
+  
+  /**
+   * Return an interned symbol. May return a new symbol or this (if previously interned)
+   */
+  public Symbol intern()
+  {
+    return cache.get(this.name, () -> this);
+  }
 }

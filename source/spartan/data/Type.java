@@ -14,8 +14,6 @@ public record Type(int id, String name)
   public static final Type BOOLEAN = TypeRegistry.register(Symbol.of("boolean"));
   /** The builtin "symbol" type */
   public static final Type SYMBOL = TypeRegistry.register(Symbol.of("symbol"));
-  /** The builtin "keyword" type */
-  public static final Type KEYWORD = TypeRegistry.register(Symbol.of("keyword"));
   /** The builtin "integer" type */
   public static final Type INTEGER = TypeRegistry.register(Symbol.of("integer"));
   /** The builtin "real" type */
