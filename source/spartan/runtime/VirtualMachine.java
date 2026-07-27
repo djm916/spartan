@@ -96,7 +96,7 @@ public final class VirtualMachine
             control = next;
             break;
           }
-          case LoadGlobal(_, _, var loc, var next): {
+          case LoadGlobal(_, var loc, var next): {
             result = loc.get();
             control = next;
             break;
@@ -161,7 +161,7 @@ public final class VirtualMachine
           case Raise(var err, _): {
             throw err;
           }
-          case StoreGlobal(_, _, var loc, var next): {
+          case StoreGlobal(_, var loc, var next): {
             loc.set(result);
             control = next;
             break;

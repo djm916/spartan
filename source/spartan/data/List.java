@@ -206,12 +206,12 @@ permits EmptyList
     return rest().rest().rest();
   }
   
-  public Datum drop(int n)
+  public List drop(int n)
   {
     return drop(this, n);
   }
   
-  public Datum take(int n)
+  public List take(int n)
   {
     return take(this, n);
   }
@@ -349,7 +349,7 @@ permits EmptyList
     return list.first();
   }
   
-  private static Datum take(List list, int n)
+  private static List take(List list, int n)
   {
     var result = new Builder();
     for (; !list.isEmpty() && n > 0; list = list.rest(), --n)
@@ -357,7 +357,7 @@ permits EmptyList
     return result.build();
   }
   
-  private static Datum drop(List list, int n)
+  private static List drop(List list, int n)
   {
     for (; !list.isEmpty() && n > 0; list = list.rest(), --n)
       ;

@@ -145,21 +145,18 @@ public class Compiler
   private Inst compileGlobalVarRef(Symbol s, Inst next)
   {
     if (s instanceof QualifiedSymbol qs) {
-      var moduleName = canonicalName(Symbol.of(qs.moduleName()));
+      var moduleName = Symbol.of(qs.moduleName());
       var baseName = Symbol.of(qs.baseName());
-      var loc = spartan.Runtime.getModule(moduleName)
+      var loc = spartan.Runtime.getModule(canonicalName(moduleName))
                 .orElseThrow(() -> new ModuleDoesNotExist(moduleName, new SourceInfo(s, positionOf(s))))
                 .lookupPublic(baseName)
-                .orElseThrow(() -> new UnboundSymbol(baseName, new SourceInfo(s, positionOf(s))));
-      return new LoadGlobal(moduleName, baseName, loc, next);
+                .orElseThrow(() -> new UnboundSymbol(s, new SourceInfo(s, positionOf(s))));
+      return new LoadGlobal(s, loc, next);
     }
     else {
-      var moduleName = currentModule().name();
-      var baseName = s.intern();
-      var loc = currentModule()
-                .lookup(baseName)
+      var loc = currentModule().lookup(s.intern())
                 .orElseThrow(() -> new UnboundSymbol(s, new SourceInfo(s, positionOf(s))));
-      return new LoadGlobal(moduleName, baseName, loc, next);
+      return new LoadGlobal(s, loc, next);
     }
   }
   
@@ -201,23 +198,18 @@ public class Compiler
   private Inst compileSetGlobalVar(Symbol s, Inst next)
   {
     if (s instanceof QualifiedSymbol qs) {
-      var moduleName = canonicalName(Symbol.of(qs.moduleName()));
+      var moduleName = Symbol.of(qs.moduleName());
       var baseName = Symbol.of(qs.baseName());
-      var loc = spartan.Runtime.getModule(moduleName)
+      var loc = spartan.Runtime.getModule(canonicalName(moduleName))
                 .orElseThrow(() -> new ModuleDoesNotExist(moduleName, new SourceInfo(s, positionOf(s))))
-                .lookup(baseName, true)
-                .orElseThrow(() -> new UnboundSymbol(baseName, new SourceInfo(s, positionOf(s))));
-      return new StoreGlobal(moduleName, baseName, loc,
-             new LoadConst(Nil.VALUE, next));
+                .lookupPublic(baseName)
+                .orElseThrow(() -> new UnboundSymbol(s, new SourceInfo(s, positionOf(s))));
+      return new StoreGlobal(s, loc, new LoadConst(Nil.VALUE, next));
     }
     else {
-      var moduleName = currentModule().name();
-      var baseName = s.intern();
-      var loc = currentModule()
-                .lookup(baseName, false)
+      var loc = currentModule().lookup(s.intern())
                 .orElseThrow(() -> new UnboundSymbol(s, new SourceInfo(s, positionOf(s))));
-      return new StoreGlobal(moduleName, baseName, loc,
-             new LoadConst(Nil.VALUE, next));
+      return new StoreGlobal(s, loc, new LoadConst(Nil.VALUE, next));
     }
   }
   
@@ -233,11 +225,9 @@ public class Compiler
     if (!(exp.length() == 3 && exp.second() instanceof Symbol s && s.isSimple()))
       throw malformedExp(exp);   
     var init = exp.third();
-    var moduleName = currentModule().name();
-    var baseName = s.intern();
-    var loc = currentModule().bind(baseName);
+    var loc = currentModule().bind(s.intern());
     return compile(init, scope, false, false,
-           new StoreGlobal(moduleName, baseName, loc,
+           new StoreGlobal(s, loc,
            new LoadConst(Nil.VALUE, next)));
   }
   
@@ -890,19 +880,19 @@ public class Compiler
     var body = exp.drop2();
     
     var jump = new Jump();    
-    var endOfLoop = new LoadConst(Nil.VALUE, next);
-    var topOfLoop = compile(pred, scope, false, false,
-                    new BranchFalse(endOfLoop,
-                    compileSequence(body, scope, false, jump)));
-    jump.setTarget(topOfLoop);
-    jump.setNext(endOfLoop);
-    return topOfLoop;
+    var end = new LoadConst(Nil.VALUE, next);
+    var top = compile(pred, scope, false, false,
+              new BranchFalse(end,
+              compileSequence(body, scope, false, jump)));
+    jump.setTarget(top);
+    jump.setNext(end);
+    return top;
   }
   
-  /* Compile the "for" special form.
+  /* Compile the "rep" special form.
    
-     Syntax: (for ((var1 init1 step1) ...)
-               (test result)
+     Syntax: (rep ((var init step) ...)
+               :when test result
                body...)
      
      Compilation:
@@ -924,9 +914,9 @@ public class Compiler
            ; iteration test and body
 
      loop: <<test>>
-           brancht done
+           jump-true done
 
-           ; evaluate loop body for side-effect
+           ; evaluate body expressions for side-effect
 
      body: <<body>>
            
@@ -948,10 +938,10 @@ public class Compiler
      done: <<result>>
            pop-env
   */
-  private Inst compileFor(List exp, Scope scope, boolean tail, boolean allowDefs, Inst next)
+  private Inst compileRepLoop(List exp, Scope scope, boolean tail, boolean allowDefs, Inst next)
   {
-    if (!(exp.length() >= 3 && exp.second() instanceof List bindings && checkForBindingsForm(bindings)
-          && exp.third() instanceof List third && (third.length() == 1 || third.length() == 2)))
+    if (!(exp.length() >= 5 && exp.second() instanceof List bindings && checkForBindingsForm(bindings)
+        && exp.third() == Symbol.of(":when")))
       throw malformedExp(exp);
     
     int numBindings = bindings.length();
@@ -959,41 +949,25 @@ public class Compiler
     var inits = extractSecond(bindings);
     var steps = extractThird(bindings);
     var extendedScope = scope.extend(vars);
-    var test = third.first();
-    var result = third.length() == 2 ? third.second() : Nil.VALUE;
-    var body = exp.drop3();
+    var test = exp.nth(3);
+    var result = exp.nth(4);
+    var body = exp.drop(5);
     
     var jump = new Jump();
-    var endOfLoop = compile(result, extendedScope, false, false,
-                    new PopEnv(next));
-    var topOfLoop = compile(test, extendedScope, false, false,
-                    new BranchTrue(endOfLoop,
-                    compileSequence(body, extendedScope, false,
-                    compilePushArgs(steps, extendedScope,
-                    compileBindLocals(0, numBindings,                          
-                    jump)))));
-    jump.setTarget(topOfLoop);
-    jump.setNext(endOfLoop);
+    var end = compile(result, extendedScope, false, false,
+              new PopEnv(next));
+    var top = compile(test, extendedScope, false, false,
+              new BranchTrue(end,
+              compileSequence(body, extendedScope, false,
+              compilePushArgs(steps, extendedScope,
+              compileBindLocals(0, numBindings,                          
+              jump)))));
+    jump.setTarget(top);
+    jump.setNext(end);
     return compilePushArgs(inits, scope,
            new PushEnv(numBindings,
            compileBindLocals(0, numBindings,
-           topOfLoop)));
-    /*
-    var jump = new Jump();
-    var loop = compile(test, extendedScope, false, false,
-               new BranchTrue(
-                          compileSequence(body, extendedScope, false,
-                          compilePushArgs(steps, extendedScope,
-                          compileBindLocals(0, numBindings,                          
-                          jump))),
-                          compile(result, extendedScope, false, false,
-                          new PopEnv(next))));
-    jump.setTarget(loop);                          
-    return compilePushArgs(inits, scope,
-           new PushEnv(numBindings,
-           compileBindLocals(0, numBindings,
-           loop)));
-    */
+           top)));
   }
   
   // (quote x)
@@ -1556,7 +1530,7 @@ public class Compiler
     Map.entry(Symbol.DO, this::compileDo),
     Map.entry(Symbol.WHILE, this::compileWhile),
     Map.entry(Symbol.SET, this::compileSet),
-    Map.entry(Symbol.FOR, this::compileFor),
+    Map.entry(Symbol.REP, this::compileRepLoop),
     Map.entry(Symbol.QUOTE, this::compileQuote),
     Map.entry(Symbol.QUASIQUOTE, this::compileQuasiquote),
     Map.entry(Symbol.OR, this::compileOr),

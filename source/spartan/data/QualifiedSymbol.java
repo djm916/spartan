@@ -20,6 +20,11 @@ public final class QualifiedSymbol extends Symbol
     this(moduleName + ":" + baseName, moduleName, baseName);
   }
   
+  public QualifiedSymbol(Symbol moduleName, Symbol baseName)
+  {
+    this(moduleName.name(), baseName.name());
+  }
+  
   public String moduleName()
   {
     return moduleName;

@@ -4,5 +4,5 @@ import spartan.data.Symbol;
 import spartan.data.Datum;
 import spartan.util.Box;
 
-public record LoadGlobal(Symbol moduleName, Symbol baseName, Box<Datum> location, Inst next) implements Inst
+public record LoadGlobal(Symbol symbol, Box<Datum> location, Inst next) implements Inst
 {}

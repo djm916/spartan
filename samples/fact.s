@@ -24,5 +24,13 @@
         (set! n (- n 1)))
       p)))
 
-(print-line "10! = " (fact-rec 10)) ; should equal 3628800
-(print-line "20! = " (fact-rec 20)) ; should equal 2432902008176640000
+(defun fact-loop2 (n)
+  (rep ([n n (- n 1)]
+        [p 1 (* n p)])
+    :when (= n 0) p))
+
+(def fact fact-loop2)
+
+(print-line "0! = " (fact 0)) ; = 1
+(print-line "10! = " (fact 10)) ; = 3628800
+(print-line "20! = " (fact 20)) ; = 2432902008176640000

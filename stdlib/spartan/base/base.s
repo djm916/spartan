@@ -85,9 +85,9 @@
 ; (->> x (f ...) (g ...) (h ...)) => (h ... (g ... (f ... x)))
 
 (defmacro ->> (arg form & forms)
-  (for ((forms forms (rest forms))
+  (rep ((forms  forms             (rest forms))
         (result (append arg form) (append result (first forms))))
-    ((empty? forms) result)))
+    :when (empty? forms) result))
 
 ; (curry () ...) => (fun () ...)
 ; (curry (x) ...) => (fun (x) ...)

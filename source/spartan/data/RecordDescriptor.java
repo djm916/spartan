@@ -27,7 +27,7 @@ public record RecordDescriptor(Type instanceType, Symbol name, Symbol[] fields) 
   public int slot(Symbol field)
   {
     for (int i = 0; i < fields.length; ++i)
-      if (fields[i] == field)
+      if (fields[i] == field) // use identity equality, assuming symbols already interned
         return i;
     throw new NoSuchElement();
   }

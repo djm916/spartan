@@ -25,7 +25,7 @@ permits QualifiedSymbol
   public static final Symbol LETREC = new Symbol("letrec");
   public static final Symbol WHILE = new Symbol("while");
   public static final Symbol DO = new Symbol("do");
-  public static final Symbol FOR = new Symbol("for");
+  //public static final Symbol FOR = new Symbol("for");
   public static final Symbol SET = new Symbol("set!");
   public static final Symbol AND = new Symbol("and");
   public static final Symbol OR = new Symbol("or");
@@ -38,6 +38,7 @@ permits QualifiedSymbol
   public static final Symbol LIST_STAR = new Symbol("list*");
   public static final Symbol VECTOR = new Symbol("vector");
   public static final Symbol RECORD = new Symbol("record");
+  public static final Symbol REP = new Symbol("rep");
   
   /**
    * Returns an interned symbol with the given name.

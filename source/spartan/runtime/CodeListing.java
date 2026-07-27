@@ -138,7 +138,7 @@ public class CodeListing
       case Halt() -> "(halt)";
       case Jump inst -> String.format("(jump %s)", ctx.labelFor(inst.target()));
       case LoadConst(var value, _) -> String.format("(load-const %s)", value.repr());
-      case LoadGlobal(var moduleName, var baseName, _, _) -> String.format("(load-global %s:%s)", moduleName.str(), baseName.str());
+      case LoadGlobal(var symbol, _, _) -> String.format("(load-global %s)", symbol);
       case LoadLocal(var depth, var offset, _) -> String.format("(load-local %d %d)", depth, offset);
       case LoadLocal0(var offset, _) -> String.format("(load-local 0 %d)", offset);
       case MakeClosure(Procedure(var body, _), _) -> String.format("(make-closure %s)", ctx.labelFor(body));
@@ -152,7 +152,7 @@ public class CodeListing
       case PushEnv(var numSlots, _) -> String.format("(push-env %d)", numSlots);
       case PushFrame inst -> "(push-frame)";
       case Raise inst -> "(raise)";
-      case StoreGlobal(var moduleName, var baseName, _, _) -> String.format("(store-global %s:%s)", moduleName.str(), baseName.str());
+      case StoreGlobal(var symbol, _, _) -> String.format("(store-global %s)", symbol);
       case StoreLocal(var depth, var offset, _) -> String.format("(store-local %d %d)", depth, offset);
       case StoreLocal0(var offset, _) -> String.format("(store-local 0 %d)", offset);
     };

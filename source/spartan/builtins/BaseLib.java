@@ -466,8 +466,8 @@ public final class BaseLib
       if (!(vm.popArg() instanceof List fields))
         throw new TypeMismatch();
       validateFields(fields);
-      var fullName = new QualifiedSymbol(spartan.Runtime.currentModule().name().name(), name.name()).intern();
-      var fieldArray = fields.streamOf(Symbol.class).toArray(Symbol[]::new);
+      var fullName = new QualifiedSymbol(spartan.Runtime.currentModule().name(), name).intern();
+      var fieldArray = fields.streamOf(Symbol.class).map(Symbol::intern).toArray(Symbol[]::new);
       var type = TypeRegistry.register(fullName);
       vm.result = new RecordDescriptor(type, fullName, fieldArray);
       vm.popFrame();
