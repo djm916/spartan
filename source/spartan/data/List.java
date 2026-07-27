@@ -435,5 +435,5 @@ permits EmptyList
   }
   
   private Datum first;
-  private List rest;  
+  private List rest;
 }

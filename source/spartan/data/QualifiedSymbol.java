@@ -2,9 +2,6 @@ package spartan.data;
 
 public final class QualifiedSymbol extends Symbol
 {
-  private final String moduleName;   // namespace (qualified) portion
-  private final String baseName; // base (unqualified) portion
-  
   /**
    * Create a new, uninterned qualified symbol
    */
@@ -39,4 +36,7 @@ public final class QualifiedSymbol extends Symbol
   {
     return true;
   }
+
+  private final String moduleName;   // namespace (qualified) portion
+  private final String baseName; // base (unqualified) portion
 }

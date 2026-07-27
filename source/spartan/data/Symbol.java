@@ -24,28 +24,36 @@ permits QualifiedSymbol
   public static final Symbol LETSTAR = new Symbol("let*");
   public static final Symbol LETREC = new Symbol("letrec");
   public static final Symbol WHILE = new Symbol("while");
-  public static final Symbol DO = new Symbol("do");
-  //public static final Symbol FOR = new Symbol("for");
+  public static final Symbol REP = new Symbol("rep");
+  public static final Symbol DO = new Symbol("do");  
   public static final Symbol SET = new Symbol("set!");
   public static final Symbol AND = new Symbol("and");
   public static final Symbol OR = new Symbol("or");
   public static final Symbol AMPERSAND = new Symbol("&");
-  public static final Symbol Q_ADJOIN = new QualifiedSymbol("spartan.base", "adjoin");
-  public static final Symbol Q_CONCAT = new QualifiedSymbol("spartan.base", "concat");
   public static final Symbol MATCH = new Symbol("match");
   public static final Symbol UNDERSCORE = new Symbol("_");
   public static final Symbol LIST = new Symbol("list");
   public static final Symbol LIST_STAR = new Symbol("list*");
   public static final Symbol VECTOR = new Symbol("vector");
-  public static final Symbol RECORD = new Symbol("record");
-  public static final Symbol REP = new Symbol("rep");
+  public static final Symbol RECORD = new Symbol("record");  
+  public static final Symbol Q_ADJOIN = new QualifiedSymbol("spartan.base", "adjoin");
+  public static final Symbol Q_CONCAT = new QualifiedSymbol("spartan.base", "concat");
   
   /**
-   * Returns an interned symbol with the given name.
+   * Returns an interned unqualified symbol.
    */
   public static Symbol of(String name)
   {
     return cache.get(name, () -> new Symbol(name));
+  }
+  
+  /**
+   * Returns an interned qualified symbol.
+   */
+  public static Symbol of(String moduleName, String baseName)
+  {
+    var fullName = moduleName + ":" + baseName;
+    return cache.get(fullName, () -> new QualifiedSymbol(fullName, moduleName, baseName));
   }
   
   /**

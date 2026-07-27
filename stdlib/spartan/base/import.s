@@ -33,7 +33,7 @@
   (defun lookup-alias (symbol)
     (let ((entry (find (fun (pair) (= symbol (first pair))) alias-map)))
       (if (nil? entry) symbol (second entry))))
-  (for-each
+  (foreach
     (fun (symbol) (module-import module symbol (lookup-alias symbol)))
     symbols))
 

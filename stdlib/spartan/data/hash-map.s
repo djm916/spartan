@@ -9,7 +9,7 @@
         remove!
         find
         find/default
-        for-each
+        foreach
         entries
         keys
         values)
@@ -113,7 +113,7 @@
 (defun find (self key)
   (find/default self key #nil))
 
-(defun for-each (self proc)
+(defun foreach (self proc)
   (match self
     ((record hashtable hash-fn equal-fn table size)
      (let* ((capacity (vector-length table))
@@ -127,7 +127,7 @@
 
 (defun entries (self)
   (def result ())
-  (for-each self 
+  (foreach self 
     (fun (key value)
       (set! result (adjoin (list key value) result))))
   result)

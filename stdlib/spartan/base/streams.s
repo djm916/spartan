@@ -24,7 +24,7 @@
         stream-empty?
         stream-map
         stream-filter
-        stream-for-each
+        stream-foreach
         stream-take
         stream-drop
         stream-reduce
@@ -60,10 +60,10 @@
   (if (stream-empty? s) s
     (stream-adjoin (f (stream-first s)) (stream-map f (stream-rest s)))))
 
-(defun stream-for-each (f s)
+(defun stream-foreach (f s)
   (if (not (stream-empty? s))
     (do (f (stream-first s))
-        (stream-for-each f (stream-rest s)))))
+        (stream-foreach f (stream-rest s)))))
 
 (defun stream-filter (f s)
   (cond ((stream-empty? s) s)

@@ -4,7 +4,7 @@
 (in-module spartan.base)
 
 (export fold-right unfold-left unfold-right enumerate take take-while drop drop-while 
-        map map/index for-each filter find find-index contains? remove fold-left 
+        map map/index foreach filter find find-index contains? remove fold-left 
         zip list-compare)
 
 ; map - Maps a procedure across a list
@@ -20,10 +20,10 @@
     (adjoin (f (first xs) i)
             (map/index f (+ 1 i) (rest xs)))))
 
-(defun for-each (f xs)
+(defun foreach (f xs)
   (if (not (empty? xs))
     (do (f (first xs))
-        (for-each f (rest xs)))))
+        (foreach f (rest xs)))))
 
 (defun filter (f xs)
   (if (empty? xs) ()
@@ -136,3 +136,20 @@
           (let ([order (c (first x) (first y))])      ; compare the first elements
             (if (/= order 0) order                    ; the ordering of the first pair of unequal elements determines the result
               (list-compare (rest x) (rest y) c)))])) ; first elements are equal, compare the rest
+
+(defun list-min (x & xs)
+  (let ((lo x))
+    (while (not (empty? xs))
+      (if (< (first xs) lo)
+        (set! lo (first xs)))
+      (set! xs (rest xs)))
+  lo))
+
+(defun list-max (x & xs)
+  (let ((hi x))
+    (while (not (empty? xs))
+      (if (> (first xs) hi)
+        (set! hi (first xs)))
+      (set! xs (rest xs)))
+  hi))
+

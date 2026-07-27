@@ -140,7 +140,7 @@ public final class BaseLib
   
   public static final Primitive TYPE = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
-      vm.result = Symbol.of(vm.popArg().type().name());
+      vm.result = vm.popArg().type().name();
       vm.popFrame();
     }
   };

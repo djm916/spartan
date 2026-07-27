@@ -11,9 +11,6 @@ import spartan.errors.MultipleDefinition;
  */
 public final class TypeRegistry
 {
-  private static int nextTypeId = 0;
-  private static final Map<Symbol, Type> registry = new IdentityHashMap<>();
-  
   /** Registers a new type in the system
    *
    * @param typeName the type name, a (possibly qualified) symbol
@@ -23,7 +20,7 @@ public final class TypeRegistry
   {
     if (registry.containsKey(typeName))
       throw new MultipleDefinition(typeName);
-    registry.put(typeName, new Type(nextTypeId++, typeName.name()));
+    registry.put(typeName, new Type(nextTypeId++, typeName));
     return registry.get(typeName);
   }
   
@@ -33,4 +30,7 @@ public final class TypeRegistry
   }
   
   private TypeRegistry() {}
+
+  private static int nextTypeId = 0;
+  private static final Map<Symbol, Type> registry = new IdentityHashMap<>();
 }
