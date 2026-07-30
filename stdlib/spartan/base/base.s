@@ -45,8 +45,8 @@
 (defmacro export (& symbols)
   `(spartan.base:module-export ',symbols))
 
-(export ->> compose curry in-module export inc! dec! let-values rec defrec
-        swap! when unless import)
+(export ->> compose curry in-module export import inc! dec! min max let-values
+        rec defrec swap! when unless)
 
 (defmacro inc! (var)
   `(set! ,var (+ 1 ,var)))
@@ -67,6 +67,18 @@
     `(let ((,tmp ,a))
        (set! ,a ,b)
        (set! ,b ,tmp))))
+
+(load "spartan/base/lists.s")
+
+(defun min (x y & args)
+  (defun min2 (x y)
+    (if (< x y) x y))
+  (fold-left min2 (min2 x y) args))
+
+(defun max (x y & args)
+  (defun max2 (x y)
+    (if (> x y) x y))
+  (fold-left max2 (max2 x y) args))
 
 ; (compose f) => f
 ; (compose f g) => (fun (x) (g (f x)))
@@ -103,19 +115,13 @@
            `(fun (,(first args)) ,(loop (rest args))))))
   (loop args))
 
-; need a map function before the list library is loaded
-(defun %map (f xs)
-  (if (empty? xs) ()
-    (adjoin (f (first xs))
-            (%map f (rest xs)))))
-
 ; (rec f ((var1 init1) ... (varN initN)) body...)
 ; ==>
 ; (letrec ((f (fun (var1 ... varN) body..)))
 ;   (f init1 ... initN))
 (defmacro rec (symbol bindings & body)
-  (let ((vars (%map first bindings))
-        (inits (%map second bindings)))
+  (let ((vars (map first bindings))
+        (inits (map second bindings)))
     `(letrec ((,symbol (fun ,vars ,@body)))
        (,symbol ,@inits))))
 
@@ -128,8 +134,8 @@
 
 (defmacro defrec (& forms)
   `(do
-     ,@(%map (fun (form) `(def ,(first form) #nil)) forms)
-     ,@(%map (fun (form) `(set! ,(first form) ,(second form))) forms)))
+     ,@(map (fun (form) `(def ,(first form) #nil)) forms)
+     ,@(map (fun (form) `(set! ,(first form) ,(second form))) forms)))
 
 ; (let-values (((var...) init)...) body...)
 ; ==>
@@ -145,7 +151,6 @@
              (exp (second binding))]
         `(apply (fun ,formals ,(loop (rest bindings))) ,exp)))))
 
-(load "spartan/base/lists.s")
 (load "spartan/base/vectors.s")
 (load "spartan/base/defrecord.s")
 (load "spartan/base/promises.s")
