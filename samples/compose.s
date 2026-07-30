@@ -9,10 +9,10 @@
     (adjoin lo (range (+ 1 lo) hi))))
   
 (print-line "(2*2)^2 = " ((compose double square) 2))
-(print-line "(2*2)^2 = " (->> 2 (double) (square)))
+(print-line "(2*2)^2 = " (->> 2 (* 2) (square)))
 
 (print-line "2*(2^2) = " ((compose square double) 2))
-(print-line "2*(2^2) = " (->> 2 (square) (double)))
+(print-line "2*(2^2) = " (->> 2 (square) (* 2)))
 
 (print-line "squares 1..100 = "
   (->> (range 1 100)

@@ -1,6 +1,4 @@
 
-;(require "stdlib/vectors.s")
-
 ; level  row
 ; ----------------
 ; 0      [1]      

@@ -45,8 +45,8 @@
 (defmacro export (& symbols)
   `(spartan.base:module-export ',symbols))
 
-(export ->> compose curry in-module export import inc! dec! min max let-values
-        rec defrec swap! when unless)
+(export ->> compose curry in-module export import inc! dec! min max
+        rec when unless defrec let-values swap!)
 
 (defmacro inc! (var)
   `(set! ,var (+ 1 ,var)))
@@ -96,10 +96,12 @@
 ; (->> x (f ...) (g ...)) => (g ... (f ... x))
 ; (->> x (f ...) (g ...) (h ...)) => (h ... (g ... (f ... x)))
 
+;(defmacro ->> (arg form & forms)
+;  (rep ((forms  forms             (rest forms))
+;        (result (append arg form) (append result (first forms))))
+;    :when (empty? forms) result))
 (defmacro ->> (arg form & forms)
-  (rep ((forms  forms             (rest forms))
-        (result (append arg form) (append result (first forms))))
-    :when (empty? forms) result))
+  (fold-left append (append arg form) forms))
 
 ; (curry () ...) => (fun () ...)
 ; (curry (x) ...) => (fun (x) ...)
