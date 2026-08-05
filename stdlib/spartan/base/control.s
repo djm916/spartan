@@ -14,21 +14,25 @@
 ; winders list that is not also on the current winders list. The winders list is updated incrementally, again to ensure that a winder is on the
 ; current winders list only if control has passed through its in thunk and not entered its out thunk.
 
+(export dynamic-wind
+        make-exception exception-name exception-message
+        with-exception-handler raise guard)
+
 (def *winders* ())
 
 (defun %do-winds (from to)
   (set! *winders* from)
   (if (not (identical? from to))
-      (cond ((empty? from)
-               (%do-winds from (rest to))
-               ((first (first to))))
-            ((empty? to)
-               ((second (first from)))
-               (%do-winds (rest from) to))
-            (else
-               ((second (first from)))
-               (%do-winds (rest from) (rest to))
-               ((first (first to))))))
+    (cond ((empty? from)
+           (%do-winds from (rest to))
+           ((first (first to)))) ; call "pre" thunk
+          ((empty? to)
+           ((second (first from))) ; call "post" thunk
+           (%do-winds (rest from) to))
+          (else
+           ((second (first from))) ; call "post" thunk
+           (%do-winds (rest from) (rest to))
+           ((first (first to)))))) ; call "pre" thunk
   (set! *winders* to))
 
 (defun dynamic-wind (pre thunk post)

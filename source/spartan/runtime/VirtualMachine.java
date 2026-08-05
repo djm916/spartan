@@ -7,7 +7,7 @@ import spartan.data.Bool;
 import spartan.data.IFun;
 import spartan.data.Primitive;
 import spartan.data.Closure;
-import spartan.data.Kontinue;
+import spartan.data.Continuation;
 import spartan.compiling.Procedure;
 import spartan.errors.Error;
 import spartan.errors.WrongNumberArgs;
@@ -42,7 +42,7 @@ public final class VirtualMachine
   /**
    * The current continuation: a pointer to the head of the chain of continuation frames
    */
-  public Kon kon;
+  public CallFrame frame;
   
   private static Datum loadLocal(Env env, int depth, int offset)
   {
@@ -189,7 +189,7 @@ public final class VirtualMachine
     assert control == null;
     assert args == List.EMPTY;
     assert env == null;
-    assert kon == null;
+    assert frame == null;
         
     return result;
   }
@@ -217,16 +217,16 @@ public final class VirtualMachine
   
   public void pushFrame(Inst returnTo, Position position)
   {
-    kon = new Kon(kon, env, args, returnTo, position);
+    frame = new CallFrame(frame, env, args, returnTo, position);
     args = List.EMPTY;
   }
   
   public void popFrame()
   {
-    control = kon.returnTo();
-    env = kon.env();
-    args = kon.args();
-    kon = kon.parent();
+    control = frame.returnTo();
+    env = frame.env();
+    args = frame.args();
+    frame = frame.parent();
   }
   
   public void apply(int numArgs)
@@ -247,8 +247,8 @@ public final class VirtualMachine
         control = body;
         return;
       }
-      case Kontinue(var savedKon, _): {
-        kon = savedKon;
+      case Continuation(var savedFrame, _): {
+        frame = savedFrame;
         result = popArg();
         popFrame();
         return;
@@ -261,13 +261,13 @@ public final class VirtualMachine
     control = null;
     args = List.EMPTY;
     env = null;
-    kon = null;
+    frame = null;
   }
   
   public java.util.List<Position> generateBackTrace()
   {
     var backTrace = new java.util.ArrayList<Position>();
-    for (var f = this.kon; f != null; f = f.parent())
+    for (var f = this.frame; f != null; f = f.parent())
       if (f.position() != null)
         backTrace.add(f.position());
     return backTrace;

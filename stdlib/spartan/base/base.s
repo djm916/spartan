@@ -45,7 +45,7 @@
 (defmacro export (& symbols)
   `(spartan.base:module-export ',symbols))
 
-(export ->> compose curry in-module export import inc! dec! min max
+(export ->> compose curry in-module export inc! dec! min max
         rec when unless defrec let-values swap!)
 
 (defmacro inc! (var)

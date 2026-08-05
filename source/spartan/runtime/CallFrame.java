@@ -14,4 +14,4 @@ import spartan.parsing.Position;
  * @param returnTo the instruction to return to when the call is complete
  * @param position the source position where the call occurs
  */
-public record Kon(Kon parent, Env env, List args, Inst returnTo, Position position) {}
+public record CallFrame(CallFrame parent, Env env, List args, Inst returnTo, Position position) {}

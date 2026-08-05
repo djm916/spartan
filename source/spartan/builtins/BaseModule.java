@@ -122,8 +122,8 @@ public final class BaseModule extends Module
     //bindPublic(Symbol.of("fourth"), ListLib.FOURTH);
     bindPublic(Symbol.of("rest"), ListLib.REST);
     bindPublic(Symbol.of("empty?"), ListLib.IS_EMPTY);
-    bindPublic(Symbol.of("set-first!"), ListLib.SET_FIRST);
-    bindPublic(Symbol.of("set-rest!"), ListLib.SET_REST);
+    //bindPublic(Symbol.of("set-first!"), ListLib.SET_FIRST);
+    //bindPublic(Symbol.of("set-rest!"), ListLib.SET_REST);
     bindPublic(Symbol.of("list"), ListLib.MAKE_LIST);
     bindPublic(Symbol.of("length"), ListLib.LENGTH);
     bindPublic(Symbol.of("reverse"), ListLib.REVERSE);
@@ -132,7 +132,7 @@ public final class BaseModule extends Module
     //bindPublic(Symbol.of("take"), ListLib.TAKE);
     //bindPublic(Symbol.of("drop"), ListLib.DROP);
     bindPublic(Symbol.of("nth"), ListLib.NTH);
-    bindPublic(Symbol.of("nth-rest"), ListLib.DROP);
+    bindPublic(Symbol.of("nth-tail"), ListLib.DROP);
     
     /* Vector procedures */
     

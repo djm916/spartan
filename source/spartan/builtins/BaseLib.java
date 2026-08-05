@@ -108,7 +108,7 @@ public final class BaseLib
       //if (! (vm.popArg() instanceof Closure proc))
         //throw new TypeMismatch();
       vm.result = vm.popArg();
-      vm.args = List.of(new Kontinue(vm.kon));
+      vm.args = List.of(new Continuation(vm.frame));
       vm.apply(1);
     }
   };

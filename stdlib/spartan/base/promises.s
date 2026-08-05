@@ -1,22 +1,22 @@
 
 (in-module spartan.base)
 
-(defrecord promise (thunk value has-value))
-
-(defmacro delay (exp)
-  `(spartan.base:make-promise (fun () ,exp) #nil #false))
-
-(defun force (p)
-  (cond [(not (promise? p))
-         p]
-        [else
-         (if (not (promise-has-value p))
-           (do
-             (set-promise-value! p ((promise-thunk p)))
-             (set-promise-has-value! p #true)
-             (set-promise-thunk! p #nil)))
-         (promise-value p)]))
-
-(export make-promise ; must export the promise constructor as it is used in the macro expansion of "delay"
+(export make-promise ; must export promise constructor as it's used in the macro expansion of "delay"
         delay
         force)
+
+(defrecord promise (thunk value forced))
+
+; Redefine promise constructor to supply default arguments
+(let ((orig make-promise))
+  (set! make-promise (fun (thunk) (orig thunk #nil #false))))
+
+(defmacro delay (exp)
+  `(spartan.base:make-promise (fun () ,exp)))
+
+(defun force (p)
+  (when (not (promise-forced p))
+    (set-promise-value! p ((promise-thunk p)))
+    (set-promise-forced! p #true)
+    (set-promise-thunk! p #nil))
+  (promise-value p))
