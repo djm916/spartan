@@ -150,3 +150,99 @@
 ;; Expected execution-log: '(outer-before outer-body inner-before inner-body inner-after outer-after)
 ;; Note: 'after' runs even though the body did not finish normally.
 (print-line execution-log)
+
+;; ====================================================================
+;; TEST 6: Cross Jumping Between Parallel Dynamic-Wind Contexts
+;; ====================================================================
+(print-line "TEST 6: Cross Jumping Between Parallel Dynamic-Wind Contexts")
+(reset-log!)
+
+;; Continuations to jump into the depths of each tree
+(def alpha-target #nil)
+(def beta-target  #nil)
+
+;; Control flag to orchestrate the test execution flow
+(def test-stage 0)
+
+;; ====================================================================
+;; DEFINING THE PARALLEL TREES
+;; ====================================================================
+
+;; --------------------------------------------------------------------
+;; TREE ALPHA (Target Tree)
+;; --------------------------------------------------------------------
+(dynamic-wind
+  (fun () (log-event! 'alpha-outer-before))
+  (fun ()
+    (dynamic-wind
+      (fun () (log-event! 'alpha-inner-before))
+      (fun ()
+        (log-event! 'alpha-deep-body)
+        ;; Capture the continuation deep inside Alpha
+        (call/cc (fun (cc) (set! alpha-target cc))))
+      (fun () (log-event! 'alpha-inner-after))))
+  (fun () (log-event! 'alpha-outer-after)))
+
+;; --------------------------------------------------------------------
+;; TREE BETA (Origin Tree)
+;; --------------------------------------------------------------------
+;; We only execute Beta after Alpha has finished its initial run.
+(if (= test-stage 0)
+    (dynamic-wind
+      (fun () (log-event! 'beta-outer-before))
+      (fun ()
+        (dynamic-wind
+          (fun () (log-event! 'beta-inner-before))
+          (fun ()
+            (log-event! 'beta-deep-body)
+            ;; Capture the continuation deep inside Beta
+            (call/cc (fun (cc) (set! beta-target cc)))
+            ;; Stage 2: While deep inside Beta, perform the parallel cross-jump to Alpha.
+            (if (= test-stage 1)
+              (do
+                (log-event! '---CROSS-JUMP-BETA-TO-ALPHA---)
+                (alpha-target #true))))
+          (fun () (log-event! 'beta-inner-after))))
+      (fun () (log-event! 'beta-outer-after))))
+
+;; ====================================================================
+;; EXECUTING THE CROSS-JUMP
+;; ====================================================================
+;; At this point, we are at the root level. Both trees have executed 
+;; their initial passes normally. 
+
+;; Stage 1: Jump deep into Beta to establish our active origin state.
+(if (= test-stage 0)
+    (do
+      (set! test-stage 1)
+      (log-event! '---jumping-into-beta---)
+      (beta-target #true)))
+
+;; ====================================================================
+;; EXPECTED FINAL EXECUTION LOG
+;; ====================================================================
+;; '(
+;;   ;; 1. Initial normal pass through Tree Alpha
+;;   alpha-outer-before alpha-inner-before alpha-deep-body alpha-inner-after alpha-outer-after
+;;
+;;   ;; 2. Initial normal pass through Tree Beta
+;;   beta-outer-before beta-inner-before beta-deep-body beta-inner-after beta-outer-after
+;;
+;;   ---jumping-into-beta---
+;;   ;; 3. Winding down into Beta for Stage 1
+;;   beta-outer-before beta-inner-before
+;;
+;;   ---CROSS-JUMP-BETA-TO-ALPHA---
+;;   ;; 4. UNWINDING BETA (Inside-Out)
+;;   beta-inner-after
+;;   beta-outer-after
+;;
+;;   ;; 5. WINDING ALPHA (Outside-In)
+;;   alpha-outer-before
+;;   alpha-inner-before
+;;   
+;;   ;; 6. RESUMING AND NATURAL EXIT OF ALPHA (Inside-Out)
+;;   alpha-inner-after
+;;   alpha-outer-after
+;;  )
+(print-line execution-log)
