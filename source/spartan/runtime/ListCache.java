@@ -2,6 +2,7 @@ package spartan.runtime;
 
 import spartan.data.Datum;
 import spartan.data.List;
+import java.util.logging.Logger;
 
 public final class ListCache
 {
@@ -35,5 +36,11 @@ public final class ListCache
     freeList = list;
   }
   
+  public static void logMemoryUsageStats()
+  {
+    log.info(() -> String.format("arglist cache: max. cache size: %d; %d total nodes reused", maxCacheSize, reusedCount));
+  }
+  
   private static List freeList = List.EMPTY;
+  private static final Logger log = Logger.getLogger(ListCache.class.getName());
 }
