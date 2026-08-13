@@ -85,6 +85,10 @@ public class Main implements Callable<Integer>
       Repl.start();
     }
     
+    if (spartan.Config.LOG_DEBUG) {
+      spartan.runtime.ListCache.logMemoryUsageStats();
+    }
+    
     return 0; // Successful exit
   }
 }
