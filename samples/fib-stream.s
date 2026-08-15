@@ -10,5 +10,6 @@
 (def fibs (stream-adjoin 0 (stream-adjoin 1 (sum-streams fibs (stream-rest fibs)))))
 
 (def N 10)
-(def fibs-to-N (stream->list (stream-take N fibs)))
-(print-line "The first " N " Fibonacci numbers are: " fibs-to-N)
+(def fibs-to-N (stream-take N fibs))
+(print-line "The first " N " Fibonacci numbers are: " (stream->list fibs-to-N))
+

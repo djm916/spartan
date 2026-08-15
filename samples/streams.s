@@ -15,4 +15,3 @@
 (print-line "Squares = " (stream->list squares))
 (print-line "Even Squares = " (stream->list even-squares))
 (print-line "Sum of squares = " (stream-reduce + 0 squares))
-(print-line "Random numbers = " (stream->list (stream-take 10 (generator->stream rand))))
