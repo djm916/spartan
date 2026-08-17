@@ -1,23 +1,14 @@
 ; Streams library
 
-; A "stream" is a lazyily-evaluated, possibly infinite, sequence.
-
-; In this implementation, a stream is a promise that, when forced, returns a
-; pair: the stream's first element, and the rest of the stream (another promise).
-
-; A stream may be either finite or infinite. Be warned that some
-; stream operations cannot be computed on infinite streams. 
-
-; Create a new stream
-;
-; Parameters:
-;
-; gen   A generator procedure that produces succesive stream values
-;       each time it is called.
-
 (in-module spartan.base)
 
-(export make-stream-pair
+(export stream-eager
+        stream-lazy
+        stream-delay
+        make-stream
+        stream?
+        make-stream-promise
+        make-stream-pair
         *empty-stream*
         stream-adjoin
         stream-first
@@ -35,70 +26,97 @@
         generator->stream
 )
 
-(defrecord stream-pair (first rest))
+(defrecord stream (val))
 
-; The unique empty stream object
+(defrecord stream-promise (tag val))
 
-(def *empty-stream* (delay (make-stream-pair #nil #nil)))
+(defmacro stream-lazy (expr)
+  `(make-stream (make-stream-promise 'lazy (fun () ,expr))))
 
-; Add an element to the front of a stream
+(defun stream-eager (expr)
+  (make-stream (make-stream-promise 'eager expr)))
 
-(defmacro stream-adjoin (e s)
-  `(spartan.base:delay (make-stream-pair ,e ,s)))
+(defmacro stream-delay (expr)
+  `(stream-lazy (stream-eager ,expr)))
 
-;(defmacro stream-adjoin (e s) `(spartan.base:adjoin ,e (spartan.base:delay ,s)))
+(defun stream-force (stream)
+  (let ((promise (stream-val stream)))
+    (cond ((= (stream-promise-tag promise) 'eager)
+           (stream-promise-val promise))
+          ((= (stream-promise-tag promise) 'lazy)
+           (let* ((stream* ((stream-promise-val promise)))
+                  (promise  (stream-val stream)))
+             (if (not (= (stream-promise-tag promise) 'eager))
+               (do (set-stream-promise-tag! promise (stream-promise-tag (stream-val stream*)))
+                   (set-stream-promise-val! promise (stream-promise-val (stream-val stream*)))
+                   (set-stream-val! stream* promise)))
+             (stream-force stream))))))
 
-; Return the first element of a stream
+(def *empty-stream* (stream-delay (make-stream-promise 'stream 'null)))
 
-(defun stream-first (s) (stream-pair-first (force s)))
+(defun stream-empty? (stream)
+  (identical? (stream-force stream)
+              (stream-force *empty-stream*)))
 
-; Return the rest of a stream
+(defrecord stream-pair (fst rst))
 
-(defun stream-rest (s) (stream-pair-rest (force s)))
+(defmacro stream-adjoin (obj stream)
+  `(stream-eager (make-stream-pair (stream-delay ,obj) (stream-lazy ,stream))))
 
-; Determine if a stream is empty
+(defun stream-first (stream)
+  (stream-force (stream-pair-fst (stream-force stream))))
 
-(defun stream-empty? (s) (identical? s *empty-stream*))
+(defun stream-rest (stream)
+  (stream-pair-rst (stream-force stream)))
 
-(defun stream-map (f s)
-  (if (stream-empty? s) s
-    (stream-adjoin (f (stream-first s)) (stream-map f (stream-rest s)))))
+(defmacro stream-fun (params & body)
+  `(fun ,params (stream-lazy (do ,@body))))
 
-(defun stream-foreach (f s)
-  (if (not (stream-empty? s))
-    (do (f (stream-first s))
-        (stream-foreach f (stream-rest s)))))
+(def __stream-take
+  (stream-fun (n stream)
+    (if (or (stream-empty? stream) (= 0 n))
+      *empty-stream*
+      (stream-adjoin (stream-first stream)
+                     (__stream-take (- n 1) (stream-rest stream))))))
 
-(defun stream-filter (f s)
-  (cond ((stream-empty? s) s)
-        ((f (stream-first s)) (stream-adjoin (stream-first s) (stream-filter f (stream-rest s))))
-        (else (stream-filter f (stream-rest s)))))
+(defun stream-take (n stream)
+  (__stream-take n stream))
 
-(defun stream-take (n s)
-  (if (or (stream-empty? s) (= n 0)) *empty-stream*
-    (stream-adjoin (stream-first s) (stream-take (- n 1) (stream-rest s)))))
+(defun stream->list (stream)
+  (if (stream-empty? stream)
+    ()
+    (adjoin (stream-first stream)
+            (stream->list (stream-rest stream)))))
 
-(defun stream-drop (n s)
-  (if (or (stream-empty? s) (= n 0)) s (stream-drop (- n 1) (stream-rest s))))
+(def __stream-filter
+  (stream-fun (pred stream)
+    (cond [(stream-empty? stream)
+           *empty-stream*]
+          [(pred (stream-first stream))
+           (stream-adjoin (stream-first stream)
+                          (__stream-filter pred (stream-rest stream)))]
+          [else
+           (__stream-filter pred (stream-rest stream))])))
 
-(defun stream-reduce (f i s)
-  (if (stream-empty? s) i
-    (stream-reduce f (f i (stream-first s)) (stream-rest s))))
+(defun stream-filter (pred stream)
+  (__stream-filter pred stream))
 
-(defun stream-enumerate (i s)
-  (if (stream-empty? s) ()
-    (stream-adjoin (list i (stream-first s)) (stream-enumerate (+ i 1) (stream-rest s)))))
+(def __stream-map
+  (stream-fun (f stream)
+    (if (stream-empty? stream)
+      *empty-stream*
+      (stream-adjoin (f (stream-first stream))
+                     (__stream-map f (stream-rest stream))))))
 
-(defun stream-ref (i s)
-  (stream-first (stream-drop i s)))
+(defun stream-map (f stream)
+  (__stream-map f stream))
 
-(defun stream->list (s)
-  (if (stream-empty? s) ()
-    (adjoin (stream-first s) (stream->list (stream-rest s)))))
+(defun stream-reduce (f e stream)
+  (if (stream-empty? stream)
+    e
+    (stream-reduce f (f e (stream-first stream)) (stream-rest stream))))
 
-(defun generator->stream (g)
-  (delay
-    (let ((result (g)))
-      (if (nil? result)
-        *empty-stream*
-        (make-stream-pair result (generator->stream g))))))
+(defun stream-ref (n stream)
+  (if (= 0 n)
+    (stream-first stream)
+    (stream-ref (- n 1) (stream-rest stream))))
