@@ -72,6 +72,9 @@
 (defmacro stream-fun (params & body)
   `(fun ,params (stream-lazy (do ,@body))))
 
+(defmacro define-stream (name params & body)
+  `(def ,name (stream-fun params body)))
+
 (def __stream-take
   (stream-fun (n stream)
     (if (or (stream-empty? stream) (= 0 n))
@@ -81,6 +84,15 @@
 
 (defun stream-take (n stream)
   (__stream-take n stream))
+
+(def __stream-drop
+  (stream-fun (n stream)
+    (if (or (= 0 n) (stream-empty? stream))
+      stream
+      (__stream-drop (- n 1) (stream-rest stream)))))
+
+(defun stream-drop (n stream)
+  (__stream-drop n stream))
 
 (defun stream->list (stream)
   (if (stream-empty? stream)
