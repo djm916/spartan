@@ -72,7 +72,7 @@
 (defmacro stream-fun (params & body)
   `(fun ,params (stream-lazy (do ,@body))))
 
-(defmacro define-stream (name params & body)
+(defmacro defstream (name params & body)
   `(def ,name (stream-fun params body)))
 
 (def __stream-take

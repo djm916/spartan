@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.io.BufferedWriter;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.StringWriter;
 import java.io.Writer;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -47,6 +48,13 @@ class Context
 
 public class CodeListing
 {
+  public static String generateToString(Inst code) throws IOException
+  {
+    var w = new StringWriter();
+    generate(code, w);
+    return w.toString();
+  }
+  
   public static void generate(Inst code) throws IOException
   {
     generate(code, new BufferedWriter(new OutputStreamWriter(System.err, StandardCharsets.UTF_8)));

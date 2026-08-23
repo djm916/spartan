@@ -50,7 +50,7 @@ public class Compiler
   public Inst compile(SourceDatum exp)
   {
     positionMap = exp.positionMap();
-    var code = compile(exp.datum(), Scope.EMPTY, false, true, new Halt());
+    var code = compile(exp.datum(), Scope.EMPTY, false, true, new Halt());    
     if (Config.LOG_DEBUG && Config.EMIT_BYTECODE) {
       log.info(() -> String.format("Generating bytecode listing for expression at %s\n", positionOf(exp.datum())));
       try {
@@ -218,55 +218,59 @@ public class Compiler
     return currentModule().lookupAlias(moduleName).orElse(moduleName);
   }
   
+  /* Compile "def" special form
+  
+     Syntax: (def name init)
+     
+     Compilation:
+     
+         <<init>>
+         store-global name
+         load-const #nil
+  */
   private Inst compileDef(List exp, Scope scope, boolean tail, boolean allowDefs, Inst next)
   {
     if (!allowDefs)
       throw defNotAllowed(exp);
-    if (!(exp.length() == 3 && exp.second() instanceof Symbol s && s.isSimple()))
-      throw malformedExp(exp);   
+    if (!(exp.length() == 3 && exp.second() instanceof Symbol name && name.isSimple()))
+      throw malformedExp(exp);
     var init = exp.third();
-    var loc = currentModule().bind(s.intern());
+    var loc = currentModule().bind(name.intern());
     return compile(init, scope, false, false,
-           new StoreGlobal(s, loc,
+           new StoreGlobal(name, loc,
            new LoadConst(Nil.VALUE, next)));
   }
   
   /* Compile "defun" special form
   
-     Syntax: (defun symbol (params...) body...)
+     Syntax: (defun name (param...) body...)
   */
-  
   private Inst compileDefun(List exp, Scope scope, boolean tail, boolean allowDefs, Inst next)
   {
-    if (exp.length() < 4)
-      throw malformedExp(exp);
+    if (!allowDefs)
+      throw defNotAllowed(exp);
+    if (!(exp.length() > 3 && exp.second() instanceof Symbol name && name.isSimple()
+       && exp.third() instanceof List params && checkParamListForm(params)))
+     throw malformedExp(exp);
     
     var xform = transformDefun(exp);
     
     if (Config.LOG_DEBUG && Config.SHOW_MACRO_EXPANSION)
       log.info(() -> String.format("defun transform: %s => %s", exp.repr(), xform.repr()));
     
-    // TODO: Any error raised by compiling the body will have its position
-    // reset incorrectly here!
-    try {
-      return compile(xform, scope, false, allowDefs, next);
-    }
-    catch (Error err) {
-      err.setSource(new SourceInfo(xform, positionOf(exp)));
-      throw err;
-    }
+    return compile(xform, scope, false, allowDefs, next);
   }
   
   /* Transform "defun" special form into equivalent equivalent "def" form:
      
-     (defun symb (params...) body...) => (def symb (fun (params...) body...))
+     (defun name (param...) body...) => (def name (fun (param...) body...))
   */
   private List transformDefun(List exp)
   {
-    var symb = exp.second();
+    var name = exp.second();
     var params = exp.third();
     var body = exp.drop3();
-    return List.of(Symbol.DEF, symb, List.adjoin(Symbol.FUN, List.adjoin(params, body)));
+    return List.of(Symbol.DEF, name, List.adjoin(Symbol.FUN, List.adjoin(params, body)));
   }
 
   /* Compile the "if" special form.
@@ -740,16 +744,24 @@ public class Compiler
   */
   private List transformInnerDefs(List body)
   {
-    List.Builder bindings = new List.Builder();
+    var bindings = new List.Builder();
 
     while (!body.isEmpty() && isInnerDefinition(body.first())) {
       var exp = (List) body.first();
-      if (Symbol.DEFUN.equals(exp.first()))
+      if (Symbol.DEFUN.equals(exp.first())) {
+        if (!(exp.length() > 3 && exp.second() instanceof Symbol s && s.isSimple()
+           && exp.third() instanceof List params && checkParamListForm(params)))
+          throw malformedExp(exp);
         exp = transformDefun(exp);
+      }
+      if (!(exp.length() == 3 && exp.second() instanceof Symbol s && s.isSimple()))
+        throw malformedExp(exp);
       bindings.add(exp.rest());
       body = body.rest();
     }
 
+    // TODO: body possibly empty after inner definitions; causes error since letrec
+    // doesn't allow empty body
     return List.adjoin(Symbol.LETREC, List.adjoin(bindings.build(), body));
   }
 
@@ -1019,8 +1031,9 @@ public class Compiler
   }
 
   /**
-   * Transform a quasiquoted expression
-   * 
+   * Transforms a quasiquote expression with nested unquote and unquote-splicing
+   * forms into an equivalent expression using only quote, adjoin, and concat.
+   *
    * Let QQ(exp, N) denote the quasiquote transformation of exp with nesting
    * level N. Then QQ is defined as follows:
    *
@@ -1031,9 +1044,7 @@ public class Compiler
    * QQ(((unquote-splicing x) xs...), N) => (concat QQ((unquote-splicing x), N-1) QQ(xs..., N)), N > 0
    * QQ(((quasiquote x) xs...), N) => (adjoin QQ((quasiquote x), N+1) QQ(xs..., N))
    * QQ((x xs...), N) => (adjoin QQ(x, N) QQ(xs..., N))
-   */
-
-  // Reduce a quasiquote form (quasiquote x) to equivalent list form.
+   */  
   private List transformQuasiquote(Datum exp, int level)
   {
     if (exp == List.EMPTY)
