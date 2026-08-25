@@ -111,7 +111,7 @@
 ;         (#true (raise exn)))))
 ;   (fun () exp))
 
-(defmacro guard (exp & clauses)
+(defmacro guard (exp :rest clauses)
   (let ((exn (gensym))
         (name (gensym)))
     `(with-exception-handler

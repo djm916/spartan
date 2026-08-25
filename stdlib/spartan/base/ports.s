@@ -4,7 +4,7 @@
 (defmacro wrap-io-primitive (fname)
   `(set! ,fname
      (let ((f ,fname))
-       (fun (& args)
+       (fun (:rest args)
          (let-values (((result error) (apply f args)))
            (if (not (nil? error))
              (raise (make-exception 'io-error error))

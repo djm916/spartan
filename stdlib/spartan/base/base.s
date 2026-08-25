@@ -42,7 +42,7 @@
      (let ((m (spartan.base:find-module ',module-name)))
        (if (not (nil? m)) m (spartan.base:make-module ',module-name)))))
 
-(defmacro export (& symbols)
+(defmacro export (:rest symbols)
   `(spartan.base:module-export ',symbols))
 
 (export ->> compose curry in-module export inc! dec! min max
@@ -54,11 +54,11 @@
 (defmacro dec! (var)
   `(set! ,var (- ,var 1)))
 
-(defmacro when (test & body)
+(defmacro when (test :rest body)
   `(if ,test
      (do ,@body)))
 
-(defmacro unless (test & body)
+(defmacro unless (test :rest body)
   `(if (not (,test))
      (do ,@body)))
 
@@ -70,12 +70,12 @@
 
 (load "spartan/base/lists.s")
 
-(defun min (x y & args)
+(defun min (x y :rest args)
   (defun min2 (x y)
     (if (< x y) x y))
   (fold-left min2 (min2 x y) args))
 
-(defun max (x y & args)
+(defun max (x y :rest args)
   (defun max2 (x y)
     (if (> x y) x y))
   (fold-left max2 (max2 x y) args))
@@ -84,7 +84,7 @@
 ; (compose f g) => (fun (x) (g (f x)))
 ; (compose f g h) => (fun (x) (h (g (f x))))
 
-(defmacro compose (& fs)
+(defmacro compose (:rest fs)
   (def x (gensym))
   (defun loop (fs)
     (if (empty? (rest fs))
@@ -96,18 +96,18 @@
 ; (->> x (f ...) (g ...)) => (g ... (f ... x))
 ; (->> x (f ...) (g ...) (h ...)) => (h ... (g ... (f ... x)))
 
-;(defmacro ->> (arg form & forms)
+;(defmacro ->> (arg form :rest forms)
 ;  (rep ((forms  forms             (rest forms))
 ;        (result (append arg form) (append result (first forms))))
 ;    :when (empty? forms) result))
-(defmacro ->> (arg form & forms)
+(defmacro ->> (arg form :rest forms)
   (fold-left append (append arg form) forms))
 
 ; (curry () ...) => (fun () ...)
 ; (curry (x) ...) => (fun (x) ...)
 ; (curry (x y) ...) => (fun (x) (fun (y) ...))
 
-(defmacro curry (args & body)
+(defmacro curry (args :rest body)
   (defun loop (args)
     (cond ((empty? args)
            `(fun () ,@body))
@@ -121,7 +121,7 @@
 ; ==>
 ; (letrec ((f (fun (var1 ... varN) body..)))
 ;   (f init1 ... initN))
-(defmacro rec (symbol bindings & body)
+(defmacro rec (symbol bindings :rest body)
   (let ((vars (map first bindings))
         (inits (map second bindings)))
     `(letrec ((,symbol (fun ,vars ,@body)))
@@ -134,7 +134,7 @@
 ; (def f #nil)
 ; (set! f (fun (param ...) body...))
 
-(defmacro defrec (& forms)
+(defmacro defrec (:rest forms)
   `(do
      ,@(map (fun (form) `(def ,(first form) #nil)) forms)
      ,@(map (fun (form) `(set! ,(first form) ,(second form))) forms)))
@@ -144,7 +144,7 @@
 ; (apply (fun (var...) (do body...)) init)
 ;
 
-(defmacro let-values (bindings & body)
+(defmacro let-values (bindings :rest body)
   (rec loop ((bindings bindings))
     (if (empty? bindings)
       `(do ,@body)

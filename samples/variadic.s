@@ -6,7 +6,7 @@
 ; intended to be good code, but demonstrates the use
 ; of recursive variadic procedures with "apply".
 
-(defun sum (init & xs)
+(defun sum (init :rest xs)
   (if (empty? xs) init
     (apply sum (adjoin (+ init (first xs)) (rest xs)))))
 

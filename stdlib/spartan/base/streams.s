@@ -69,10 +69,10 @@
 (defun stream-rest (stream)
   (stream-pair-rst (stream-force stream)))
 
-(defmacro stream-fun (params & body)
+(defmacro stream-fun (params :rest body)
   `(fun ,params (stream-lazy (do ,@body))))
 
-(defmacro defstream (name params & body)
+(defmacro defstream (name params :rest body)
   `(def ,name (stream-fun params body)))
 
 (def __stream-take

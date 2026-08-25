@@ -8,11 +8,11 @@
 
 (export use import %import-all %import-only %import-except)
 
-(defmacro use (module-name & args)
+(defmacro use (module-name :rest args)
   `(do (spartan.base:load ,(module-name->path module-name))
        (spartan.base:import ,module-name ,@args)))
 
-(defmacro import (module-name & args)
+(defmacro import (module-name :rest args)
   (match args
     [(list :as local-alias)
      `(spartan.base:module-alias ',module-name ',local-alias)]

@@ -560,7 +560,7 @@ public class Compiler
   
   /* Check that a parameter list is well-formed
    * 
-   * <params> => "(" <id>* [&option (<id> <exp>)+] [&rest <id>] ")"
+   * <params> => "(" <id>* [:option (<id> <exp>)+] [:rest <id>] ")"
    */
   private boolean checkParamListForm(List params)
   {
