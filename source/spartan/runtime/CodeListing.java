@@ -83,12 +83,12 @@ public class CodeListing
   {
     while (code != null) {
       switch (code) {
-        case BranchFalse(var target, var next): {
+        case JumpFalse(var target, var next): {
           ctx.addLabel(target);
           code = next;
           break;
         }
-        case BranchTrue(var target, var next): {
+        case JumpTrue(var target, var next): {
           ctx.addLabel(target);
           code = next;
           break;
@@ -146,11 +146,11 @@ public class CodeListing
   {
     return switch (code) {
       case Apply(var numArgs, _, _) -> String.format("(apply %d)", numArgs);
-      case BranchFalse(var target, _) -> String.format("(branch-false %s)", ctx.labelFor(target));
-      case BranchTrue(var target, _)-> String.format("(branch-true %s)", ctx.labelFor(target));
       case Halt() -> "(halt)";
       case Jump inst -> String.format("(jump %s)", ctx.labelFor(inst.target()));
-      case JumpArgsEmpty(var target, _) -> String.format("(jump-args-empty %s)", ctx.labelFor(target));
+      case JumpFalse(var target, _) -> String.format("(jump-false %s)", ctx.labelFor(target));
+      case JumpTrue(var target, _)-> String.format("(jump-true %s)", ctx.labelFor(target));
+      case JumpArgsEmpty(var target, _) -> String.format("(jump-noarg %s)", ctx.labelFor(target));
       case LoadConst(var value, _) -> String.format("(load-const %s)", value.repr());
       case LoadGlobal(var symbol, _, _) -> String.format("(load-global %s)", symbol);
       case LoadLocal(var depth, var offset, _) -> String.format("(load-local %d %d)", depth, offset);
@@ -159,7 +159,7 @@ public class CodeListing
       case Match(var pattern, var target, _) -> String.format("(match %s %s)", pattern.toString(), ctx.labelFor(target));
       case Nop inst -> "(nop)";
       case PopArg inst -> "(pop-arg)";
-      case PopRestArgs inst -> "(pop-arg*)";
+      case PopRestArgs inst -> "(pop-rest-args)";
       case PopEnv inst -> "(pop-env)";
       case PopFrame inst -> "(pop-frame)";
       case PushArg inst -> "(push-arg)";

@@ -43,21 +43,7 @@ public final class VirtualMachine
    * The current continuation: a pointer to the head of the chain of continuation frames
    */
   public CallFrame frame;
-  
-  private static Datum loadLocal(Env env, int depth, int offset)
-  {
-    for (; depth > 0; --depth)
-      env = env.parent();
-    return env.get(offset);
-  }
-  
-  private static void storeLocal(Env env, int depth, int offset, Datum value)
-  {
-    for (; depth > 0; --depth)
-      env = env.parent();
-    env.set(offset, value);
-  }
-  
+    
   public Datum eval(Inst code)
   {
     control = code;
@@ -75,18 +61,6 @@ public final class VirtualMachine
             }
             break;
           }
-          case BranchFalse(var target, var next): {
-            control = !result.boolValue() ? target : next;
-            break;
-          }
-          case BranchTrue(var target, var next): {
-            control = result.boolValue() ? target : next;
-            break;
-          }
-          case Halt(): {
-            control = null;
-            break;
-          }
           case Jump j: {
             control = j.target();
             break;
@@ -95,6 +69,18 @@ public final class VirtualMachine
             control = args.isEmpty() ? target : next;
             break;
           }
+          case JumpFalse(var target, var next): {
+            control = !result.boolValue() ? target : next;
+            break;
+          }
+          case JumpTrue(var target, var next): {
+            control = result.boolValue() ? target : next;
+            break;
+          }
+          case Halt(): {
+            control = null;
+            break;
+          }         
           case LoadConst(var value, var next): {
             result = value;
             control = next;
@@ -275,5 +261,19 @@ public final class VirtualMachine
       if (f.position() != null)
         backTrace.add(f.position());
     return backTrace;
+  }
+    
+  private static Datum loadLocal(Env env, int depth, int offset)
+  {
+    for (; depth > 0; --depth)
+      env = env.parent();
+    return env.get(offset);
+  }
+  
+  private static void storeLocal(Env env, int depth, int offset, Datum value)
+  {
+    for (; depth > 0; --depth)
+      env = env.parent();
+    env.set(offset, value);
   }
 }

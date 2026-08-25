@@ -23,17 +23,12 @@ import static spartan.Runtime.lookupMacro;
 import static spartan.Runtime.currentModule;
 import spartan.util.Box;
 
-interface ISpecialForm
-{
-  Inst compile(List exp, Scope scope, boolean tail, boolean allowDefs, Inst next);
-}
-
 /**
  * Compiles source expressions into executable bytecodes.
  */
 public class Compiler
 {
-  /**
+  /** Constructor. Requires a VM instance for macro expansion.
    * @param vm the {@code VirtualMachine} used for macro expansion.
    */
   public Compiler(VirtualMachine vm)
@@ -303,7 +298,7 @@ public class Compiler
     
     var elseBranch = compile(alt, scope, tail, false, next);
     return compile(pred, scope, false, false,
-           new BranchFalse(elseBranch,
+           new JumpFalse(elseBranch,
            compile(sub, scope, tail, false,
            new Jump(next,
            elseBranch))));
@@ -370,7 +365,7 @@ public class Compiler
 
     var nextClause = compileCondClauses(clauses.rest(), scope, tail, next);
     return compile(pred, scope, false, false,
-           new BranchFalse(nextClause,
+           new JumpFalse(nextClause,
            compileSequence(body, scope, tail,
            new Jump(next,
            nextClause))));
@@ -558,9 +553,9 @@ public class Compiler
     return true;
   }
   
-  /* Check that a parameter list is well-formed
-   * 
-   * <params> => "(" <id>* [:option (<id> <exp>)+] [:rest <id>] ")"
+  /* Check that a parameter list is well-formed according to the grammar:
+ 
+     <parameter-list> => "(" <symbol>* [:option (<symbol> <exp>)+] [:rest <symbol>] ")"
    */
   private boolean checkParamListForm(List params)
   {
@@ -730,10 +725,8 @@ public class Compiler
   }
   
   /* Compiles a lambda expression (anonymous procedure)
-   *
-   * Syntax: (fun (param...) body...)
-   *         (fun (param... & rest) body...)
-   *
+    
+     Syntax: (fun <params> body...)
    */
   private Inst compileFun(List exp, Scope scope, boolean tail, boolean allowDefs, Inst next)
   {
@@ -830,7 +823,7 @@ public class Compiler
       return compile(exp.first(), scope, tail, false, next);
 
     return compile(exp.first(), scope, false, false,
-           new BranchTrue(next,
+           new JumpTrue(next,
            compileDisjunction(exp.rest(), scope, tail, next)));
   }
 
@@ -861,7 +854,7 @@ public class Compiler
       return compile(exp.first(), scope, tail, false, next);
 
     return compile(exp.first(), scope, false, false,
-           new BranchFalse(next,
+           new JumpFalse(next,
            compileConjuction(exp.rest(), scope, tail, next)));
   }
 
@@ -917,7 +910,7 @@ public class Compiler
     var jump = new Jump();    
     var end = new LoadConst(Nil.VALUE, next);
     var top = compile(pred, scope, false, false,
-              new BranchFalse(end,
+              new JumpFalse(end,
               compileSequence(body, scope, false, jump)));
     jump.setTarget(top);
     jump.setNext(end);
@@ -992,7 +985,7 @@ public class Compiler
     var end = compile(result, extendedScope, false, false,
               new PopEnv(next));
     var top = compile(test, extendedScope, false, false,
-              new BranchTrue(end,
+              new JumpTrue(end,
               compileSequence(body, extendedScope, false,
               compilePushArgs(steps, extendedScope,
               compileBindLocals(0, numBindings,                          
@@ -1147,20 +1140,28 @@ public class Compiler
            List.EMPTY)));
   }
   
-  private record ParamInfo(List requiredArgs, List optionalArgs, List restArg) {};
+  
+  
+  private static record ParsedParameters(List requiredArgs, List optionalArgs, List restArg)
+  {};
 
-  /* Parse a parameter list of the form, returning 3 lists:
-       requiredArgs - A (possibly empty) list of symbols denoting the function's required arguments
-       optionalArgs - A (possibly empty) list of pairs denoting the function's optional arguments
-                      Each pair is of the form (symbol initexp)
-       restArg      - A (possibly empty) list containing a symbol denoting the rest argument, if any
+  /* Parse a parameter list of the form
+  
+       "(" <symbol>* [:option (<symbol> <exp>)+] [:rest <symbol>] ")"
+     
+     Returns 3 lists of symbols (each of which may be empty):
+     
+     requiredArgs - The function's required arguments
+     optionalArgs - A list of pairs denoting the function's optional arguments and default values
+     restArg      - Contains the rest argument, if any
   */
-  private ParamInfo parseParamList(List params)
+  private ParsedParameters parseParamList(List params)
   {
     var requiredArgs = new List.Builder();
     var optionalArgs = new List.Builder();
-    var restArg = new List.Builder();
+    var restArg = List.EMPTY;
     
+    // Parse required argument section, stopping on end of list or next keyword
     for (; !params.isEmpty(); params = params.rest()) {
       if (Symbol.OPTARG.equals(params.first()))
         break;
@@ -1168,6 +1169,9 @@ public class Compiler
         break;
       requiredArgs.add(params.first());
     }
+    
+    // Parse optional argument section, stopping on end of list or next keyword
+    // NOTE: Assumes each optional argument is a binding pair: (<symbol> <exp>)
     if (!params.isEmpty() && Symbol.OPTARG.equals(params.first())) {
       params = params.rest();
       for (; !params.isEmpty(); params = params.rest()) {
@@ -1176,13 +1180,19 @@ public class Compiler
         optionalArgs.add(params.first());
       }
     }
-    if (!params.isEmpty() && Symbol.RESTARG.equals(params.first())) {
-      restArg.add(params.rest().first());
-    }
-    return new ParamInfo(requiredArgs.build(), optionalArgs.build(), restArg.build());
+    
+    // Parse rest argument
+    // NOTE: Assumes exactly 1 symbol in the rest of the parameter list
+    if (!params.isEmpty() && Symbol.RESTARG.equals(params.first()))
+      restArg = params.rest();
+    
+    return new ParsedParameters(requiredArgs.build(), 
+                                optionalArgs.build(),
+                                restArg);
   }
 
-  /** Create a Procedure
+  /** Given a function parameter list and body expression, return a Procedure
+   *  object containing a Signature and the compiled bytecode for the function.
    *
    * @param params the procedure parameters
    * @param body the procedure body
@@ -1191,14 +1201,15 @@ public class Compiler
    */  
   private Procedure makeProcedure(List params, List body, Scope scope)
   {
-    var paramInfo = parseParamList(params);
-    var requiredArgs = paramInfo.requiredArgs();
+    var parsedParams = parseParamList(params);
+    var requiredArgs = parsedParams.requiredArgs();
     var numRequired = requiredArgs.length();
-    var optionalArgs = paramInfo.optionalArgs();
+    var optionalArgs = parsedParams.optionalArgs();
     var numOptional = optionalArgs.length();
-    var restArg = paramInfo.restArg();
+    var restArg = parsedParams.restArg();
     var numRest = restArg.length(); // 0 or 1
     var numBindings = numRequired + numOptional + numRest;
+    var allArgs = List.concat(requiredArgs, extractFirst(optionalArgs), restArg);
     
     var sig = !restArg.isEmpty()
                 ? Signature.variadic(numRequired)
@@ -1209,8 +1220,8 @@ public class Compiler
     var code = new PushEnv(numBindings,
                compileBindRequired(0, numRequired,
                compileBindOptionals(numRequired, optionalArgs, scope.extend(requiredArgs),
-               compileBindRestArg(numRequired + numOptional, restArg,
-               compileBody(body, scope.extend(List.concat(requiredArgs, extractFirst(optionalArgs), restArg)),
+               compileBindRestArg(numRequired + numOptional, numRest != 0,
+               compileBody(body, scope.extend(allArgs),
                new PopFrame())))));
     
     return new Procedure(code, sig);
@@ -1229,34 +1240,32 @@ public class Compiler
   private Inst compileBindOptionals(int offset, List optionalArgs, Scope scope, Inst next)
   {
     if (optionalArgs.isEmpty())
-      return next;
-    
-    var symb = (Symbol) ((List)optionalArgs.first()).first();
-    var initExp = ((List)optionalArgs.first()).second();
+      return next;    
+    var pair = (List) optionalArgs.first();
+    var symb = (Symbol) pair.first();
+    var init = pair.second();    
     next = new StoreLocal0(offset,
            compileBindOptionals(offset + 1, optionalArgs.rest(), scope.bind(symb),
            next));
-    var elseBranch = compile(initExp, scope, false, false, next);
+    var elseBranch = compile(init, scope, false, false, next);
     return new JumpArgsEmpty(elseBranch,
            new PopArg(
            new Jump(next, elseBranch)));
   }
 
-  private Inst compileBindRestArg(int offset, List restArg, Inst next)
+  private Inst compileBindRestArg(int offset, boolean hasRest, Inst next)
   {
-    if (restArg.isEmpty())
-      return next;
-    
-    return new PopRestArgs(
-           new StoreLocal0(offset,
-           next));
+    return !hasRest
+             ? next
+             : new PopRestArgs(
+               new StoreLocal0(offset,
+               next));
   }
   
   
   /* Compile the "defmacro" special form.
      
      Syntax: (defmacro f (param...) body...)
-             (defmacro f (param... & rest) body...)
      
      Creates a macro, which is essentially a regular procedure, but
      is intended to generate code rather than data. It receives
@@ -1268,7 +1277,8 @@ public class Compiler
   {
     if (!allowDefs)
       throw defNotAllowed(exp);
-    if (!(exp.length() >= 4 && exp.second() instanceof Symbol symbol && symbol.isSimple() && exp.third() instanceof List params && checkParamListForm(params)))
+    if (!(exp.length() >= 4 && exp.second() instanceof Symbol symbol && symbol.isSimple()
+        && exp.third() instanceof List params && checkParamListForm(params)))
       throw malformedExp(exp);
     var body = exp.drop3();
     var macro = new Macro(makeProcedure(params, body, Scope.EMPTY));
@@ -1317,7 +1327,7 @@ public class Compiler
       positionMap.put(exp, position);
     }
   }
-  
+
   /**
        <pattern> =>   _                               ; match anything
                     | <symbol>                        ; match anything and bind to symbol
@@ -1363,12 +1373,12 @@ public class Compiler
     var clauses = exp.drop2();
     
     return compile(exp.second(), scope, false, false,
-           new PushEnv(matchEnvSize(clauses),
+           new PushEnv(calcMatchEnvSize(clauses),
            compileMatchClauses(exp, clauses, scope, tail,
            new PopEnv(next))));
   }
   
-  private int matchEnvSize(List clauses)
+  private int calcMatchEnvSize(List clauses)
   {
     int maxVars = 0;
     for (; !clauses.isEmpty(); clauses = clauses.rest()) {
@@ -1583,6 +1593,11 @@ public class Compiler
       return compileVarRef(s, scope, next);
     else 
       return compileCompound((List)exp, scope, tail, allowDefs, next);
+  }
+  
+  private static interface ISpecialForm
+  {
+    Inst compile(List exp, Scope scope, boolean tail, boolean allowDefs, Inst next);
   }
   
   private final Map<Symbol, ISpecialForm> specialForms = Map.ofEntries(
