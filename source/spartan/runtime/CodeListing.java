@@ -98,6 +98,11 @@ public class CodeListing
           code = inst.next();
           break;
         }
+        case JumpArgsEmpty(var target, var next): {
+          ctx.addLabel(target);
+          code = next;
+          break;
+        }
         case MakeClosure(Procedure(var body, _), var next): {
           ctx.addLabel(body);
           ctx.addProcEntry(body);
@@ -145,6 +150,7 @@ public class CodeListing
       case BranchTrue(var target, _)-> String.format("(branch-true %s)", ctx.labelFor(target));
       case Halt() -> "(halt)";
       case Jump inst -> String.format("(jump %s)", ctx.labelFor(inst.target()));
+      case JumpArgsEmpty(var target, _) -> String.format("(jump-args-empty %s)", ctx.labelFor(target));
       case LoadConst(var value, _) -> String.format("(load-const %s)", value.repr());
       case LoadGlobal(var symbol, _, _) -> String.format("(load-global %s)", symbol);
       case LoadLocal(var depth, var offset, _) -> String.format("(load-local %d %d)", depth, offset);

@@ -137,6 +137,15 @@ permits EmptyList
     return builder.build();
   }
   
+  public static List concat(List... lists)
+  {
+    var builder = new List.Builder();
+    for (var list : lists)
+      for (var e : list)
+        builder.add(e);
+    return builder.build();
+  }
+  
   public static List concat2(List left, List right)
   {
     var builder = new List.Builder();

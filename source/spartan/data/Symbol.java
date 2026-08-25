@@ -38,6 +38,8 @@ permits QualifiedSymbol
   public static final Symbol RECORD = new Symbol("record");  
   public static final Symbol Q_ADJOIN = new QualifiedSymbol("spartan.base", "adjoin");
   public static final Symbol Q_CONCAT = new QualifiedSymbol("spartan.base", "concat");
+  public static final Symbol OPTARG = new Symbol("&option");
+  public static final Symbol RESTARG = new Symbol("&rest");
   
   /**
    * Returns an interned unqualified symbol.

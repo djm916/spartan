@@ -560,13 +560,36 @@ public class Compiler
   
   /* Check that a parameter list is well-formed
    * 
-   * <parameter-list> => "(" <symbol>* ("&" <symbol>)? ")"
+   * <params> => "(" <id>* [&option (<id> <exp>)+] [&rest <id>] ")"
    */
   private boolean checkParamListForm(List params)
   {
-    for (; !params.isEmpty(); params = params.rest())
-      if (!(params.first() instanceof Symbol param && param.isSimple()) || (param.equals(Symbol.AMPERSAND) && (params.rest().isEmpty() || !params.drop2().isEmpty())))
+    for (; !params.isEmpty(); params = params.rest()) {
+      if (Symbol.OPTARG.equals(params.first()))
+        break;
+      if (Symbol.RESTARG.equals(params.first()))
+        break;
+      if (!(params.first() instanceof Symbol s && s.isSimple()))
         return false;
+    }
+    if (!params.isEmpty() && Symbol.OPTARG.equals(params.first())) {
+      params = params.rest();
+      for (; !params.isEmpty(); params = params.rest()) {
+        if (Symbol.RESTARG.equals(params.first()))
+          break;
+        if (!(params.first() instanceof List pair && pair.length() == 2
+            && pair.first() instanceof Symbol s && s.isSimple()))
+          return false;
+      }
+    }
+    if (!params.isEmpty() && Symbol.RESTARG.equals(params.first())) {
+      params = params.rest();
+      if (!(!params.isEmpty() && params.first() instanceof Symbol s && s.isSimple()))
+        return false;
+      params = params.rest();
+    }
+    if (!params.isEmpty())
+      return false;
     return true;
   }
   
@@ -1124,6 +1147,41 @@ public class Compiler
            List.EMPTY)));
   }
   
+  private record ParamInfo(List requiredArgs, List optionalArgs, List restArg) {};
+
+  /* Parse a parameter list of the form, returning 3 lists:
+       requiredArgs - A (possibly empty) list of symbols denoting the function's required arguments
+       optionalArgs - A (possibly empty) list of pairs denoting the function's optional arguments
+                      Each pair is of the form (symbol initexp)
+       restArg      - A (possibly empty) list containing a symbol denoting the rest argument, if any
+  */
+  private ParamInfo parseParamList(List params)
+  {
+    var requiredArgs = new List.Builder();
+    var optionalArgs = new List.Builder();
+    var restArg = new List.Builder();
+    
+    for (; !params.isEmpty(); params = params.rest()) {
+      if (Symbol.OPTARG.equals(params.first()))
+        break;
+      if (Symbol.RESTARG.equals(params.first()))
+        break;
+      requiredArgs.add(params.first());
+    }
+    if (!params.isEmpty() && Symbol.OPTARG.equals(params.first())) {
+      params = params.rest();
+      for (; !params.isEmpty(); params = params.rest()) {
+        if (Symbol.RESTARG.equals(params.first()))
+          break;
+        optionalArgs.add(params.first());
+      }
+    }
+    if (!params.isEmpty() && Symbol.RESTARG.equals(params.first())) {
+      restArg.add(params.rest().first());
+    }
+    return new ParamInfo(requiredArgs.build(), optionalArgs.build(), restArg.build());
+  }
+
   /** Create a Procedure
    *
    * @param params the procedure parameters
@@ -1133,68 +1191,67 @@ public class Compiler
    */  
   private Procedure makeProcedure(List params, List body, Scope scope)
   {
-    var isVariadic = params.index(Symbol.AMPERSAND::equals) >= 0;
-    var requiredArgs = isVariadic ? params.length() - 2 : params.length();
-    if (isVariadic)
-      params = params.remove(Symbol.AMPERSAND::equals);
-    var extendedScope = scope.extend(params);
-    return isVariadic
-      ? new Procedure(compileVariadicProc(body, extendedScope, requiredArgs),
-                      Signature.variadic(requiredArgs))
-      : new Procedure(compileFixedProc(body, extendedScope, requiredArgs),
-                      Signature.fixed(requiredArgs));
-  }
-  
-  /* Compile the body of a procedure with a fixed number of arguments N
-
-     Syntax: (fun (param...) body...)
-
-     Compilation:
-
-     push-env N          // extend environment for N arguments
-     pop-arg             // bind arguments to parameters
-     store-local 0 0
-     ...
-     pop-arg
-     store-local 0 N-1
-     <<body>>            // evaluate body
-     pop-frame           // return to caller
-  */
-  
-  private Inst compileFixedProc(List body, Scope scope, int requiredArgs)
-  {
-    return new PushEnv(requiredArgs,
-           compileBindLocals(0, requiredArgs,
-           compileBody(body, scope,
-           new PopFrame())));
-  }
-  
-  /* Compile the body of a variadic procedure with at least N arguments
-     and optionally more
-
-     Syntax: (fun (param... & rest) body...)
-
-     Compilation:
-
-     push-env N+1        // extend environment for N+1 arguments
-     pop-arg             // bind all but last argument to parameters
-     store-local 0 0
-     ...
-     pop-rest-args       // bind all additional arguments to rest parameter
-     store-local 0 N-1
-     <<body>>            // evaluate body
-     pop-frame           // return to caller
-  */
-  
-  private Inst compileVariadicProc(List body, Scope scope, int requiredArgs)
-  {
-    return new PushEnv(requiredArgs + 1,
-               compileBindLocals(0, requiredArgs,
-               new PopRestArgs(
-               new StoreLocal0(requiredArgs,
-               compileBody(body, scope,
+    var paramInfo = parseParamList(params);
+    var requiredArgs = paramInfo.requiredArgs();
+    var numRequired = requiredArgs.length();
+    var optionalArgs = paramInfo.optionalArgs();
+    var numOptional = optionalArgs.length();
+    var restArg = paramInfo.restArg();
+    var numRest = restArg.length(); // 0 or 1
+    var numBindings = numRequired + numOptional + numRest;
+    
+    var sig = !restArg.isEmpty()
+                ? Signature.variadic(numRequired)
+                : (!optionalArgs.isEmpty()
+                     ? Signature.variadic(numRequired, numOptional)
+                     : Signature.fixed(numRequired));
+    
+    var code = new PushEnv(numBindings,
+               compileBindRequired(0, numRequired,
+               compileBindOptionals(numRequired, optionalArgs, scope.extend(requiredArgs),
+               compileBindRestArg(numRequired + numOptional, restArg,
+               compileBody(body, scope.extend(List.concat(requiredArgs, extractFirst(optionalArgs), restArg)),
                new PopFrame())))));
+    
+    return new Procedure(code, sig);
   }
+
+  private Inst compileBindRequired(int offset, int numRequired, Inst next)
+  {
+    if (offset >= numRequired)
+      return next;
+
+    return new PopArg(
+           new StoreLocal0(offset,
+           compileBindRequired(offset + 1, numRequired, next)));
+  }
+
+  private Inst compileBindOptionals(int offset, List optionalArgs, Scope scope, Inst next)
+  {
+    if (optionalArgs.isEmpty())
+      return next;
+    
+    var symb = (Symbol) ((List)optionalArgs.first()).first();
+    var initExp = ((List)optionalArgs.first()).second();
+    next = new StoreLocal0(offset,
+           compileBindOptionals(offset + 1, optionalArgs.rest(), scope.bind(symb),
+           next));
+    var elseBranch = compile(initExp, scope, false, false, next);
+    return new JumpArgsEmpty(elseBranch,
+           new PopArg(
+           new Jump(next, elseBranch)));
+  }
+
+  private Inst compileBindRestArg(int offset, List restArg, Inst next)
+  {
+    if (restArg.isEmpty())
+      return next;
+    
+    return new PopRestArgs(
+           new StoreLocal0(offset,
+           next));
+  }
+  
   
   /* Compile the "defmacro" special form.
      

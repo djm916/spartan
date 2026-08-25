@@ -15,7 +15,7 @@
 ; (any? xs...) => (if (first xs) #true (any? (rest xs)))
 ;
 
-(defmacro any? (& xs)
+(defmacro any? (&rest xs)
   (if (empty? xs)
     #false
     `(if ,(first xs) #true (any? ,@(rest xs)))))
@@ -27,7 +27,7 @@
 ; (all? xs...) => (if (not (first xs)) #false (all? (rest xs)))
 ;
 
-(defmacro all? (& xs)
+(defmacro all? (&rest xs)
   (if (empty? xs)
     #true
     `(if (not ,(first xs)) #false (all? ,@(rest xs)))))

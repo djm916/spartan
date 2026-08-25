@@ -91,6 +91,10 @@ public final class VirtualMachine
             control = j.target();
             break;
           }
+          case JumpArgsEmpty(var target, var next): {
+            control = args.isEmpty() ? target : next;
+            break;
+          }
           case LoadConst(var value, var next): {
             result = value;
             control = next;
