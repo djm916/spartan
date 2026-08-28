@@ -79,6 +79,29 @@ public final class Runtime
     modules.put(module.name(), module);
   }
   
+  /** Remove a module by name.
+      
+      NOTE: Only intended for internal use!
+  */
+  public static void removeModule(Symbol moduleName)
+  {
+    var module = getModule(moduleName).orElseThrow(() -> new ModuleDoesNotExist(moduleName));
+    modules.remove(module);
+  }
+  
+  /** Remove the "user" and all other user-defined modules
+      
+      NOTE: Only intended for internal use!
+  */
+  public static void removeAllUserModules()
+  {
+    // Remove all entries and add back the base module
+    modules.clear();
+    var baseModule = BaseModule.INSTANCE;
+    addModule(baseModule);
+    currentModule(baseModule);
+  }
+  
   public static Module createModule(Symbol moduleName)
   {
     //return modules.computeIfAbsent(moduleName, (_) -> new Module(moduleName, BaseModule.INSTANCE));
@@ -87,7 +110,7 @@ public final class Runtime
     return module;
   }
   
-  private static Symbol canonicalName(Symbol moduleName)
+  public static Symbol canonicalName(Symbol moduleName)
   {
     return currentModule().lookupAlias(moduleName).orElse(moduleName);
   }
@@ -122,13 +145,12 @@ public final class Runtime
     return lookup(s).filter(RecordDescriptor.class::isInstance).map(RecordDescriptor.class::cast);
   }
   
-  /** Bootstrap the initial system state and global environment.
+  /** Bootstrap the spartan.base module
    *
-   *  <ul>
-   *    <li>Add the "spartan.core" namespace</li>
-   *    <li>Load the "builtins.s" file</li>
-   *    <li>Set the current namespace to the "user" namespace</li>
-   *  </ul>
+   *  Adds the "spartan.base" module and then initializes it by loading
+   *  "spartan/base/base.s", which itself loads further files.
+   *  Finally, sets the current module to "user" which inherits all the
+   *  bindings in "spartan.base".
    */
   public static void boot()
   {

@@ -37,7 +37,7 @@ public final class BaseModule extends Module
     bindPublic(Symbol.of("apply"), BaseLib.APPLY);
     bindPublic(Symbol.of("call/cc"), BaseLib.CALL_CC);
     bindPublic(Symbol.of("print"), BaseLib.PRINT);
-    bindPublic(Symbol.of("print-line"), BaseLib.PRINT_LINE);
+    bindPublic(Symbol.of("println"), BaseLib.PRINTLN);
     bindPublic(Symbol.of("type"), BaseLib.TYPE);    
     bindPublic(Symbol.of("load"), BaseLib.LOAD);    
     bindPublic(Symbol.of("gensym"), BaseLib.GENSYM);    

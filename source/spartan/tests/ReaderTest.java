@@ -1,6 +1,6 @@
 package spartan.tests;
 
-import org.junit.Test;
+import org.junit.*;
 import static org.junit.Assert.*;
 import spartan.parsing.Reader;
 import spartan.errors.Error;
@@ -12,6 +12,7 @@ import spartan.data.Int;
 public class ReaderTest
 {
   /** Reader throws EOFException on encountering end of input. */
+  // throwsOnEOF
   @Test(expected = EOFException.class)
   public void endOfInputThrowsEOF() throws EOFException
   {
@@ -20,6 +21,7 @@ public class ReaderTest
     }
   }
   
+  // throwsOnNull
   @Test(expected = NullPointerException.class)
   public void nullInputThrowsNPE() throws EOFException
   {

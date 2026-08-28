@@ -12,11 +12,6 @@ public abstract class TestBase
 {
   public static Datum eval(String code)
   {
-    // Set up a namespace "testbed" as the current one
-    //var testNS = new Namespace(Symbol.of("testbed"), spartan.builtins.CoreNS.INSTANCE);
-    //spartan.Runtime.add(testPkg);
-    //spartan.Runtime.currentPackage(testPkg);
-    spartan.Runtime.enterModule(Symbol.of("testbed"));
     // Evaluate each top-level form in the source code
     try (Reader r = Reader.forString(code)) {
       var vm = new VirtualMachine();

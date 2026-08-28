@@ -124,9 +124,9 @@ public final class BaseLib
     }
   };
   
-  // (print-line obj...)
+  // (println obj...)
   
-  public static final Primitive PRINT_LINE = new Primitive(Signature.variadic(0)) {
+  public static final Primitive PRINTLN = new Primitive(Signature.variadic(0)) {
     public void apply(VirtualMachine vm) {
       while (!vm.args.isEmpty())
         System.out.print(vm.popArg().str());

@@ -1,12 +1,18 @@
 package spartan.tests;
 
-import org.junit.Test;
+import org.junit.*;
 import static org.junit.Assert.*;
-
 import spartan.data.Int;
+import spartan.data.Symbol;
 
 public class Factorial extends TestBase
 {
+  @Before
+  public void setup()
+  {
+    spartan.Runtime.enterModule(Symbol.of("testbed"));
+  }
+  
   @Test
   public void test1()
   {

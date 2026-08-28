@@ -18,9 +18,11 @@ import spartan.Config;
 import java.util.logging.Logger;
 import java.util.Optional;
 import java.util.Map;
+import static spartan.compiling.CompilerUtils.*;
 import static java.util.Map.entry;
 import static spartan.Runtime.lookupMacro;
 import static spartan.Runtime.currentModule;
+import static spartan.Runtime.canonicalName;
 import spartan.util.Box;
 
 /**
@@ -208,11 +210,6 @@ public class Compiler
     }
   }
   
-  private static Symbol canonicalName(Symbol moduleName)
-  {
-    return currentModule().lookupAlias(moduleName).orElse(moduleName);
-  }
-  
   /* Compile "def" special form
   
      Syntax: (def name init)
@@ -245,7 +242,7 @@ public class Compiler
     if (!allowDefs)
       throw defNotAllowed(exp);
     if (!(exp.length() > 3 && exp.second() instanceof Symbol name && name.isSimple()
-       && exp.third() instanceof List params && checkParamListForm(params)))
+       && exp.third() instanceof List params && checkParamList(params)))
      throw malformedExp(exp);
     
     var xform = transformDefun(exp);
@@ -335,7 +332,7 @@ public class Compiler
   */
   private Inst compileCond(List exp, Scope scope, boolean tail, boolean allowDefs, Inst next)
   {
-    if (exp.length() < 2 || !checkClauseListForm(exp.rest()))
+    if (exp.length() < 2 || !checkCondClauses(exp.rest()))
       throw malformedExp(exp);
 
     return compileCondClauses(exp.rest(), scope, tail, next);
@@ -390,7 +387,7 @@ public class Compiler
 
   private Inst compileLet(List exp, Scope scope, boolean tail, boolean allowDefs, Inst next)
   {
-    if (!(exp.length() >= 3 && exp.second() instanceof List bindings && checkBindingListForm(bindings)))
+    if (!(exp.length() >= 3 && exp.second() instanceof List bindings && checkBindingList(bindings)))
       throw malformedExp(exp);
 
     var body = exp.drop2();
@@ -427,7 +424,7 @@ public class Compiler
   */
   private Inst compileLetStar(List exp, Scope scope, boolean tail, boolean allowDefs, Inst next)
   {
-    if (!(exp.length() >= 3 && exp.second() instanceof List bindings && checkBindingListForm(bindings)))
+    if (!(exp.length() >= 3 && exp.second() instanceof List bindings && checkBindingList(bindings)))
       throw malformedExp(exp);
 
     var body = exp.drop2();
@@ -483,7 +480,7 @@ public class Compiler
   */
   private Inst compileLetRec(List exp, Scope scope, boolean tail, boolean allowDefs, Inst next)
   {
-    if (!(exp.length() >= 3 && exp.second() instanceof List bindings && checkBindingListForm(bindings)))
+    if (!(exp.length() >= 3 && exp.second() instanceof List bindings && checkBindingList(bindings)))
       throw malformedExp(exp);
 
     var body = exp.drop2();
@@ -522,94 +519,7 @@ public class Compiler
       return new StoreLocal0(offset,
              compileInitRecEnv(offset + 1, numBindings, next));
   }
-    
-  /* Check that a binding list for a "let" expression is well-formed */
-  
-  private static boolean checkBindingListForm(List bindings)
-  {
-    for (; !bindings.isEmpty(); bindings = bindings.rest())
-      if (!(bindings.first() instanceof List list && list.length() == 2 && list.first() instanceof Symbol s && s.isSimple()))
-        return false;
-    return true;
-  }
-  
-  /* Check that a binding list for a "rep" expression is well-formed */
-  
-  private static boolean checkRepBindingsForm(List bindings)
-  {
-    for (; !bindings.isEmpty(); bindings = bindings.rest())
-      if (!(bindings.first() instanceof List list && list.length() == 3 && list.first() instanceof Symbol s && s.isSimple()))
-        return false;
-    return true;
-  }
-  
-  /* Check that a parameter list is well-formed according to the grammar:
- 
-     <parameter-list> => "(" <symbol>* [:option (<symbol> <exp>)+] [:rest <symbol>] ")"
-   */
-  private static boolean checkParamListForm(List params)
-  {
-    for (; !params.isEmpty(); params = params.rest()) {
-      if (Symbol.OPTARG.equals(params.first()))
-        break;
-      if (Symbol.RESTARG.equals(params.first()))
-        break;
-      if (!(params.first() instanceof Symbol s && s.isSimple()))
-        return false;
-    }
-    if (!params.isEmpty() && Symbol.OPTARG.equals(params.first())) {
-      params = params.rest();
-      for (; !params.isEmpty(); params = params.rest()) {
-        if (Symbol.RESTARG.equals(params.first()))
-          break;
-        if (!(params.first() instanceof List pair && pair.length() == 2
-            && pair.first() instanceof Symbol s && s.isSimple()))
-          return false;
-      }
-    }
-    if (!params.isEmpty() && Symbol.RESTARG.equals(params.first())) {
-      params = params.rest();
-      if (!(!params.isEmpty() && params.first() instanceof Symbol s && s.isSimple()))
-        return false;
-      params = params.rest();
-    }
-    if (!params.isEmpty())
-      return false;
-    return true;
-  }
-  
-  /* Check that a clause list is well-formed
-   * 
-   * <clause-list> => "(" <clause>+ <else-clause>? ")"
-   * <clause> => "(" <expr> <expr>+ ")"
-   * <else-clause> => "(" "else" <expr>+ ")"
-   */
-  private static boolean checkClauseListForm(List clauses)
-  {
-    for (; !clauses.isEmpty(); clauses = clauses.rest())
-      if (!(clauses.first() instanceof List clause) || clause.length() < 2 || (Symbol.ELSE.equals(clause.first()) && !clauses.rest().isEmpty()))
-        return false;
-    return true;
-  }
 
-  // Extract the first sub-element from each element in a list of lists
-  private static List extractFirst(List bindings)
-  {
-    return bindings.map(list -> ((List)list).first());
-  }
-
-  // Extract the second sub-element from each element in a list of lists
-  private static List extractSecond(List bindings)
-  {
-    return bindings.map(list -> ((List)list).second());
-  }
-  
-  // Extract the third sub-element from each element in a list of lists
-  private static List extractThird(List bindings)
-  {
-    return bindings.map(list -> ((List)list).third());
-  }
-  
   /* Generate the argument-evaluation sequence of a procedure application */
   
   private Inst compilePushArgs(List args, Scope scope, Inst next)
@@ -720,7 +630,7 @@ public class Compiler
    */
   private Inst compileFun(List exp, Scope scope, boolean tail, boolean allowDefs, Inst next)
   {
-    if (!(exp.length() >= 3 && exp.second() instanceof List params && checkParamListForm(params)))
+    if (!(exp.length() >= 3 && exp.second() instanceof List params && checkParamList(params)))
       throw malformedExp(exp);
     var body = exp.drop2();
     var proc = makeProcedure(params, body, scope);    
@@ -756,7 +666,7 @@ public class Compiler
       var exp = (List) body.first();
       if (Symbol.DEFUN.equals(exp.first())) {
         if (!(exp.length() > 3 && exp.second() instanceof Symbol s && s.isSimple()
-           && exp.third() instanceof List params && checkParamListForm(params)))
+           && exp.third() instanceof List params && checkParamList(params)))
           throw malformedExp(exp);
         exp = transformDefun(exp);
       }
@@ -771,21 +681,6 @@ public class Compiler
     return List.adjoin(Symbol.LETREC, List.adjoin(bindings.build(), body));
   }
 
-  // Determine if a form is an inner definition (i.e., "def", "defun")
-  // These can only appear at the top of a function body
-  private static boolean isInnerDefinition(Datum exp)
-  {
-    return exp instanceof List form && !form.isEmpty() && (Symbol.DEF.equals(form.first()) || Symbol.DEFUN.equals(form.first()));
-  }
-
-  // Determine if form is a top-level definition (i.e., "def", "defun", "defmacro")
-  // These can only appear at the top-level and within "do" forms at the top-level
-  private static boolean isTopLevelDefinition(Datum exp)
-  {
-    //return exp instanceof List form && !form.isEmpty() && (Symbol.DEF.equals(form.first()) || Symbol.DEFUN.equals(form.first()) || Symbol.DEFMACRO.equals(form.first()) || Symbol.DO.equals(form.first()));
-    return exp instanceof List form && !form.isEmpty() && (Symbol.DEF.equals(form.first()) || Symbol.DEFUN.equals(form.first()) || Symbol.DEFMACRO.equals(form.first()));
-  }
-  
   /* Compiles the "or" special form, a logical disjunction.
 
      Syntax: (or exp1 ... expN)
@@ -962,7 +857,7 @@ public class Compiler
   */
   private Inst compileRep(List exp, Scope scope, boolean tail, boolean allowDefs, Inst next)
   {
-    if (!(exp.length() >= 3 && exp.second() instanceof List bindings && checkRepBindingsForm(bindings)
+    if (!(exp.length() >= 3 && exp.second() instanceof List bindings && checkRepBindings(bindings)
         && exp.third() instanceof List subform && subform.length() == 3 && Symbol.WHEN.equals(subform.first())))
       throw malformedExp(exp);
     
@@ -1047,7 +942,7 @@ public class Compiler
    * forms into an equivalent expression using only quote, adjoin, and concat.
    *
    * Let QQ(exp, N) denote the quasiquote transformation of exp with nesting
-   * level N. Then QQ is defined as follows:
+   * level N, defined as follows:
    *
    * QQ(x, N) => (quote x), for non-list value x
    * QQ(((unquote x) xs...), 0) => (adjoin x QQ(xs..., 0))
@@ -1136,57 +1031,6 @@ public class Compiler
            List.EMPTY)));
   }
   
-  
-  
-  private static record ParsedParams(List requiredArgs, List optionalArgs, List restArg)
-  {};
-
-  /* Parse a parameter list of the form
-  
-       "(" <symbol>* [:option (<symbol> <exp>)+] [:rest <symbol>] ")"
-     
-     Returns 3 lists of symbols (each of which may be empty):
-     
-     requiredArgs - The function's required arguments
-     optionalArgs - A list of pairs denoting the function's optional arguments and default values
-     restArg      - Contains the rest argument, if any
-  */
-  private static ParsedParams parseParamList(List params)
-  {
-    var requiredArgs = new List.Builder();
-    var optionalArgs = new List.Builder();
-    var restArg = List.EMPTY;
-    
-    // Parse required arguments, stopping at end of list or next keyword
-    for (; !params.isEmpty(); params = params.rest()) {
-      if (Symbol.OPTARG.equals(params.first()))
-        break;
-      if (Symbol.RESTARG.equals(params.first()))
-        break;
-      requiredArgs.add(params.first());
-    }
-    
-    // Parse optional arguments, stopping at end of list or next keyword
-    // NOTE: Assumes each optional argument is a binding pair: (<symbol> <exp>)
-    if (!params.isEmpty() && Symbol.OPTARG.equals(params.first())) {
-      params = params.rest();
-      for (; !params.isEmpty(); params = params.rest()) {
-        if (Symbol.RESTARG.equals(params.first()))
-          break;
-        optionalArgs.add(params.first());
-      }
-    }
-    
-    // Parse the rest argument
-    // NOTE: Assumes exactly 1 symbol in the rest of the parameter list
-    if (!params.isEmpty() && Symbol.RESTARG.equals(params.first()))
-      restArg = params.rest();
-    
-    return new ParsedParams(requiredArgs.build(), 
-                            optionalArgs.build(),
-                            restArg);
-  }
-
   /** Given a function parameter list and body expression, return a Procedure
    *  object containing a Signature and the compiled bytecode for the function.
    *
@@ -1284,7 +1128,7 @@ public class Compiler
     if (!allowDefs)
       throw defNotAllowed(exp);
     if (!(exp.length() >= 4 && exp.second() instanceof Symbol symbol && symbol.isSimple()
-        && exp.third() instanceof List params && checkParamListForm(params)))
+        && exp.third() instanceof List params && checkParamList(params)))
       throw malformedExp(exp);
     var body = exp.drop3();
     var macro = new Macro(makeProcedure(params, body, Scope.EMPTY));
@@ -1392,25 +1236,11 @@ public class Compiler
     var clauses = exp.drop2();
     
     return compile(exp.second(), scope, false, false,
-           new PushEnv(calcMatchEnvSize(clauses),
+           new PushEnv(matchEnvSize(clauses),
            compileMatchClauses(exp, clauses, scope, tail,
            new PopEnv(next))));
   }
-  
-  private static int calcMatchEnvSize(List clauses)
-  {
-    int maxVars = 0;
-    for (; !clauses.isEmpty(); clauses = clauses.rest()) {
-      var clause = (List) clauses.first();
-      var patt = clause.first();
-      var vars = patternVars(patt);
-      var len = vars.length();
-      if (len > maxVars)
-        maxVars = len;
-    }
-    return maxVars;
-  }
-  
+
   private Inst compileMatchClauses(List matchExp, List clauses, Scope scope, boolean tail, Inst next)
   {
     if (clauses.isEmpty())
@@ -1427,43 +1257,6 @@ public class Compiler
            compileSequence(body, extendedScope, tail,
            new Jump(next,
            nextClause)));
-  }
-  
-  private static boolean checkMatchClauses(List clauses)
-  {
-    for (; !clauses.isEmpty(); clauses = clauses.rest())
-      if (!(clauses.first() instanceof List clause && clause.length() >= 2))
-        return false;
-    return true;
-  }
-    
-  private static List patternVars(Datum pattern)
-  {
-    if (pattern instanceof Symbol symb && !symb.isKeyword() && !Symbol.UNDERSCORE.equals(symb))
-      return List.of(symb);
-    if (pattern instanceof List list && !list.isEmpty() && list.first() instanceof Symbol first) {
-      if (first.equals(Symbol.LIST))
-        return patternVarsInner(list.rest());
-      if (first.equals(Symbol.LIST_STAR))
-        return patternVarsInner(list.rest());
-      if (first.equals(Symbol.VECTOR))
-        return patternVarsInner(list.rest());
-      if (first.equals(Symbol.RECORD))
-        return patternVarsInner(list.drop2());
-      if (first.equals(Symbol.AND))
-        return patternVarsInner(list.rest());
-      if (first.equals(Symbol.OR))
-        return patternVarsInner(list.rest());
-    }
-    return List.EMPTY;
-  }
-  
-  private static List patternVarsInner(List patterns)
-  {
-    if (patterns.isEmpty())
-      return List.EMPTY;
-    else
-      return List.concat2(patternVars(patterns.first()), patternVarsInner(patterns.rest()));
   }
   
   private IPattern compilePattern(Datum pattern, List vars)
@@ -1493,11 +1286,6 @@ public class Compiler
         return compileOrPattern(list.rest(), vars);
     }
     throw malformedExp(pattern);
-  }
-  
-  private static boolean checkQuotePattern(List pattern)
-  {
-    return pattern.length() == 2 && pattern.second() instanceof IEq;
   }
   
   private IPattern compileQuotePattern(List pattern)
@@ -1555,25 +1343,6 @@ public class Compiler
     else
       return new MatchOr(compilePattern(patterns.first(), vars),
                          compileOrPattern(patterns.rest(), vars));
-  }
-  
-  private static boolean checkOrPattern(List patterns)
-  {
-    var vars = patternVars(patterns.first());
-    for (patterns = patterns.rest(); !patterns.isEmpty(); patterns = patterns.rest())
-      if (!vars.equals(patternVars(patterns.first())))
-        return false;
-    return true;
-  }
-  
-  // (record <type-name> <pattern>...)
-  private static boolean checkRecordPattern(List pattern)
-  {
-    return pattern.length() >= 2
-        && pattern.second() instanceof Symbol typeName
-        && spartan.Runtime.lookupRTD(typeName)
-           .map(rtd -> rtd.fields().length == pattern.drop2().length())
-           .orElse(false);
   }
   
   /* Compile a compound expression (i.e., special forms, function application, or macro usage.)
