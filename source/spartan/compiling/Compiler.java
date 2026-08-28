@@ -270,20 +270,21 @@ public class Compiler
 
   /* Compile the "if" special form.
 
-     Syntax (2-branch form): (if pred sub alt)        
+     Syntax: (if pred sub alt)
+     
+     Syntax: (if pred sub)
 
+     The second form (without a 2nd branch) is converted to the first form,
+     as (if pred sub #nil).
+     
      Compilation:
 
            <<pred>>
-           jf L
+           jump-false L
            <<sub>>
-           j next
+           jump next
      L:    <<alt>>
      next: ...
-     
-     Syntax (1-branch form): (if pred sub)
-     
-     Translation: (if pred sub #nil)
   */
   private Inst compileIf(List exp, Scope scope, boolean tail, boolean allowDefs, Inst next)
   {
@@ -310,38 +311,27 @@ public class Compiler
                    ...
                    (predN bodyN))
      
-     Compilation:
-
-     P1:  <<pred1>>
-          jf P2
-          <<body1>>
-          j next
-          ...
-     PN:  <<predN>>
-          jf none
-             <<bodyN>>
-             jump next
-     none:   load-const nil
-     next:   ...
-     
      Syntax: (cond (pred1 body1)
                    ...
                    (predN bodyN)
                    (else  default))
-
+          
+     The first form (without an explicit else clause) is equivalent to the
+     second form with an (else #nil) clause.
+     
      Compilation:
 
-     pred1:    <<pred1>>
-               branchf pred2
-               <<body1>>
-               jump next
-               ...
-     predN:    <<predN>>
-               branchf default
-               <<bodyN>>
-               jump next
-     default:  <<default>>
-     next:     ...
+     L1:   <<pred1>>
+           jump-false P2
+           <<body1>>
+           jump next
+     L2:   ...
+     LN:   <<predN>>
+           jump-false none
+           <<bodyN>>
+           jump next
+     none: <<default>>
+     next: ...
   */
   private Inst compileCond(List exp, Scope scope, boolean tail, boolean allowDefs, Inst next)
   {
@@ -524,7 +514,7 @@ public class Compiler
   
   /* Generate the initialization sequence of a letrec expression. */
   
-  private static Inst compileInitRecEnv(int offset, int numBindings, Inst next)
+  private Inst compileInitRecEnv(int offset, int numBindings, Inst next)
   {
     if (offset >= numBindings)
       return next;
@@ -535,7 +525,7 @@ public class Compiler
     
   /* Check that a binding list for a "let" expression is well-formed */
   
-  private boolean checkBindingListForm(List bindings)
+  private static boolean checkBindingListForm(List bindings)
   {
     for (; !bindings.isEmpty(); bindings = bindings.rest())
       if (!(bindings.first() instanceof List list && list.length() == 2 && list.first() instanceof Symbol s && s.isSimple()))
@@ -543,9 +533,9 @@ public class Compiler
     return true;
   }
   
-  /* Check that a binding list for a "do" expression is well-formed */
+  /* Check that a binding list for a "rep" expression is well-formed */
   
-  private boolean checkForBindingsForm(List bindings)
+  private static boolean checkRepBindingsForm(List bindings)
   {
     for (; !bindings.isEmpty(); bindings = bindings.rest())
       if (!(bindings.first() instanceof List list && list.length() == 3 && list.first() instanceof Symbol s && s.isSimple()))
@@ -557,7 +547,7 @@ public class Compiler
  
      <parameter-list> => "(" <symbol>* [:option (<symbol> <exp>)+] [:rest <symbol>] ")"
    */
-  private boolean checkParamListForm(List params)
+  private static boolean checkParamListForm(List params)
   {
     for (; !params.isEmpty(); params = params.rest()) {
       if (Symbol.OPTARG.equals(params.first()))
@@ -594,7 +584,7 @@ public class Compiler
    * <clause> => "(" <expr> <expr>+ ")"
    * <else-clause> => "(" "else" <expr>+ ")"
    */
-  private boolean checkClauseListForm(List clauses)
+  private static boolean checkClauseListForm(List clauses)
   {
     for (; !clauses.isEmpty(); clauses = clauses.rest())
       if (!(clauses.first() instanceof List clause) || clause.length() < 2 || (Symbol.ELSE.equals(clause.first()) && !clauses.rest().isEmpty()))
@@ -603,19 +593,19 @@ public class Compiler
   }
 
   // Extract the first sub-element from each element in a list of lists
-  private List extractFirst(List bindings)
+  private static List extractFirst(List bindings)
   {
     return bindings.map(list -> ((List)list).first());
   }
 
   // Extract the second sub-element from each element in a list of lists
-  private List extractSecond(List bindings)
+  private static List extractSecond(List bindings)
   {
     return bindings.map(list -> ((List)list).second());
   }
   
   // Extract the third sub-element from each element in a list of lists
-  private List extractThird(List bindings)
+  private static List extractThird(List bindings)
   {
     return bindings.map(list -> ((List)list).third());
   }
@@ -746,7 +736,7 @@ public class Compiler
        (def varN initN)
        body...)
 
-     into an equivalent nested letrec form:
+     into an equivalent letrec form:
 
      (fun (param...)
        (letrec ((var1 init1)
@@ -754,7 +744,7 @@ public class Compiler
                 (varN initN))
          body...))
 
-     Inner "defun" forms are first transformed:
+     Inner procedure definitions are first transformed into simple definitions:
 
      (defun var params body) => (def var (fun params body))
   */
@@ -783,14 +773,14 @@ public class Compiler
 
   // Determine if a form is an inner definition (i.e., "def", "defun")
   // These can only appear at the top of a function body
-  private boolean isInnerDefinition(Datum exp)
+  private static boolean isInnerDefinition(Datum exp)
   {
     return exp instanceof List form && !form.isEmpty() && (Symbol.DEF.equals(form.first()) || Symbol.DEFUN.equals(form.first()));
   }
 
   // Determine if form is a top-level definition (i.e., "def", "defun", "defmacro")
   // These can only appear at the top-level and within "do" forms at the top-level
-  private boolean isTopLevelDefinition(Datum exp)
+  private static boolean isTopLevelDefinition(Datum exp)
   {
     //return exp instanceof List form && !form.isEmpty() && (Symbol.DEF.equals(form.first()) || Symbol.DEFUN.equals(form.first()) || Symbol.DEFMACRO.equals(form.first()) || Symbol.DO.equals(form.first()));
     return exp instanceof List form && !form.isEmpty() && (Symbol.DEF.equals(form.first()) || Symbol.DEFUN.equals(form.first()) || Symbol.DEFMACRO.equals(form.first()));
@@ -803,7 +793,7 @@ public class Compiler
      Compilation:
 
             <<exp1>>
-            jt next
+            jump-true next
             ...
             <<expN>>
       next: ...
@@ -834,7 +824,7 @@ public class Compiler
      Compilation:
 
             <<exp1>>
-            jf next
+            jump-false next
             ...
             <<expN>>
       next: ...
@@ -865,24 +855,28 @@ public class Compiler
     if (exp.length() < 2)
       throw malformedExp(exp);
     
-    return compileDoWithDefs(exp.rest(), scope, tail, allowDefs, next);
+    return compileDoInner(exp.rest(), scope, tail, allowDefs, next);
   }
   
-  private Inst compileDoWithDefs(List exp, Scope scope, boolean tail, boolean allowDefs, Inst next)
+  private Inst compileDoInner(List exp, Scope scope, boolean tail, boolean allowDefs, Inst next)
   {
-    if (exp.isEmpty()) {
+    if (exp.isEmpty())
       return next;
-    }
-    else if (isTopLevelDefinition(exp.first())) {
+    
+    // Handle definitions within the "do" form.
+    // Some weirdness here to ensure definitions appearing in the sequence are compiled
+    // top-to-bottom (such that later expressions may refer to them) instead of the usual
+    // bottom-to-top compilation strategy. Compile the definition with a mutable "nop" as
+    // the next instruction; only once it is compiled do we set the next of the nop.
+    if (isTopLevelDefinition(exp.first())) {
       var end = new Nop();
       var result = compile(exp.first(), scope, tail && exp.rest().isEmpty(), allowDefs, end);
-      end.setNext(compileDoWithDefs(exp.rest(), scope, tail, allowDefs, next));
+      end.setNext(compileDoInner(exp.rest(), scope, tail, allowDefs, next));
       return result;
     }
-    else {
-      return compile(exp.first(), scope, tail && exp.rest().isEmpty(), allowDefs,
-             compileDoWithDefs(exp.rest(), scope, tail, allowDefs, next));
-    }
+
+    return compile(exp.first(), scope, tail && exp.rest().isEmpty(), allowDefs,
+           compileDoInner(exp.rest(), scope, tail, allowDefs, next));
   }
   
   /* Compiles the "while" special form.
@@ -891,11 +885,11 @@ public class Compiler
 
      Compilation:
 
-     L0: <<pred>>
-         jf L1
-         <<body>>
-         j L0
-     L1: ldc #nil
+     L0:   <<pred>>
+           jump-false L1
+           <<body>>
+           jump L0
+     L1:   load-const #nil
      next: ...
   */
 
@@ -917,10 +911,10 @@ public class Compiler
     return top;
   }
   
-  /* Compile the "rep" special form.
+  /* Compile the "rep" special form for expressing (functional) iteration.
    
      Syntax: (rep ((var init step) ...)
-               :when test result
+               (when test result)
                body...)
      
      Compilation:
@@ -966,10 +960,10 @@ public class Compiler
      done: <<result>>
            pop-env
   */
-  private Inst compileRepLoop(List exp, Scope scope, boolean tail, boolean allowDefs, Inst next)
+  private Inst compileRep(List exp, Scope scope, boolean tail, boolean allowDefs, Inst next)
   {
-    if (!(exp.length() >= 5 && exp.second() instanceof List bindings && checkForBindingsForm(bindings)
-        && exp.third() == Symbol.of(":when")))
+    if (!(exp.length() >= 3 && exp.second() instanceof List bindings && checkRepBindingsForm(bindings)
+        && exp.third() instanceof List subform && subform.length() == 3 && Symbol.WHEN.equals(subform.first())))
       throw malformedExp(exp);
     
     int numBindings = bindings.length();
@@ -977,9 +971,9 @@ public class Compiler
     var inits = extractSecond(bindings);
     var steps = extractThird(bindings);
     var extendedScope = scope.extend(vars);
-    var test = exp.nth(3);
-    var result = exp.nth(4);
-    var body = exp.drop(5);
+    var test = subform.second();
+    var result = subform.third();
+    var body = exp.drop3();
     
     var jump = new Jump();
     var end = compile(result, extendedScope, false, false,
@@ -998,8 +992,10 @@ public class Compiler
            top)));
   }
   
-  // (quote x)
-
+  /* Compile the "quote" special form.
+  
+     Syntax: (quote x)
+  */
   private Inst compileQuote(List exp, Scope scope, boolean tail, boolean allowDefs, Inst next)
   {
     if (exp.length() != 2)
@@ -1013,7 +1009,7 @@ public class Compiler
       return new LoadConst(exp.second(), next);
   }
 
-  private List quoteList(List list)
+  private static List quoteList(List list)
   {
     return list.map(
       x -> switch (x) {
@@ -1142,7 +1138,7 @@ public class Compiler
   
   
   
-  private static record ParsedParameters(List requiredArgs, List optionalArgs, List restArg)
+  private static record ParsedParams(List requiredArgs, List optionalArgs, List restArg)
   {};
 
   /* Parse a parameter list of the form
@@ -1155,13 +1151,13 @@ public class Compiler
      optionalArgs - A list of pairs denoting the function's optional arguments and default values
      restArg      - Contains the rest argument, if any
   */
-  private ParsedParameters parseParamList(List params)
+  private static ParsedParams parseParamList(List params)
   {
     var requiredArgs = new List.Builder();
     var optionalArgs = new List.Builder();
     var restArg = List.EMPTY;
     
-    // Parse required argument section, stopping on end of list or next keyword
+    // Parse required arguments, stopping at end of list or next keyword
     for (; !params.isEmpty(); params = params.rest()) {
       if (Symbol.OPTARG.equals(params.first()))
         break;
@@ -1170,7 +1166,7 @@ public class Compiler
       requiredArgs.add(params.first());
     }
     
-    // Parse optional argument section, stopping on end of list or next keyword
+    // Parse optional arguments, stopping at end of list or next keyword
     // NOTE: Assumes each optional argument is a binding pair: (<symbol> <exp>)
     if (!params.isEmpty() && Symbol.OPTARG.equals(params.first())) {
       params = params.rest();
@@ -1181,14 +1177,14 @@ public class Compiler
       }
     }
     
-    // Parse rest argument
+    // Parse the rest argument
     // NOTE: Assumes exactly 1 symbol in the rest of the parameter list
     if (!params.isEmpty() && Symbol.RESTARG.equals(params.first()))
       restArg = params.rest();
     
-    return new ParsedParameters(requiredArgs.build(), 
-                                optionalArgs.build(),
-                                restArg);
+    return new ParsedParams(requiredArgs.build(), 
+                            optionalArgs.build(),
+                            restArg);
   }
 
   /** Given a function parameter list and body expression, return a Procedure
@@ -1211,6 +1207,16 @@ public class Compiler
     var numBindings = numRequired + numOptional + numRest;
     var allArgs = List.concat(requiredArgs, extractFirst(optionalArgs), restArg);
     
+    // Determine procedure Signature
+    // Case 1: N required args
+    //   Check: numArgs == N; folds into Signature.fixed(N)
+    // Case 2: N required args, M optional args
+    //   Check: numArgs >= N && numArgs <= N+M; folds into Signature.variadic(N, M)
+    // Case 3: N required args + a rest arg
+    //   Check: numArgs >= N; folds into Signature.variadic(N)
+    // Case 4: N required args, M optional args + a rest arg
+    //   Check: numArgs >= N; folds into Signature.variadic(N)
+
     var sig = !restArg.isEmpty()
                 ? Signature.variadic(numRequired)
                 : (!optionalArgs.isEmpty()
@@ -1234,7 +1240,8 @@ public class Compiler
 
     return new PopArg(
            new StoreLocal0(offset,
-           compileBindRequired(offset + 1, numRequired, next)));
+           compileBindRequired(offset + 1, numRequired,
+           next)));
   }
 
   private Inst compileBindOptionals(int offset, List optionalArgs, Scope scope, Inst next)
@@ -1248,18 +1255,17 @@ public class Compiler
            compileBindOptionals(offset + 1, optionalArgs.rest(), scope.bind(symb),
            next));
     var elseBranch = compile(init, scope, false, false, next);
-    return new JumpArgsEmpty(elseBranch,
+    return new JumpNoArgs(elseBranch,
            new PopArg(
-           new Jump(next, elseBranch)));
+           new Jump(next,
+           elseBranch)));
   }
 
   private Inst compileBindRestArg(int offset, boolean hasRest, Inst next)
   {
-    return !hasRest
-             ? next
-             : new PopRestArgs(
-               new StoreLocal0(offset,
-               next));
+    return !hasRest ? next : new PopRestArgs(
+                             new StoreLocal0(offset,
+                             next));
   }
   
   
@@ -1328,8 +1334,14 @@ public class Compiler
     }
   }
 
-  /**
-       <pattern> =>   _                               ; match anything
+  /* Compile the "match" special form for generalized pattern matching.
+      
+      Syntax: (match exp
+                (pattern1 body1)
+                ...
+                (patternN bodyN))
+      
+      <pattern> =>    _                               ; match anything
                     | <symbol>                        ; match anything and bind to symbol
                     | <number>                        ; match numeric value
                     | <string>                        ; match string value
@@ -1341,26 +1353,33 @@ public class Compiler
                     | (record <symbol> <pattern> ...) ;
                     | (and <pattern> ...)
                     | (or <pattern> ...)
-                    
-                    
-     Syntax: (match exp
-               (pattern1 body1)
-               ...
-               (patternN bodyN))
-   
+     
      Compilation:
 
            <<exp>>
-           push-env N_max      // extend environment
-     P1:   match pattern1      // 
-           jf P2               // continue if pattern matches value in RES; otherwise try next pattern
-           <<body1>>           // evaluate body
-           j DONE
+           push-env N_max
+     P1:   jump-no-match pattern1 P2
+           <<body1>>
+           jump DONE
      P2:   ...
-     PN:   match patternN
-           jf FAIL
+     PN:   jump-no-match patternN FAIL
            <<bodyN>>
-           j DONE
+           jump DONE
+     FAIL: raise               // all patterns failed to match; raise error
+     DONE: pop-env
+           ...
+           
+           <<exp>>
+           push-env N_max
+           jump-match pattern1 L2
+           ...
+           jump-match patternN LN
+           jump FAIL
+     L1:   <<body1>>
+           jump DONE
+           ...
+     LN:   <<bodyN>>
+           jump DONE
      FAIL: raise               // all patterns failed to match; raise error
      DONE: pop-env
            ...
@@ -1378,7 +1397,7 @@ public class Compiler
            new PopEnv(next))));
   }
   
-  private int calcMatchEnvSize(List clauses)
+  private static int calcMatchEnvSize(List clauses)
   {
     int maxVars = 0;
     for (; !clauses.isEmpty(); clauses = clauses.rest()) {
@@ -1404,13 +1423,13 @@ public class Compiler
     var extendedScope = scope.extend(vars);
     
     var nextClause = compileMatchClauses(matchExp, clauses.rest(), scope, tail, next);
-    return new Match(compilePattern(patt, vars), nextClause,
+    return new JumpNoMatch(compilePattern(patt, vars), nextClause,
            compileSequence(body, extendedScope, tail,
            new Jump(next,
            nextClause)));
   }
   
-  private boolean checkMatchClauses(List clauses)
+  private static boolean checkMatchClauses(List clauses)
   {
     for (; !clauses.isEmpty(); clauses = clauses.rest())
       if (!(clauses.first() instanceof List clause && clause.length() >= 2))
@@ -1418,7 +1437,7 @@ public class Compiler
     return true;
   }
     
-  private List patternVars(Datum pattern)
+  private static List patternVars(Datum pattern)
   {
     if (pattern instanceof Symbol symb && !symb.isKeyword() && !Symbol.UNDERSCORE.equals(symb))
       return List.of(symb);
@@ -1439,7 +1458,7 @@ public class Compiler
     return List.EMPTY;
   }
   
-  private List patternVarsInner(List patterns)
+  private static List patternVarsInner(List patterns)
   {
     if (patterns.isEmpty())
       return List.EMPTY;
@@ -1476,16 +1495,16 @@ public class Compiler
     throw malformedExp(pattern);
   }
   
-  private boolean checkQuotePattern(List pattern)
+  private static boolean checkQuotePattern(List pattern)
   {
     return pattern.length() == 2 && pattern.second() instanceof IEq;
   }
   
-  // (quote <datum>)
   private IPattern compileQuotePattern(List pattern)
   {
     var datum = (IEq)pattern.second();
-    return new MatchEqual(datum instanceof Symbol s ? s.intern() : datum);
+    datum = datum instanceof Symbol s ? s.intern() : datum;
+    return new MatchEqual(datum);
   }
   
   private IPattern compileListPattern(List patterns, List vars)
@@ -1538,7 +1557,7 @@ public class Compiler
                          compileOrPattern(patterns.rest(), vars));
   }
   
-  private boolean checkOrPattern(List patterns)
+  private static boolean checkOrPattern(List patterns)
   {
     var vars = patternVars(patterns.first());
     for (patterns = patterns.rest(); !patterns.isEmpty(); patterns = patterns.rest())
@@ -1548,7 +1567,7 @@ public class Compiler
   }
   
   // (record <type-name> <pattern>...)
-  private boolean checkRecordPattern(List pattern)
+  private static boolean checkRecordPattern(List pattern)
   {
     return pattern.length() >= 2
         && pattern.second() instanceof Symbol typeName
@@ -1613,7 +1632,7 @@ public class Compiler
     Map.entry(Symbol.DO, this::compileDo),
     Map.entry(Symbol.WHILE, this::compileWhile),
     Map.entry(Symbol.SET, this::compileSet),
-    Map.entry(Symbol.REP, this::compileRepLoop),
+    Map.entry(Symbol.REP, this::compileRep),
     Map.entry(Symbol.QUOTE, this::compileQuote),
     Map.entry(Symbol.QUASIQUOTE, this::compileQuasiquote),
     Map.entry(Symbol.OR, this::compileOr),

@@ -25,6 +25,7 @@ permits QualifiedSymbol
   public static final Symbol LETREC = new Symbol("letrec");
   public static final Symbol WHILE = new Symbol("while");
   public static final Symbol REP = new Symbol("rep");
+  public static final Symbol WHEN = new Symbol("when");
   public static final Symbol DO = new Symbol("do");  
   public static final Symbol SET = new Symbol("set!");
   public static final Symbol AND = new Symbol("and");

@@ -98,7 +98,12 @@ public class CodeListing
           code = inst.next();
           break;
         }
-        case JumpArgsEmpty(var target, var next): {
+        case JumpNoArgs(var target, var next): {
+          ctx.addLabel(target);
+          code = next;
+          break;
+        }
+        case JumpNoMatch(_, var target, var next): {
           ctx.addLabel(target);
           code = next;
           break;
@@ -107,11 +112,6 @@ public class CodeListing
           ctx.addLabel(body);
           ctx.addProcEntry(body);
           generateLabels(body, ctx);
-          code = next;
-          break;
-        }
-        case Match(_, var target, var next): {
-          ctx.addLabel(target);
           code = next;
           break;
         }
@@ -150,13 +150,13 @@ public class CodeListing
       case Jump inst -> String.format("(jump %s)", ctx.labelFor(inst.target()));
       case JumpFalse(var target, _) -> String.format("(jump-false %s)", ctx.labelFor(target));
       case JumpTrue(var target, _)-> String.format("(jump-true %s)", ctx.labelFor(target));
-      case JumpArgsEmpty(var target, _) -> String.format("(jump-noarg %s)", ctx.labelFor(target));
+      case JumpNoArgs(var target, _) -> String.format("(jump-noargs %s)", ctx.labelFor(target));
+      case JumpNoMatch(var pattern, var target, _) -> String.format("(jump-nomatch %s %s)", pattern.toString(), ctx.labelFor(target));
       case LoadConst(var value, _) -> String.format("(load-const %s)", value.repr());
       case LoadGlobal(var symbol, _, _) -> String.format("(load-global %s)", symbol);
       case LoadLocal(var depth, var offset, _) -> String.format("(load-local %d %d)", depth, offset);
       case LoadLocal0(var offset, _) -> String.format("(load-local 0 %d)", offset);
-      case MakeClosure(Procedure(var body, _), _) -> String.format("(make-closure %s)", ctx.labelFor(body));
-      case Match(var pattern, var target, _) -> String.format("(match %s %s)", pattern.toString(), ctx.labelFor(target));
+      case MakeClosure(Procedure(var body, _), _) -> String.format("(make-closure %s)", ctx.labelFor(body));      
       case Nop inst -> "(nop)";
       case PopArg inst -> "(pop-arg)";
       case PopRestArgs inst -> "(pop-rest-args)";

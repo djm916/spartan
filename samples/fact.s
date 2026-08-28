@@ -27,7 +27,7 @@
 (defun fact-loop2 (n)
   (rep ([n n (- n 1)]
         [p 1 (* n p)])
-    :when (= n 0) p))
+    (when (= n 0) p)))
 
 (def fact fact-loop2)
 

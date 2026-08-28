@@ -65,16 +65,20 @@ public final class VirtualMachine
             control = j.target();
             break;
           }
-          case JumpArgsEmpty(var target, var next): {
-            control = args.isEmpty() ? target : next;
-            break;
-          }
           case JumpFalse(var target, var next): {
             control = !result.boolValue() ? target : next;
             break;
           }
           case JumpTrue(var target, var next): {
             control = result.boolValue() ? target : next;
+            break;
+          }
+          case JumpNoArgs(var target, var next): {
+            control = args.isEmpty() ? target : next;
+            break;
+          }
+          case JumpNoMatch(var pattern, var target, var next): {
+            control = !pattern.match(result, env) ? target : next;
             break;
           }
           case Halt(): {
@@ -104,10 +108,6 @@ public final class VirtualMachine
           case MakeClosure(Procedure(var body, var sig), var next): {
             result = new Closure(body, sig, env);
             control = next;
-            break;
-          }
-          case Match(var pattern, var target, var next): {
-            control = pattern.match(result, env) ? next : target;
             break;
           }
           case Nop inst: {

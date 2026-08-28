@@ -99,7 +99,7 @@
 ;(defmacro ->> (arg form :rest forms)
 ;  (rep ((forms  forms             (rest forms))
 ;        (result (append arg form) (append result (first forms))))
-;    :when (empty? forms) result))
+;    (when (empty? forms) result))
 (defmacro ->> (arg form :rest forms)
   (fold-left append (append arg form) forms))
 
