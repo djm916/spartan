@@ -26,8 +26,11 @@
         generator->stream
 )
 
+; val is 
 (defrecord stream (val))
 
+; tag is the symbol 'lazy or 'eager
+; val is a thunk in case tag is 'lazy or an evaluated value in case of 'eager
 (defrecord stream-promise (tag val))
 
 (defmacro stream-lazy (expr)

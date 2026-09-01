@@ -3,7 +3,9 @@ package spartan.tests;
 import org.junit.*;
 import static org.junit.Assert.*;
 import spartan.data.Symbol;
+import spartan.data.Int;
 import spartan.errors.UnboundSymbol;
+import spartan.errors.MultipleDefinition;
 
 public class ModuleTests extends TestBase
 {
@@ -134,5 +136,104 @@ y
     assertEquals(output, Symbol.of("pass"));
   }
   
+  // Can import all exported variables from another module
+  @Test
+  public void test7()
+  {
+    var code = """
+(in-module a)
+(export x y)
+(def x 1)
+(def y 2)
+(def z #nil)
+
+(in-module b)
+(import a :all)
+(+ x y)
+""";
+    
+    var output = eval(code);
+    assertTrue(output instanceof Int);
+    assertEquals(output, Int.valueOf(3));
+  }
   
+  // Can import only some of the exported variables from another module
+  @Test
+  public void test8()
+  {
+    var code = """
+(in-module a)
+(export x y)
+(def x 1)
+(def y 2)
+(def z 3)
+
+(in-module b)
+(import a :only (x y))
+(+ x y)
+""";
+    
+    var output = eval(code);
+    assertTrue(output instanceof Int);
+    assertEquals(output, Int.valueOf(3));
+  }
+  
+  // Can import all except some of the exported variables from another module
+  @Test
+  public void test9()
+  {
+    var code = """
+(in-module a)
+(export x y z)
+(def x 1)
+(def y 2)
+(def z 3)
+
+(in-module b)
+(import a :except (x y))
+z
+""";
+    
+    var output = eval(code);
+    assertTrue(output instanceof Int);
+    assertEquals(output, Int.valueOf(3));
+  }
+  
+  // Importing a previously defined variable throws
+  // importingExistingVariableThrows
+  @Test(expected = MultipleDefinition.class)
+  public void test10()
+  {
+    var code = """
+(in-module a)
+(export x)
+(def x 1)
+
+(in-module b)
+(def x 2)
+(import a :only (x))
+x
+""";
+    
+    var output = eval(code);
+  }
+  
+  // Defining a previously imported variable throws
+  // definingPreviouslyImportedVariableThrows
+  @Test(expected = MultipleDefinition.class)
+  public void test11()
+  {
+    var code = """
+(in-module a)
+(export x)
+(def x 1)
+
+(in-module b)
+(import a :only (x))
+(def x 2)
+x
+""";
+    
+    var output = eval(code);
+  }
 }

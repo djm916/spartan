@@ -114,10 +114,15 @@ public class Module implements Datum
   {
     return Optional.ofNullable(aliasMap.get(alias));
   }
-    
+  
   public Box<Datum> bind(Symbol name)
   {
-    return bindings.computeIfAbsent(name, (_) -> new Box<Datum>());
+    //return bindings.computeIfAbsent(name, (_) -> new Box<Datum>());
+    if (!spartan.Config.ALLOW_REDEFINITION && bindings.containsKey(name))
+      throw new MultipleDefinition(name);
+    var box = new Box<Datum>();
+    bindings.put(name, box);
+    return box;
   }
   
   /**

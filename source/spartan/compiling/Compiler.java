@@ -71,7 +71,7 @@ public class Compiler
   {
     return new SyntaxError("definition not allowed in this context", new SourceInfo(exp, positionOf(exp)));
   }
-  
+    
   private Position positionOf(Datum exp)
   {
     var pos = positionMap.get(exp);
@@ -227,10 +227,17 @@ public class Compiler
     if (!(exp.length() == 3 && exp.second() instanceof Symbol name && name.isSimple()))
       throw malformedExp(exp);
     var init = exp.third();
-    var loc = currentModule().bind(name.intern());
+    Box<Datum> loc = null;
+    try {
+      loc = currentModule().bind(name.intern());
+    }
+    catch (MultipleDefinition err) {
+      err.setSource(new SourceInfo(exp, positionOf(name)));
+      throw err;
+    }
     return compile(init, scope, false, false,
-           new StoreGlobal(name, loc,
-           new LoadConst(Nil.VALUE, next)));
+       new StoreGlobal(name, loc,
+       new LoadConst(Nil.VALUE, next)));
   }
   
   /* Compile "defun" special form

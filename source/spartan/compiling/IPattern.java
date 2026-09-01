@@ -7,7 +7,6 @@ import spartan.data.Record;
 import spartan.data.RecordDescriptor;
 import spartan.data.Symbol;
 import spartan.data.Vector;
-import spartan.data.TypeRegistry;
 import spartan.data.IEq;
 
 public sealed interface IPattern

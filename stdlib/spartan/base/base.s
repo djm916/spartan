@@ -6,7 +6,6 @@
 
 (set-current-module! (the-module 'spartan.base))
 
-(def %quasiquote #nil)
 (defun %quasiquote (exp level)
   (defun unquote? (form)
     (and (list? form) (not (empty? form)) (symbol? (first form)) (= (first form) 'unquote)))

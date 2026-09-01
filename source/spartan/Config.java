@@ -28,6 +28,7 @@ public final class Config
   /** Enables or disables logging of macro expansion results. Valid values are "true" and "false". Defaults to "false". */
   public static final boolean SHOW_MACRO_EXPANSION = Boolean.valueOf(System.getProperty("spartan.show-macro-expansion", "false"));
   
+  /** Allow redefinition of global variables. Only intended to be enabled in interactive mode (the REPL). */  
   public static boolean ALLOW_REDEFINITION = false;
   
   /** The default character encoding for converting text to and from binary. Default is UTF-8.
