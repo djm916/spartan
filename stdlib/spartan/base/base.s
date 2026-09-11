@@ -154,6 +154,7 @@
 
 (load "spartan/base/vectors.s")
 (load "spartan/base/defrecord.s")
+(load "spartan/base/pair.s")
 (load "spartan/base/promises.s")
 (load "spartan/base/streams.s")
 (load "spartan/base/import.s")

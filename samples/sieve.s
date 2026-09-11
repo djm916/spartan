@@ -15,4 +15,4 @@
         (adjoin x (prime-sieve xs)))))
   (prime-sieve (range 2 n)))
 
-(print-line "The prime numbers up to 100 are " (prime-sieve 100))
+(println "The prime numbers up to 100 are " (prime-sieve 100))

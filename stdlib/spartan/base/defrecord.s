@@ -1,55 +1,58 @@
 
-; defrecord - a simple syntactic record type facility
+; defrecord - a simple facility for record definitions
 ;
 ; A record is a compound data type composed of a set of named fields.
+; Each record type definition results in the definition of:
 ;
-; Records are defined with the "defrecord" macro, which results in the
-; implicit definitions of the following:
-; 
-;   * a record type descriptor
-;   * a positional constructor
-;   * a type predicate
-;   * accessors and mutators for each field
+;   * A record type descriptor that represents the record type itself
+;   * A constructor: accepts values for each field and returns a new instance of this record type
+;   * A type predicate: tests if an object is an instance of this record type
+;   * An accessor for each field: returns the field value
+;   * A mutator for each mutable field: updates the field value
 ;
-; For example, (defrecord point (x y)) defines the following:
+; Records are defined with the "defrecord" macro, which has the syntax:
 ;
-; point          ; the record type descriptor
-; make-point     ; constructor
+; <record type definition> =>
+;   (defrecord <type name>
+;	    <constructor name>
+;     <predicate name>
+;     <field> ...)
+;
+; <field> => (<field name> <accessor name>)
+;         => (<field name> <accessor name> <mutator name>)
+;
+; For example, the record definition
+;
+; (defrecord Point
+;   point
+;   point?
+;   (x point-x point-set-x!)
+;   (y point-y point-set-y!))
+;
+; results in the following definitions:
+;
+; Point          ; the record type descriptor
+; point          ; constructor
 ; point?         ; predicate
 ; point-x        ; field accessors
 ; point-y
-; set-point-x!   ; field mutators
-; set-point-y!
+; point-set-x!   ; field mutators
+; point-set-y!
 
 (in-module spartan.base)
 
 (export defrecord)
 
-(defmacro defrecord (name fields)
-  ; Generate the name of a record constructor
-  (defun constructor-name (name)
-    (string->symbol (string-concat "make-" (symbol->string name))))
-
-  ; Generate the name of a record type predicate
-  (defun predicate-name (name)
-    (string->symbol (string-concat (symbol->string name) "?")))
-
-  ; Generate the name of a record field accessor
-  (defun accessor-name (name field)
-    (string->symbol (string-concat (symbol->string name) "-" (symbol->string field))))
-
-  ; Generate the name of a record field mutator
-  (defun mutator-name (name field)
-    (string->symbol (string-concat "set-" (symbol->string name) "-" (symbol->string field) "!")))
-
+(defmacro defrecord (name cons pred :rest fields)
   `(do
      ; Bind record type name to the record type descriptor
-     (def ,name (spartan.base:make-record-type ',name ',fields))
+     (def ,name (spartan.base:make-record-type ',name ',(spartan.base:map spartan.base:first fields)))
      ; Define constructor
-     (def ,(constructor-name name) (spartan.base:record-constructor ,name))
+     (def ,cons (spartan.base:record-constructor ,name))
      ; Define type predicate
-     (def ,(predicate-name name) (spartan.base:record-predicate ,name))
+     (def ,pred (spartan.base:record-predicate ,name))
      ; Define accessors
-     ,@(spartan.base:map (fun (field) `(def ,(accessor-name name field) (spartan.base:record-accessor ,name ',field))) fields)
+     ,@(spartan.base:map (fun (f) `(def ,(second f) (spartan.base:record-accessor ,name ',(first f)))) fields)
      ; Define mutators
-     ,@(spartan.base:map (fun (field) `(def ,(mutator-name name field) (spartan.base:record-mutator ,name ',field))) fields)))
+     ,@(spartan.base:map (fun (f) `(def ,(third f) (spartan.base:record-mutator ,name ',(first f))))
+                         (spartan.base:filter (fun (f) (= 3 (length f))) fields))))

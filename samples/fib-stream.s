@@ -11,5 +11,5 @@
 
 (def N 10)
 (def fibs-to-N (stream-take N fibs))
-(print-line "The first " N " Fibonacci numbers are: " (stream->list fibs-to-N))
+(println "The first " N " Fibonacci numbers are: " (stream->list fibs-to-N))
 

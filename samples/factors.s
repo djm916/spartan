@@ -29,4 +29,4 @@
 
 (def N (string->int (first *command-line-args*)))
 
-(print-line (prime-factors N))
+(println (prime-factors N))

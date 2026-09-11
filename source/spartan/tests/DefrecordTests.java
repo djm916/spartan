@@ -19,6 +19,13 @@ public class DefrecordTests extends TestBase
   public void setup()
   {
     spartan.Runtime.enterModule(Symbol.of("testbed"));
+    eval("""
+(defrecord Point
+  point
+  point?
+  (x point-x point-set-x!)
+  (y point-y point-set-y!))
+""");
   }
   
   @After
@@ -33,14 +40,13 @@ public class DefrecordTests extends TestBase
   public void test1()
   {
     var code = """
-(defrecord point (x y))
-(def p (make-point 0 0))
+(def p (point 0 0))
 (type p)
 """;
     
     var output = eval(code);
     assertTrue(output instanceof Symbol);
-    assertEquals(output, Symbol.of("testbed:point"));
+    assertEquals(output, Symbol.of("testbed:Point"));
   }
   
   // Type predicate
@@ -49,8 +55,7 @@ public class DefrecordTests extends TestBase
   public void test2()
   {
     var code = """
-(defrecord point (x y))
-(def p (make-point 0 0))
+(def p (point 0 0))
 (point? p)
 """;
     
@@ -64,8 +69,7 @@ public class DefrecordTests extends TestBase
   public void test3()
   {
     var code = """
-(defrecord point (x y))
-(def p (make-point 1 2))
+(def p (point 1 2))
 (list (point-x p) (point-y p))
 """;
     
@@ -80,10 +84,9 @@ public class DefrecordTests extends TestBase
   public void test4()
   {
     var code = """
-(defrecord point (x y))
-(def p (make-point 1 2))
-(set-point-x! p 2)
-(set-point-y! p 1)
+(def p (point 1 2))
+(point-set-x! p 2)
+(point-set-y! p 1)
 (list (point-x p) (point-y p))
 """;
     
@@ -98,10 +101,9 @@ public class DefrecordTests extends TestBase
   public void test5()
   {
     var code = """
-(defrecord point (x y))
-(def p (make-point 1 2))
+(def p (point 1 2))
 (match p
-  ((record point x y) (list x y)))
+  ((record Point x y) (list x y)))
 """;
     
     var output = eval(code);

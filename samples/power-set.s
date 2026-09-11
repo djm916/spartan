@@ -10,7 +10,7 @@
         (map (fun (subset) (adjoin (first set) subset)) excludes)
         excludes))))
 
-(print-line "(power-set ()) = " (power-set ()))
-(print-line "(power-set '(1)) = " (power-set '(1)))
-(print-line "(power-set '(1 2)) = " (power-set '(1 2)))
-(print-line "(power-set '(1 2 3)) = " (power-set '(1 2 3)))
+(println "(power-set ()) = " (power-set ()))
+(println "(power-set '(1)) = " (power-set '(1)))
+(println "(power-set '(1 2)) = " (power-set '(1 2)))
+(println "(power-set '(1 2 3)) = " (power-set '(1 2 3)))

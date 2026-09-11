@@ -41,9 +41,9 @@
 
 (defun print-row (row)
   (vector-foreach (fun (n) (print n " ")) row)
-  (print-line))
+  (println))
 
 (defun print-triangle (triangle)
   (vector-foreach print-row triangle))
 
-(print-triangle (pascals-triangle 5))
+(print-triangle (pascals-triangle 10))

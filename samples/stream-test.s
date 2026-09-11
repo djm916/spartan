@@ -11,9 +11,9 @@
 (defun consume-stream (stream count)
   (cond
     ((= 0 count)
-     (print-line "Test complete. No crash!\n"))
+     (println "Test complete. No crash!\n"))
     ((stream-empty? stream) 
-     (print-line "Stream ended unexpectedly.\n"))
+     (println "Stream ended unexpectedly.\n"))
     (else
      ;; Passing (stream-rest stream) directly allows the old head 
      ;; to be garbage collected on each tail-recursive step.
@@ -25,5 +25,5 @@
 ;   (print-line "Starting memory leak test...\n")
 ;   (consume-stream my-stream 10000000))
 
-(print-line "Starting memory leak test...\n")
+(println "Starting memory leak test...\n")
 (consume-stream (stream-filter even? (stream-map double (integer-stream 0))) 1000000)

@@ -15,7 +15,7 @@
 ; current winders list only if control has passed through its in thunk and not entered its out thunk.
 
 (export dynamic-wind
-        make-exception exception-name exception-message
+        exception exception-name exception-message
         with-exception-handler raise guard)
 
 (def *winders* ())
@@ -57,7 +57,11 @@
 ; ==========
 ;
 
-(defrecord exception (name message))
+(defrecord Exception
+  exception
+  exception?
+  (name exception-name)
+  (message exception-message))
 
 (defun *default-exception-handler* (ex)
   (let ((message (string-concat "unhandled exception "

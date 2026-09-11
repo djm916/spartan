@@ -11,5 +11,5 @@
       (fun (x) (= 0 (remainder x n)))
       (integer-stream 0))))
 
-(def N 1000000)
-(print-line (times3 N))
+(def N 2000000)
+(println (times3 N))

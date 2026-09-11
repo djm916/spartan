@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <NotepadPlus>
     <UserLang name="Spartan" ext="s" udlVersion="2.1">
         <Settings>
@@ -6,33 +7,43 @@
         </Settings>
         <KeywordLists>
             <Keywords name="Comments">00; 01 02 03 04</Keywords>
-            <Keywords name="Numbers, prefix1"></Keywords>
-            <Keywords name="Numbers, prefix2"></Keywords>
-            <Keywords name="Numbers, extras1"></Keywords>
-            <Keywords name="Numbers, extras2"></Keywords>
-            <Keywords name="Numbers, suffix1"></Keywords>
-            <Keywords name="Numbers, suffix2"></Keywords>
+            <Keywords name="Numbers, prefix1" />
+            <Keywords name="Numbers, prefix2" />
+            <Keywords name="Numbers, extras1" />
+            <Keywords name="Numbers, extras2" />
+            <Keywords name="Numbers, suffix1" />
+            <Keywords name="Numbers, suffix2" />
             <Keywords name="Numbers, range">/</Keywords>
-            <Keywords name="Operators1">( ) [ ] &apos; ` , @</Keywords>
+            <Keywords name="Operators1">( ) [ ] ' ` , @</Keywords>
             <Keywords name="Operators2">= &lt; &gt; &lt;= &gt;= /= + - ~ * /</Keywords>
-            <Keywords name="Folders in code1, open"></Keywords>
-            <Keywords name="Folders in code1, middle"></Keywords>
-            <Keywords name="Folders in code1, close"></Keywords>
-            <Keywords name="Folders in code2, open"></Keywords>
-            <Keywords name="Folders in code2, middle"></Keywords>
-            <Keywords name="Folders in code2, close"></Keywords>
-            <Keywords name="Folders in comment, open"></Keywords>
-            <Keywords name="Folders in comment, middle"></Keywords>
-            <Keywords name="Folders in comment, close"></Keywords>
-            <Keywords name="Keywords1">def defun defmacro defrecord fun if cond else let let* letrec rec set! do while rep delay and or load in-module import export use inc! dec! when unless quote unquote unquote-splicing quasiquote match</Keywords>
-            <Keywords name="Keywords2">not vector apply force&#x000D;&#x000A;adjoin first rest empty? length&#x000D;&#x000A;list list* first second third fourth&#x000D;&#x000A;set-first! set-rest!&#x000D;&#x000A;gensym&#x000D;&#x000A;print print-line&#x000D;&#x000A;quotient remainder&#x000D;&#x000A;numerator denominator&#x000D;&#x000A;nil? list? vector? boolean? symbol? number? string?&#x000D;&#x000A;call/cc dynamic-wind&#x000D;&#x000A;error</Keywords>
+            <Keywords name="Folders in code1, open" />
+            <Keywords name="Folders in code1, middle" />
+            <Keywords name="Folders in code1, close" />
+            <Keywords name="Folders in code2, open" />
+            <Keywords name="Folders in code2, middle" />
+            <Keywords name="Folders in code2, close" />
+            <Keywords name="Folders in comment, open" />
+            <Keywords name="Folders in comment, middle" />
+            <Keywords name="Folders in comment, close" />
+            <Keywords name="Keywords1">def defun defmacro defrecord fun if cond else let let* letrec rec set! do while rep and or import export use when unless quote unquote unquote-splicing quasiquote match &amp;option &amp;rest in-module</Keywords>
+            <Keywords name="Keywords2">not vector apply delay force
+adjoin first rest empty? length foreach
+list list* first second third fourth
+gensym
+print println
+quotient remainder
+numerator denominator
+nil? list? vector? boolean? symbol? number? string?
+call/cc dynamic-wind
+error
+load </Keywords>
             <Keywords name="Keywords3">:</Keywords>
             <Keywords name="Keywords4">#</Keywords>
-            <Keywords name="Keywords5"></Keywords>
-            <Keywords name="Keywords6"></Keywords>
-            <Keywords name="Keywords7"></Keywords>
-            <Keywords name="Keywords8"></Keywords>
-            <Keywords name="Delimiters">00&quot; 01\ 02&quot; 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19 20 21 22 23</Keywords>
+            <Keywords name="Keywords5" />
+            <Keywords name="Keywords6" />
+            <Keywords name="Keywords7" />
+            <Keywords name="Keywords8" />
+            <Keywords name="Delimiters">00" 01\ 02" 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19 20 21 22 23</Keywords>
         </KeywordLists>
         <Styles>
             <WordsStyle name="DEFAULT" fgColor="808080" bgColor="FFFFFF" colorStyle="1" fontStyle="0" nesting="0" />

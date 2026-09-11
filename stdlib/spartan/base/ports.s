@@ -7,7 +7,7 @@
        (fun (:rest args)
          (let-values (((result error) (apply f args)))
            (if (not (nil? error))
-             (raise (make-exception 'io-error error))
+             (raise (exception 'io-error error))
              result))))))
 
 (wrap-io-primitive port-open-file)

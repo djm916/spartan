@@ -10,5 +10,5 @@
   (if (empty? xs) init
     (apply sum (adjoin (+ init (first xs)) (rest xs)))))
 
-(print-line "(sum 0) = " (sum 0))
-(print-line "(sum 1 2 3 4 5) = " (sum 1 2 3 4 5))
+(println "(sum 0) = " (sum 0))
+(println "(sum 1 2 3 4 5) = " (sum 1 2 3 4 5))

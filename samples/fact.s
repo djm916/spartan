@@ -31,6 +31,6 @@
 
 (def fact fact-loop2)
 
-(print-line "0! = " (fact 0)) ; = 1
-(print-line "10! = " (fact 10)) ; = 3628800
-(print-line "20! = " (fact 20)) ; = 2432902008176640000
+(println "0! = " (fact 0)) ; = 1
+(println "10! = " (fact 10)) ; = 3628800
+(println "20! = " (fact 20)) ; = 2432902008176640000

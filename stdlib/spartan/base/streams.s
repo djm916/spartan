@@ -6,10 +6,9 @@
         stream-lazy
         stream-delay
         make-stream
-        stream?
-        make-stream-promise
-        make-stream-pair
         *empty-stream*
+        stream?
+        stream
         stream-adjoin
         stream-first
         stream-rest
@@ -22,61 +21,74 @@
         stream-reduce
         stream-enumerate
         stream-ref
+        stream-length
         stream->list
         generator->stream
 )
 
-; val is 
-(defrecord stream (val))
-
-; tag is the symbol 'lazy or 'eager
-; val is a thunk in case tag is 'lazy or an evaluated value in case of 'eager
-(defrecord stream-promise (tag val))
+; Define stream type
+; A stream is implemented as a mutable boxed promise. The promise is a mutable
+; pair, where:
+;   - the car is a tag, the symbol 'lazy or 'eager
+;   - the cdr is a thunk in case tag is 'lazy or an evaluated value in case of 'eager
+(defrecord <stream>
+  make-stream
+  stream?
+  (promise stream-promise stream-set-promise!))
 
 (defmacro stream-lazy (expr)
-  `(make-stream (make-stream-promise 'lazy (fun () ,expr))))
+  `(spartan.base:make-stream (spartan.base:cons 'lazy (fun () ,expr))))
 
 (defun stream-eager (expr)
-  (make-stream (make-stream-promise 'eager expr)))
+  (make-stream (cons 'eager expr)))
 
 (defmacro stream-delay (expr)
-  `(stream-lazy (stream-eager ,expr)))
+  `(spartan.base:stream-lazy (spartan.base:stream-eager ,expr)))
 
 (defun stream-force (stream)
-  (let ((promise (stream-val stream)))
-    (cond ((= (stream-promise-tag promise) 'eager)
-           (stream-promise-val promise))
-          ((= (stream-promise-tag promise) 'lazy)
-           (let* ((stream* ((stream-promise-val promise)))
-                  (promise  (stream-val stream)))
-             (if (not (= (stream-promise-tag promise) 'eager))
-               (do (set-stream-promise-tag! promise (stream-promise-tag (stream-val stream*)))
-                   (set-stream-promise-val! promise (stream-promise-val (stream-val stream*)))
-                   (set-stream-val! stream* promise)))
+  (let ((promise (stream-promise stream)))
+    (cond ((= (car promise) 'eager)
+           (cdr promise))
+          ((= (car promise) 'lazy)
+           (let* ((stream* ((cdr promise)))
+                  (promise  (stream-promise stream)))
+             (if (not (= (car promise) 'eager))
+               (do (set-car! promise (car (stream-promise stream*)))
+                   (set-cdr! promise (cdr (stream-promise stream*)))
+                   (stream-set-promise! stream* promise)))
              (stream-force stream))))))
 
-(def *empty-stream* (stream-delay (make-stream-promise 'stream 'null)))
+(def *empty-stream* (stream-delay (cons #nil #nil)))
 
 (defun stream-empty? (stream)
   (identical? (stream-force stream)
               (stream-force *empty-stream*)))
 
-(defrecord stream-pair (fst rst))
-
 (defmacro stream-adjoin (obj stream)
-  `(stream-eager (make-stream-pair (stream-delay ,obj) (stream-lazy ,stream))))
+  `(spartan.base:stream-eager (spartan.base:cons (stream-delay ,obj) (stream-lazy ,stream))))
 
 (defun stream-first (stream)
-  (stream-force (stream-pair-fst (stream-force stream))))
+  (stream-force (car (stream-force stream))))
 
 (defun stream-rest (stream)
-  (stream-pair-rst (stream-force stream)))
+  (cdr (stream-force stream)))
 
 (defmacro stream-fun (params :rest body)
-  `(fun ,params (stream-lazy (do ,@body))))
+  `(fun ,params (spartan.base:stream-lazy (do ,@body))))
 
 (defmacro defstream (name params :rest body)
-  `(def ,name (stream-fun params body)))
+  `(def ,name (spartan.base:stream-fun params body)))
+
+(defmacro stream (:rest elems)
+  (if (empty? elems)
+    '*empty-stream*
+    `(spartan.base:stream-adjoin ,(first elems) (spartan.base:stream ,@(rest elems)))))
+
+(defun __stream-length (n stream)
+  (if (stream-empty? stream) n (__stream-length (+ 1 n) (stream-rest stream))))
+
+(defun stream-length (stream)
+  (__stream-length 0 stream))
 
 (def __stream-take
   (stream-fun (n stream)

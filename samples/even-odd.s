@@ -11,4 +11,4 @@
               #false
               (even? (- n 1))))))
 
-(print-line "101 is even? " (even? 101))
+(println "101 is even? " (even? 101))

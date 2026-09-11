@@ -10,7 +10,7 @@
 ;; ====================================================================
 ;; TEST 1: Normal Execution Flow
 ;; ====================================================================
-(print-line "TEST 1: Normal Execution Flow")
+(println "TEST 1: Normal Execution Flow")
 (reset-log!)
 
 (dynamic-wind
@@ -19,12 +19,12 @@
   (fun () (log-event! 'after)))
 
 ;; Expected execution-log: '(before body after)
-(print-line execution-log)
+(println execution-log)
 
 ;; ====================================================================
 ;; TEST 2: Escaping the Body via Continuation (Non-local Exit)
 ;; ====================================================================
-(print-line "TEST 2: Escaping the Body via Continuation (Non-local Exit)")
+(println "TEST 2: Escaping the Body via Continuation (Non-local Exit)")
 (reset-log!)
 
 (def escape-cont #nil)
@@ -41,12 +41,12 @@
 
 ;; Expected execution-log: '(before body after)
 ;; Note: 'after' runs even though the body did not finish normally.
-(print-line execution-log)
+(println execution-log)
 
 ;; ====================================================================
 ;; TEST 3: Re-entering the Body via Continuation
 ;; ====================================================================
-(print-line "TEST 3: Re-entering the Body via Continuation")
+(println "TEST 3: Re-entering the Body via Continuation")
 (reset-log!)
 
 (def reenter-cont #nil)
@@ -61,7 +61,7 @@
   (fun () (log-event! 'enter-after)))
 
 ;; First pass log: '(enter-before enter-body inside-body-checkpoint enter-after)
-(print-line execution-log)
+(println execution-log)
 
 ;; Now, invoke the saved continuation to jump back INSIDE the body
 (reenter-cont #true)
@@ -71,12 +71,12 @@
 ;;   enter-before inside-body-checkpoint enter-after)
 ;; Note: Re-entry forces 'enter-before' to run again, and exiting 
 ;; the body a second time forces 'enter-after' to run again.
-(print-line execution-log)
+(println execution-log)
 
 ;; ====================================================================
 ;; TEST 3: Re-entering Nested Body via Continuation
 ;; ====================================================================
-(print-line "TEST 4: Re-entering Nested Body via Continuation")
+(println "TEST 4: Re-entering Nested Body via Continuation")
 (reset-log!)
 
 (def inner-continuation #nil)
@@ -100,7 +100,7 @@
 ;; --------------------------------------------------------------------
 ;; After the initial code execution finishes, the nested-log is:
 ;; '(outer-before outer-body inner-before inner-body inner-after outer-after)
-(print-line execution-log)
+(println execution-log)
 
 ;; --------------------------------------------------------------------
 ;; TRIGGERING THE JUMP
@@ -125,15 +125,15 @@
 ;; 3. The inner body finishes (evaluating the rest of the inner-body block).
 ;; 4. 'inner-after' runs as control leaves the inner context.
 ;; 5. 'outer-after' runs as control leaves the outer context.
-(print-line execution-log)
+(println execution-log)
 
 ;; ====================================================================
 ;; TEST 5: Escaping Nested Windings via Continuation (Non-local Exit)
 ;; ====================================================================
-(print-line "TEST 5: Escaping Nested Windings via Continuation (Non-local Exit)")
+(println "TEST 5: Escaping Nested Windings via Continuation (Non-local Exit)")
 (reset-log!)
 
-(def escape-cont #nil)
+;(def escape-cont #nil)
 
 (call/cc (fun (cc) (set! escape-cont cc))) ; Save outer continuation
 
@@ -149,12 +149,12 @@
 
 ;; Expected execution-log: '(outer-before outer-body inner-before inner-body inner-after outer-after)
 ;; Note: 'after' runs even though the body did not finish normally.
-(print-line execution-log)
+(println execution-log)
 
 ;; ====================================================================
 ;; TEST 6: Cross Jumping Between Parallel Dynamic-Wind Contexts
 ;; ====================================================================
-(print-line "TEST 6: Cross Jumping Between Parallel Dynamic-Wind Contexts")
+(println "TEST 6: Cross Jumping Between Parallel Dynamic-Wind Contexts")
 (reset-log!)
 
 ;; Continuations to jump into the depths of each tree
@@ -245,4 +245,4 @@
 ;;   alpha-inner-after
 ;;   alpha-outer-after
 ;;  )
-(print-line execution-log)
+(println execution-log)

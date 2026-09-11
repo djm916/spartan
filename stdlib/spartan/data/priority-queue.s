@@ -1,12 +1,16 @@
 (in-module spartan.data.priority-queue)
 
-(export make-queue
+(export queue
         queue?
         empty?
         push
         pop)
 
-(defrecord queue-impl (elems comparator))
+(defrecord <queue>
+  make-queue
+  queue?
+  (elems queue-elems)
+  (comparator queue-comparator))
 
 (defun reheap-up (v c)
   (let [(root (- (vector-length v) 1))]
@@ -30,27 +34,24 @@
             (set! right (+ 2 (* 2 root))))
           (set! done #true))))))
 
-(defun make-queue (comparator)
-  (make-queue-impl (vector) comparator))
-
-(defun priority-queue? (self)
-  (queue-impl? self))
+(defun queue (comparator)
+  (make-queue (vector) comparator))
 
 (defun empty? (self)
-  (= 0 (vector-length (queue-impl-elems self))))
+  (= 0 (vector-length (queue-elems self))))
 
 (defun push (self item)
   (match self
-    [(record queue-impl v c)
+    [(record <queue> v c)
      (vector-append! v item)
      (reheap-up v c)]))
 
 (defun pop (self)
   (match self
-    [(record queue-impl v c)
+    [(record <queue> v c)
      (if (empty? self) #nil
        (let [(top (vector-ref v 0)) (last (- (vector-length v) 1))]
-       (vector-set! v 0 (vector-ref v last))
-       (vector-remove! v last)
-       (reheap-down v c)
-       top))]))
+         (vector-set! v 0 (vector-ref v last))
+         (vector-remove! v last)
+         (reheap-down v c)
+         top))]))

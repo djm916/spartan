@@ -567,7 +567,7 @@ public final class BaseLib
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Symbol moduleName))
         throw new TypeMismatch();
-      vm.result = spartan.Runtime.createModule(moduleName);
+      vm.result = spartan.Runtime.getOrCreateModule(moduleName);
       vm.popFrame();
     }
   };

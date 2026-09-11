@@ -85,11 +85,10 @@ public final class Runtime
   */
   public static void removeModule(Symbol moduleName)
   {
-    var module = getModule(moduleName).orElseThrow(() -> new ModuleDoesNotExist(moduleName));
-    modules.remove(module);
+    modules.remove(moduleName);
   }
   
-  /** Remove the "user" and all other user-defined modules
+  /** Remove all user-defined modules (i.e., all other than "spartan.base")
       
       NOTE: Only intended for internal use!
   */
@@ -104,10 +103,10 @@ public final class Runtime
   
   public static Module createModule(Symbol moduleName)
   {
-    //return modules.computeIfAbsent(moduleName, (_) -> new Module(moduleName, BaseModule.INSTANCE));
-    var module = new Module(moduleName, BaseModule.INSTANCE);
-    modules.put(moduleName, module);
-    return module;
+    return modules.computeIfAbsent(moduleName, (_) -> new Module(moduleName, BaseModule.INSTANCE));
+    //var module = new Module(moduleName, BaseModule.INSTANCE);
+    //modules.put(moduleName, module);
+    //return module;
   }
   
   public static Symbol canonicalName(Symbol moduleName)

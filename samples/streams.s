@@ -11,7 +11,8 @@
 
 (def even-squares (stream-filter even? squares))
 
-(print-line "Integers = " (stream->list nats))
-(print-line "Squares = " (stream->list squares))
-(print-line "Even Squares = " (stream->list even-squares))
-(print-line "Sum of squares = " (stream-reduce + 0 squares))
+(println "Integers = " (stream->list nats))
+(println "length = " (stream-length nats))
+(println "Squares = " (stream->list squares))
+(println "Even Squares = " (stream->list even-squares))
+(println "Sum of squares = " (stream-reduce + 0 squares))

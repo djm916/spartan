@@ -114,7 +114,7 @@ public final class BaseModule extends Module
     bindPublic(Symbol.of("format-decimal"), BaseLib.FORMAT_DECIMAL);
     
     /* List procedures */
-        
+    
     bindPublic(Symbol.of("adjoin"), ListLib.ADJOIN);
     bindPublic(Symbol.of("first"), ListLib.FIRST);
     bindPublic(Symbol.of("second"), ListLib.SECOND);
