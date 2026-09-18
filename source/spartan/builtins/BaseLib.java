@@ -227,17 +227,21 @@ public final class BaseLib
     }
   };
   
-  // (bytes->string bytes start count)
+  // (bytes->string bytes [start [end]])
   
-  public static final Primitive BYTES_TO_STRING = new Primitive(Signature.fixed(3)) {
+  public static final Primitive BYTES_TO_STRING = new Primitive(Signature.variadic(1, 2)) {
     public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof Bytes bytes && vm.popArg() instanceof IInt start && vm.popArg() instanceof IInt count))
+      if (!(vm.popArg() instanceof Bytes bytes))
         throw new TypeMismatch();
-      vm.result = new Text(bytes.decode(start.intValue(), count.intValue(), Config.DEFAULT_ENCODING));
+      if (!((vm.args.isEmpty() ? Int.valueOf(0) : vm.popArg()) instanceof IInt start))
+        throw new TypeMismatch();
+      if (!((vm.args.isEmpty() ? Int.valueOf(bytes.length()) : vm.popArg()) instanceof IInt end))
+        throw new TypeMismatch();
+      vm.result = new Text(bytes.decode(start.intValue(), end.intValue(), Config.DEFAULT_ENCODING));
       vm.popFrame();
     }
   };
-    
+  
   public static final Primitive ERROR = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof Text errMsg))

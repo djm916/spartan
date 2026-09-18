@@ -90,10 +90,10 @@ public final class Bytes implements Datum
     return buffer.capacity();
   }
   
-  public String decode(int start, int count, Charset encoding)
+  public String decode(int start, int end, Charset encoding)
   {
     try {
-      return new String(buffer.array(), start, count, encoding);
+      return new String(buffer.array(), start, end - start, encoding);
     }
     catch (IndexOutOfBoundsException ex) {
       throw new InvalidArgument();
