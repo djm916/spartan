@@ -51,10 +51,11 @@ public final class BaseModule extends Module
     
     bindPublic(Symbol.of("nil?"), BaseLib.IS_NIL);
     bindPublic(Symbol.of("boolean?"), BaseLib.IS_BOOL);
-    bindPublic(Symbol.of("integer?"), BaseLib.IS_INT);
-    bindPublic(Symbol.of("real?"), BaseLib.IS_REAL);
-    bindPublic(Symbol.of("complex?"), BaseLib.IS_COMPLEX);
-    bindPublic(Symbol.of("number?"), BaseLib.IS_NUMBER);
+    bindPublic(Symbol.of("number?"), MathLib.IS_NUMBER);
+    bindPublic(Symbol.of("integer?"), MathLib.IS_INTEGER);
+    bindPublic(Symbol.of("real?"), MathLib.IS_REAL);
+    bindPublic(Symbol.of("rational?"), MathLib.IS_RATIONAL);
+    bindPublic(Symbol.of("complex?"), MathLib.IS_COMPLEX);
     bindPublic(Symbol.of("symbol?"), BaseLib.IS_SYMBOL);
     bindPublic(Symbol.of("string?"), BaseLib.IS_TEXT);
     bindPublic(Symbol.of("list?"), BaseLib.IS_LIST);
@@ -94,13 +95,19 @@ public final class BaseModule extends Module
     bindPublic(Symbol.of("atan"), MathLib.ATAN);    
     bindPublic(Symbol.of("rand"), MathLib.RAND);
     bindPublic(Symbol.of("complex"), MathLib.MAKE_COMPLEX);
-    bindPublic(Symbol.of("real"), MathLib.REAL);
-    bindPublic(Symbol.of("imag"), MathLib.IMAG);
+    bindPublic(Symbol.of("real-part"), MathLib.REAL_PART);
+    bindPublic(Symbol.of("imag-part"), MathLib.IMAG_PART);
     bindPublic(Symbol.of("angle"), MathLib.ANGLE);
     bindPublic(Symbol.of("magnitude"), MathLib.MAGNITUDE);
     bindPublic(Symbol.of("ratio"), MathLib.MAKE_RATIO);
-    bindPublic(Symbol.of("numer"), MathLib.NUMERATOR);
-    bindPublic(Symbol.of("denom"), MathLib.DENOMINATOR);
+    bindPublic(Symbol.of("numerator"), MathLib.NUMERATOR);
+    bindPublic(Symbol.of("denominator"), MathLib.DENOMINATOR);
+    bindPublic(Symbol.of("zero?"), MathLib.IS_ZERO);
+    bindPublic(Symbol.of("positive?"), MathLib.IS_POSITIVE);
+    bindPublic(Symbol.of("negative?"), MathLib.IS_NEGATIVE);
+    bindPublic(Symbol.of("finite?"), MathLib.IS_FINITE);
+    bindPublic(Symbol.of("infinite?"), MathLib.IS_INFINITE);
+    bindPublic(Symbol.of("nan?"), MathLib.IS_NAN);
     
     /* Conversion procedures */
     

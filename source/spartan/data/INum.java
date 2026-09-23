@@ -78,4 +78,15 @@ permits IInt, IRatio, IReal, IComplex, ITrans, Int, BigInt, Ratio, Real, Complex
   
   INum neg();
   INum abs();
+    
+  boolean isInteger();
+  boolean isRational();
+  boolean isReal();
+  boolean isComplex();
+  
+  boolean isZero();
+  boolean isFinite();
+  //boolean isInfinite();
+  boolean isNaN();  
+  //boolean isExact();
 }

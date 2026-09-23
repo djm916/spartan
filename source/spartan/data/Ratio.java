@@ -10,7 +10,7 @@ public final class Ratio implements Datum, INum, IRatio, IReal, IComplex, IEq, I
     if (denom.equals(BigInteger.ZERO))
       throw new InvalidArgument();
     
-    // Maintain the invariant that the numerator carries the sign,
+    // Maintain the invariant that the numerator carries the sign
     // of the fraction, and the denominator is always positive.
     if (denom.compareTo(BigInteger.ZERO) < 0) {
       numer = numer.negate();
@@ -34,8 +34,7 @@ public final class Ratio implements Datum, INum, IRatio, IReal, IComplex, IEq, I
   
   public Ratio(long numer, long denom)
   {
-    this(BigInteger.valueOf(numer),
-         BigInteger.valueOf(denom));
+    this(BigInteger.valueOf(numer), BigInteger.valueOf(denom));
   }
   
   @Override
@@ -97,21 +96,21 @@ public final class Ratio implements Datum, INum, IRatio, IReal, IComplex, IEq, I
   }
   
   @Override
-  public Int floor()
+  public Real floor()
   {
-    return Int.valueOf((long) Math.floor(doubleValue()));
+    return new Real(Math.floor(doubleValue()));
   }
   
   @Override
-  public Int ceiling()
+  public Real ceiling()
   {
-    return Int.valueOf((long) Math.ceil(doubleValue()));
+    return new Real(Math.ceil(doubleValue()));
   }
-    
+  
   @Override
-  public Int round()
+  public Real round()
   {
-    return Int.valueOf((long) Math.round(doubleValue()));
+    return new Real(Math.round(doubleValue()));
   }
   
   @Override
@@ -357,28 +356,86 @@ public final class Ratio implements Datum, INum, IRatio, IReal, IComplex, IEq, I
     return toReal().compareTo(rhs);
   }
   
-  @Override
-  public Real real()
+  @Override // IComplex
+  public Real realPart()
   {
     return toReal();
   }
   
-  @Override
-  public Real imag()
+  @Override // IComplex
+  public Real imagPart()
   {
     return Real.ZERO;
   }
   
-  @Override
+  @Override // IComplex
   public Real angle()
   {
     return toComplex().angle();
   }
   
-  @Override
+  @Override // IComplex
   public Real magnitude()
   {
     return toComplex().magnitude();
+  }
+  
+  @Override // IComplex
+  public boolean isFinite()
+  {
+    return true;
+  }
+  
+  @Override // IComplex
+  public boolean isNaN()
+  {
+    return false;
+  }
+  
+  @Override // INum
+  public boolean isInteger()
+  {
+    return denom.equals(BigInteger.ONE);
+  }
+  
+  @Override // INum
+  public boolean isReal()
+  {
+    return true;
+  }
+  
+  @Override // INum
+  public boolean isRational()
+  {
+    return true;
+  }
+  
+  @Override // INum
+  public boolean isComplex()
+  {
+    return true;
+  }
+  
+  @Override // INum
+  public boolean isZero()
+  {
+    // In this representation, the denominator is never 0 and the zero
+    // rational has zero numerator and 1 denominator.
+    return numer.equals(BigInteger.ZERO);
+  }
+  
+  @Override // IReal
+  public boolean isPositive()
+  {
+    // In this representation, the numerator always carries the sign
+    return numer.compareTo(BigInteger.ZERO) > 0;
+  }
+  
+  @Override // IReal
+  public boolean isNegative()
+  {
+    // In this representation, the numerator always carries the sign
+    return numer.compareTo(BigInteger.ZERO) < 0;
   }
   
   private final BigInteger numer;

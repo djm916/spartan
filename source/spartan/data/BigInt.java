@@ -363,13 +363,13 @@ public final class BigInt implements Datum, INum, IInt, IRatio, IReal, IComplex,
   }
     
   @Override
-  public Real real()
+  public Real realPart()
   {
     return toReal();
   }
   
   @Override
-  public Real imag()
+  public Real imagPart()
   {
     return Real.ZERO;
   }
@@ -396,6 +396,24 @@ public final class BigInt implements Datum, INum, IInt, IRatio, IReal, IComplex,
   public BigInt denominator()
   {
     return ONE;
+  }
+  
+  @Override // INum
+  public boolean isZero()
+  {
+    return value.compareTo(BigInteger.ZERO) == 0;
+  }
+  
+  @Override // IReal
+  public boolean isPositive()
+  {
+    return value.compareTo(BigInteger.ZERO) > 0;
+  }
+  
+  @Override // IReal
+  public boolean isNegative()
+  {
+    return value.compareTo(BigInteger.ZERO) < 0;
   }
   
   private final BigInteger value;

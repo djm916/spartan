@@ -49,5 +49,41 @@ permits Int, BigInt
     return Type.INTEGER;
   }
   
+  @Override // INum
+  default boolean isInteger()
+  {
+    return true;
+  }
+  
+  @Override // INum
+  default boolean isReal()
+  {
+    return true;
+  }
+  
+  @Override // INum
+  default boolean isRational()
+  {
+    return true;
+  }
+  
+  @Override // INum
+  default boolean isComplex()
+  {
+    return true;
+  }
+  
+  @Override // INum
+  default boolean isFinite()
+  {
+    return true;
+  }
+  
+  @Override // INum
+  default boolean isNaN()
+  {
+    return false;
+  }
+  
   String formatInt(int base);
 }

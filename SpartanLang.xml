@@ -33,7 +33,7 @@ gensym
 print println
 quotient remainder
 numerator denominator
-nil? list? vector? boolean? symbol? number? string?
+nil? list? vector? boolean? symbol? number? integer? rational? real? complex? string?
 call/cc dynamic-wind
 error
 load </Keywords>

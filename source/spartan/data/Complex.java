@@ -37,13 +37,13 @@ public final class Complex implements Datum, INum, IComplex, ITrans, IEq
   }
   
   @Override
-  public Real real()
+  public Real realPart()
   {
     return new Real(real);
   }
   
   @Override
-  public Real imag()
+  public Real imagPart()
   {
     return new Real(imag);
   }
@@ -58,6 +58,18 @@ public final class Complex implements Datum, INum, IComplex, ITrans, IEq
   public Real angle()
   {
     return new Real(Math.atan2(imag, real));
+  }
+  
+  @Override // IComplex
+  public boolean isFinite()
+  {
+    return Double.isFinite(real) && Double.isFinite(imag);
+  }
+  
+  @Override // IComplex
+  public boolean isNaN()
+  {
+    return Double.isNaN(real) || Double.isNaN(imag);
   }
   
   @Override
@@ -316,6 +328,36 @@ public final class Complex implements Datum, INum, IComplex, ITrans, IEq
   public Complex log(Complex rhs)
   {
     return clog(this.real, this.imag, rhs.real, rhs.imag);
+  }
+  
+  @Override // INum
+  public boolean isInteger()
+  {
+    return imag == 0.0 && Math.floor(real) == real;
+  }
+  
+  @Override // INum
+  public boolean isReal()
+  {
+    return imag == 0.0;
+  }
+  
+  @Override // INum
+  public boolean isRational()
+  {
+    return false;
+  }
+  
+  @Override // INum
+  public boolean isComplex()
+  {
+    return true;
+  }
+  
+  @Override // INum
+  public boolean isZero()
+  {
+    return real == 0.0 && imag == 0.0;
   }
   
   private static native Complex clog(double x1, double y1, double x2, double y2);

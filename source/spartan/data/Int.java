@@ -344,31 +344,31 @@ public final class Int implements Datum, INum, IInt, IRatio, IReal, IComplex, IE
   {
     return valueOf(1);
   }
-    
-  @Override
-  public Real real()
+  
+  @Override // IComplex
+  public Real realPart()
   {
     return toReal();
   }
   
-  @Override
-  public Real imag()
+  @Override // IComplex
+  public Real imagPart()
   {
     return Real.ZERO;
   }
   
-  @Override
+  @Override // IComplex
   public Real angle()
   {
     return toComplex().angle();
   }
   
-  @Override
+  @Override // IComplex
   public Real magnitude()
   {
     return toComplex().magnitude();
   }
-  
+    
   @Override
   public boolean isEqual(Int rhs)  
   {
@@ -421,6 +421,24 @@ public final class Int implements Datum, INum, IInt, IRatio, IReal, IComplex, IE
   public int compareTo(Real rhs)
   {
     return toReal().compareTo(rhs);
+  }
+  
+  @Override // INum
+  public boolean isZero()
+  {
+    return value == 0;
+  }
+  
+  @Override // IReal
+  public boolean isPositive()
+  {
+    return value > 0;
+  }
+  
+  @Override // IReal
+  public boolean isNegative()
+  {
+    return value < 0;
   }
   
   private final long value;

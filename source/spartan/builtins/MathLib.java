@@ -2,6 +2,7 @@ package spartan.builtins;
 
 import spartan.data.*;
 import spartan.errors.TypeMismatch;
+import spartan.errors.InexactArgument;
 import spartan.runtime.VirtualMachine;
 import spartan.Config;
 
@@ -39,14 +40,20 @@ public final class MathLib
   {
     if (x instanceof IInt lhs && y instanceof IInt rhs)
       return lhs.quotient(rhs);
-    throw new TypeMismatch();
+    if (!(x instanceof INum && y instanceof INum))
+      throw new TypeMismatch();
+    else
+      throw new InexactArgument();
   }
   
   public static IInt remainder(Datum x, Datum y)
   {
     if (x instanceof IInt lhs && y instanceof IInt rhs)
       return lhs.remainder(rhs);
-    throw new TypeMismatch();    
+    if (!(x instanceof INum && y instanceof INum))
+      throw new TypeMismatch();
+    else
+      throw new InexactArgument();    
   }
   
   public static INum neg(Datum x)
@@ -63,21 +70,21 @@ public final class MathLib
     throw new TypeMismatch();
   }
   
-  public static IInt floor(Datum x)
+  public static INum floor(Datum x)
   {
     if (x instanceof IReal arg)
       return arg.floor();
     throw new TypeMismatch();
   }
   
-  public static IInt ceiling(Datum x)
+  public static INum ceiling(Datum x)
   {
     if (x instanceof IReal arg)
       return arg.ceiling();
     throw new TypeMismatch();
   }
   
-  public static IInt round(Datum x)
+  public static INum round(Datum x)
   {
     if (x instanceof IReal arg)
       return arg.round();
@@ -153,6 +160,43 @@ public final class MathLib
       return numer.over(denom);
     throw new TypeMismatch();
   }
+  
+  /* Numeric "type" predicates */
+  
+  public static final Primitive IS_INTEGER = new Primitive(Signature.fixed(1)) {
+    public void apply(VirtualMachine vm) {      
+      vm.result = Bool.valueOf(vm.popArg() instanceof INum x && x.isInteger());
+      vm.popFrame();
+    }
+  };
+  
+  public static final Primitive IS_REAL = new Primitive(Signature.fixed(1)) {
+    public void apply(VirtualMachine vm) {
+      vm.result = Bool.valueOf(vm.popArg() instanceof INum x && x.isReal());
+      vm.popFrame();
+    }
+  };
+  
+  public static final Primitive IS_RATIONAL = new Primitive(Signature.fixed(1)) {
+    public void apply(VirtualMachine vm) {
+      vm.result = Bool.valueOf(vm.popArg() instanceof INum x && x.isRational());
+      vm.popFrame();
+    }
+  };
+  
+  public static final Primitive IS_COMPLEX = new Primitive(Signature.fixed(1)) {
+    public void apply(VirtualMachine vm) {
+      vm.result = Bool.valueOf(vm.popArg() instanceof INum x && x.isComplex());
+      vm.popFrame();
+    }
+  };
+  
+  public static final Primitive IS_NUMBER = new Primitive(Signature.fixed(1)) {
+    public void apply(VirtualMachine vm) {
+      vm.result = Bool.valueOf(vm.popArg() instanceof INum);
+      vm.popFrame();
+    }
+  };
   
   public static final Primitive ADD = new Primitive(Signature.variadic(2)) {
     public void apply(VirtualMachine vm) {
@@ -305,20 +349,20 @@ public final class MathLib
     }
   };
     
-  public static final Primitive REAL = new Primitive(Signature.fixed(1)) {
+  public static final Primitive REAL_PART = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof IComplex c))
         throw new TypeMismatch();
-      vm.result = c.real();
+      vm.result = c.realPart();
       vm.popFrame();
     }
   };
   
-  public static final Primitive IMAG = new Primitive(Signature.fixed(1)) {
+  public static final Primitive IMAG_PART = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof IComplex c))
         throw new TypeMismatch();
-      vm.result = c.imag();
+      vm.result = c.imagPart();
       vm.popFrame();
     }
   };
@@ -362,6 +406,60 @@ public final class MathLib
       if (!(vm.popArg() instanceof IRatio q))
         throw new TypeMismatch();
       vm.result = q.denominator();
+      vm.popFrame();
+    }
+  };
+  
+  public static final Primitive IS_ZERO = new Primitive(Signature.fixed(1)) {
+    public void apply(VirtualMachine vm) {
+      if (!(vm.popArg() instanceof INum x))
+        throw new TypeMismatch();
+      vm.result = Bool.valueOf(x.isZero());
+      vm.popFrame();
+    }
+  };
+  
+  public static final Primitive IS_POSITIVE = new Primitive(Signature.fixed(1)) {
+    public void apply(VirtualMachine vm) {
+      if (!(vm.popArg() instanceof IReal x))
+        throw new TypeMismatch();
+      vm.result = Bool.valueOf(x.isPositive());
+      vm.popFrame();
+    }
+  };
+  
+  public static final Primitive IS_NEGATIVE = new Primitive(Signature.fixed(1)) {
+    public void apply(VirtualMachine vm) {
+      if (!(vm.popArg() instanceof IReal x))
+        throw new TypeMismatch();
+      vm.result = Bool.valueOf(x.isNegative());
+      vm.popFrame();
+    }
+  };
+  
+  public static final Primitive IS_FINITE = new Primitive(Signature.fixed(1)) {
+    public void apply(VirtualMachine vm) {
+      if (!(vm.popArg() instanceof INum z))
+        throw new TypeMismatch();
+      vm.result = Bool.valueOf(z.isFinite());
+      vm.popFrame();
+    }
+  };
+  
+  public static final Primitive IS_INFINITE = new Primitive(Signature.fixed(1)) {
+    public void apply(VirtualMachine vm) {
+      if (!(vm.popArg() instanceof INum z))
+        throw new TypeMismatch();
+      vm.result = Bool.valueOf(!z.isFinite());
+      vm.popFrame();
+    }
+  };
+  
+  public static final Primitive IS_NAN = new Primitive(Signature.fixed(1)) {
+    public void apply(VirtualMachine vm) {
+      if (!(vm.popArg() instanceof INum z))
+        throw new TypeMismatch();
+      vm.result = Bool.valueOf(z.isNaN());
       vm.popFrame();
     }
   };

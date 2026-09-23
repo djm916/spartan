@@ -293,35 +293,7 @@ public final class BaseLib
       vm.popFrame();
     }
   };
-  
-  public static final Primitive IS_INT = new Primitive(Signature.fixed(1)) {
-    public void apply(VirtualMachine vm) {
-      vm.result = Bool.valueOf(vm.popArg() instanceof IInt);
-      vm.popFrame();
-    }
-  };
-  
-  public static final Primitive IS_REAL = new Primitive(Signature.fixed(1)) {
-    public void apply(VirtualMachine vm) {
-      vm.result = Bool.valueOf(vm.popArg() instanceof IReal);
-      vm.popFrame();
-    }
-  };
-  
-  public static final Primitive IS_COMPLEX = new Primitive(Signature.fixed(1)) {
-    public void apply(VirtualMachine vm) {
-      vm.result = Bool.valueOf(vm.popArg() instanceof Complex);
-      vm.popFrame();
-    }
-  };
-  
-  public static final Primitive IS_NUMBER = new Primitive(Signature.fixed(1)) {
-    public void apply(VirtualMachine vm) {
-      vm.result = Bool.valueOf(vm.popArg() instanceof INum);
-      vm.popFrame();
-    }
-  };
-  
+    
   public static final Primitive IS_SYMBOL = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       vm.result = Bool.valueOf(vm.popArg() instanceof Symbol);

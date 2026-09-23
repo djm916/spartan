@@ -38,7 +38,7 @@ public final class Real implements Datum, INum, IReal, IComplex, ITrans, IEq, IO
     else
       return Double.toString(value);
   }
-    
+  
   private static double round(double x, int n)
   {
     double scale = Math.pow(10.0, n);
@@ -76,21 +76,21 @@ public final class Real implements Datum, INum, IReal, IComplex, ITrans, IEq, IO
   }
   
   @Override
-  public Int floor()
+  public Real floor()
   {
-    return Int.valueOf((long) Math.floor(value));
+    return new Real(Math.floor(value));
   }
   
   @Override
-  public Int ceiling()
+  public Real ceiling()
   {
-    return Int.valueOf((long) Math.ceil(value));
+    return new Real(Math.ceil(value));
   }
   
   @Override
-  public Int round()
+  public Real round()
   {
-    return Int.valueOf((long) Math.round(value));
+    return new Real(Math.round(value));
   }
   
   public Real sin()
@@ -321,28 +321,87 @@ public final class Real implements Datum, INum, IReal, IComplex, ITrans, IEq, IO
     return Double.compare(this.value, that.value);
   }
   
-  @Override
-  public IReal real()
+  @Override // IComplex
+  public Real realPart()
   {
-    return new Real(value);
+    return this;
   }
   
-  @Override
-  public IReal imag()
+  @Override // IComplex
+  public Real imagPart()
   {
     return ZERO;
   }
   
-  @Override
+  @Override // IComplex
   public Real angle()
   {
     return toComplex().angle();
   }
   
-  @Override
+  @Override // IComplex
   public Real magnitude()
   {
     return toComplex().magnitude();
+  }
+  
+  @Override // IComplex
+  public boolean isFinite()
+  {
+    return Double.isFinite(value);
+  }
+  
+  @Override // IComplex
+  public boolean isNaN()
+  {
+    return Double.isNaN(value);
+  }
+  
+  @Override // INum
+  public boolean isInteger()
+  {
+    // A double is considered an integer according to the integer? predicate if
+    // and only if it is finite, has 0 fractional part, and is not NaN.
+    return Double.isFinite(value) && Math.floor(value) == value;
+  }
+  
+  @Override // INum
+  public boolean isReal()
+  {
+    return true; // The imaginary part is implicitly 0
+  }
+  
+  @Override // INum
+  public boolean isRational()
+  {
+    // If this double value is considered an integer, then it is also rational
+    // with an implicit denominator of 1.
+    return isInteger();
+  }
+  
+  @Override // INum
+  public boolean isComplex()
+  {
+    // Every real is a complex with 0 imaginary part
+    return true;
+  }
+  
+  @Override // INum
+  public boolean isZero()
+  {
+    return value == 0.0;
+  }
+  
+  @Override // IReal
+  public boolean isPositive()
+  {
+    return value > 0.0;
+  }
+  
+  @Override // IReal
+  public boolean isNegative()
+  {
+    return value < 0.0;
   }
   
   private final double value;

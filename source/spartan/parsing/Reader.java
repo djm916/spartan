@@ -408,6 +408,9 @@ public class Reader implements AutoCloseable
     catch (NumberFormatException ex) {
       throw malformedNumeric();
     }
+    catch (spartan.errors.InvalidArgument err) {
+      throw malformedNumeric();
+    }
   }
   
   private Real makeReal(String text)

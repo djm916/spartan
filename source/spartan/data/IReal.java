@@ -7,8 +7,10 @@ public sealed interface IReal extends INum
 permits Int, BigInt, Ratio, Real
 {
   double doubleValue();
-  IInt floor();
-  IInt ceiling();
-  IInt round();
+  IReal floor();
+  IReal ceiling();
+  IReal round();
+  boolean isPositive();
+  boolean isNegative();
   String formatDec(int precision);
 }
