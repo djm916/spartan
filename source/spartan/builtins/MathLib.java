@@ -35,7 +35,7 @@ public final class MathLib
       return lhs.div(rhs);
     throw new TypeMismatch();
   }
-    
+  
   public static IInt quotient(Datum x, Datum y)
   {
     if (x instanceof IInt lhs && y instanceof IInt rhs)
@@ -161,7 +161,7 @@ public final class MathLib
     throw new TypeMismatch();
   }
   
-  /* Numeric "type" predicates */
+  /* Numeric classification predicates */
   
   public static final Primitive IS_INTEGER = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {      
@@ -460,6 +460,33 @@ public final class MathLib
       if (!(vm.popArg() instanceof INum z))
         throw new TypeMismatch();
       vm.result = Bool.valueOf(z.isNaN());
+      vm.popFrame();
+    }
+  };
+  
+  public static final Primitive IS_EXACT = new Primitive(Signature.fixed(1)) {
+    public void apply(VirtualMachine vm) {
+      if (!(vm.popArg() instanceof INum z))
+        throw new TypeMismatch();
+      vm.result = Bool.valueOf(z.isExact());
+      vm.popFrame();
+    }
+  };
+  
+  public static final Primitive TO_EXACT = new Primitive(Signature.fixed(1)) {
+    public void apply(VirtualMachine vm) {
+      if (!(vm.popArg() instanceof INum z))
+        throw new TypeMismatch();
+      vm.result = z.toExact();
+      vm.popFrame();
+    }
+  };
+  
+  public static final Primitive RATIONALIZE = new Primitive(Signature.fixed(1)) {
+    public void apply(VirtualMachine vm) {
+      if (!(vm.popArg() instanceof Real x))
+        throw new TypeMismatch();
+      vm.result = x.rationalize();
       vm.popFrame();
     }
   };

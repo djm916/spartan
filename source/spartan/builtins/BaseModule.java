@@ -108,6 +108,22 @@ public final class BaseModule extends Module
     bindPublic(Symbol.of("finite?"), MathLib.IS_FINITE);
     bindPublic(Symbol.of("infinite?"), MathLib.IS_INFINITE);
     bindPublic(Symbol.of("nan?"), MathLib.IS_NAN);
+    bindPublic(Symbol.of("exact?"), MathLib.IS_EXACT);
+    bindPublic(Symbol.of("exact"), MathLib.TO_EXACT);
+    //bindPublic(Symbol.of("exact-fast"), MathLib.TO_EXACT_FAST);
+    bindPublic(Symbol.of("rationalize"), MathLib.RATIONALIZE);
+    
+    
+    /* Bitwise Operations */
+    
+    bindPublic(Symbol.of("bitwise-not"), BitOpsLib.NOT);
+    bindPublic(Symbol.of("bitwise-and"), BitOpsLib.AND);
+    bindPublic(Symbol.of("bitwise-or"), BitOpsLib.OR);
+    bindPublic(Symbol.of("bitwise-xor"), BitOpsLib.XOR);
+    bindPublic(Symbol.of("bit-set?"), BitOpsLib.IS_BIT_SET);
+    bindPublic(Symbol.of("set-bit"), BitOpsLib.SET_BIT);
+    bindPublic(Symbol.of("clear-bit"), BitOpsLib.CLEAR_BIT);
+    bindPublic(Symbol.of("flip-bit"), BitOpsLib.FLIP_BIT);
     
     /* Conversion procedures */
     

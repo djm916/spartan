@@ -87,6 +87,7 @@ permits IInt, IRatio, IReal, IComplex, ITrans, Int, BigInt, Ratio, Real, Complex
   boolean isZero();
   boolean isFinite();
   //boolean isInfinite();
-  boolean isNaN();  
-  //boolean isExact();
+  boolean isNaN();
+  boolean isExact();
+  INum toExact();
 }

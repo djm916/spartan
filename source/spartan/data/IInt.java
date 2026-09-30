@@ -43,6 +43,48 @@ permits Int, BigInt
   IRatio over(Int rhs);
   IRatio over(BigInt rhs);
   
+  // Bitwise Operations
+  
+  IInt bitNot();
+  
+  default IInt bitAnd(IInt rhs)
+  {
+    return switch (rhs) {
+      case Int z -> bitAnd(z);
+      case BigInt z -> bitAnd(z);
+    };
+  }
+  
+  IInt bitAnd(Int rhs);
+  IInt bitAnd(BigInt rhs);
+  
+  default IInt bitOr(IInt rhs)
+  {
+    return switch (rhs) {
+      case Int z -> bitOr(z);
+      case BigInt z -> bitOr(z);
+    };
+  }
+  
+  IInt bitOr(Int rhs);
+  IInt bitOr(BigInt rhs);
+  
+  default IInt bitXor(IInt rhs)
+  {
+    return switch (rhs) {
+      case Int z -> bitXor(z);
+      case BigInt z -> bitXor(z);
+    };
+  }
+  
+  IInt bitXor(Int rhs);
+  IInt bitXor(BigInt rhs);
+  
+  boolean isBitSet(int index);
+  IInt setBit(int index);
+  IInt clearBit(int index);
+  IInt flipBit(int index);
+  
   @Override // Datum
   default Type type()
   {

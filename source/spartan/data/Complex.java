@@ -1,5 +1,10 @@
 package spartan.data;
 
+import spartan.errors.IntegerOverflow;
+import spartan.errors.InvalidArgument;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+
 /**
  * Implementation of IComplex as a pair of 64-bit floating point numbers (Java doubles).
  */
@@ -24,61 +29,61 @@ public final class Complex implements Datum, INum, IComplex, ITrans, IEq
     this(Double.parseDouble(real), Double.parseDouble(imag));
   }
   
-  @Override
+  @Override // Datum
   public Type type()
   {
     return Type.COMPLEX;
   }
   
-  @Override
+  @Override // Datum
   public String repr()
   {
-    return String.format("%g%+gi", real, imag);
+    return String.format("%.6f%+.6fi", real, imag);
   }
   
-  @Override
+  @Override // IComplex
   public Real realPart()
   {
     return new Real(real);
   }
   
-  @Override
+  @Override // IComplex
   public Real imagPart()
   {
     return new Real(imag);
   }
   
-  @Override
+  @Override // IComplex
   public Real magnitude()
   {
     return abs();
   }
   
-  @Override
+  @Override // IComplex
   public Real angle()
   {
     return new Real(Math.atan2(imag, real));
   }
   
-  @Override // IComplex
+  @Override // INum
   public boolean isFinite()
   {
     return Double.isFinite(real) && Double.isFinite(imag);
   }
   
-  @Override // IComplex
+  @Override // INum
   public boolean isNaN()
   {
     return Double.isNaN(real) || Double.isNaN(imag);
   }
   
-  @Override
+  @Override // INum
   public Complex neg()
   {
     return new Complex(-real, -imag);
   }
   
-  @Override
+  @Override // INum
   public Real abs()
   {
     return new Real(Math.hypot(real, imag));
@@ -114,85 +119,85 @@ public final class Complex implements Datum, INum, IComplex, ITrans, IEq
     return this.real == rhs.real && this.imag == rhs.imag;
   }
   
-  @Override
+  @Override // INum
   public Complex add(Int rhs)
   {
     return add(rhs.toComplex());
   }
   
-  @Override
+  @Override // INum
   public Complex add(BigInt rhs)
   {
     return add(rhs.toComplex());
   }
   
-  @Override
+  @Override // INum
   public Complex add(Ratio rhs)
   {
     return add(rhs.toComplex());
   }
   
-  @Override
+  @Override // INum
   public Complex add(Real rhs)
   {
     return add(rhs.toComplex());
   }
   
-  @Override
+  @Override // INum
   public Complex add(Complex that)
   {
     return new Complex(this.real + that.real, this.imag + that.imag);
   }
   
-  @Override
+  @Override // INum
   public Complex sub(Int rhs)
   {
     return sub(rhs.toComplex());
   }
   
-  @Override
+  @Override // INum
   public Complex sub(BigInt rhs)
   {
     return sub(rhs.toComplex());
   }
   
-  @Override
+  @Override // INum
   public Complex sub(Ratio rhs)
   {
     return sub(rhs.toComplex());
   }
   
-  @Override
+  @Override // INum
   public Complex sub(Real rhs)
   {
     return sub(rhs.toComplex());
   }
   
-  @Override
+  @Override // INum
   public Complex sub(Complex that)
   { 
     return new Complex(this.real - that.real, this.imag - that.imag);
   }
   
-  @Override
+  @Override // INum
   public Complex mul(Int rhs)
   {
     return mul(rhs.toComplex());
   }
   
-  @Override
+  @Override // INum
   public Complex mul(BigInt rhs)
   {
     return mul(rhs.toComplex());
   }
   
-  @Override
+  @Override // INum
   public Complex mul(Ratio rhs)
   {
     return mul(rhs.toComplex());
   }
   
-  @Override
+  @Override // INum
   public Complex mul(Real rhs)
   {
     return mul(rhs.toComplex());
@@ -208,7 +213,7 @@ public final class Complex implements Datum, INum, IComplex, ITrans, IEq
         = (a*c - b*d) + (a*d + b*c)*i
   */
   
-  @Override
+  @Override // INum
   public Complex mul(Complex rhs)
   {
     var a = this.real;
@@ -219,25 +224,25 @@ public final class Complex implements Datum, INum, IComplex, ITrans, IEq
     return new Complex(a * c - b * d, a * d + b * c);
   }
   
-  @Override
+  @Override // INum
   public Complex div(Int rhs)
   {
     return div(rhs.toComplex());
   }
   
-  @Override
+  @Override // INum
   public Complex div(BigInt rhs)
   {
     return div(rhs.toComplex());
   }
   
-  @Override
+  @Override // INum
   public Complex div(Ratio rhs)
   {
     return div(rhs.toComplex());
   }
   
-  @Override
+  @Override // INum
   public Complex div(Real rhs)
   {
     return div(rhs.toComplex());
@@ -258,7 +263,7 @@ public final class Complex implements Datum, INum, IComplex, ITrans, IEq
            = ((a*c + b*d) / (c^2 + d^2)) + ((b*c - a*d) / (c^2 + d^2))*i
   */
   
-  @Override
+  @Override // INum
   public Complex div(Complex rhs)
   {
     var a = this.real;
@@ -270,7 +275,7 @@ public final class Complex implements Datum, INum, IComplex, ITrans, IEq
     return new Complex(s * (a * c + b * d), s * (b * c - a * d));
   }
   
-  @Override
+  @Override 
   public Complex sin()
   {
     return csin(real, imag);
@@ -333,7 +338,10 @@ public final class Complex implements Datum, INum, IComplex, ITrans, IEq
   @Override // INum
   public boolean isInteger()
   {
-    return imag == 0.0 && Math.floor(real) == real;
+    // A complex number is considered an integer according to the integer? predicate if
+    // and only if its imaginary part is zero, and the real part is finite, has 0
+    // fractional part, and is not NaN.
+    return imag == 0.0 && Double.isFinite(real) && Math.floor(real) == real;
   }
   
   @Override // INum
@@ -360,6 +368,42 @@ public final class Complex implements Datum, INum, IComplex, ITrans, IEq
     return real == 0.0 && imag == 0.0;
   }
   
+  @Override // INum
+  public boolean isExact()
+  {
+    return false;
+  }
+  
+  @Override // INum
+  public IInt toExact()
+  {
+    if (!isInteger())
+      // fractional part was non-zero
+      throw new InvalidArgument("cannot convert non-integer valued number to exact number");
+    
+    try {
+      var big = BigDecimal.valueOf(real).toBigIntegerExact();
+      
+      // as an optimization, attempt to convert the BigInteger to a long 
+      try {
+        var small = big.longValueExact();
+        return Int.valueOf(small);
+      }
+      catch (ArithmeticException ex) {
+        // the value cannot fit in a long, keep as is
+        return new BigInt(big);
+      }
+    }
+    catch (NumberFormatException ex) {
+      // value is infinite or NaN
+      throw new InvalidArgument("cannot convert infinite or NaN values to exact");
+    }
+    catch (ArithmeticException ex) {
+      // fractional part was non-zero
+      throw new InvalidArgument("cannot convert non-integer valued number to exact number");
+    }
+  }
+    
   private static native Complex clog(double x1, double y1, double x2, double y2);
   private static native Complex cexp(double x1, double y1, double x2, double y2);
   private static native Complex csin(double x, double y);

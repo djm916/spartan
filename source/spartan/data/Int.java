@@ -2,6 +2,7 @@ package spartan.data;
 
 import spartan.errors.DivisionByZero;
 import spartan.errors.IntegerOverflow;
+import spartan.errors.InvalidArgument;
 
 /**
  * Implementation of IInt as 64-bit signed integer (a Java long).
@@ -439,6 +440,98 @@ public final class Int implements Datum, INum, IInt, IRatio, IReal, IComplex, IE
   public boolean isNegative()
   {
     return value < 0;
+  }
+  
+  @Override // INum
+  public boolean isExact()
+  {
+    return true;
+  }
+  
+  @Override // INum
+  public Int toExact()
+  {
+    return this;
+  }
+  
+  @Override // IInt
+  public IInt bitNot()
+  {
+    return valueOf(~value);
+  }
+  
+  @Override // IInt
+  public IInt bitAnd(Int rhs)
+  {
+    return valueOf(this.value & rhs.value);
+  }
+  
+  @Override // IInt
+  public IInt bitAnd(BigInt rhs)
+  {
+    return toBigInt().bitAnd(rhs);
+  }
+  
+  @Override // IInt
+  public IInt bitOr(Int rhs)
+  {
+    return valueOf(this.value | rhs.value);
+  }
+  
+  @Override // IInt
+  public IInt bitOr(BigInt rhs)
+  {
+    return toBigInt().bitOr(rhs);
+  }
+  
+  @Override // IInt
+  public IInt bitXor(Int rhs)
+  {
+    return valueOf(this.value ^ rhs.value);
+  }
+  
+  @Override // IInt
+  public IInt bitXor(BigInt rhs)
+  {
+    return toBigInt().bitXor(rhs);
+  }
+  
+  // Create a bitmask with just the bit at the given index set
+  private static long maskBit(int index)
+  {
+    return 1 << index;
+  }
+  
+  @Override // IInt
+  public boolean isBitSet(int index)
+  {
+    if (index < 0)
+      throw new InvalidArgument();
+    return (value & maskBit(index)) != 0;
+  }
+  
+  @Override // IInt
+  public IInt setBit(int index)
+  {
+    if (index < 0)
+      throw new InvalidArgument();
+    return new Int(value & maskBit(index));
+  }
+  
+  @Override // IInt
+  public IInt clearBit(int index)
+  {
+    if (index < 0)
+      throw new InvalidArgument();
+    return new Int(value & ~maskBit(index));
+  }
+  
+  @Override // IInt
+  public IInt flipBit(int index)
+  {
+    if (index < 0)
+      throw new InvalidArgument();
+    return new Int(value ^ maskBit(index));
   }
   
   private final long value;

@@ -438,6 +438,18 @@ public final class Ratio implements Datum, INum, IRatio, IReal, IComplex, IEq, I
     return numer.compareTo(BigInteger.ZERO) < 0;
   }
   
+  @Override // INum
+  public boolean isExact()
+  {
+    return true;
+  }
+  
+  @Override // INum
+  public Ratio toExact()
+  {
+    return this;
+  }
+  
   private final BigInteger numer;
   private final BigInteger denom;
 }

@@ -3,6 +3,7 @@ package spartan.data;
 import java.math.BigInteger;
 import spartan.errors.DivisionByZero;
 import spartan.errors.IntegerOverflow;
+import spartan.errors.InvalidArgument;
 
 /**
  * Implementation of IInt as an arbitrary-precision signed integer.
@@ -416,5 +417,107 @@ public final class BigInt implements Datum, INum, IInt, IRatio, IReal, IComplex,
     return value.compareTo(BigInteger.ZERO) < 0;
   }
   
+  @Override // INum
+  public boolean isExact()
+  {
+    return true;
+  }
+  
+  @Override // INum
+  public BigInt toExact()
+  {
+    return this;
+  }
+  
+  @Override // IInt
+  public IInt bitNot()
+  {
+    return new BigInt(value.not());
+  }
+  
+  @Override // IInt
+  public IInt bitAnd(Int rhs)
+  {
+    return bitAnd(rhs.toBigInt());
+  }
+  
+  @Override // IInt
+  public IInt bitAnd(BigInt rhs)
+  {
+    return new BigInt(this.value.and(rhs.value));
+  }
+  
+  @Override // IInt
+  public IInt bitOr(Int rhs)
+  {
+    return bitOr(rhs.toBigInt());
+  }
+  
+  @Override // IInt
+  public IInt bitOr(BigInt rhs)
+  {
+    return new BigInt(this.value.or(rhs.value));
+  }
+  
+  @Override // IInt
+  public IInt bitXor(Int rhs)
+  {
+    return bitXor(rhs.toBigInt());
+  }
+  
+  @Override // IInt
+  public IInt bitXor(BigInt rhs)
+  {
+    return new BigInt(this.value.xor(rhs.value));
+  }
+  
+  @Override // IInt
+  public boolean isBitSet(int index)
+  {
+    try {
+      return value.testBit(index);
+    }
+    catch (ArithmeticException ex) {
+      // index was negative
+      throw new InvalidArgument();
+    }
+  }
+  
+  @Override // IInt
+  public IInt setBit(int index)
+  {
+    try {
+      return new BigInt(value.setBit(index));
+    }
+    catch (ArithmeticException ex) {
+      // index was negative
+      throw new InvalidArgument();
+    }
+  }
+  
+  @Override // IInt
+  public IInt clearBit(int index)
+  {
+    try {
+      return new BigInt(value.clearBit(index));
+    }
+    catch (ArithmeticException ex) {
+      // index was negative
+      throw new InvalidArgument();
+    }
+  }
+  
+  @Override // IInt
+  public IInt flipBit(int index)
+  {
+    try {
+      return new BigInt(value.flipBit(index));
+    }
+    catch (ArithmeticException ex) {
+      // index was negative
+      throw new InvalidArgument();
+    }
+  }
+
   private final BigInteger value;
 }

@@ -1,6 +1,9 @@
 package spartan.data;
 
 import spartan.errors.IntegerOverflow;
+import spartan.errors.InvalidArgument;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 
 public final class Real implements Datum, INum, IReal, IComplex, ITrans, IEq, IOrd
 {
@@ -29,14 +32,11 @@ public final class Real implements Datum, INum, IReal, IComplex, ITrans, IEq, IO
   
   public String repr()
   {
-    if (value == Double.POSITIVE_INFINITY)
-      return "+inf";
-    else if (value == Double.NEGATIVE_INFINITY)
-      return "-inf";
-    else if (value == Double.NaN)
+    if (Double.isInfinite(value))
+      return value > 0 ? "+inf" : "-inf";
+    if (Double.isNaN(value))
       return "NaN";
-    else
-      return Double.toString(value);
+    return String.format("%.6f", value);
   }
   
   private static double round(double x, int n)
@@ -90,7 +90,8 @@ public final class Real implements Datum, INum, IReal, IComplex, ITrans, IEq, IO
   @Override
   public Real round()
   {
-    return new Real(Math.round(value));
+    // Use Math.rint here instead of Math.round to avoid possible loss of precision when converting to long
+    return new Real(Math.rint(value));
   }
   
   public Real sin()
@@ -376,6 +377,7 @@ public final class Real implements Datum, INum, IReal, IComplex, ITrans, IEq, IO
   {
     // If this double value is considered an integer, then it is also rational
     // with an implicit denominator of 1.
+    // NOTE: Should all doubles be considered rational?
     return isInteger();
   }
   
@@ -402,6 +404,79 @@ public final class Real implements Datum, INum, IReal, IComplex, ITrans, IEq, IO
   public boolean isNegative()
   {
     return value < 0.0;
+  }
+  
+  @Override // INum
+  public boolean isExact()
+  {
+    return false;
+  }
+  
+  @Override // INum
+  public IInt toExact()
+  {
+    try {
+      var big = BigDecimal.valueOf(value).toBigIntegerExact();
+      
+      // as an optimization, attempt to convert the BigInteger to a long 
+      try {
+        var small = big.longValueExact();
+        return Int.valueOf(small);
+      }
+      catch (ArithmeticException ex) {
+        // the value cannot fit in a long, keep as is
+        return new BigInt(big);
+      }
+    }
+    catch (NumberFormatException ex) {
+      // value is infinite or NaN
+      throw new InvalidArgument("cannot convert infinite or NaN values to exact");
+    }
+    catch (ArithmeticException ex) {
+      // fractional part was non-zero
+      throw new InvalidArgument("cannot convert non-integer valued number to exact number");
+    }
+  }
+  
+  public Ratio rationalize()
+  {
+    return rationalize(this.value);
+  }
+  
+  public static Ratio rationalize(double val)
+  {
+    // Convert the double bits to a 64-bit long representation
+    long bits = Double.doubleToLongBits(val);
+    // Extract Sign Bit (1 bit at position 63)
+    int sign = (int) (bits >> 63) & 1;
+    // Extract Exponent (11 bits from positions 62 to 52), minus the bias of 1023
+    int exp = (int) ((bits >> 52) & 0x7FF) - 1023;
+    // Extract Mantissa / Fraction (52 bits from positions 51 to 0)
+    //significand = (1L << 52) + (bits & 0xFFFFFFFFFFFFFL);
+    long frac = bits & 0xFFFFFFFFFFFFFL;
+
+    System.err.println(String.format("doubleToLongBits: raw = 0x%x, sign = %d, exp = %d, frac = 0x%x", bits, sign, exp, frac));
+    
+    if (exp >= 52) {
+      // num = sign * ((1L << 52) + frac) * (1L << (exp - 52));
+      // den = 1;
+      var num = BigInteger.ONE.shiftLeft(52)
+                .add(BigInteger.valueOf(frac))
+                .multiply(BigInteger.ONE.shiftLeft(exp - 52));
+      var den = BigInteger.ONE;
+      if (sign > 0)
+        num = num.negate();
+      return new Ratio(num, den);
+    }
+    else { // (exp < 52)
+      // num = sign * ((1L << 52) + frac);
+      // den = (1L << (52 - exp));
+      var num = BigInteger.ONE.shiftLeft(52).add(BigInteger.valueOf(frac));
+      var den = BigInteger.ONE.shiftLeft(52 - exp);
+      if (sign > 0)
+        num = num.negate();
+      return new Ratio(num, den);
+    }
   }
   
   private final double value;

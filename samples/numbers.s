@@ -29,3 +29,19 @@
 (display (number? NaN))    ; #true
 (display (= NaN NaN))      ; #false
 (display (= -0.0 0.0))     ; #true
+(display (= +inf +inf))    ; #true
+(display (= +inf -inf))    ; #false
+(display (= -inf -inf))    ; #true
+
+;(display (exact NaN))     ; error
+
+(display (integer? 1.0+0.0i)) ; #true
+;(display (exact 1.0+0.0i)) ; error
+
+;(display (exact (complex NaN 0.0)))
+(display (integer? (complex +inf 0.0)))
+;(display (exact (complex +inf 0.0)))
+
+(display (/ 0.0 0.0)) ; NaN
+(display (/ 1.0 0.0)) ; +inf
+(display (/ -1.0 0.0)) ; -inf
