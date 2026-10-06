@@ -38,7 +38,7 @@ public final class Complex implements Datum, INum, IComplex, ITrans, IEq
   @Override // Datum
   public String repr()
   {
-    return String.format("%.6f%+.6fi", real, imag);
+    return String.format("%.6g%+.6gi", real, imag);
   }
   
   @Override // IComplex
@@ -375,6 +375,19 @@ public final class Complex implements Datum, INum, IComplex, ITrans, IEq
   }
   
   @Override // INum
+  public INum toExact()
+  {
+    throw new InvalidArgument("exact complex numbers not supported");
+  }
+  
+  @Override // INum
+  public INum toInexact()
+  {
+    return this;
+  }
+    
+  /*
+  @Override // INum
   public IInt toExact()
   {
     if (!isInteger())
@@ -403,7 +416,9 @@ public final class Complex implements Datum, INum, IComplex, ITrans, IEq
       throw new InvalidArgument("cannot convert non-integer valued number to exact number");
     }
   }
-    
+  */
+  
+  
   private static native Complex clog(double x1, double y1, double x2, double y2);
   private static native Complex cexp(double x1, double y1, double x2, double y2);
   private static native Complex csin(double x, double y);

@@ -5,6 +5,8 @@ import spartan.errors.InvalidArgument;
 
 public final class Ratio implements Datum, INum, IRatio, IReal, IComplex, IEq, IOrd
 {
+  public static Ratio ZERO = new Ratio(0, 1);
+  
   public Ratio(BigInteger numer, BigInteger denom)
   {
     if (denom.equals(BigInteger.ZERO))
@@ -446,6 +448,18 @@ public final class Ratio implements Datum, INum, IRatio, IReal, IComplex, IEq, I
   
   @Override // INum
   public Ratio toExact()
+  {
+    return this;
+  }
+  
+  @Override // INum
+  public INum toInexact()
+  {
+    return toReal();
+  }
+  
+  @Override // IReal
+  public IRatio rationalize()
   {
     return this;
   }

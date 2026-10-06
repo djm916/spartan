@@ -36,7 +36,7 @@ public final class Real implements Datum, INum, IReal, IComplex, ITrans, IEq, IO
       return value > 0 ? "+inf" : "-inf";
     if (Double.isNaN(value))
       return "NaN";
-    return String.format("%.6f", value);
+    return String.format("%.6g", value);
   }
   
   private static double round(double x, int n)
@@ -412,6 +412,7 @@ public final class Real implements Datum, INum, IReal, IComplex, ITrans, IEq, IO
     return false;
   }
   
+  /*
   @Override // INum
   public IInt toExact()
   {
@@ -437,31 +438,83 @@ public final class Real implements Datum, INum, IReal, IComplex, ITrans, IEq, IO
       throw new InvalidArgument("cannot convert non-integer valued number to exact number");
     }
   }
+  */
   
-  public Ratio rationalize()
+  @Override // INum
+  public IRatio toExact()
   {
     return rationalize(this.value);
   }
   
+  @Override // INum
+  public INum toInexact()
+  {
+    return this;
+  }
+  
+  @Override // IReal
+  public IRatio rationalize()
+  {
+    return rationalize(this.value);
+  }
+    
+  /**
+   * Losslessly convert an IEEE 754 double precision floating point value
+   * into a rational number (integer numerator and denominator).
+   *
+   * An IEEE 754 double-precision number is split into three parts:
+   * a 1-bit sign S, an 11-bit biased exponent E, and a 52-bit fraction F.
+   * Its exact mathematical value is:
+   *
+   * (-1)^S * (1 + (F / 2^52)) * 2^(E-1023)
+   */
   public static Ratio rationalize(double val)
   {
+    //if (isNaN() || !isFinite())
+      //throw new InvalidArgument("cannot convert NaN or infinity to rational number");
+    
     // Convert the double bits to a 64-bit long representation
     long bits = Double.doubleToLongBits(val);
     // Extract Sign Bit (1 bit at position 63)
     int sign = (int) (bits >> 63) & 1;
-    // Extract Exponent (11 bits from positions 62 to 52), minus the bias of 1023
-    int exp = (int) ((bits >> 52) & 0x7FF) - 1023;
+    // Extract Exponent (11 bits from positions 62 to 52)
+    int biasedExp = (int) ((bits >> 52) & 0x7FF);
+    // Compute true exponent (subtract implicit bias of 1023)
+    int exp = biasedExp - 1023;
     // Extract Mantissa / Fraction (52 bits from positions 51 to 0)
-    //significand = (1L << 52) + (bits & 0xFFFFFFFFFFFFFL);
     long frac = bits & 0xFFFFFFFFFFFFFL;
-
+    // true fraction (for normalized values) = (1L << 52) + frac;
+    
     System.err.println(String.format("doubleToLongBits: raw = 0x%x, sign = %d, exp = %d, frac = 0x%x", bits, sign, exp, frac));
+    
+    // Handle Infinities and NaN
+
+    if (biasedExp == 0x7FF)
+      throw new InvalidArgument("cannot convert NaN or infinity to rational number");
+    
+    // Handle zero
+    // -0.0 and +0.0 are collapsed into 0/1 (which is non-negative).
+    
+    if (biasedExp == 0 && frac == 0)
+      return Ratio.ZERO;
+    
+    // Handle subnormal values
+    
+    if (biasedExp == 0 && frac != 0) {
+      System.err.println("subnormal");
+      var num = BigInteger.valueOf(frac).multiply(BigInteger.ONE.shiftLeft(-1022));
+      var den = BigInteger.ONE;
+      if (sign > 0)
+        num = num.negate();
+      return new Ratio(num, den);
+    }
+    
+    // Handle normalized values
     
     if (exp >= 52) {
       // num = sign * ((1L << 52) + frac) * (1L << (exp - 52));
       // den = 1;
-      var num = BigInteger.ONE.shiftLeft(52)
-                .add(BigInteger.valueOf(frac))
+      var num = BigInteger.ONE.shiftLeft(52).add(BigInteger.valueOf(frac))
                 .multiply(BigInteger.ONE.shiftLeft(exp - 52));
       var den = BigInteger.ONE;
       if (sign > 0)

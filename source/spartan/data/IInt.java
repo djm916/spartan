@@ -127,5 +127,17 @@ permits Int, BigInt
     return false;
   }
   
+  @Override // INum
+  default IInt toExact()
+  {
+    return this;
+  }
+  
+  @Override // INum
+  default boolean isExact()
+  {
+    return true;
+  }
+    
   String formatInt(int base);
 }

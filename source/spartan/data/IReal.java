@@ -1,7 +1,7 @@
 package spartan.data;
 
 /**
- * Extends the base numeric interface with a set of functions specific to real values.
+ * Extends the base numeric interface with a set of functions specific to real numbers.
  */
 public sealed interface IReal extends INum
 permits Int, BigInt, Ratio, Real
@@ -12,5 +12,6 @@ permits Int, BigInt, Ratio, Real
   IReal round();
   boolean isPositive();
   boolean isNegative();
+  IRatio rationalize();
   String formatDec(int precision);
 }

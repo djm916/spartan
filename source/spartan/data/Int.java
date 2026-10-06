@@ -441,17 +441,17 @@ public final class Int implements Datum, INum, IInt, IRatio, IReal, IComplex, IE
   {
     return value < 0;
   }
-  
-  @Override // INum
-  public boolean isExact()
+    
+  @Override // IReal
+  public IRatio rationalize()
   {
-    return true;
+    return this;
   }
   
   @Override // INum
-  public Int toExact()
+  public INum toInexact()
   {
-    return this;
+    return toReal();
   }
   
   @Override // IInt

@@ -85,7 +85,7 @@ public final class BaseModule extends Module
     //bindPublic(Symbol.of("truncate"), MathLib.TRUNC);
     bindPublic(Symbol.of("quotient"), MathLib.QUOTIENT);
     bindPublic(Symbol.of("remainder"), MathLib.REMAINDER);
-    bindPublic(Symbol.of("exp"), MathLib.EXP);
+    bindPublic(Symbol.of("expt"), MathLib.EXPT);
     bindPublic(Symbol.of("log"), MathLib.LOG);
     bindPublic(Symbol.of("sin"), MathLib.SIN);
     bindPublic(Symbol.of("cos"), MathLib.COS);
@@ -109,10 +109,10 @@ public final class BaseModule extends Module
     bindPublic(Symbol.of("infinite?"), MathLib.IS_INFINITE);
     bindPublic(Symbol.of("nan?"), MathLib.IS_NAN);
     bindPublic(Symbol.of("exact?"), MathLib.IS_EXACT);
+    bindPublic(Symbol.of("inexact?"), MathLib.IS_INEXACT);
     bindPublic(Symbol.of("exact"), MathLib.TO_EXACT);
-    //bindPublic(Symbol.of("exact-fast"), MathLib.TO_EXACT_FAST);
+    bindPublic(Symbol.of("inexact"), MathLib.TO_INEXACT);
     bindPublic(Symbol.of("rationalize"), MathLib.RATIONALIZE);
-    
     
     /* Bitwise Operations */
     
@@ -133,8 +133,8 @@ public final class BaseModule extends Module
     bindPublic(Symbol.of("bytes->string"), BaseLib.BYTES_TO_STRING); // decode
     //bindPublic(Symbol.of("string->number"), BaseLib.TEXT_TO_NUMBER);
     bindPublic(Symbol.of("string->int"), BaseLib.TEXT_TO_INT);
-    bindPublic(Symbol.of("format-int"), BaseLib.FORMAT_INT);
-    bindPublic(Symbol.of("format-decimal"), BaseLib.FORMAT_DECIMAL);
+    bindPublic(Symbol.of("integer->string"), BaseLib.FORMAT_INT);
+    bindPublic(Symbol.of("real->string"), BaseLib.FORMAT_DECIMAL);
     
     /* List procedures */
     

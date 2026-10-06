@@ -279,7 +279,7 @@ public final class MathLib
     }
   };
   
-  public static final Primitive EXP = new Primitive(Signature.fixed(2)) {
+  public static final Primitive EXPT = new Primitive(Signature.fixed(2)) {
     public void apply(VirtualMachine vm) {
       vm.result = exp(vm.popArg(), vm.popArg());
       vm.popFrame();
@@ -473,6 +473,15 @@ public final class MathLib
     }
   };
   
+  public static final Primitive IS_INEXACT = new Primitive(Signature.fixed(1)) {
+    public void apply(VirtualMachine vm) {
+      if (!(vm.popArg() instanceof INum z))
+        throw new TypeMismatch();
+      vm.result = Bool.valueOf(!z.isExact());
+      vm.popFrame();
+    }
+  };
+  
   public static final Primitive TO_EXACT = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
       if (!(vm.popArg() instanceof INum z))
@@ -482,9 +491,18 @@ public final class MathLib
     }
   };
   
+  public static final Primitive TO_INEXACT = new Primitive(Signature.fixed(1)) {
+    public void apply(VirtualMachine vm) {
+      if (!(vm.popArg() instanceof INum z))
+        throw new TypeMismatch();
+      vm.result = z.toInexact();
+      vm.popFrame();
+    }
+  };
+  
   public static final Primitive RATIONALIZE = new Primitive(Signature.fixed(1)) {
     public void apply(VirtualMachine vm) {
-      if (!(vm.popArg() instanceof Real x))
+      if (!(vm.popArg() instanceof IReal x))
         throw new TypeMismatch();
       vm.result = x.rationalize();
       vm.popFrame();

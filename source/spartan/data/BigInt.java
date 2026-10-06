@@ -417,16 +417,16 @@ public final class BigInt implements Datum, INum, IInt, IRatio, IReal, IComplex,
     return value.compareTo(BigInteger.ZERO) < 0;
   }
   
-  @Override // INum
-  public boolean isExact()
+  @Override // IReal
+  public IRatio rationalize()
   {
-    return true;
+    return this;
   }
   
   @Override // INum
-  public BigInt toExact()
+  public INum toInexact()
   {
-    return this;
+    return toReal();
   }
   
   @Override // IInt
