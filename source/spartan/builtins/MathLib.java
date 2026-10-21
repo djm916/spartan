@@ -337,7 +337,7 @@ public final class MathLib
     
   public static final Primitive RAND = new Primitive(Signature.fixed(0)) {
     public void apply(VirtualMachine vm) {
-      vm.result = new Real(Config.DEFAULT_RNG.nextDouble());
+      vm.result = new Float64(Config.DEFAULT_RNG.nextDouble());
       vm.popFrame();
     }
   };

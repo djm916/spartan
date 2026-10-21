@@ -42,7 +42,7 @@ public final class Ratio implements Datum, INum, IRatio, IReal, IComplex, IEq, I
   @Override
   public Type type()
   {
-    return Type.RATIONAL;
+    return Type.RATNUM;
   }
   
   @Override
@@ -54,7 +54,7 @@ public final class Ratio implements Datum, INum, IRatio, IReal, IComplex, IEq, I
   @Override
   public String formatDec(int precision)
   {
-    return toReal().formatDec(precision);
+    return toFloat64().formatDec(precision);
   }
   
   @Override // IRatio
@@ -75,9 +75,9 @@ public final class Ratio implements Datum, INum, IRatio, IReal, IComplex, IEq, I
     return numer.doubleValue() / denom.doubleValue();
   }
   
-  public Real toReal()
+  public Float64 toFloat64()
   {
-    return new Real(doubleValue());
+    return new Float64(doubleValue());
   }
   
   public Complex toComplex()
@@ -98,21 +98,21 @@ public final class Ratio implements Datum, INum, IRatio, IReal, IComplex, IEq, I
   }
   
   @Override
-  public Real floor()
+  public Float64 floor()
   {
-    return new Real(Math.floor(doubleValue()));
+    return new Float64(Math.floor(doubleValue()));
   }
   
   @Override
-  public Real ceiling()
+  public Float64 ceiling()
   {
-    return new Real(Math.ceil(doubleValue()));
+    return new Float64(Math.ceil(doubleValue()));
   }
   
   @Override
-  public Real round()
+  public Float64 round()
   {
-    return new Real(Math.round(doubleValue()));
+    return new Float64(Math.round(doubleValue()));
   }
   
   @Override
@@ -146,9 +146,9 @@ public final class Ratio implements Datum, INum, IRatio, IReal, IComplex, IEq, I
   }
   
   @Override
-  public Real add(Real rhs)
+  public Float64 add(Float64 rhs)
   {
-    return toReal().add(rhs);
+    return toFloat64().add(rhs);
   }
   
   @Override
@@ -186,9 +186,9 @@ public final class Ratio implements Datum, INum, IRatio, IReal, IComplex, IEq, I
   }
   
   @Override
-  public Real sub(Real rhs)
+  public Float64 sub(Float64 rhs)
   {
-    return toReal().sub(rhs);
+    return toFloat64().sub(rhs);
   }
   
   @Override
@@ -225,9 +225,9 @@ public final class Ratio implements Datum, INum, IRatio, IReal, IComplex, IEq, I
   }
 
   @Override
-  public Real mul(Real rhs)
+  public Float64 mul(Float64 rhs)
   {
-    return toReal().mul(rhs);
+    return toFloat64().mul(rhs);
   }
   
   @Override
@@ -265,9 +265,9 @@ public final class Ratio implements Datum, INum, IRatio, IReal, IComplex, IEq, I
   }
   
   @Override
-  public Real div(Real rhs)
+  public Float64 div(Float64 rhs)
   {
-    return toReal().div(rhs);
+    return toFloat64().div(rhs);
   }
   
   @Override
@@ -306,9 +306,9 @@ public final class Ratio implements Datum, INum, IRatio, IReal, IComplex, IEq, I
   }
   
   @Override // IEq
-  public boolean isEqual(Real rhs)  
+  public boolean isEqual(Float64 rhs)  
   {
-    return toReal().isEqual(rhs);
+    return toFloat64().isEqual(rhs);
   }
   
   @Override // IEq
@@ -353,42 +353,42 @@ public final class Ratio implements Datum, INum, IRatio, IReal, IComplex, IEq, I
   }
   
   @Override
-  public int compareTo(Real rhs)
+  public int compareTo(Float64 rhs)
   {
-    return toReal().compareTo(rhs);
+    return toFloat64().compareTo(rhs);
   }
   
   @Override // IComplex
-  public Real realPart()
+  public Float64 realPart()
   {
-    return toReal();
+    return toFloat64();
   }
   
   @Override // IComplex
-  public Real imagPart()
+  public Int imagPart()
   {
-    return Real.ZERO;
+    return Int.ZERO;
   }
   
   @Override // IComplex
-  public Real angle()
+  public Float64 angle()
   {
     return toComplex().angle();
   }
   
   @Override // IComplex
-  public Real magnitude()
+  public Float64 magnitude()
   {
     return toComplex().magnitude();
   }
   
-  @Override // IComplex
+  @Override // INum
   public boolean isFinite()
   {
     return true;
   }
   
-  @Override // IComplex
+  @Override // INum
   public boolean isNaN()
   {
     return false;
@@ -422,7 +422,7 @@ public final class Ratio implements Datum, INum, IRatio, IReal, IComplex, IEq, I
   public boolean isZero()
   {
     // In this representation, the denominator is never 0 and the zero
-    // rational has zero numerator and 1 denominator.
+    // value has zero numerator and 1 denominator.
     return numer.equals(BigInteger.ZERO);
   }
   
@@ -455,7 +455,7 @@ public final class Ratio implements Datum, INum, IRatio, IReal, IComplex, IEq, I
   @Override // INum
   public INum toInexact()
   {
-    return toReal();
+    return toFloat64();
   }
   
   @Override // IReal

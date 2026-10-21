@@ -1,7 +1,7 @@
 package spartan.data;
 
 public sealed interface IEq
-permits Nil, Bool, Symbol, Int, BigInt, Ratio, Real, Complex, Text, Text.Cursor
+permits Nil, Bool, Symbol, Int, BigInt, Ratio, Float64, Complex, Text, Text.Cursor
 {
   default boolean isEqual(IEq rhs)
   {
@@ -12,7 +12,7 @@ permits Nil, Bool, Symbol, Int, BigInt, Ratio, Real, Complex, Text, Text.Cursor
       case Int z -> isEqual(z);
       case BigInt z -> isEqual(z);
       case Ratio q -> isEqual(q);
-      case Real r -> isEqual(r);
+      case Float64 r -> isEqual(r);
       case Complex c -> isEqual(c);      
       case Text s -> isEqual(s);
       case Text.Cursor c -> isEqual(c);      
@@ -34,7 +34,7 @@ permits Nil, Bool, Symbol, Int, BigInt, Ratio, Real, Complex, Text, Text.Cursor
     return false;
   }
   
-  default boolean isEqual(Real rhs)
+  default boolean isEqual(Float64 rhs)
   {
     return false;
   }

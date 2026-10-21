@@ -67,11 +67,11 @@ public final class BaseModule extends Module
     
     /* Math constants & procedures */
 
-    bindPublic(Symbol.of("E"), Real.E);
-    bindPublic(Symbol.of("PI"), Real.PI);
-    bindPublic(Symbol.of("+inf"), Real.POS_INF);
-    bindPublic(Symbol.of("-inf"), Real.NEG_INF);
-    bindPublic(Symbol.of("NaN"), Real.NAN);
+    bindPublic(Symbol.of("E"), Float64.E);
+    bindPublic(Symbol.of("PI"), Float64.PI);
+    bindPublic(Symbol.of("+inf"), Float64.POS_INF);
+    bindPublic(Symbol.of("-inf"), Float64.NEG_INF);
+    bindPublic(Symbol.of("NaN"), Float64.NAN);
     bindPublic(Symbol.of("I"), Complex.I);    
     bindPublic(Symbol.of("+"), MathLib.ADD);
     bindPublic(Symbol.of("-"), MathLib.SUB);

@@ -5,21 +5,21 @@ import spartan.errors.InvalidArgument;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-public final class Real implements Datum, INum, IReal, IComplex, ITrans, IEq, IOrd
+public final class Float64 implements Datum, INum, IReal, IComplex, ITrans, IEq, IOrd
 {
-  public static final Real PI = new Real(Math.PI);
-  public static final Real E = new Real(Math.E);
-  public static final Real POS_INF = new Real(Double.POSITIVE_INFINITY);
-  public static final Real NEG_INF = new Real(Double.NEGATIVE_INFINITY);
-  public static final Real NAN = new Real(Double.NaN);
-  public static final Real ZERO = new Real(0.0);
-  
-  public Real(double value)
+  public static final Float64 PI = new Float64(Math.PI);
+  public static final Float64 E = new Float64(Math.E);
+  public static final Float64 POS_INF = new Float64(Double.POSITIVE_INFINITY);
+  public static final Float64 NEG_INF = new Float64(Double.NEGATIVE_INFINITY);
+  public static final Float64 NAN = new Float64(Double.NaN);
+  public static final Float64 ZERO = new Float64(0.0);
+    
+  public Float64(double value)
   {
     this.value = value;
   }
   
-  public Real(String val)
+  public Float64(String val)
   {
     this(Double.parseDouble(val));
   }
@@ -27,9 +27,10 @@ public final class Real implements Datum, INum, IReal, IComplex, ITrans, IEq, IO
   @Override
   public Type type()
   {
-    return Type.REAL;
+    return Type.FLONUM;
   }
   
+  @Override
   public String repr()
   {
     if (Double.isInfinite(value))
@@ -46,7 +47,7 @@ public final class Real implements Datum, INum, IReal, IComplex, ITrans, IEq, IO
     return result;
   }
   
-  @Override
+  @Override // IReal
   public String formatDec(int precision)
   {
     return Double.toString(round(this.value, precision));
@@ -57,95 +58,95 @@ public final class Real implements Datum, INum, IReal, IComplex, ITrans, IEq, IO
     return new Complex(value, 0.0);
   }
   
-  @Override
+  @Override // IReal
   public double doubleValue()
   {
     return value;
   }
   
   @Override
-  public Real neg()
+  public Float64 neg()
   {
-    return new Real(-value);
+    return new Float64(-value);
   }
   
   @Override
-  public Real abs()
+  public Float64 abs()
   {
-    return new Real(Math.abs(value));
+    return new Float64(Math.abs(value));
   }
   
   @Override
-  public Real floor()
+  public Float64 floor()
   {
-    return new Real(Math.floor(value));
+    return new Float64(Math.floor(value));
   }
   
   @Override
-  public Real ceiling()
+  public Float64 ceiling()
   {
-    return new Real(Math.ceil(value));
+    return new Float64(Math.ceil(value));
   }
   
   @Override
-  public Real round()
+  public Float64 round()
   {
     // Use Math.rint here instead of Math.round to avoid possible loss of precision when converting to long
-    return new Real(Math.rint(value));
+    return new Float64(Math.rint(value));
   }
   
-  public Real sin()
+  public Float64 sin()
   {
-    return new Real(Math.sin(value));
+    return new Float64(Math.sin(value));
   }
   
-  public Real cos()
+  public Float64 cos()
   {
-    return new Real(Math.cos(value));
+    return new Float64(Math.cos(value));
   }
   
-  public Real tan()
+  public Float64 tan()
   {
-    return new Real(Math.tan(value));
+    return new Float64(Math.tan(value));
   }
   
-  public Real asin()
+  public Float64 asin()
   {
-    return new Real(Math.asin(value));
+    return new Float64(Math.asin(value));
   }
   
-  public Real acos()
+  public Float64 acos()
   {
-    return new Real(Math.acos(value));
+    return new Float64(Math.acos(value));
   }
   
-  public Real atan()
+  public Float64 atan()
   {
-    return new Real(Math.atan(value));
-  }
-  
-  @Override
-  public Real add(Int rhs)
-  {
-    return add(rhs.toReal());
+    return new Float64(Math.atan(value));
   }
   
   @Override
-  public Real add(BigInt rhs)
+  public Float64 add(Int rhs)
   {
-    return add(rhs.toReal());
+    return add(rhs.toFloat64());
   }
   
   @Override
-  public Real add(Ratio rhs)
+  public Float64 add(BigInt rhs)
   {
-    return add(rhs.toReal());
+    return add(rhs.toFloat64());
   }
   
   @Override
-  public Real add(Real that)
+  public Float64 add(Ratio rhs)
   {
-    return new Real(this.value + that.value);
+    return add(rhs.toFloat64());
+  }
+  
+  @Override
+  public Float64 add(Float64 that)
+  {
+    return new Float64(this.value + that.value);
   }
   
   @Override
@@ -155,27 +156,27 @@ public final class Real implements Datum, INum, IReal, IComplex, ITrans, IEq, IO
   }
   
   @Override
-  public Real sub(Int rhs)
+  public Float64 sub(Int rhs)
   {
-    return sub(rhs.toReal());
+    return sub(rhs.toFloat64());
   }
   
   @Override
-  public Real sub(BigInt rhs)
+  public Float64 sub(BigInt rhs)
   {
-    return sub(rhs.toReal());
+    return sub(rhs.toFloat64());
   }
   
   @Override
-  public Real sub(Ratio rhs)
+  public Float64 sub(Ratio rhs)
   {
-    return sub(rhs.toReal());
+    return sub(rhs.toFloat64());
   }
   
   @Override
-  public Real sub(Real that)
+  public Float64 sub(Float64 that)
   {
-    return new Real(this.value - that.value);
+    return new Float64(this.value - that.value);
   }
   
   @Override
@@ -185,26 +186,27 @@ public final class Real implements Datum, INum, IReal, IComplex, ITrans, IEq, IO
   }
   
   @Override
-  public Real mul(Int rhs)
+  public Float64 mul(Int rhs)
   {
-    return mul(rhs.toReal());
+    return mul(rhs.toFloat64());
   }
   
   @Override
-  public Real mul(BigInt rhs)
+  public Float64 mul(BigInt rhs)
   {
-    return mul(rhs.toReal());
+    return mul(rhs.toFloat64());
   }
   
   @Override
-  public Real mul(Ratio rhs)
+  public Float64 mul(Ratio rhs)
   {
-    return mul(rhs.toReal());
+    return mul(rhs.toFloat64());
   }
   
-  public Real mul(Real that)
+  @Override
+  public Float64 mul(Float64 that)
   {
-    return new Real(this.value * that.value);
+    return new Float64(this.value * that.value);
   }
   
   @Override
@@ -214,27 +216,27 @@ public final class Real implements Datum, INum, IReal, IComplex, ITrans, IEq, IO
   }
   
   @Override
-  public Real div(Int rhs)
+  public Float64 div(Int rhs)
   {
-    return div(rhs.toReal());
+    return div(rhs.toFloat64());
   }
   
   @Override
-  public Real div(BigInt rhs)
+  public Float64 div(BigInt rhs)
   {
-    return div(rhs.toReal());
+    return div(rhs.toFloat64());
   }
   
   @Override
-  public Real div(Ratio rhs)
+  public Float64 div(Ratio rhs)
   {
-    return div(rhs.toReal());
+    return div(rhs.toFloat64());
   }
   
   @Override
-  public Real div(Real rhs)
+  public Float64 div(Float64 rhs)
   {
-    return new Real(this.value / rhs.value);
+    return new Float64(this.value / rhs.value);
   }
   
   @Override
@@ -242,11 +244,15 @@ public final class Real implements Datum, INum, IReal, IComplex, ITrans, IEq, IO
   {
     return toComplex().div(rhs);
   }
-    
+  
   @Override
-  public Real exp(Real rhs)
+  public ITrans exp(Float64 rhs)
   {
-    return new Real(Math.pow(this.value, rhs.value));
+    // x^y = e^(y*ln(x))
+    // This gives a complex result if x is negative and y is not an integer
+    //if (this.value < 0)
+      //return toComplex().exp(rhs);
+    return new Float64(Math.pow(this.value, rhs.value));
   }
   
   @Override
@@ -256,10 +262,10 @@ public final class Real implements Datum, INum, IReal, IComplex, ITrans, IEq, IO
   }
     
   @Override
-  public Real log(Real rhs)
+  public Float64 log(Float64 rhs)
   {
     // log_b (x) = ln (x) / ln (b)
-    return new Real(Math.log(this.value) / Math.log(rhs.value));
+    return new Float64(Math.log(this.value) / Math.log(rhs.value));
   }
   
   @Override
@@ -271,23 +277,23 @@ public final class Real implements Datum, INum, IReal, IComplex, ITrans, IEq, IO
   @Override // IEq
   public boolean isEqual(Int rhs)  
   {
-    return isEqual(rhs.toReal());
+    return isEqual(rhs.toFloat64());
   }
   
   @Override // IEq
   public boolean isEqual(BigInt rhs)
   {
-    return isEqual(rhs.toReal());
+    return isEqual(rhs.toFloat64());
   }
   
   @Override // IEq
   public boolean isEqual(Ratio rhs)  
   {
-    return isEqual(rhs.toReal());
+    return isEqual(rhs.toFloat64());
   }
   
   @Override // IEq
-  public boolean isEqual(Real rhs)
+  public boolean isEqual(Float64 rhs)
   {
     return this.value == rhs.value;
   }
@@ -301,47 +307,47 @@ public final class Real implements Datum, INum, IReal, IComplex, ITrans, IEq, IO
   @Override // IOrd
   public int compareTo(Int rhs)
   {
-    return compareTo(rhs.toReal());
+    return compareTo(rhs.toFloat64());
   }
   
   @Override // IOrd
   public int compareTo(BigInt rhs)
   {
-    return compareTo(rhs.toReal());
+    return compareTo(rhs.toFloat64());
   }
   
   @Override // IOrd
   public int compareTo(Ratio rhs)
   {
-    return compareTo(rhs.toReal());
+    return compareTo(rhs.toFloat64());
   }
   
   @Override // IOrd
-  public int compareTo(Real that)
+  public int compareTo(Float64 that)
   {
     return Double.compare(this.value, that.value);
   }
   
   @Override // IComplex
-  public Real realPart()
+  public Float64 realPart()
   {
     return this;
   }
   
   @Override // IComplex
-  public Real imagPart()
+  public IReal imagPart()
   {
-    return ZERO;
+    return Int.ZERO;
   }
   
   @Override // IComplex
-  public Real angle()
+  public Float64 angle()
   {
     return toComplex().angle();
   }
   
   @Override // IComplex
-  public Real magnitude()
+  public Float64 magnitude()
   {
     return toComplex().magnitude();
   }
@@ -378,7 +384,8 @@ public final class Real implements Datum, INum, IReal, IComplex, ITrans, IEq, IO
     // If this double value is considered an integer, then it is also rational
     // with an implicit denominator of 1.
     // NOTE: Should all doubles be considered rational?
-    return isInteger();
+    //return isInteger();
+    return Double.isFinite(value) && !Double.isNaN(value);
   }
   
   @Override // INum

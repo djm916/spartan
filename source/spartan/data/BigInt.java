@@ -29,6 +29,12 @@ public final class BigInt implements Datum, INum, IInt, IRatio, IReal, IComplex,
   }
   
   @Override
+  public Type type()
+  {
+    return Type.BIGNUM;
+  }
+  
+  @Override
   public String repr()
   {
     return value.toString();
@@ -96,9 +102,9 @@ public final class BigInt implements Datum, INum, IInt, IRatio, IReal, IComplex,
     return new Ratio(value, BigInteger.ONE);
   }
   
-  public Real toReal()
+  public Float64 toFloat64()
   {
-    return new Real(doubleValue());
+    return new Float64(doubleValue());
   }
   
   public Complex toComplex()
@@ -115,7 +121,7 @@ public final class BigInt implements Datum, INum, IInt, IRatio, IReal, IComplex,
   @Override
   public String formatDec(int precision)
   {
-    return toReal().formatDec(precision);
+    return toFloat64().formatDec(precision);
   }
   
   
@@ -150,9 +156,9 @@ public final class BigInt implements Datum, INum, IInt, IRatio, IReal, IComplex,
   }
   
   @Override // IEq
-  public boolean isEqual(Real rhs)  
+  public boolean isEqual(Float64 rhs)  
   {
-    return toReal().isEqual(rhs);
+    return toFloat64().isEqual(rhs);
   }
   
   @Override // IEq
@@ -180,9 +186,9 @@ public final class BigInt implements Datum, INum, IInt, IRatio, IReal, IComplex,
   }
   
   @Override // IOrd
-  public int compareTo(Real rhs)
+  public int compareTo(Float64 rhs)
   {
-    return toReal().compareTo(rhs);
+    return toFloat64().compareTo(rhs);
   }
   
   @Override
@@ -216,9 +222,9 @@ public final class BigInt implements Datum, INum, IInt, IRatio, IReal, IComplex,
   }
   
   @Override
-  public Real add(Real rhs)
+  public Float64 add(Float64 rhs)
   {
-    return toReal().add(rhs);
+    return toFloat64().add(rhs);
   }
   
   @Override
@@ -246,9 +252,9 @@ public final class BigInt implements Datum, INum, IInt, IRatio, IReal, IComplex,
   }
   
   @Override
-  public Real sub(Real rhs)
+  public Float64 sub(Float64 rhs)
   {
-    return toReal().sub(rhs);
+    return toFloat64().sub(rhs);
   }
   
   @Override
@@ -276,9 +282,9 @@ public final class BigInt implements Datum, INum, IInt, IRatio, IReal, IComplex,
   }
   
   @Override
-  public Real mul(Real rhs)
+  public Float64 mul(Float64 rhs)
   {
-    return toReal().mul(rhs);
+    return toFloat64().mul(rhs);
   }
   
   @Override
@@ -306,9 +312,9 @@ public final class BigInt implements Datum, INum, IInt, IRatio, IReal, IComplex,
   }
   
   @Override
-  public Real div(Real rhs)
+  public Float64 div(Float64 rhs)
   {
-    return toReal().div(rhs);
+    return toFloat64().div(rhs);
   }
   
   @Override
@@ -364,25 +370,25 @@ public final class BigInt implements Datum, INum, IInt, IRatio, IReal, IComplex,
   }
     
   @Override
-  public Real realPart()
+  public Float64 realPart()
   {
-    return toReal();
+    return toFloat64();
   }
   
   @Override
-  public Real imagPart()
+  public Int imagPart()
   {
-    return Real.ZERO;
+    return Int.ZERO;
   }
   
   @Override
-  public Real angle()
+  public Float64 angle()
   {
     return toComplex().angle();
   }
   
   @Override
-  public Real magnitude()
+  public Float64 magnitude()
   {
     return toComplex().magnitude();
   }
@@ -426,7 +432,7 @@ public final class BigInt implements Datum, INum, IInt, IRatio, IReal, IComplex,
   @Override // INum
   public INum toInexact()
   {
-    return toReal();
+    return toFloat64();
   }
   
   @Override // IInt

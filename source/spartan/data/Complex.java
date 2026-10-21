@@ -32,7 +32,7 @@ public final class Complex implements Datum, INum, IComplex, ITrans, IEq
   @Override // Datum
   public Type type()
   {
-    return Type.COMPLEX;
+    return Type.CFLONUM;
   }
   
   @Override // Datum
@@ -42,27 +42,27 @@ public final class Complex implements Datum, INum, IComplex, ITrans, IEq
   }
   
   @Override // IComplex
-  public Real realPart()
+  public Float64 realPart()
   {
-    return new Real(real);
+    return new Float64(real);
   }
   
   @Override // IComplex
-  public Real imagPart()
+  public Float64 imagPart()
   {
-    return new Real(imag);
+    return new Float64(imag);
   }
   
   @Override // IComplex
-  public Real magnitude()
+  public Float64 magnitude()
   {
     return abs();
   }
   
   @Override // IComplex
-  public Real angle()
+  public Float64 angle()
   {
-    return new Real(Math.atan2(imag, real));
+    return new Float64(Math.atan2(imag, real));
   }
   
   @Override // INum
@@ -84,9 +84,9 @@ public final class Complex implements Datum, INum, IComplex, ITrans, IEq
   }
   
   @Override // INum
-  public Real abs()
+  public Float64 abs()
   {
-    return new Real(Math.hypot(real, imag));
+    return new Float64(Math.hypot(real, imag));
   }
   
   @Override // IEq
@@ -108,7 +108,7 @@ public final class Complex implements Datum, INum, IComplex, ITrans, IEq
   }
   
   @Override // IEq
-  public boolean isEqual(Real rhs)
+  public boolean isEqual(Float64 rhs)
   {
     return isEqual(rhs.toComplex());
   }
@@ -138,7 +138,7 @@ public final class Complex implements Datum, INum, IComplex, ITrans, IEq
   }
   
   @Override // INum
-  public Complex add(Real rhs)
+  public Complex add(Float64 rhs)
   {
     return add(rhs.toComplex());
   }
@@ -168,7 +168,7 @@ public final class Complex implements Datum, INum, IComplex, ITrans, IEq
   }
   
   @Override // INum
-  public Complex sub(Real rhs)
+  public Complex sub(Float64 rhs)
   {
     return sub(rhs.toComplex());
   }
@@ -198,7 +198,7 @@ public final class Complex implements Datum, INum, IComplex, ITrans, IEq
   }
   
   @Override // INum
-  public Complex mul(Real rhs)
+  public Complex mul(Float64 rhs)
   {
     return mul(rhs.toComplex());
   }
@@ -243,7 +243,7 @@ public final class Complex implements Datum, INum, IComplex, ITrans, IEq
   }
   
   @Override // INum
-  public Complex div(Real rhs)
+  public Complex div(Float64 rhs)
   {
     return div(rhs.toComplex());
   }
@@ -312,7 +312,7 @@ public final class Complex implements Datum, INum, IComplex, ITrans, IEq
   }
     
   @Override
-  public Complex exp(Real rhs)
+  public Complex exp(Float64 rhs)
   {
     return exp(rhs.toComplex());
   }
@@ -324,7 +324,7 @@ public final class Complex implements Datum, INum, IComplex, ITrans, IEq
   }
   
   @Override
-  public Complex log(Real rhs)
+  public Complex log(Float64 rhs)
   {
     return log(rhs.toComplex());
   }

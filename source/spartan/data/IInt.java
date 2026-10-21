@@ -84,13 +84,7 @@ permits Int, BigInt
   IInt setBit(int index);
   IInt clearBit(int index);
   IInt flipBit(int index);
-  
-  @Override // Datum
-  default Type type()
-  {
-    return Type.INTEGER;
-  }
-  
+    
   @Override // INum
   default boolean isInteger()
   {

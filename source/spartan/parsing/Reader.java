@@ -308,7 +308,7 @@ public class Reader implements AutoCloseable
         return makeComplex(real, imag);
       }
       
-      return makeReal(text.toString());
+      return makeFloat64(text.toString());
     }
         
     return makeInt(text.toString());
@@ -413,10 +413,10 @@ public class Reader implements AutoCloseable
     }
   }
   
-  private Real makeReal(String text)
+  private Float64 makeFloat64(String text)
   {
     try {
-      return new Real(text);
+      return new Float64(text);
     }
     catch (NumberFormatException ex) {
       throw malformedNumeric();

@@ -15,7 +15,8 @@ import spartan.errors.InvalidArgument;
  */
 public final class Int implements Datum, INum, IInt, IRatio, IReal, IComplex, IEq, IOrd
 {
-  private static final IntCache cache = new IntCache();
+  private static final IntCache cache = new IntCache();    
+  public static final Int ZERO = valueOf(0);
   
   public static Int valueOf(long value)
   {
@@ -31,7 +32,13 @@ public final class Int implements Datum, INum, IInt, IRatio, IReal, IComplex, IE
   {
     this.value = value;
   }
-    
+  
+  @Override
+  public Type type()
+  {
+    return Type.FIXNUM;
+  }
+  
   @Override
   public String repr()
   {
@@ -68,25 +75,7 @@ public final class Int implements Datum, INum, IInt, IRatio, IReal, IComplex, IE
   {
     return (double)value;
   }
-  
-  @Override
-  public Int floor()
-  {
-    return this;
-  }
-  
-  @Override
-  public Int ceiling()
-  {
-    return this;
-  }
-  
-  @Override
-  public Int round()
-  {
-    return this;
-  }
-  
+    
   @Override
   public String formatInt(int base)
   {
@@ -96,7 +85,7 @@ public final class Int implements Datum, INum, IInt, IRatio, IReal, IComplex, IE
   @Override
   public String formatDec(int precision)
   {
-    return toReal().formatDec(precision);
+    return toFloat64().formatDec(precision);
   }
   
   @Override
@@ -121,9 +110,9 @@ public final class Int implements Datum, INum, IInt, IRatio, IReal, IComplex, IE
     return new Ratio(value, 1);
   }
   
-  public Real toReal()
+  public Float64 toFloat64()
   {
-    return new Real(doubleValue());
+    return new Float64(doubleValue());
   }
   
   public Complex toComplex()
@@ -177,9 +166,9 @@ public final class Int implements Datum, INum, IInt, IRatio, IReal, IComplex, IE
   }
   
   @Override
-  public Real add(Real rhs)
+  public Float64 add(Float64 rhs)
   {
-    return toReal().add(rhs);
+    return toFloat64().add(rhs);
   }
   
   @Override
@@ -212,9 +201,9 @@ public final class Int implements Datum, INum, IInt, IRatio, IReal, IComplex, IE
   }
   
   @Override
-  public Real sub(Real rhs)
+  public Float64 sub(Float64 rhs)
   {
-    return toReal().sub(rhs);
+    return toFloat64().sub(rhs);
   }
   
   @Override
@@ -247,9 +236,9 @@ public final class Int implements Datum, INum, IInt, IRatio, IReal, IComplex, IE
   }
   
   @Override
-  public Real mul(Real rhs)
+  public Float64 mul(Float64 rhs)
   {
-    return toReal().mul(rhs);
+    return toFloat64().mul(rhs);
   }
   
   @Override
@@ -277,9 +266,9 @@ public final class Int implements Datum, INum, IInt, IRatio, IReal, IComplex, IE
   }
   
   @Override
-  public Real div(Real rhs)
+  public Float64 div(Float64 rhs)
   {
-    return toReal().div(rhs);
+    return toFloat64().div(rhs);
   }
   
   @Override
@@ -320,8 +309,7 @@ public final class Int implements Datum, INum, IInt, IRatio, IReal, IComplex, IE
   {
     return toBigInt().remainder(rhs);
   }
-  
-  
+    
   @Override
   public Ratio over(Int rhs)
   {
@@ -347,25 +335,25 @@ public final class Int implements Datum, INum, IInt, IRatio, IReal, IComplex, IE
   }
   
   @Override // IComplex
-  public Real realPart()
+  public Float64 realPart()
   {
-    return toReal();
+    return toFloat64();
   }
   
   @Override // IComplex
-  public Real imagPart()
+  public Int imagPart()
   {
-    return Real.ZERO;
+    return ZERO;
   }
   
   @Override // IComplex
-  public Real angle()
+  public Float64 angle()
   {
     return toComplex().angle();
   }
   
   @Override // IComplex
-  public Real magnitude()
+  public Float64 magnitude()
   {
     return toComplex().magnitude();
   }
@@ -389,9 +377,9 @@ public final class Int implements Datum, INum, IInt, IRatio, IReal, IComplex, IE
   }
   
   @Override
-  public boolean isEqual(Real rhs)  
+  public boolean isEqual(Float64 rhs)  
   {
-    return toReal().isEqual(rhs);
+    return toFloat64().isEqual(rhs);
   }
   
   @Override
@@ -419,15 +407,33 @@ public final class Int implements Datum, INum, IInt, IRatio, IReal, IComplex, IE
   }
   
   @Override
-  public int compareTo(Real rhs)
+  public int compareTo(Float64 rhs)
   {
-    return toReal().compareTo(rhs);
+    return toFloat64().compareTo(rhs);
   }
   
   @Override // INum
   public boolean isZero()
   {
     return value == 0;
+  }
+    
+  @Override
+  public Int floor()
+  {
+    return this;
+  }
+  
+  @Override
+  public Int ceiling()
+  {
+    return this;
+  }
+  
+  @Override
+  public Int round()
+  {
+    return this;
   }
   
   @Override // IReal
@@ -451,7 +457,7 @@ public final class Int implements Datum, INum, IInt, IRatio, IReal, IComplex, IE
   @Override // INum
   public INum toInexact()
   {
-    return toReal();
+    return toFloat64();
   }
   
   @Override // IInt
@@ -533,6 +539,6 @@ public final class Int implements Datum, INum, IInt, IRatio, IReal, IComplex, IE
       throw new InvalidArgument();
     return new Int(value ^ maskBit(index));
   }
-  
+
   private final long value;
 }

@@ -1,10 +1,13 @@
 package spartan.data;
 
 /**
- * Extends the set of base numeric functions with the transcendental functions.
+ * Extends the base set of numeric functions with the transcendental functions.
+ *
+ * In general, these operations are inherently approximate and are defined
+ * only for inexact inputs and return inexact output.
  */
 public sealed interface ITrans extends INum
-permits Real, Complex
+permits Float64, Complex
 {
   ITrans sin();
   ITrans cos();
@@ -16,22 +19,22 @@ permits Real, Complex
   default ITrans exp(ITrans rhs)
   {
     return switch (rhs) {
-      case Real r -> exp(r);
+      case Float64 r -> exp(r);
       case Complex c -> exp(c);
     };
   }
   
-  ITrans exp(Real rhs);
+  ITrans exp(Float64 rhs);
   ITrans exp(Complex rhs);
   
   default ITrans log(ITrans rhs)
   {
     return switch (rhs) {
-      case Real r -> log(r);
+      case Float64 r -> log(r);
       case Complex c -> log(c);
     };
   }
   
-  ITrans log(Real rhs);
+  ITrans log(Float64 rhs);
   ITrans log(Complex rhs);
 }

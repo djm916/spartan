@@ -16,14 +16,16 @@ public record Type(int id, Symbol name)
   public static final Type BOOLEAN = register(Symbol.of("spartan.base", "boolean"));
   /** The builtin "symbol" type */
   public static final Type SYMBOL = register(Symbol.of("spartan.base", "symbol"));
-  /** The builtin "integer" type */
-  public static final Type INTEGER = register(Symbol.of("spartan.base", "integer"));
-  /** The builtin "real" type */
-  public static final Type REAL = register(Symbol.of("spartan.base", "real"));
-  /** The builtin "rational" type */
-  public static final Type RATIONAL = register(Symbol.of("spartan.base", "rational"));
-  /** The builtin "complex" type */
-  public static final Type COMPLEX = register(Symbol.of("spartan.base", "complex"));
+  /** The builtin "fixnum" type */
+  public static final Type FIXNUM = register(Symbol.of("spartan.base", "fixnum"));
+  /** The builtin "bignum" type */
+  public static final Type BIGNUM = register(Symbol.of("spartan.base", "bignum"));
+  /** The builtin "flonum" type */
+  public static final Type FLONUM = register(Symbol.of("spartan.base", "flonum"));
+  /** The builtin "ratnum" type */
+  public static final Type RATNUM = register(Symbol.of("spartan.base", "ratnum"));
+  /** The builtin "cflonum" type */
+  public static final Type CFLONUM = register(Symbol.of("spartan.base", "cflonum"));
   /** The builtin "procedure" type */
   public static final Type PROCEDURE = register(Symbol.of("spartan.base", "procedure"));
   /** The builtin "macro" type */

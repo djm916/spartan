@@ -1,10 +1,11 @@
 package spartan.data;
 
 /**
- * Extends the base numeric interface with a set of functions specific to real numbers.
+ * Extends the base set of numeric functions with functions defined on integer,
+ * rational, and real (but not complex) numbers.
  */
 public sealed interface IReal extends INum
-permits Int, BigInt, Ratio, Real
+permits Int, BigInt, Ratio, Float64
 {
   double doubleValue();
   IReal floor();
