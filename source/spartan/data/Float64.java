@@ -37,7 +37,7 @@ public final class Float64 implements Datum, INum, IReal, IComplex, ITrans, IEq,
       return value > 0 ? "+inf" : "-inf";
     if (Double.isNaN(value))
       return "NaN";
-    return String.format("%.6g", value);
+    return String.format("%+.6g", value);
   }
   
   private static double round(double x, int n)
@@ -95,16 +95,57 @@ public final class Float64 implements Datum, INum, IReal, IComplex, ITrans, IEq,
     return new Float64(Math.rint(value));
   }
   
+  /* By Euler's identity,
+       
+       sin(x + y*I) = sin(x)*cosh(y) + cos(x)*sinh(y)*I
+       
+     When y is (exactly) 0,
+     
+       cosh(y) = 1
+       sinh(y) = 0
+       
+     and the expression reduces to the (real) sin function.
+  */
   public Float64 sin()
   {
     return new Float64(Math.sin(value));
   }
   
+  /* By Euler's identity,
+  
+       cos(x + y*I) = cos(x)*cosh(y) - sin(x)*sinh(y)*I
+     
+     Similiarly to above, when y is exactly 0, the imaginary term reduces to
+     exactly 0, and the whole expression reduces to the (real) cos function.
+  */
   public Float64 cos()
   {
     return new Float64(Math.cos(value));
   }
   
+  /* By Euler's identity,
+
+                      sin(2*x) + sinh(2*y)*I
+      tan(x + y*I) =  ----------------------
+                       cos(2*x) + cosh(2*y)
+
+     In case y = 0, sinh(2*y) = 0 and cosh(2*y) = 1. Then,
+
+                         sin(2*x)
+      tan(x + y*I) =  --------------
+                       cos(2*x) + 1
+
+     Using the double-angle identities for sin and cos,
+
+      sin(2*x) = 2*sin(x)*cos(x)
+      cos(2*x) = 2*cos(x)^2 - 1
+
+     the expression reduces to the (real) tan function:
+
+               sin(x)
+      tan(x) = ------
+               cos(x)
+  */
   public Float64 tan()
   {
     return new Float64(Math.tan(value));
@@ -248,10 +289,13 @@ public final class Float64 implements Datum, INum, IReal, IComplex, ITrans, IEq,
   @Override
   public ITrans exp(Float64 rhs)
   {
-    // x^y = e^(y*ln(x))
-    // This gives a complex result if x is negative and y is not an integer
-    //if (this.value < 0)
-      //return toComplex().exp(rhs);
+    // The power function is defined in terms of the exponential and (natural) logarithm.
+    //
+    //   x^y = e^(y*ln(x))
+    //
+    // This produces a complex result if x < 0, and y is not an integer.
+    if (this.value < 0)
+      return Complex.cexp(this.value, 0.0, rhs.value, 0.0);
     return new Float64(Math.pow(this.value, rhs.value));
   }
   
@@ -260,7 +304,7 @@ public final class Float64 implements Datum, INum, IReal, IComplex, ITrans, IEq,
   {
     return toComplex().exp(rhs);
   }
-    
+  
   @Override
   public Float64 log(Float64 rhs)
   {

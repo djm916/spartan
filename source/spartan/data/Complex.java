@@ -419,14 +419,14 @@ public final class Complex implements Datum, INum, IComplex, ITrans, IEq
   */
   
   
-  private static native Complex clog(double x1, double y1, double x2, double y2);
-  private static native Complex cexp(double x1, double y1, double x2, double y2);
-  private static native Complex csin(double x, double y);
-  private static native Complex ccos(double x, double y);
-  private static native Complex ctan(double x, double y);
-  private static native Complex casin(double x, double y);
-  private static native Complex cacos(double x, double y);
-  private static native Complex catan(double x, double y);
+  public static native Complex clog(double x1, double y1, double x2, double y2);
+  public static native Complex cexp(double x1, double y1, double x2, double y2);
+  public static native Complex csin(double x, double y);
+  public static native Complex ccos(double x, double y);
+  public static native Complex ctan(double x, double y);
+  public static native Complex casin(double x, double y);
+  public static native Complex cacos(double x, double y);
+  public static native Complex catan(double x, double y);
   
   private final double real;
   private final double imag;
