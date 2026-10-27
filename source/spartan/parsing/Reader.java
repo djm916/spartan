@@ -92,7 +92,7 @@ public class Reader implements AutoCloseable
   private Reader(String source, InputStream input)
   {
     this.source = source;
-    this.input = new PushbackReader(new BufferedReader(new InputStreamReader(input, spartan.Config.DEFAULT_ENCODING)));
+    this.input = new PushbackReader(new BufferedReader(new InputStreamReader(input, spartan.Config.DEFAULT_ENCODING)), 5);
   }
 
   private static boolean isDigit(int ch)
@@ -151,6 +151,98 @@ public class Reader implements AutoCloseable
   private static boolean isRadix(int ch)
   {
     return ch == '.';
+  }
+  
+  // Returns true iff the next sequence of characters in the input is "inf.0".
+  // Requires 5 tokens of lookahead
+  // If the input does not match, the input position is unchanged.
+  // If the input matches, the input position is advanced past the matching characters,
+  // and the token buffer contains the matching characters.
+  private boolean isInf()
+  {    
+    int ch = _read();
+    if (ch != 'i') {
+      _unread(ch);
+      return false;
+    }
+    ch = _read();
+    if (ch != 'n') {
+      _unread(ch);
+      _unread('i');
+      return false;
+    }
+    ch = _read();
+    if (ch != 'f') {
+      _unread(ch);
+      _unread('n');
+      _unread('i');
+      return false;
+    }
+    ch = _read();
+    if (ch != '.') {
+      _unread(ch);
+      _unread('f');
+      _unread('n');
+      _unread('i');
+      return false;
+    }
+    ch = _read();
+    if (ch != '0') {
+      _unread(ch);
+      _unread('.');
+      _unread('f');
+      _unread('n');
+      _unread('i');
+      return false;
+    }
+    currentPos.column += 5;     // update read position
+    return true;
+  }
+  
+  // Returns true iff the next sequence of characters in the input is "nan.0".
+  // Requires 5 tokens of lookahead
+  // If the input does not match, the input position is unchanged.
+  // If the input matches, the input position is advanced past the matching characters,
+  // and the token buffer contains the matching characters.
+  private boolean isNaN()
+  {    
+    int ch = _read();
+    if (ch != 'n') {
+      _unread(ch);
+      return false;
+    }
+    ch = _read();
+    if (ch != 'a') {
+      _unread(ch);
+      _unread('n');
+      return false;
+    }
+    ch = _read();
+    if (ch != 'n') {
+      _unread(ch);
+      _unread('a');
+      _unread('n');
+      return false;
+    }
+    ch = _read();
+    if (ch != '.') {
+      _unread(ch);
+      _unread('n');
+      _unread('a');
+      _unread('n');
+      return false;
+    }
+    ch = _read();
+    if (ch != '0') {
+      _unread(ch);
+      _unread('.');
+      _unread('n');
+      _unread('a');
+      _unread('n');
+      return false;
+    }
+    currentPos.column += 5;     // update read position
+    return true;
   }
   
   // Wrapper over input.read() to convert IOException to UncheckedIOException
@@ -361,23 +453,41 @@ public class Reader implements AutoCloseable
     
   private void scanImaginaryPart(StringBuilder text)
   {
-    // add the sign character
     getChar();
-    text.append((char)lastChar);
-    
-    // add digits before "."
-    getChar();
-    scanDigits(text);
-    
-    if (peekChar() != '.')
-      throw syntaxError("malformed numeric literal");
-    
-    scanFractionAndExponent(text);
-    
+    text.append((char)lastChar); // append the sign
+    // Check for special cases +inf.0 and -inf.0
+    if (isInf()) {
+      text.append("inf.0");
+    }
+    // Check for special cases +nan.0 and -nan.0
+    else if (isNaN()) {
+      text.append("nan.0");
+    }
+    // Normal case, scan a regular flonum
+    else {
+      getChar();
+      scanDigits(text);
+      if (peekChar() != '.')
+        throw syntaxError("malformed numeric literal");
+      scanFractionAndExponent(text);
+    }
+    // Require the "i" after the imaginary part
     if (peekChar() != 'i')
       throw syntaxError("malformed numeric literal");
-    
     getChar(); // eat "i"
+  }
+  
+  private INum readSpecialNumber(String real)
+  {
+    if (isSign(peekChar())) {
+        var text = new StringBuilder();
+        scanImaginaryPart(text);
+        var imag = text.toString();
+        var result = makeComplex(real, imag);
+        return result;
+    }
+    
+    return makeFloat64(real);
   }
   
   private IInt makeInt(String text)
@@ -660,6 +770,26 @@ public class Reader implements AutoCloseable
       return readList(']');
     if (isSign(lastChar) && isDigit(peekChar()))
       return readNumber();
+    /*
+    // Handle peculiar numeric literals +inf.0, -inf.0, +nan.0, -nan.0
+    if (isSign(lastChar) && isInf()) {
+      //return lastChar == '+' ? readSpecialNumber("+inf.0") : readSpecialNumber("-inf.0");
+      var text = new StringBuilder();
+      text.append((char)lastChar);
+      text.append("inf.0");
+      return readSpecialNumber(text);
+    }
+    if (isSign(lastChar) && isNaN()) {
+      var text = new StringBuilder();
+      text.append((char)lastChar);
+      text.append("nan.0");
+      return readSpecialNumber(text);
+    }
+    */
+    if (isSign(lastChar) && isInf())
+      return readSpecialNumber((char)lastChar + "inf.0");
+    if (isSign(lastChar) && isNaN())
+      return readSpecialNumber((char)lastChar + "nan.0");
     if (isDigit(lastChar))
       return readNumber();
     if (lastChar == ':')

@@ -19,9 +19,31 @@ public final class Float64 implements Datum, INum, IReal, IComplex, ITrans, IEq,
     this.value = value;
   }
   
-  public Float64(String val)
+  public Float64(String s)
   {
-    this(Double.parseDouble(val));
+    this(parseFloat64(s));
+  }
+  
+  public static double parseFloat64(String s)
+  {
+    if (s.equals("+inf.0"))
+      return Double.POSITIVE_INFINITY;
+    if (s.equals("-inf.0"))
+      return Double.NEGATIVE_INFINITY;
+    if (s.equals("+nan.0"))
+      return Double.NaN;
+    if (s.equals("-nan.0"))
+      return Double.NaN;
+    return Double.parseDouble(s);
+  }
+  
+  public static String toString(double value)
+  {
+    if (Double.isInfinite(value))
+      return value > 0 ? "+inf.0" : "-inf.0";
+    if (Double.isNaN(value))
+      return "+nan.0";
+    return String.format("%.6g", value);
   }
   
   @Override
@@ -33,11 +55,7 @@ public final class Float64 implements Datum, INum, IReal, IComplex, ITrans, IEq,
   @Override
   public String repr()
   {
-    if (Double.isInfinite(value))
-      return value > 0 ? "+inf" : "-inf";
-    if (Double.isNaN(value))
-      return "NaN";
-    return String.format("%+.6g", value);
+    return toString(value);
   }
   
   private static double round(double x, int n)

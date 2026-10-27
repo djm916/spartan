@@ -26,7 +26,29 @@ public final class Complex implements Datum, INum, IComplex, ITrans, IEq
   
   public Complex(String real, String imag)
   {
-    this(Double.parseDouble(real), Double.parseDouble(imag));
+    this(Float64.parseFloat64(real), Float64.parseFloat64(imag));
+  }
+  
+  public String toString()
+  {
+    var text = new StringBuilder();
+    // write real part
+    if (Double.isInfinite(real))
+      text.append(real > 0 ? "+inf.0" : "-inf.0");
+    else if (Double.isNaN(real))
+      text.append("+nan.0");
+    else
+      text.append(String.format("%.6g", real));
+    // write imaginary part
+    if (Double.isInfinite(imag))
+      text.append(imag > 0 ? "+inf.0" : "-inf.0");
+    else if (Double.isNaN(imag))
+      text.append("+nan.0");
+    else
+      text.append(String.format("%+.6g", imag));
+    // append imaginary unit
+    text.append("i");
+    return text.toString();
   }
   
   @Override // Datum
@@ -38,7 +60,7 @@ public final class Complex implements Datum, INum, IComplex, ITrans, IEq
   @Override // Datum
   public String repr()
   {
-    return String.format("%.6g%+.6gi", real, imag);
+    return toString();
   }
   
   @Override // IComplex
